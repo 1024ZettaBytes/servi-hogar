@@ -4,9 +4,10 @@ import interactionPlugin from "@fullcalendar/interaction";
 import timeGridPlugin from "@fullcalendar/timegrid";
 
 import { useRef } from "react";
+import { nullFormat } from 'numeral';
 
 const Calendar = () => {
-  const calendarRef = useRef(null);
+  /*const calendarRef = useRef(null);
   return (
     <FullCalendar
       
@@ -14,7 +15,8 @@ const Calendar = () => {
       editable
       selectable
     />
-  );
+  );*/
+  return null;
 };
 
 export default Calendar;
