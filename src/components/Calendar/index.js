@@ -9,7 +9,7 @@ const Calendar = () => {
   const calendarRef = useRef(null);
   return (
     <FullCalendar
-      innerRef={calendarRef}
+      
       plugins={[timeGridPlugin, interactionPlugin]}
       editable
       selectable
