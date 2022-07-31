@@ -39,7 +39,7 @@ const HeaderWrapper = styled(Box)(
 `
 );
 
-function Header(props) {
+function Header({username}) {
   const { sidebarToggle, toggleSidebar } = useContext(SidebarContext);
   const theme = useTheme();
 
@@ -73,7 +73,7 @@ function Header(props) {
       </Stack>
       <Box display="flex" alignItems="center">
         <HeaderButtons />
-        <HeaderUserbox username={props?.username}/>
+        <HeaderUserbox username={username}/>
         <Box
           component="span"
           sx={{

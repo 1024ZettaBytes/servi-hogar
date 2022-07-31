@@ -1,17 +1,28 @@
 import mongoose, { Model, model, Schema } from 'mongoose';
 import { hash, compare, genSalt } from 'bcryptjs';
-
 export interface IUser extends Document {
   user: string;
+  name: string;
+  role: string;
   password: string;
 }
 
 const UserSchema: Schema = new Schema({
   user: {
-    type: String
+    type: String,
+    required: true
+  },
+  name: {
+    type: String,
+    required: true
+  },
+  role: {
+    type: String,
+    required: true
   },
   password: {
-    type: String
+    type: String,
+    required: true
   },
 });
 UserSchema.methods.encryptPassword = async (psw) => {

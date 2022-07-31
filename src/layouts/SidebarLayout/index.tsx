@@ -11,7 +11,7 @@ interface SidebarLayoutProps {
 
 const SidebarLayout: FC<SidebarLayoutProps> = ({ children }) => {
   const theme = useTheme();
-
+  const {name, role} = children['props']?.session?.user;
   return (
     <>
       <Box
@@ -41,8 +41,8 @@ const SidebarLayout: FC<SidebarLayoutProps> = ({ children }) => {
           }
         }}
       >
-       <Header username={children["props"]?.session?.user?.username}/>
-        <Sidebar />
+       <Header username={name}/>
+        <Sidebar userRole={role}/>
         <Box
           sx={{
             position: 'relative',

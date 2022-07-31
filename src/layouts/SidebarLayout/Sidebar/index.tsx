@@ -28,7 +28,7 @@ const SidebarWrapper = styled(Box)(
 `
 );
 
-function Sidebar() {
+function Sidebar({userRole}) {
   const { sidebarToggle, toggleSidebar } = useContext(SidebarContext);
   const closeSidebar = () => toggleSidebar();
   const theme = useTheme();
@@ -72,7 +72,7 @@ function Sidebar() {
               background: theme.colors.alpha.trueWhite[10]
             }}
           />
-          <SidebarMenu />
+          <SidebarMenu userRole={userRole}/>
         </Scrollbar>
         <Divider
           sx={{
@@ -116,7 +116,7 @@ function Sidebar() {
                 background: theme.colors.alpha.trueWhite[10]
               }}
             />
-            <SidebarMenu />
+            <SidebarMenu userRole={userRole}/>
           </Scrollbar>
         </SidebarWrapper>
       </Drawer>
