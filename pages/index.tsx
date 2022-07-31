@@ -1,5 +1,5 @@
 import Head from 'next/head';
-import { getSession, useSession, signIn, signOut } from 'next-auth/react';
+import { getSession } from 'next-auth/react';
 import SidebarLayout from '@/layouts/SidebarLayout';
 import {validateServerSideSession} from "../lib/auth"
 import PageHeader from '@/components/PageHeader';
