@@ -167,7 +167,7 @@ const SubMenuWrapper = styled(Box)(
 `
 );
 
-function SidebarMenu() {
+function SidebarMenu({userRole}) {
   const { closeSidebar } = useContext(SidebarContext);
   const router = useRouter();
   const currentRoute = router.pathname;
@@ -318,6 +318,7 @@ function SidebarMenu() {
             </List>
           </SubMenuWrapper>
         </List>
+        {userRole.id === "ADMIN" ?
         <List
           component="div"
           subheader={
@@ -413,7 +414,7 @@ function SidebarMenu() {
               </ListItem>
             </List>
           </SubMenuWrapper>
-        </List>
+        </List>:null}
       </MenuWrapper>
     </>
   );

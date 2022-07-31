@@ -1,5 +1,5 @@
 import Head from 'next/head';
-import { getSession } from 'next-auth/react';
+import { getSession, useSession, signIn, signOut } from 'next-auth/react';
 import SidebarLayout from '@/layouts/SidebarLayout';
 import {validateServerSideSession} from "../lib/auth"
 import PageHeader from '@/components/PageHeader';
@@ -10,14 +10,16 @@ import Calendar from '../src/components/Calendar'
 import AccountBalance from '@/content/Dashboards/Crypto/AccountBalance';
 import Wallets from '@/content/Dashboards/Crypto/Wallets';
 import WatchList from '@/content/Dashboards/Crypto/WatchList';
+
 function Home({session}) {
+  const {user} = session;
   return (
     <>
       <Head>
         <title>Servi Hogar</title>
       </Head>
       <PageTitleWrapper>
-      <PageHeader title={"¡Bienvenido(a) "+session?.user?.username+"!"} sutitle={"Esta es la página de inicio"} showAvatar={true}/>
+      <PageHeader title={"¡Bienvenido(a) "+user?.name+"!"} sutitle={"Esta es la página de inicio"} showAvatar={true}/>
       </PageTitleWrapper>
       <Container maxWidth="lg">
         <Calendar />
