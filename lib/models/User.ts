@@ -1,14 +1,14 @@
 import mongoose, { Model, model, Schema } from 'mongoose';
 import { hash, compare, genSalt } from 'bcryptjs';
 export interface IUser extends Document {
-  user: string;
+  id: string;
   name: string;
-  role: string;
+  role: Schema.Types.ObjectId;
   password: string;
 }
 
 const UserSchema: Schema = new Schema({
-  user: {
+  id: {
     type: String,
     required: true
   },
@@ -17,7 +17,8 @@ const UserSchema: Schema = new Schema({
     required: true
   },
   role: {
-    type: String,
+    type: Schema.Types.ObjectId,
+    ref:'roles',
     required: true
   },
   password: {
@@ -35,4 +36,4 @@ UserSchema.methods.matchPassword = async function (psw) {
 };
 
 export const User: Model<IUser> =
-  mongoose.models.User || model('User', UserSchema);
+  mongoose.models.users || model('users', UserSchema);

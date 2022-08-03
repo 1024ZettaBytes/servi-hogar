@@ -29,13 +29,13 @@ async function handler(req, res) {
     client.disconnect();
     return;
   }
-  const givenRole = Role.findOne({ id: role });
+  const givenRole = await Role.findOne({ id: role });
   if (!givenRole) {
     res.status(422).json({ ok: false, message: `El rol ${rol} no existe` });
     client.disconnect();
     return;
   }
-  const newUser = new User({ user, name, role });
+  const newUser = new User({ user, name, role : givenRole._id });
   newUser.password = await newUser.encryptPassword(password);
   await newUser.save();
   res.status(200).json({ ok: true, message: "¡Usuario creado!" });

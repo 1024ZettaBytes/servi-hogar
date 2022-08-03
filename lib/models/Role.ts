@@ -10,4 +10,4 @@ const RoleSchema: Schema = new Schema({
   name: { type: 'string' },
 });
 export const Role: Model<IRole> =
-  mongoose.models.Role || model('Role', RoleSchema);
+  mongoose.models.roles || model('roles', RoleSchema);

@@ -4,6 +4,8 @@ import { User } from "../../../lib/models/User";
 import { Role } from "../../../lib/models/Role";
 import { connectToDatabase } from "../../../lib/db";
 
+Role.init();
+
 export default NextAuth({
   session: {
     jwt: true,
@@ -12,17 +14,12 @@ export default NextAuth({
   callbacks: {
     async session({ session, token }) {
       const currentUser = token.user;
-      console.log("Current user:", currentUser);
       const client = await connectToDatabase();
-       
-      const userFromDb = await User.findOne({
+      const user = await User.findOne({
         user: currentUser.id,
-      });
-      const userRole = await Role.findOne({
-        id: userFromDb.role,
-      });
+      }).populate("role").exec();
       client.disconnect();
-      session.user  = { id: userFromDb.id, name: userFromDb.name, role: userRole };
+      session.user  = { id:user.id, name:user.name, role:user.role };
       return session;
     },
     async jwt({ token, user }) {
@@ -41,9 +38,8 @@ export default NextAuth({
           throw new Error("Error de conexión. Por favor contacte a Soporte.");
         }
         const user = await User.findOne({
-          user: credentials.user,
-        });
-        const role = 1;
+          id: credentials.user,
+        }).populate('role').exec();
 
         if (!user) {
           client.disconnect();
@@ -56,15 +52,9 @@ export default NextAuth({
           client.disconnect();
           throw new Error("Usuario y/o contraseña incorrectos");
         }
-        const userRole = await Role.findOne({
-          id: user.role,
-        });
-        if (!userRole) {
-          client.disconnect();
-          throw new Error("Rol no encontrado");
-        }
         client.disconnect();
-        return { id: user.user, name: user.name, role: userRole };
+
+        return { id: user.id, name:user.name, role: user.role} = user;
       },
     }),
   ],
