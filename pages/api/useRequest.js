@@ -1,5 +1,5 @@
 import useSWR, { mutate } from "swr";
-import { ROUTES } from "../API_URL_CONST";
+import { ROUTES } from "../../lib/consts/API_URL_CONST";
 export const refreshData = async(apiUrl) => {
   await mutate(apiUrl);
 };
