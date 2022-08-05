@@ -40,6 +40,7 @@ function PageHeader(props) {
           variant="contained"
           startIcon={<AddTwoToneIcon fontSize="small" />}
           onClick={() =>button.onClick()}
+          disabled={button.disabled}
         >
           {button.text}
         </Button>:null

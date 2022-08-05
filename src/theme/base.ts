@@ -4,6 +4,7 @@ import { Theme } from '@mui/material';
 import { PureLightTheme } from './schemes/PureLightTheme';
 import { GreyGooseTheme } from './schemes/GreyGooseTheme';
 import { PurpleFlowTheme } from './schemes/PurpleFlowTheme';
+import { Localization } from '@mui/material/locale';
 
 export function themeCreator(theme: string): Theme {
   return themeMap[theme];
@@ -11,6 +12,7 @@ export function themeCreator(theme: string): Theme {
 
 declare module '@mui/material/styles' {
   interface Theme {
+    locale: Localization;
     colors: {
       gradients: {
         blue1: string;

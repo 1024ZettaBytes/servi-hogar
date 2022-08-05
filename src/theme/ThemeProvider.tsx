@@ -1,7 +1,8 @@
 import { FC, useState, createContext, useEffect } from 'react';
-import { ThemeProvider } from '@mui/material';
+import { createTheme,ThemeProvider } from '@mui/material';
 import { themeCreator } from './base';
 import { StylesProvider } from '@mui/styles';
+import { esES } from '@mui/material/locale';
 
 export const ThemeContext = createContext((_themeName: string): void => {});
 
@@ -14,7 +15,8 @@ const ThemeProviderWrapper: FC = (props) => {
     _setThemeName(curThemeName);
   }, []);
 
-  const theme = themeCreator(themeName);
+  const themeprev = themeCreator(themeName);
+  const theme = createTheme(themeprev,esES);
   const setThemeName = (themeName: string): void => {
     window.localStorage.setItem('appTheme', themeName);
     _setThemeName(themeName);

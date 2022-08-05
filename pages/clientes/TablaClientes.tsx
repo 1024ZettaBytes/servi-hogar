@@ -1,5 +1,4 @@
 import { FC, ChangeEvent, useState } from 'react';
-import { format } from 'date-fns';
 import numeral from 'numeral';
 import PropTypes from 'prop-types';
 import {
@@ -26,91 +25,106 @@ import {
 } from '@mui/material';
 
 import Label from '@/components/Label';
-import { CryptoOrder, CryptoOrderStatus } from '@/models/crypto_order';
+import {  CustomerLevel } from '@/models/crypto_order';
 import EditTwoToneIcon from '@mui/icons-material/EditTwoTone';
 import DeleteTwoToneIcon from '@mui/icons-material/DeleteTwoTone';
 import BulkActions from './BulkActions';
 
 interface TablaClientesProps {
   className?: string;
-  cryptoOrders: CryptoOrder[];
+  customerList: any[];
+  levelsList: any[];
 }
 
 interface Filters {
-  status?: CryptoOrderStatus;
+  level?: CustomerLevel;
 }
-
-const getStatusLabel = (cryptoOrderStatus: CryptoOrderStatus): JSX.Element => {
+const getStatusLabel = (customerLevel: CustomerLevel): JSX.Element => {
   const map = {
-    failed: {
-      text: 'Failed',
-      color: 'error'
+    nuevo: {
+      text: "Nuevo",
+      color: 'secondary'
     },
-    completed: {
-      text: 'Completed',
+    regular: {
+      text: "Regular",
+      color: 'info'
+    },
+    permanente: {
+      text: "Permanente",
       color: 'success'
     },
-    pending: {
-      text: 'Pending',
+    deudor: {
+      text: "Deudor",
       color: 'warning'
+    },
+    conflictivo: {
+      text: "Conflictivo",
+      color: 'error'
     }
   };
 
-  const { text, color }: any = map[cryptoOrderStatus];
+  const { text, color }: any = map[customerLevel];
 
   return <Label color={color}>{text}</Label>;
 };
 
 const applyFilters = (
-  cryptoOrders: CryptoOrder[],
+  customerList: any[],
   filters: Filters
-): CryptoOrder[] => {
-  return cryptoOrders.filter((cryptoOrder) => {
+): any[] => {
+  return customerList.filter((customer) => {
     let matches = true;
 
-    if (filters.status && cryptoOrder.status !== filters.status) {
+    if (filters.level && customer.level.id !== filters.level) {
       matches = false;
     }
-
     return matches;
   });
 };
 
 const applyPagination = (
-  cryptoOrders: CryptoOrder[],
+  customerList: any[],
   page: number,
   limit: number
-): CryptoOrder[] => {
-  return cryptoOrders.slice(page * limit, page * limit + limit);
+): any[] => {
+  return customerList.slice(page * limit, page * limit + limit);
 };
 
-const TablaClientes: FC<TablaClientesProps> = ({ cryptoOrders }) => {
-  const [selectedCryptoOrders, setSelectedCryptoOrders] = useState<string[]>(
+const TablaClientes: FC<TablaClientesProps> = ({ customerList }) => {
+  const [selectedCustomers, setSelectedCustomers] = useState<string[]>(
     []
   );
-  const selectedBulkActions = selectedCryptoOrders.length > 0;
+  const selectedBulkActions = selectedCustomers.length > 0;
   const [page, setPage] = useState<number>(0);
   const [limit, setLimit] = useState<number>(5);
   const [filters, setFilters] = useState<Filters>({
-    status: null
+    level: null
   });
 
-  const statusOptions = [
+  const levelsOptions = [
     {
-      id: 'all',
-      name: 'All'
+      id: 'todos',
+      name: 'Todos'
     },
     {
-      id: 'completed',
-      name: 'Completed'
+      id: 'nuevo',
+      name: 'Nuevo'
     },
     {
-      id: 'pending',
-      name: 'Pending'
+      id: 'regular',
+      name: 'Regular'
     },
     {
-      id: 'failed',
-      name: 'Failed'
+      id: 'permanente',
+      name: 'Permanente'
+    },
+    {
+      id: 'deudor',
+      name: 'Deudor'
+    },
+    {
+      id: 'conflictivo',
+      name: 'Conflictivo'
     }
   ];
 
@@ -123,32 +137,32 @@ const TablaClientes: FC<TablaClientesProps> = ({ cryptoOrders }) => {
 
     setFilters((prevFilters) => ({
       ...prevFilters,
-      status: value
+      level: value
     }));
   };
 
   const handleSelectAllCryptoOrders = (
     event: ChangeEvent<HTMLInputElement>
   ): void => {
-    setSelectedCryptoOrders(
+    setSelectedCustomers(
       event.target.checked
-        ? cryptoOrders.map((cryptoOrder) => cryptoOrder.id)
+        ? customerList.map((customer) => customer.curp)
         : []
     );
   };
 
-  const handleSelectOneCryptoOrder = (
+  const handleSelectOneCustomer = (
     _event: ChangeEvent<HTMLInputElement>,
-    cryptoOrderId: string
+    customerCurp: string
   ): void => {
-    if (!selectedCryptoOrders.includes(cryptoOrderId)) {
-      setSelectedCryptoOrders((prevSelected) => [
+    if (!selectedCustomers.includes(customerCurp)) {
+      setSelectedCustomers((prevSelected) => [
         ...prevSelected,
-        cryptoOrderId
+        customerCurp
       ]);
     } else {
-      setSelectedCryptoOrders((prevSelected) =>
-        prevSelected.filter((id) => id !== cryptoOrderId)
+      setSelectedCustomers((prevSelected) =>
+        prevSelected.filter((id) => id !== customerCurp)
       );
     }
   };
@@ -161,19 +175,18 @@ const TablaClientes: FC<TablaClientesProps> = ({ cryptoOrders }) => {
     setLimit(parseInt(event.target.value));
   };
 
-  const filteredCryptoOrders = applyFilters(cryptoOrders, filters);
+  const filteredCryptoOrders = applyFilters(customerList, filters);
   const paginatedCryptoOrders = applyPagination(
     filteredCryptoOrders,
     page,
     limit
   );
   const selectedSomeCryptoOrders =
-    selectedCryptoOrders.length > 0 &&
-    selectedCryptoOrders.length < cryptoOrders.length;
+    selectedCustomers.length > 0 &&
+    selectedCustomers.length < customerList.length;
   const selectedAllCryptoOrders =
-    selectedCryptoOrders.length === cryptoOrders.length;
+  selectedCustomers.length === customerList.length;
   const theme = useTheme();
-
   return (
     <Card>
       {selectedBulkActions && (
@@ -186,23 +199,23 @@ const TablaClientes: FC<TablaClientesProps> = ({ cryptoOrders }) => {
           action={
             <Box width={150}>
               <FormControl fullWidth variant="outlined">
-                <InputLabel>Status</InputLabel>
+                <InputLabel>Nivel</InputLabel>
                 <Select
-                  value={filters.status || 'all'}
+                  value={filters.level || 'todos'}
                   onChange={handleStatusChange}
                   label="Status"
                   autoWidth
                 >
-                  {statusOptions.map((statusOption) => (
-                    <MenuItem key={statusOption.id} value={statusOption.id}>
-                      {statusOption.name}
+                  {levelsOptions.map((levelOption) => (
+                    <MenuItem key={levelOption.id} value={levelOption.id}>
+                      {levelOption.name}
                     </MenuItem>
                   ))}
                 </Select>
               </FormControl>
             </Box>
           }
-          title="Recent Orders"
+          title="Todos los Clientes"
         />
       )}
       <Divider />
@@ -218,23 +231,23 @@ const TablaClientes: FC<TablaClientesProps> = ({ cryptoOrders }) => {
                   onChange={handleSelectAllCryptoOrders}
                 />
               </TableCell>
-              <TableCell>ID</TableCell>
-              <TableCell>Nombre</TableCell>
+              <TableCell>Cliente</TableCell>
               <TableCell>Celular</TableCell>
-              <TableCell>Colonia</TableCell>
+              <TableCell align="left">Domicilio</TableCell>
+              <TableCell align="left">Sector</TableCell>
               <TableCell align="center">Nivel</TableCell>
               <TableCell align="right">Actions</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
-            {paginatedCryptoOrders.map((cryptoOrder) => {
-              const isCryptoOrderSelected = selectedCryptoOrders.includes(
-                cryptoOrder.id
+            {paginatedCryptoOrders.map((customer) => {
+              const isCryptoOrderSelected = selectedCustomers.includes(
+                customer.curp
               );
               return (
                 <TableRow
                   hover
-                  key={cryptoOrder.id}
+                  key={customer.curp}
                   selected={isCryptoOrderSelected}
                 >
                   <TableCell padding="checkbox">
@@ -242,7 +255,7 @@ const TablaClientes: FC<TablaClientesProps> = ({ cryptoOrders }) => {
                       color="primary"
                       checked={isCryptoOrderSelected}
                       onChange={(event: ChangeEvent<HTMLInputElement>) =>
-                        handleSelectOneCryptoOrder(event, cryptoOrder.id)
+                        handleSelectOneCustomer(event, customer.curp)
                       }
                       value={isCryptoOrderSelected}
                     />
@@ -255,10 +268,12 @@ const TablaClientes: FC<TablaClientesProps> = ({ cryptoOrders }) => {
                       gutterBottom
                       noWrap
                     >
-                      {cryptoOrder.orderDetails}
+                      {customer.curp}
                     </Typography>
                     <Typography variant="body2" color="text.secondary" noWrap>
-                      {format(cryptoOrder.orderDate, 'MMMM dd yyyy')}
+                      {//format(customer.orderDate, 'MMMM dd yyyy')
+                      customer.name
+                      }
                     </Typography>
                   </TableCell>
                   <TableCell>
@@ -269,7 +284,7 @@ const TablaClientes: FC<TablaClientesProps> = ({ cryptoOrders }) => {
                       gutterBottom
                       noWrap
                     >
-                      {cryptoOrder.orderID}
+                      {customer.cell}
                     </Typography>
                   </TableCell>
                   <TableCell>
@@ -280,10 +295,10 @@ const TablaClientes: FC<TablaClientesProps> = ({ cryptoOrders }) => {
                       gutterBottom
                       noWrap
                     >
-                      {cryptoOrder.sourceName}
+                      {customer.street}
                     </Typography>
                     <Typography variant="body2" color="text.secondary" noWrap>
-                      {cryptoOrder.sourceDesc}
+                      {customer.suburb}
                     </Typography>
                   </TableCell>
                   <TableCell>
@@ -294,17 +309,17 @@ const TablaClientes: FC<TablaClientesProps> = ({ cryptoOrders }) => {
                       gutterBottom
                       noWrap
                     >
-                      {cryptoOrder.amountCrypto}
-                      {cryptoOrder.cryptoCurrency}
+                      {customer.amountCrypto}
+                      {customer.cryptoCurrency}
                     </Typography>
                     <Typography variant="body2" color="text.secondary" noWrap>
-                      {numeral(cryptoOrder.amount).format(
-                        `${cryptoOrder.currency}0,0.00`
+                      {numeral(customer.amount).format(
+                        `${customer.currency}0,0.00`
                       )}
                     </Typography>
                   </TableCell>
                   <TableCell align="center">
-                    {getStatusLabel(cryptoOrder.status)}
+                    {getStatusLabel(customer.level.id)}
                   </TableCell>
                   <TableCell align="right">
                     <Tooltip title="Edit Order" arrow>
@@ -356,11 +371,13 @@ const TablaClientes: FC<TablaClientesProps> = ({ cryptoOrders }) => {
 };
 
 TablaClientes.propTypes = {
-  cryptoOrders: PropTypes.array.isRequired
+  customerList: PropTypes.array.isRequired,
+  levelsList: PropTypes.array.isRequired
 };
 
 TablaClientes.defaultProps = {
-  cryptoOrders: []
+  customerList: [],
+  levelsList: []
 };
 
 export default TablaClientes;

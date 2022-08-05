@@ -1,4 +1,4 @@
-import { connectToDatabase } from "../../../lib/db";
+import { connectToDatabase, isConnected } from "../../../lib/db";
 import { User } from "../../../lib/models/User";
 import { Role } from "../../../lib/models/Role";
 async function handler(req, res) {
@@ -8,9 +8,9 @@ async function handler(req, res) {
 
   const data = req.body;
 
-  const { user, password, name, role } = data;
+  const { id, password, name, role } = data;
 
-  if (!user || !password || !name || !role || password.trim().length < 7) {
+  if (!id || !password || !name || !role || password.trim().length < 7) {
     res.status(422).json({
       ok: false,
       message:
@@ -18,28 +18,23 @@ async function handler(req, res) {
     });
     return;
   }
-
-  const client = await connectToDatabase();
-
-  const existingUser = await User.findOne({ user });
+  if (!isConnected()) {
+    await connectToDatabase();
+  }
+  const existingUser = await User.findOne({ id });
   if (existingUser) {
-    res
-      .status(422)
-      .json({ ok: false, message: `El usuario ${user} ya existe` });
-    client.disconnect();
+    res.status(422).json({ ok: false, message: `El usuario ${id} ya existe` });
     return;
   }
   const givenRole = await Role.findOne({ id: role });
   if (!givenRole) {
     res.status(422).json({ ok: false, message: `El rol ${rol} no existe` });
-    client.disconnect();
     return;
   }
-  const newUser = new User({ user, name, role : givenRole._id });
+  const newUser = new User({ id, name, role: givenRole._id });
   newUser.password = await newUser.encryptPassword(password);
   await newUser.save();
   res.status(200).json({ ok: true, message: "¡Usuario creado!" });
-  client.disconnect();
 }
 
 export default handler;

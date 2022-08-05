@@ -1,4 +1,4 @@
-import { FC, ChangeEvent, useState } from 'react';
+/*import { FC, ChangeEvent, useState } from 'react';
 import { format } from 'date-fns';
 import numeral from 'numeral';
 import PropTypes from 'prop-types';
@@ -26,7 +26,7 @@ import {
 } from '@mui/material';
 
 import Label from '@/components/Label';
-import { CryptoOrder, CryptoOrderStatus } from '@/models/crypto_order';
+import { CryptoOrder, CryptoOrderStatus } from '@/models/customer_item';
 import EditTwoToneIcon from '@mui/icons-material/EditTwoTone';
 import DeleteTwoToneIcon from '@mui/icons-material/DeleteTwoTone';
 import BulkActions from './BulkActions';
@@ -362,5 +362,8 @@ RecentOrdersTable.propTypes = {
 RecentOrdersTable.defaultProps = {
   cryptoOrders: []
 };
-
+*/
+function RecentOrdersTable() {
+  return null;
+}
 export default RecentOrdersTable;

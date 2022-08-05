@@ -1,8 +1,8 @@
-export type CryptoOrderStatus = 'completed' | 'pending' | 'failed';
+export type CustomerLevel = 'nuevo' | 'regular' | 'permanente'| 'deudor'| 'conflictivo';
 
 export interface CryptoOrder {
   id: string;
-  status: CryptoOrderStatus;
+  status: CustomerLevel;
   orderDetails: string;
   orderDate: number;
   orderID: string;

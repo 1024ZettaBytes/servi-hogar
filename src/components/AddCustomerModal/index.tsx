@@ -9,48 +9,58 @@ import {
   CardHeader,
   Divider,
   Grid,
+  InputLabel,
   TextField,
   Typography,
+  Select,
+  FormControl,
+  MenuItem,
 } from "@mui/material";
-
 import { LoadingButton } from "@mui/lab";
-
+import { saveCustomer } from "../../../lib/client/customersFetch";
 function AddCustomerModal(props) {
   const { handleOnClose, open } = props;
   const [isLoading, setIsLoading] = useState(false);
   const [hasError, setHasError] = useState({ error: false, msg: "" });
-
+  const [selectedCity, setSelectedCity] = useState();
+  const [selectedSector, setSelectedSector] = useState();
+  const [citySectors, setCitySectors] = useState([]);
+function handleCitySelection(city) {
+  setSelectedCity(city);
+  setSelectedSector(undefined);
+  const filteredCity = props.citiesList.filter(c=>c._id === city);
+  setCitySectors(filteredCity[0].sectors);
+}
+function handleSectorSelection(sector) {
+  setSelectedSector(sector);
+ 
+}
   async function submitHandler(event) {
     event.preventDefault();
     setIsLoading(true);
     setHasError({ error: false, msg: "" });
-    const res = await fetch("/api/customers", {
-      body: JSON.stringify({
-        curp: event.target.curp.value,
-        name: event.target.name.value,
-        cell: event.target.cell.value,
-        street: event.target.street.value,
-        suburb: event.target.suburb.value,
-        city: event.target.city.value,
-        redidenceRef: event.target.residenceRef.value,
-        nameRef: event.target.nameRef.value,
-        telRef: event.target.telRef.value,
-        maps: event.target.maps.value,
-      }),
-      headers: {
-        "Content-Type": "application/json",
-      },
-      method: "POST",
+    const result = await saveCustomer({
+      curp: event.target.curp.value,
+      name: event.target.name.value,
+      cell: event.target.cell.value,
+      street: event.target.street.value,
+      suburb: event.target.suburb.value,
+      city: selectedCity,
+      sector: selectedSector,
+      residenceRef: event.target.residenceRef.value,
+      nameRef: event.target.nameRef.value,
+      telRef: event.target.telRef.value,
+      maps: event.target.maps.value,
     });
-    const response = await res.json();
     setIsLoading(false);
-    if ((res.status === 200 || res.status === 201) && response.ok) {
+    if (!result.error) {
       handleSavedCustomer();
     } else {
-      handleErrorOnSave(response.message);
+      handleErrorOnSave(result.msg);
     }
   }
   const handleClose = () => {
+    setHasError({ error: false, msg: "" });
     setIsLoading(false);
     handleOnClose(false);
   };
@@ -59,7 +69,7 @@ function AddCustomerModal(props) {
   };
 
   const handleErrorOnSave = (msg) => {
-    setHasError({ error: true, msg})
+    setHasError({ error: true, msg });
   };
 
   return (
@@ -76,17 +86,33 @@ function AddCustomerModal(props) {
               spacing={2}
               maxWidth="lg"
             >
+              
+              <Grid item lg={12}>
+              <Typography
+                      variant="h5"
+                      component="h5"
+                      color="secondary"
+                      textAlign="left"
+                      fontWeight="bold"
+                    >
+                      Datos personales
+                    </Typography>
+                    </Grid>
               <Grid item lg={12}>
                 <TextField
+                inputProps={{minLength:18, maxLength:18}}
+                  autoComplete="off"
                   required
                   id="curp"
                   name="curp"
                   label="CURP"
                   fullWidth={true}
+                  variant="outlined"
                 />
               </Grid>
               <Grid item lg={12}>
                 <TextField
+                  autoComplete="off"
                   required
                   id="name"
                   name="name"
@@ -94,8 +120,10 @@ function AddCustomerModal(props) {
                   fullWidth={true}
                 />
               </Grid>
+
               <Grid item lg={12}>
                 <TextField
+                  autoComplete="off"
                   required
                   id="cell"
                   name="cell"
@@ -104,7 +132,19 @@ function AddCustomerModal(props) {
                 />
               </Grid>
               <Grid item lg={12}>
+              <Typography
+                      variant="h5"
+                      component="h5"
+                      color="secondary"
+                      textAlign="left"
+                      fontWeight="bold"
+                    >
+                      Domicilio
+                    </Typography>
+                    </Grid>
+              <Grid item lg={12}>
                 <TextField
+                  autoComplete="off"
                   required
                   id="street"
                   name="street"
@@ -114,6 +154,7 @@ function AddCustomerModal(props) {
               </Grid>
               <Grid item lg={12}>
                 <TextField
+                  autoComplete="off"
                   required
                   id="suburb"
                   name="suburb"
@@ -122,16 +163,55 @@ function AddCustomerModal(props) {
                 />
               </Grid>
               <Grid item lg={12}>
-                <TextField
-                  required
-                  id="city"
-                  name="city"
-                  label="Ciudad"
-                  fullWidth={true}
-                />
+                <FormControl fullWidth>
+                  <InputLabel id="city-id">Ciudad</InputLabel>
+                  <Select
+                    labelId="city-id"
+                    id="city"
+                    name="city"
+                    label="Ciudad"
+                    required
+                    autoComplete="off"
+                    value={selectedCity || ''}
+                    onChange={(event)=>handleCitySelection(event.target.value)}
+                  >
+                    {props.citiesList 
+                      ? props.citiesList.map((city) => (
+                          <MenuItem key={city._id} value={city._id}>
+                            {city.name}
+                          </MenuItem>
+                        ))
+                      : null}
+                  </Select>
+                </FormControl>
+              </Grid>
+              <Grid item lg={12}>
+                <FormControl fullWidth>
+                  <InputLabel id="sector-id">Sector</InputLabel>
+                  <Select
+                    labelId="sector-id"
+                    id="sector"
+                    name="sector"
+                    label="Sector"
+                    required
+                    autoComplete="off"
+                    value={selectedSector || ''}
+                    disabled= {!selectedCity}
+                    onChange={(event)=>handleSectorSelection(event.target.value)}
+                  >
+                    {props.citiesList  && selectedCity
+                      ? citySectors.map((sector) => (
+                          <MenuItem key={sector._id} value={sector._id}>
+                            {sector.name}
+                          </MenuItem>
+                        ))
+                      : null}
+                  </Select>
+                </FormControl>
               </Grid>
               <Grid item lg={12}>
                 <TextField
+                  autoComplete="off"
                   required
                   id="residenceRef"
                   name="residenceRef"
@@ -141,6 +221,7 @@ function AddCustomerModal(props) {
               </Grid>
               <Grid item lg={12}>
                 <TextField
+                  autoComplete="off"
                   required
                   id="nameRef"
                   name="nameRef"
@@ -150,6 +231,7 @@ function AddCustomerModal(props) {
               </Grid>
               <Grid item lg={12}>
                 <TextField
+                  autoComplete="off"
                   required
                   id="telRef"
                   name="telRef"
@@ -159,6 +241,7 @@ function AddCustomerModal(props) {
               </Grid>
               <Grid item lg={12}>
                 <TextField
+                  autoComplete="off"
                   required
                   id="maps"
                   name="maps"
@@ -168,8 +251,8 @@ function AddCustomerModal(props) {
                   fullWidth={true}
                 />
                 {hasError.error ? (
-                    <Grid item>
-                      <br/>
+                  <Grid item>
+                    <br />
                     <Typography
                       variant="h5"
                       component="h5"
@@ -178,9 +261,8 @@ function AddCustomerModal(props) {
                     >
                       {hasError.msg}
                     </Typography>
-                    
-                    </Grid>
-                  ) : null}
+                  </Grid>
+                ) : null}
               </Grid>
 
               <Grid item lg={12}>
@@ -223,7 +305,7 @@ function AddCustomerModal(props) {
 AddCustomerModal.propTypes = {
   handleOnClose: PropTypes.func.isRequired,
   open: PropTypes.bool.isRequired,
-  selectedValue: PropTypes.string.isRequired,
+  citiesList: PropTypes.array.isRequired,
 };
 
 export default AddCustomerModal;
