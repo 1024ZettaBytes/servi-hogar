@@ -1,17 +1,20 @@
-import { useRouter } from 'next/router';
-import { getSession } from 'next-auth/react';
-import { useEffect, useState } from 'react';
+import { useRouter } from "next/router";
+import { getSession, signOut } from "next-auth/react";
+import { useEffect, useState } from "react";
 
-import LoginForm from './login'
+import LoginForm from "./login";
 
 function AuthPage() {
   const [isLoading, setIsLoading] = useState(true);
   const router = useRouter();
-
   useEffect(() => {
     getSession().then((session) => {
       if (session) {
-        router.replace('/');
+        if (session.user.wasRemoved) {
+          signOut();
+        } else {
+          router.replace("/");
+        }
       } else {
         setIsLoading(false);
       }

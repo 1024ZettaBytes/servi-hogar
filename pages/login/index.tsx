@@ -22,6 +22,7 @@ function LoginForm() {
   const [isLoading, setIsLoading] = useState(false);
   let userInputRef = React.useRef<HTMLInputElement>(null);
   let passwordInputRef = React.useRef<HTMLInputElement>(null);
+
   async function submitHandler(event) {
     event.preventDefault();
     setIsLoading(true);

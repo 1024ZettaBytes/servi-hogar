@@ -318,7 +318,7 @@ function SidebarMenu({userRole}) {
             </List>
           </SubMenuWrapper>
         </List>
-        {userRole.id === "ADMIN" ?
+        {userRole === "ADMIN" ?
         <List
           component="div"
           subheader={

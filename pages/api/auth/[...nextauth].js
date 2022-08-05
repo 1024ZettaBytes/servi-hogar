@@ -13,7 +13,21 @@ export default NextAuth({
   },
   callbacks: {
     async session({ session, token }) {
-      session.user  = token.user;
+      const tokenUser = token.user;
+      if(!isConnected()){
+        await connectToDatabase();
+      }
+      const userOnDb = await User.findById(tokenUser.id).populate("role").exec();
+      if(!userOnDb){
+        session.user={wasRemoved:true};
+        return session;
+      }
+      if (userOnDb?.role?.id === tokenUser?.role) {
+        session.user=tokenUser;
+      }
+      else{
+        session.user = { id: userOnDb?._id, name:userOnDb?.name, role: userOnDb?.role?.id}
+      }
       return session;
     },
     async jwt({ token, user }) {
@@ -42,7 +56,7 @@ export default NextAuth({
         if (!isValid) {
           throw new Error("Usuario y/o contraseña incorrectos");
         }
-        return { id: user._id, name:user.name, role: user.role} = user;
+        return { id: user._id, name:user.name, role: user?.role?.id};
       },
     }),
   ],
