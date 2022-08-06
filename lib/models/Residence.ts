@@ -4,6 +4,7 @@ export interface IResidence extends Document {
   street: string;
   suburb: string;
   city: string;
+  sector: Schema.Types.ObjectId;
   redidenceRef: string;
   nameRef: string;
   telRef: string;
@@ -18,6 +19,11 @@ const ResidenceSchema: Schema = new Schema({
   city: {
     type: Schema.Types.ObjectId,
     ref:'cities',
+    required: true
+  },
+  sector: {
+    type: Schema.Types.ObjectId,
+    ref:'sectors',
     required: true
   },
   residenceRef: { type: 'string', required: true},

@@ -15,6 +15,11 @@ import {
   Select,
   FormControl,
   MenuItem,
+  FormLabel,
+  RadioGroup,
+  FormControlLabel,
+  Radio,
+  Autocomplete,
 } from "@mui/material";
 import { LoadingButton } from "@mui/lab";
 import { saveCustomer } from "../../../lib/client/customersFetch";
@@ -25,16 +30,26 @@ function AddCustomerModal(props) {
   const [selectedCity, setSelectedCity] = useState();
   const [selectedSector, setSelectedSector] = useState();
   const [citySectors, setCitySectors] = useState([]);
-function handleCitySelection(city) {
-  setSelectedCity(city);
-  setSelectedSector(undefined);
-  const filteredCity = props.citiesList.filter(c=>c._id === city);
-  setCitySectors(filteredCity[0].sectors);
-}
-function handleSectorSelection(sector) {
-  setSelectedSector(sector);
- 
-}
+  const [wasReferred, setWasReferred] = useState(false);
+  const [selectedHowFound, setSelectedHowFound] = useState();
+  const [referredBy, setReferredBy] = useState();
+  
+  function handleCitySelection(city) {
+    setSelectedCity(city);
+    setSelectedSector(undefined);
+    const filteredCity = props.citiesList.filter((c) => c._id === city);
+    setCitySectors(filteredCity[0].sectors);
+  }
+  function handleSectorSelection(sector) {
+    setSelectedSector(sector);
+  }
+  function handleHowFoundSelection(howFound) {
+    setSelectedHowFound(howFound);
+    setWasReferred(howFound === "referred");
+  }
+  function handleReferredBySelection(referredBy){
+    setReferredBy(referredBy);
+  }
   async function submitHandler(event) {
     event.preventDefault();
     setIsLoading(true);
@@ -43,6 +58,8 @@ function handleSectorSelection(sector) {
       curp: event.target.curp.value,
       name: event.target.name.value,
       cell: event.target.cell.value,
+      howFound: event.target.howFound.value,
+      referredBy: referredBy,
       street: event.target.street.value,
       suburb: event.target.suburb.value,
       city: selectedCity,
@@ -86,21 +103,20 @@ function handleSectorSelection(sector) {
               spacing={2}
               maxWidth="lg"
             >
-              
               <Grid item lg={12}>
-              <Typography
-                      variant="h5"
-                      component="h5"
-                      color="secondary"
-                      textAlign="left"
-                      fontWeight="bold"
-                    >
-                      Datos personales
-                    </Typography>
-                    </Grid>
+                <Typography
+                  variant="h5"
+                  component="h5"
+                  color="secondary"
+                  textAlign="left"
+                  fontWeight="bold"
+                >
+                  Datos personales
+                </Typography>
+              </Grid>
               <Grid item lg={12}>
                 <TextField
-                inputProps={{minLength:18, maxLength:18}}
+                  inputProps={{ minLength: 18, maxLength: 18 }}
                   autoComplete="off"
                   required
                   id="curp"
@@ -132,16 +148,68 @@ function handleSectorSelection(sector) {
                 />
               </Grid>
               <Grid item lg={12}>
-              <Typography
-                      variant="h5"
-                      component="h5"
-                      color="secondary"
-                      textAlign="left"
-                      fontWeight="bold"
-                    >
-                      Domicilio
-                    </Typography>
-                    </Grid>
+                <FormLabel id="howFound-radiogroup-label">
+                  ¿Cómo se enteró del servicio?
+                </FormLabel>
+                <RadioGroup
+                  aria-labelledby="howFound-radiogroup-label"
+                  name="howFound"
+                  value={selectedHowFound || ""}
+                  onChange={(e) => handleHowFoundSelection(e.target.value)}
+                  row
+                >
+                  <FormControlLabel
+                    value="referred"
+                    control={<Radio required={true} />}
+                    label="Referido"
+                  />
+                  <FormControlLabel
+                    value="facebook"
+                    control={<Radio required={true} />}
+                    label="Facebook"
+                  />
+                  <FormControlLabel
+                    value="recomended"
+                    control={<Radio required={true} />}
+                    label="Recomendado"
+                  />
+                </RadioGroup>
+              </Grid>
+              {wasReferred ? (
+                  <Grid item lg={12}>
+                    <Autocomplete
+                      disablePortal
+                      id="combo-box-demo"
+                      options={props.customerList.map((customer) => {
+                        return { label: `(${customer.curp}) ${customer.name}`, id: customer._id };
+                      })}
+                      onChange={(event: any, newValue: string | null) => {
+                        event.target;
+                        handleReferredBySelection(newValue);
+                      }}
+                      fullWidth
+                      isOptionEqualToValue={(option:any, value:any) => option.id === value.id}
+                      renderInput={(params) => (
+                        <TextField
+                        required  
+                          {...params}
+                          label="Cliente que lo recomendó"
+                        />
+                      )}
+                    />
+                  </Grid>
+                ) : null}
+              <Grid item lg={12}>
+                <Typography
+                  variant="h5"
+                  component="h5"
+                  color="secondary"
+                  textAlign="left"
+                  fontWeight="bold"
+                >
+                  Domicilio
+                </Typography>
+              </Grid>
               <Grid item lg={12}>
                 <TextField
                   autoComplete="off"
@@ -172,10 +240,12 @@ function handleSectorSelection(sector) {
                     label="Ciudad"
                     required
                     autoComplete="off"
-                    value={selectedCity || ''}
-                    onChange={(event)=>handleCitySelection(event.target.value)}
+                    value={selectedCity || ""}
+                    onChange={(event) =>
+                      handleCitySelection(event.target.value)
+                    }
                   >
-                    {props.citiesList 
+                    {props.citiesList
                       ? props.citiesList.map((city) => (
                           <MenuItem key={city._id} value={city._id}>
                             {city.name}
@@ -195,11 +265,13 @@ function handleSectorSelection(sector) {
                     label="Sector"
                     required
                     autoComplete="off"
-                    value={selectedSector || ''}
-                    disabled= {!selectedCity}
-                    onChange={(event)=>handleSectorSelection(event.target.value)}
+                    value={selectedSector || ""}
+                    disabled={!selectedCity}
+                    onChange={(event) =>
+                      handleSectorSelection(event.target.value)
+                    }
                   >
-                    {props.citiesList  && selectedCity
+                    {props.citiesList && selectedCity
                       ? citySectors.map((sector) => (
                           <MenuItem key={sector._id} value={sector._id}>
                             {sector.name}
@@ -306,6 +378,7 @@ AddCustomerModal.propTypes = {
   handleOnClose: PropTypes.func.isRequired,
   open: PropTypes.bool.isRequired,
   citiesList: PropTypes.array.isRequired,
+  customerList: PropTypes.array.isRequired,
 };
 
 export default AddCustomerModal;

@@ -7,6 +7,11 @@ export interface ICustomer extends Document {
   residences: [Schema.Types.ObjectId];
   currentResidence: Schema.Types.ObjectId;
   level: Schema.Types.ObjectId;
+  howFound: string;
+  wasReferred: boolean;
+  referrals: [Schema.Types.ObjectId];
+  referedBy: Schema.Types.ObjectId;
+  freeWeeks: number;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -22,18 +27,25 @@ const CustomerSchema: Schema = new Schema({
       required: true
     }
   ],
-  currentResidence: 
-    {
-      type: Schema.Types.ObjectId,
-      ref: 'residences',
-      required: true
-    }
-  ,
+  currentResidence: {
+    type: Schema.Types.ObjectId,
+    ref: 'residences',
+    required: true
+  },
   level: {
     type: Schema.Types.ObjectId,
     ref: 'customer_levels',
     required: true
   },
+  howFound: { type: 'string', required: true },
+  wasReferred: { type: 'boolean', default: false, required: true },
+  referedBy: {
+    type: Schema.Types.ObjectId,
+    default: null,
+    ref: 'customer_levels'
+  },
+  referrals: { type: [Schema.Types.ObjectId], default: [] },
+  freeWeeks: { type: 'number', default: 0 },
   createdAt: { type: Date, required: true },
   updatedAt: { type: Date, required: true }
 });

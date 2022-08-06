@@ -1,5 +1,5 @@
 import { FC, ChangeEvent, useState } from 'react';
-import numeral from 'numeral';
+//import numeral from 'numeral';
 import PropTypes from 'prop-types';
 import {
   Tooltip,
@@ -231,12 +231,12 @@ const TablaClientes: FC<TablaClientesProps> = ({ customerList }) => {
                   onChange={handleSelectAllCryptoOrders}
                 />
               </TableCell>
-              <TableCell>Cliente</TableCell>
-              <TableCell>Celular</TableCell>
-              <TableCell align="left">Domicilio</TableCell>
-              <TableCell align="left">Sector</TableCell>
+              <TableCell align="center">Cliente</TableCell>
+              <TableCell align="center">Celular</TableCell>
+              <TableCell align="center">Domicilio</TableCell>
+              <TableCell align="center">Ciudad</TableCell>
               <TableCell align="center">Nivel</TableCell>
-              <TableCell align="right">Actions</TableCell>
+              <TableCell align="center"></TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
@@ -247,7 +247,7 @@ const TablaClientes: FC<TablaClientesProps> = ({ customerList }) => {
               return (
                 <TableRow
                   hover
-                  key={customer.curp}
+                  key={customer._id}
                   selected={isCryptoOrderSelected}
                 >
                   <TableCell padding="checkbox">
@@ -260,7 +260,7 @@ const TablaClientes: FC<TablaClientesProps> = ({ customerList }) => {
                       value={isCryptoOrderSelected}
                     />
                   </TableCell>
-                  <TableCell>
+                  <TableCell align="center">
                     <Typography
                       variant="body1"
                       fontWeight="bold"
@@ -268,15 +268,13 @@ const TablaClientes: FC<TablaClientesProps> = ({ customerList }) => {
                       gutterBottom
                       noWrap
                     >
-                      {customer.curp}
+                      {customer.name}
                     </Typography>
                     <Typography variant="body2" color="text.secondary" noWrap>
-                      {//format(customer.orderDate, 'MMMM dd yyyy')
-                      customer.name
-                      }
+                    {customer.curp}
                     </Typography>
                   </TableCell>
-                  <TableCell>
+                  <TableCell align="center">
                     <Typography
                       variant="body1"
                       fontWeight="bold"
@@ -287,7 +285,7 @@ const TablaClientes: FC<TablaClientesProps> = ({ customerList }) => {
                       {customer.cell}
                     </Typography>
                   </TableCell>
-                  <TableCell>
+                  <TableCell align="center">
                     <Typography
                       variant="body1"
                       fontWeight="bold"
@@ -295,13 +293,13 @@ const TablaClientes: FC<TablaClientesProps> = ({ customerList }) => {
                       gutterBottom
                       noWrap
                     >
-                      {customer.street}
+                      {customer.currentResidence.street}
                     </Typography>
                     <Typography variant="body2" color="text.secondary" noWrap>
-                      {customer.suburb}
+                      {customer.currentResidence.suburb}
                     </Typography>
                   </TableCell>
-                  <TableCell>
+                  <TableCell align="center">
                     <Typography
                       variant="body1"
                       fontWeight="bold"
@@ -309,19 +307,19 @@ const TablaClientes: FC<TablaClientesProps> = ({ customerList }) => {
                       gutterBottom
                       noWrap
                     >
-                      {customer.amountCrypto}
-                      {customer.cryptoCurrency}
+                      {customer.currentResidence.city.name}
+                      
                     </Typography>
                     <Typography variant="body2" color="text.secondary" noWrap>
-                      {numeral(customer.amount).format(
+                      {/*numeral(customer.amount).format(
                         `${customer.currency}0,0.00`
-                      )}
+                      )*/customer.currentResidence.sector.name}
                     </Typography>
                   </TableCell>
                   <TableCell align="center">
                     {getStatusLabel(customer.level.id)}
                   </TableCell>
-                  <TableCell align="right">
+                  <TableCell align="center">
                     <Tooltip title="Edit Order" arrow>
                       <IconButton
                         sx={{

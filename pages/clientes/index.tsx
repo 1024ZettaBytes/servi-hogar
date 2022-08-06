@@ -71,11 +71,12 @@ function Clientes({}) {
           </Grid>
         </Grid>
       </Container>
-{citiesList ?
+{modalIsOpen && citiesList && customerList  ?
       <AddCustomerModal
         open={modalIsOpen}
         handleOnClose={handleClose}
         citiesList={citiesList}
+        customerList={customerList}
       />:null}
       <Footer />
     </>
