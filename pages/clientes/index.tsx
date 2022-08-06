@@ -17,19 +17,25 @@ import Footer from "@/components/Footer";
 import AddCustomerModal from "@/components/AddCustomerModal";
 import TablaClientes from "./TablaClientes";
 import { useGetAllCustomers, getFetcher, useGetCustomerLevels, useGetCities } from "../api/useRequest";
-
+import { useSnackbar } from 'notistack';
 function Clientes({}) {
+  const { enqueueSnackbar } = useSnackbar();
   const { customerList, customerError } = useGetAllCustomers(getFetcher);
   const { customerLevelList, customerLevelError } = useGetCustomerLevels(getFetcher);
   const { citiesList, citiesError } = useGetCities(getFetcher);
   const [modalIsOpen, setModalIsOpen] = useState(false);
+  
   const handleClickOpen = () => {
-    setModalIsOpen(true);
+   setModalIsOpen(true);
   };
 
-  const handleClose = (addedCustomer) => {
+  const handleClose = (addedCustomer, successMessage=null) => {
     setModalIsOpen(false);
-    if (addedCustomer) {
+    if (addedCustomer && successMessage) {
+      enqueueSnackbar(successMessage,{variant:"success", anchorOrigin: {
+        vertical: 'top',
+        horizontal: 'center'
+      },autoHideDuration: 1500});
     }
   };
   const button = { text: "Agregar cliente", onClick: handleClickOpen, disabled:  citiesError || !citiesList};

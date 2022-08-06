@@ -71,7 +71,7 @@ function AddCustomerModal(props) {
     });
     setIsLoading(false);
     if (!result.error) {
-      handleSavedCustomer();
+      handleSavedCustomer(result.msg);
     } else {
       handleErrorOnSave(result.msg);
     }
@@ -81,8 +81,8 @@ function AddCustomerModal(props) {
     setIsLoading(false);
     handleOnClose(false);
   };
-  const handleSavedCustomer = () => {
-    handleOnClose(true);
+  const handleSavedCustomer = (successMessage) => {
+    handleOnClose(true, successMessage);
   };
 
   const handleErrorOnSave = (msg) => {

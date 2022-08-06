@@ -13,6 +13,7 @@ import createEmotionCache from 'src/createEmotionCache';
 import { SidebarProvider } from 'src/contexts/SidebarContext';
 import AdapterDateFns from '@mui/lab/AdapterDateFns';
 import LocalizationProvider from '@mui/lab/LocalizationProvider';
+import { SnackbarProvider } from 'notistack';
 import "@fullcalendar/common/main.css";
 import "@fullcalendar/daygrid/main.css";
 import "@fullcalendar/timegrid/main.css";
@@ -38,6 +39,7 @@ function TokyoApp(props: TokyoAppProps) {
 
   return (
     <SessionProvider session={pageProps.session}>
+     
     <CacheProvider value={emotionCache}>
       <Head>
         <title>Servi Hogar: Soluciones a tu medida</title>
@@ -46,6 +48,7 @@ function TokyoApp(props: TokyoAppProps) {
           content="width=device-width, initial-scale=1, shrink-to-fit=no"
         />
       </Head>
+      <SnackbarProvider maxSnack={3}>
       <SidebarProvider>
         <ThemeProvider>
           <LocalizationProvider dateAdapter={AdapterDateFns}>
@@ -53,8 +56,10 @@ function TokyoApp(props: TokyoAppProps) {
             {getLayout(<Component {...pageProps} />)}
           </LocalizationProvider>
         </ThemeProvider>
-      </SidebarProvider>
+      </SidebarProvider >
+      </SnackbarProvider>
     </CacheProvider>
+    
     </SessionProvider>
   );
 }
