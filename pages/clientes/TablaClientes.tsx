@@ -1,5 +1,6 @@
 import { FC, ChangeEvent, useState } from 'react';
 //import numeral from 'numeral';
+import * as str from "string";
 import PropTypes from 'prop-types';
 import {
   Tooltip,
@@ -21,14 +22,20 @@ import {
   MenuItem,
   Typography,
   useTheme,
-  CardHeader
+  CardHeader,
+  TextField,
+  InputAdornment,
 } from '@mui/material';
 
+
 import Label from '@/components/Label';
-import {  CustomerLevel } from '@/models/crypto_order';
+import { CustomerLevel } from '@/models/crypto_order';
 import EditTwoToneIcon from '@mui/icons-material/EditTwoTone';
 import DeleteTwoToneIcon from '@mui/icons-material/DeleteTwoTone';
 import BulkActions from './BulkActions';
+import SearchIcon from '@mui/icons-material/Search';
+import { info } from 'console';
+import { sr, srLatn } from 'date-fns/locale';
 
 interface TablaClientesProps {
   className?: string;
@@ -67,18 +74,42 @@ const getStatusLabel = (customerLevel: CustomerLevel): JSX.Element => {
 
   return <Label color={color}>{text}</Label>;
 };
-
+const compareStringsForFilter = (keyWord: string, field: string) => {
+  return str(field).latinise().toLowerCase().includes(str(keyWord).latinise().toLowerCase());
+}
 const applyFilters = (
   customerList: any[],
-  filters: Filters
+  filter: string
 ): any[] => {
   return customerList.filter((customer) => {
-    let matches = true;
-
-    if (filters.level && customer.level.id !== filters.level) {
-      matches = false;
+    if (!filter || filter === '') {
+      return true;
     }
-    return matches;
+    return Object.entries(customer).filter(keyValue => {
+      const key = keyValue[0];
+      const value = keyValue[1];
+      if (!value) {
+        return false;
+      }
+      switch (key) {
+        case 'currentResidence': {
+          const matchCity = value['city']?.name && compareStringsForFilter(filter, value['city'].name);
+          const matchSector = value['sector']?.name && compareStringsForFilter(filter, value['sector'].name);
+          const matchStreet = value['street'] && compareStringsForFilter(filter, value['street']);
+          const matchSuburb = value['suburb'] && compareStringsForFilter(filter, value['suburb']);
+          return matchCity || matchSector || matchStreet || matchSuburb;
+        }
+        case 'level': {
+          const matchLevel = value['name'] && compareStringsForFilter(filter, value['name']);
+          return matchLevel;
+        }
+        case 'curp':
+        case 'name':
+        case "cell": {
+          return compareStringsForFilter(filter, value.toString());
+        }
+      }
+    }).length > 0;
   });
 };
 
@@ -97,9 +128,7 @@ const TablaClientes: FC<TablaClientesProps> = ({ customerList }) => {
   const selectedBulkActions = selectedCustomers.length > 0;
   const [page, setPage] = useState<number>(0);
   const [limit, setLimit] = useState<number>(5);
-  const [filters, setFilters] = useState<Filters>({
-    level: null
-  });
+  const [filter, setFilter] = useState<string>("");
 
   const levelsOptions = [
     {
@@ -128,17 +157,9 @@ const TablaClientes: FC<TablaClientesProps> = ({ customerList }) => {
     }
   ];
 
-  const handleStatusChange = (e: ChangeEvent<HTMLInputElement>): void => {
-    let value = null;
-
-    if (e.target.value !== 'all') {
-      value = e.target.value;
-    }
-
-    setFilters((prevFilters) => ({
-      ...prevFilters,
-      level: value
-    }));
+  const handleSearchChange = (e: ChangeEvent<HTMLInputElement>): void => {
+    const value = e.target.value;
+    setFilter(value);
   };
 
   const handleSelectAllCryptoOrders = (
@@ -175,9 +196,9 @@ const TablaClientes: FC<TablaClientesProps> = ({ customerList }) => {
     setLimit(parseInt(event.target.value));
   };
 
-  const filteredCryptoOrders = applyFilters(customerList, filters);
+  const filteredCostumers = applyFilters(customerList, filter);
   const paginatedCryptoOrders = applyPagination(
-    filteredCryptoOrders,
+    filteredCostumers,
     page,
     limit
   );
@@ -185,7 +206,7 @@ const TablaClientes: FC<TablaClientesProps> = ({ customerList }) => {
     selectedCustomers.length > 0 &&
     selectedCustomers.length < customerList.length;
   const selectedAllCryptoOrders =
-  selectedCustomers.length === customerList.length;
+    selectedCustomers.length === customerList.length;
   const theme = useTheme();
   return (
     <Card>
@@ -197,24 +218,27 @@ const TablaClientes: FC<TablaClientesProps> = ({ customerList }) => {
       {!selectedBulkActions && (
         <CardHeader
           action={
-            <Box width={150}>
-              <FormControl fullWidth variant="outlined">
-                <InputLabel>Nivel</InputLabel>
-                <Select
-                  value={filters.level || 'todos'}
-                  onChange={handleStatusChange}
-                  label="Status"
-                  autoWidth
-                >
-                  {levelsOptions.map((levelOption) => (
-                    <MenuItem key={levelOption.id} value={levelOption.id}>
-                      {levelOption.name}
-                    </MenuItem>
-                  ))}
-                </Select>
-              </FormControl>
+            <Box width={200}>
+              <TextField
+                size='small'
+                id="input-search-customer"
+                label="Buscar"
+                onChange={handleSearchChange}
+                InputProps={{
+                  startAdornment: (
+                    <InputAdornment position="start">
+                      <SearchIcon />
+                    </InputAdornment>
+                  ),
+                }}
+                sx={{marginTop:"20px"}}
+              />
             </Box>
           }
+          sx={{display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+            flexWrap: "wrap"}}
           title="Todos los Clientes"
         />
       )}
@@ -271,7 +295,7 @@ const TablaClientes: FC<TablaClientesProps> = ({ customerList }) => {
                       {customer.name}
                     </Typography>
                     <Typography variant="body2" color="text.secondary" noWrap>
-                    {customer.curp}
+                      {customer.curp}
                     </Typography>
                   </TableCell>
                   <TableCell align="center">
@@ -308,7 +332,7 @@ const TablaClientes: FC<TablaClientesProps> = ({ customerList }) => {
                       noWrap
                     >
                       {customer.currentResidence.city.name}
-                      
+
                     </Typography>
                     <Typography variant="body2" color="text.secondary" noWrap>
                       {/*numeral(customer.amount).format(
@@ -356,7 +380,7 @@ const TablaClientes: FC<TablaClientesProps> = ({ customerList }) => {
       <Box p={2}>
         <TablePagination
           component="div"
-          count={filteredCryptoOrders.length}
+          count={filteredCostumers.length}
           onPageChange={handlePageChange}
           onRowsPerPageChange={handleLimitChange}
           page={page}

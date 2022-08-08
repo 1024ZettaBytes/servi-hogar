@@ -6,14 +6,18 @@ export const refreshData = async(apiUrl) => {
 async function errorHandler(res) {
   if (!res.ok) {
     const errorBody = await res.json();
+    console.log("errorBody:", errorBody);
     const error = new Error(
-      errorBody?.errorMsg || "Hubo un problema. Intente de nuevo"
+      errorBody?.errorMsg || "Connection error, not chached"
     );
     throw error;
   }
 }
 export const getFetcher = async (url) => {
-  const res = await fetch(url);
+  const res = await fetch(url).catch(err=>{
+    return {errorMsg:"Hubo un problema de conexión. Si persiste contacte al administrador."};
+  });
+  console.log("la respónseres: ", res);
   await errorHandler(res);
   return res.json();
 };
