@@ -65,7 +65,7 @@ function Clientes({}) {
               >
                 {customerError?.message ||customerLevelError?.message||citiesError?.message}
               </Typography>
-            ) : !customerList || !customerLevelList ? (
+            ) :( !customerList || !customerLevelList || !citiesList) ?  (
               <Box sx={{ display: "flex" }}>
                 <CircularProgress />
               </Box>
