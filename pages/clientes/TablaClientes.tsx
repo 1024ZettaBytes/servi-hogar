@@ -122,6 +122,7 @@ const applyPagination = (
 };
 
 const TablaClientes: FC<TablaClientesProps> = ({ customerList }) => {
+  console.log("Gonna render a tabla clientes page");
   const [selectedCustomers, setSelectedCustomers] = useState<string[]>(
     []
   );
