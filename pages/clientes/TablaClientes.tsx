@@ -6,8 +6,6 @@ import {
   Tooltip,
   Divider,
   Box,
-  FormControl,
-  InputLabel,
   Card,
   Checkbox,
   IconButton,
@@ -18,8 +16,6 @@ import {
   TablePagination,
   TableRow,
   TableContainer,
-  Select,
-  MenuItem,
   Typography,
   useTheme,
   CardHeader,
@@ -30,12 +26,11 @@ import {
 
 import Label from '@/components/Label';
 import { CustomerLevel } from '@/models/crypto_order';
-import EditTwoToneIcon from '@mui/icons-material/EditTwoTone';
+import VisibilityIcon from '@mui/icons-material/Visibility';
 import DeleteTwoToneIcon from '@mui/icons-material/DeleteTwoTone';
 import BulkActions from './BulkActions';
 import SearchIcon from '@mui/icons-material/Search';
-import { info } from 'console';
-import { sr, srLatn } from 'date-fns/locale';
+import NextLink from "next/link";
 
 interface TablaClientesProps {
   className?: string;
@@ -43,9 +38,6 @@ interface TablaClientesProps {
   levelsList: any[];
 }
 
-interface Filters {
-  level?: CustomerLevel;
-}
 const getStatusLabel = (customerLevel: CustomerLevel): JSX.Element => {
   const map = {
     nuevo: {
@@ -122,41 +114,14 @@ const applyPagination = (
 };
 
 const TablaClientes: FC<TablaClientesProps> = ({ customerList }) => {
-  console.log("Gonna render a tabla clientes page");
   const [selectedCustomers, setSelectedCustomers] = useState<string[]>(
     []
   );
   const selectedBulkActions = selectedCustomers.length > 0;
   const [page, setPage] = useState<number>(0);
-  const [limit, setLimit] = useState<number>(5);
+  const [limit, setLimit] = useState<number>(10);
   const [filter, setFilter] = useState<string>("");
 
-  const levelsOptions = [
-    {
-      id: 'todos',
-      name: 'Todos'
-    },
-    {
-      id: 'nuevo',
-      name: 'Nuevo'
-    },
-    {
-      id: 'regular',
-      name: 'Regular'
-    },
-    {
-      id: 'permanente',
-      name: 'Permanente'
-    },
-    {
-      id: 'deudor',
-      name: 'Deudor'
-    },
-    {
-      id: 'conflictivo',
-      name: 'Conflictivo'
-    }
-  ];
 
   const handleSearchChange = (e: ChangeEvent<HTMLInputElement>): void => {
     const value = e.target.value;
@@ -168,7 +133,7 @@ const TablaClientes: FC<TablaClientesProps> = ({ customerList }) => {
   ): void => {
     setSelectedCustomers(
       event.target.checked
-        ? customerList.map((customer) => customer.curp)
+        ? customerList.map((customer) => customer?.curp)
         : []
     );
   };
@@ -267,12 +232,12 @@ const TablaClientes: FC<TablaClientesProps> = ({ customerList }) => {
           <TableBody>
             {paginatedCryptoOrders.map((customer) => {
               const isCryptoOrderSelected = selectedCustomers.includes(
-                customer.curp
+                customer?.curp
               );
               return (
                 <TableRow
                   hover
-                  key={customer._id}
+                  key={customer?._id}
                   selected={isCryptoOrderSelected}
                 >
                   <TableCell padding="checkbox">
@@ -280,7 +245,7 @@ const TablaClientes: FC<TablaClientesProps> = ({ customerList }) => {
                       color="primary"
                       checked={isCryptoOrderSelected}
                       onChange={(event: ChangeEvent<HTMLInputElement>) =>
-                        handleSelectOneCustomer(event, customer.curp)
+                        handleSelectOneCustomer(event, customer?.curp)
                       }
                       value={isCryptoOrderSelected}
                     />
@@ -293,10 +258,10 @@ const TablaClientes: FC<TablaClientesProps> = ({ customerList }) => {
                       gutterBottom
                       noWrap
                     >
-                      {customer.name}
+                      {customer?.name}
                     </Typography>
                     <Typography variant="body2" color="text.secondary" noWrap>
-                      {customer.curp}
+                      {customer?.curp}
                     </Typography>
                   </TableCell>
                   <TableCell align="center">
@@ -307,7 +272,7 @@ const TablaClientes: FC<TablaClientesProps> = ({ customerList }) => {
                       gutterBottom
                       noWrap
                     >
-                      {customer.cell}
+                      {customer?.cell}
                     </Typography>
                   </TableCell>
                   <TableCell align="center">
@@ -318,10 +283,10 @@ const TablaClientes: FC<TablaClientesProps> = ({ customerList }) => {
                       gutterBottom
                       noWrap
                     >
-                      {customer.currentResidence.street}
+                      {customer?.currentResidence?.street}
                     </Typography>
                     <Typography variant="body2" color="text.secondary" noWrap>
-                      {customer.currentResidence.suburb}
+                      {customer?.currentResidence?.suburb}
                     </Typography>
                   </TableCell>
                   <TableCell align="center">
@@ -332,20 +297,21 @@ const TablaClientes: FC<TablaClientesProps> = ({ customerList }) => {
                       gutterBottom
                       noWrap
                     >
-                      {customer.currentResidence.city.name}
+                      {customer?.currentResidence?.city?.name}
 
                     </Typography>
                     <Typography variant="body2" color="text.secondary" noWrap>
                       {/*numeral(customer.amount).format(
                         `${customer.currency}0,0.00`
-                      )*/customer.currentResidence.sector.name}
+                      )*/customer?.currentResidence?.sector?.name}
                     </Typography>
                   </TableCell>
                   <TableCell align="center">
-                    {getStatusLabel(customer.level.id)}
+                    {getStatusLabel(customer?.level?.id)}
                   </TableCell>
                   <TableCell align="center">
-                    <Tooltip title="Edit Order" arrow>
+                  <NextLink href={`/clientes/${customer?._id}`}>
+                    <Tooltip title="Detalle" arrow>
                       <IconButton
                         sx={{
                           '&:hover': {
@@ -356,10 +322,11 @@ const TablaClientes: FC<TablaClientesProps> = ({ customerList }) => {
                         color="inherit"
                         size="small"
                       >
-                        <EditTwoToneIcon fontSize="small" />
+                        <VisibilityIcon fontSize="small" />
                       </IconButton>
                     </Tooltip>
-                    <Tooltip title="Delete Order" arrow>
+                    </NextLink>
+                    <Tooltip title="Eliminiar Cliente" arrow>
                       <IconButton
                         sx={{
                           '&:hover': { background: theme.colors.error.lighter },

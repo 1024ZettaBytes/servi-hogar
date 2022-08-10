@@ -6,7 +6,7 @@ export interface ICity extends Document {
   sectors: [Schema.Types.ObjectId],
 }
 
-const CitySchema: Schema = new Schema({
+const CitySchema = new Schema<ICity>({
   id: { type: 'string', required: true },
   name: { type: 'string', required: true },
   sectors: [{ type: Schema.Types.ObjectId, ref: 'sectors', required: true }]

@@ -3,9 +3,9 @@ import mongoose, { Date, Model, model, Schema } from 'mongoose';
 export interface IResidence extends Document {
   street: string;
   suburb: string;
-  city: string;
+  city: Schema.Types.ObjectId;
   sector: Schema.Types.ObjectId;
-  redidenceRef: string;
+  residenceRef: string;
   nameRef: string;
   telRef: string;
   maps: string;
@@ -13,7 +13,7 @@ export interface IResidence extends Document {
   updatedAt: Date;
 }
 
-const ResidenceSchema: Schema = new Schema({
+const ResidenceSchema = new Schema<IResidence>({
   street: { type: 'string', required: true},
   suburb: { type: 'string', required: true},
   city: {

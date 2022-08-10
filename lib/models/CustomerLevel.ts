@@ -5,7 +5,7 @@ export interface ICustomerLevel extends Document {
   name: string;
 }
 
-const CustomerLevelSchema: Schema = new Schema({
+const CustomerLevelSchema = new Schema<ICustomerLevel>({
   id: { type: 'string' },
   name: { type: 'string' },
 });

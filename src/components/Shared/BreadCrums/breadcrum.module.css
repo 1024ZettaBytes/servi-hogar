@@ -1,0 +1,12 @@
+.bread_text, .bread_text:visited, .bread_text:active{
+color: inherit !important;
+text-decoration: none !important;
+}
+
+.bread_text:hover{
+    text-decoration: underline !important;
+}
+
+.bread_text_last{
+    color: #223354;
+}   

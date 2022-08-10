@@ -24,7 +24,7 @@ import {
 import { LoadingButton } from "@mui/lab";
 import { saveCustomer } from "../../../lib/client/customersFetch";
 function AddCustomerModal(props) {
-  const { handleOnClose, open } = props;
+  const { handleOnClose, open, citiesList, customerList } = props;
   const [isLoading, setIsLoading] = useState(false);
   const [hasError, setHasError] = useState({ error: false, msg: "" });
   const [selectedCity, setSelectedCity] = useState();
@@ -37,7 +37,7 @@ function AddCustomerModal(props) {
   function handleCitySelection(city) {
     setSelectedCity(city);
     setSelectedSector(undefined);
-    const filteredCity = props.citiesList.filter((c) => c._id === city);
+    const filteredCity = citiesList.filter((c) => c._id === city);
     setCitySectors(filteredCity[0].sectors);
   }
   function handleSectorSelection(sector) {
@@ -180,7 +180,7 @@ function AddCustomerModal(props) {
                     <Autocomplete
                       disablePortal
                       id="combo-box-demo"
-                      options={props.customerList.map((customer) => {
+                      options={customerList.map((customer) => {
                         return { label: `(${customer.curp}) ${customer.name}`, id: customer._id };
                       })}
                       onChange={(event: any, newValue: string | null) => {
@@ -245,8 +245,8 @@ function AddCustomerModal(props) {
                       handleCitySelection(event.target.value)
                     }
                   >
-                    {props.citiesList
-                      ? props.citiesList.map((city) => (
+                    {citiesList
+                      ? citiesList.map((city) => (
                           <MenuItem key={city._id} value={city._id}>
                             {city.name}
                           </MenuItem>
@@ -271,7 +271,7 @@ function AddCustomerModal(props) {
                       handleSectorSelection(event.target.value)
                     }
                   >
-                    {props.citiesList && selectedCity
+                    {citiesList && selectedCity
                       ? citySectors.map((sector) => (
                           <MenuItem key={sector._id} value={sector._id}>
                             {sector.name}

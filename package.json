@@ -4,8 +4,8 @@
   "title": "Servi Hogar: Soluciones a tu medida",
   "description": "Sistema desarrollado utilizando NextJs y MongoDB",
   "author": {
-    "name": "BloomUI.com",
-    "url": "https://bloomui.com"
+    "name": "Eduardo Ramírez",
+    "url": ""
   },
   "private": false,
   "dependencies": {
@@ -50,6 +50,7 @@
     "react-apexcharts": "1.4.0",
     "react-custom-scrollbars-2": "4.4.0",
     "react-dom": "17.0.2",
+    "react-router-dom": "^6.3.0",
     "string": "^3.3.3",
     "swr": "^1.3.0",
     "typescript": "4.7.3"

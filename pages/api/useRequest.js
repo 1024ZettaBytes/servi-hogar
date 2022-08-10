@@ -36,10 +36,15 @@ export const useGetCustomerLevels = (fetcher) => {
   const { data, error } = useSWR(ROUTES.ALL_CUSTOMERS_LEVELS_API, fetcher);
   return { customerLevelList: data?.data, customerLevelError: error };
 };
+
+export const useGetCustomerById = (fetcher, id) => {
+  const { data, error } = useSWR(id ?ROUTES.CUSTOMER_BY_ID_API.replace(":id", id): null, fetcher);
+  return { customer: data?.data, customerByIdError: error };
+}
 //
 // Cities
 export const useGetCities = (fetcher) => {
-  const { data, error } = useSWR(ROUTES.ALL_CITIES, fetcher);
+  const { data, error } = useSWR( ROUTES.ALL_CITIES, fetcher);
   return { citiesList: data?.data, citiesError: error };
 }
 //

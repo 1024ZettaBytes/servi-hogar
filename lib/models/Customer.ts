@@ -10,13 +10,13 @@ export interface ICustomer extends Document {
   howFound: string;
   wasReferred: boolean;
   referrals: [Schema.Types.ObjectId];
-  referedBy: Schema.Types.ObjectId;
+  referredBy: Schema.Types.ObjectId;
   freeWeeks: number;
   createdAt: Date;
   updatedAt: Date;
 }
 
-const CustomerSchema: Schema = new Schema({
+const CustomerSchema = new Schema<ICustomer>({
   curp: { type: 'string', required: true },
   name: { type: 'string', required: true },
   cell: { type: 'string', required: true },
@@ -39,10 +39,10 @@ const CustomerSchema: Schema = new Schema({
   },
   howFound: { type: 'string', required: true },
   wasReferred: { type: 'boolean', default: false, required: true },
-  referedBy: {
+  referredBy: {
     type: Schema.Types.ObjectId,
     default: null,
-    ref: 'customer_levels'
+    ref: 'customers'
   },
   referrals: { type: [Schema.Types.ObjectId], default: [] },
   freeWeeks: { type: 'number', default: 0 },
@@ -50,4 +50,4 @@ const CustomerSchema: Schema = new Schema({
   updatedAt: { type: Date, required: true }
 });
 export const Customer: Model<ICustomer> =
-  mongoose.models.Customer || model('Customer', CustomerSchema);
+  mongoose.models.customers || model('customers', CustomerSchema);

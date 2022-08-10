@@ -5,7 +5,7 @@ export interface ISector extends Document {
   name: string;
 }
 
-const SectorSchema: Schema = new Schema({
+const SectorSchema = new Schema<ISector>({
   id: { type: 'string', required: true},
   name: { type: 'string', required: true},
 });

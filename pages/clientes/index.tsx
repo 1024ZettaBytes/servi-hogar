@@ -9,22 +9,25 @@ import {
   Card,
   Container,
   Grid,
-  Box,
-  CircularProgress,
   Typography,
+  Skeleton,
 } from "@mui/material";
 import Footer from "@/components/Footer";
 import AddCustomerModal from "@/components/AddCustomerModal";
 import TablaClientes from "./TablaClientes";
 import { useGetAllCustomers, getFetcher, useGetCustomerLevels, useGetCities } from "../api/useRequest";
 import { useSnackbar } from 'notistack';
+import NextBreadcrumbs from "@/components/Shared/BreadCrums";
+
 function Clientes({}) {
+  const paths = ["Inicio", "Clientes"];
   const { enqueueSnackbar } = useSnackbar();
   const { customerList, customerError } = useGetAllCustomers(getFetcher);
   const { customerLevelList, customerLevelError } = useGetCustomerLevels(getFetcher);
   const { citiesList, citiesError } = useGetCities(getFetcher);
   const [modalIsOpen, setModalIsOpen] = useState(false);
-  
+  const generalError = customerError || citiesError || customerLevelError;
+  const completeData = customerList && citiesList && customerLevelList;
   const handleClickOpen = () => {
    setModalIsOpen(true);
   };
@@ -38,14 +41,15 @@ function Clientes({}) {
       },autoHideDuration: 1500});
     }
   };
-  const button = { text: "Agregar cliente", onClick: handleClickOpen, disabled:  citiesError || !citiesList};
+  const button = { text: "Agregar cliente", onClick: handleClickOpen};
   return (
     <>
       <Head>
         <title>Clientes</title>
       </Head>
       <PageTitleWrapper>
-        <PageHeader title={"Clientes"} sutitle={""} button={button} />
+        <PageHeader title={"Clientes"} sutitle={""} button={!generalError && completeData  ? button : null} />
+        <NextBreadcrumbs paths={paths} lastLoaded={true}/>
       </PageTitleWrapper>
       <Container maxWidth="lg">
         <Grid
@@ -56,7 +60,7 @@ function Clientes({}) {
           spacing={4}
         >
           <Grid item xs={12}>
-            {customerError || customerLevelError || citiesError ? (
+            {generalError ? (
               <Typography
                 variant="h5"
                 component="h5"
@@ -65,10 +69,10 @@ function Clientes({}) {
               >
                 {customerError?.message ||customerLevelError?.message||citiesError?.message}
               </Typography>
-            ) :( !customerList || !customerLevelList || !citiesList) ?  (
-              <Box sx={{ display: "flex" }}>
-                <CircularProgress />
-              </Box>
+            ) :( !completeData) ?  (
+              <Skeleton variant="rectangular" width={"100%"} height={500 } animation="wave"/>
+  
+
             ) : (
               <Card>
                 <TablaClientes customerList={customerList} levelsList={customerLevelList} />
@@ -77,7 +81,7 @@ function Clientes({}) {
           </Grid>
         </Grid>
       </Container>
-{modalIsOpen && citiesList && customerList  ?
+{modalIsOpen && completeData  ?
       <AddCustomerModal
         open={modalIsOpen}
         handleOnClose={handleClose}

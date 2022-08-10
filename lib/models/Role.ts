@@ -5,7 +5,7 @@ export interface IRole extends Document {
   name: string;
 }
 
-const RoleSchema: Schema = new Schema({
+const RoleSchema= new Schema<IRole>({
   id: { type: 'string' },
   name: { type: 'string' },
 });

@@ -5,15 +5,62 @@ import {
   Card,
   Box,
   Divider,
-  Button
-} from '@mui/material';
-
-import EditTwoToneIcon from '@mui/icons-material/EditTwoTone';
-import DoneTwoToneIcon from '@mui/icons-material/DoneTwoTone';
-import Text from '@/components/Text';
-import Label from '@/components/Label';
-
-function EditProfileTab() {
+  Button,
+} from "@mui/material";
+import { Skeleton } from "@mui/material";
+import EditTwoToneIcon from "@mui/icons-material/EditTwoTone";
+import DoneTwoToneIcon from "@mui/icons-material/DoneTwoTone";
+import AddIcon from "@mui/icons-material/Add";
+import ThumbUpIcon from '@mui/icons-material/ThumbUp';
+import CheckCircleIcon from '@mui/icons-material/CheckCircle';
+import RequestQuoteIcon from '@mui/icons-material/RequestQuote';
+import DangerousIcon from '@mui/icons-material/Dangerous';
+import Text from "@/components/Text";
+import Label from "@/components/Label";
+const getHowFoundLabel = (howFoundId: string, referrer?: string) => {
+  const map = {
+    facebook: "Facebook",
+    referred: `Referido por ${referrer}`,
+    recomended: "Recomendado"
+  };
+  return map[howFoundId];
+};
+const getLevelLabel = (customerLevelId: string, customerLevelName: string) => {
+  const map = {
+    nuevo: (
+      <Label color="secondary">
+        <AddIcon fontSize="small" />
+        <b>{customerLevelName}</b>
+      </Label>
+    ),
+    regular: (
+      <Label color="info">
+        <ThumbUpIcon fontSize="small" />
+        <b>{customerLevelName}</b>
+      </Label>
+    ),
+    permanente: (
+      <Label color="success">
+        <CheckCircleIcon fontSize="small" />
+        <b>{customerLevelName}</b>
+      </Label>
+    ),
+    deudor: (
+      <Label color="warning">
+        <RequestQuoteIcon fontSize="small" />
+        <b>{customerLevelName}</b>
+      </Label>
+    ),
+    conflictivo: (
+      <Label color="error">
+        <DangerousIcon fontSize="small" />
+        <b>{customerLevelName}</b>
+      </Label>
+    ),
+  };
+  return map[customerLevelId];
+};
+function CustomerInfoTab({ customer }) {
   return (
     <Grid container spacing={3}>
       <Grid item xs={12}>
@@ -28,9 +75,6 @@ function EditProfileTab() {
               <Typography variant="h4" gutterBottom>
                 Datos personales
               </Typography>
-              <Typography variant="subtitle2">
-                Manage informations related to your personal details
-              </Typography>
             </Box>
             <Button variant="text" startIcon={<EditTwoToneIcon />}>
               Modificar
@@ -40,38 +84,84 @@ function EditProfileTab() {
           <CardContent sx={{ p: 4 }}>
             <Typography variant="subtitle2">
               <Grid container spacing={0}>
-                <Grid item xs={12} sm={4} md={3} textAlign={{ sm: 'right' }}>
+                <Grid item xs={12} sm={4} md={3} textAlign={{ sm: "right" }}>
                   <Box pr={3} pb={2}>
-                    Name:
+                    CURP:
                   </Box>
                 </Grid>
                 <Grid item xs={12} sm={8} md={9}>
-                  <Text color="black">
-                    <b>Craig Donin</b>
-                  </Text>
-                </Grid>
-                <Grid item xs={12} sm={4} md={3} textAlign={{ sm: 'right' }}>
-                  <Box pr={3} pb={2}>
-                    Date of birth:
-                  </Box>
-                </Grid>
-                <Grid item xs={12} sm={8} md={9}>
-                  <Text color="black">
-                    <b>15 March 1977</b>
-                  </Text>
-                </Grid>
-                <Grid item xs={12} sm={4} md={3} textAlign={{ sm: 'right' }}>
-                  <Box pr={3} pb={2}>
-                    Address:
-                  </Box>
-                </Grid>
-                <Grid item xs={12} sm={8} md={9}>
-                  <Box sx={{ maxWidth: { xs: 'auto', sm: 300 } }}>
+                  {customer ? (
                     <Text color="black">
-                      1749 High Meadow Lane, SEQUOIA NATIONAL PARK, California,
-                      93262
+                      <b>{customer?.curp}</b>
                     </Text>
+                  ) : (
+                    <Skeleton
+                      variant="text"
+                      sx={{ fontSize: "1rem", width: "100px" }}
+                    />
+                  )}
+                </Grid>
+                <Grid item xs={12} sm={4} md={3} textAlign={{ sm: "right" }}>
+                  <Box pr={3} pb={2}>
+                    Nombre:
                   </Box>
+                </Grid>
+                <Grid item xs={12} sm={8} md={9}>
+                  {customer ? (
+                    <Text color="black">{customer?.name}</Text>
+                  ) : (
+                    <Skeleton
+                      variant="text"
+                      sx={{ fontSize: "1rem", width: "100px" }}
+                    />
+                  )}
+                </Grid>
+                <Grid item xs={12} sm={4} md={3} textAlign={{ sm: "right" }}>
+                  <Box pr={3} pb={2}>
+                    Celular:
+                  </Box>
+                </Grid>
+                <Grid item xs={12} sm={8} md={9}>
+                  <Box sx={{ maxWidth: { xs: "auto", sm: 300 } }}>
+                    {customer ? (
+                      <Text color="black">{customer?.cell}</Text>
+                    ) : (
+                      <Skeleton
+                        variant="text"
+                        sx={{ fontSize: "1rem", width: "100px" }}
+                      />
+                    )}
+                  </Box>
+                </Grid>
+                <Grid item xs={12} sm={4} md={3} textAlign={{ sm: "right" }}>
+                  <Box pr={3} pb={2}>
+                    Nivel:
+                  </Box>
+                </Grid>
+                <Grid item xs={12} sm={8} md={9}>
+                {customer ? (
+                      getLevelLabel(customer?.level?.id, customer?.level?.name)
+                    ) : (
+                      <Skeleton
+                        variant="text"
+                        sx={{ fontSize: "1rem", width: "100px" }}
+                      />
+                    )}
+                </Grid>
+                <Grid item xs={12} sm={4} md={3} textAlign={{ sm: "right" }}>
+                  <Box pr={3} pb={2}>
+                    Fuente:
+                  </Box>
+                </Grid>
+                <Grid item xs={12} sm={8} md={9}>
+                {customer ? (
+                      <Text color="black">{getHowFoundLabel(customer?.howFound, customer?.referredBy?.name)}</Text>
+                    ) : (
+                      <Skeleton
+                        variant="text"
+                        sx={{ fontSize: "1rem", width: "100px" }}
+                      />
+                    )}
                 </Grid>
               </Grid>
             </Typography>
@@ -88,7 +178,7 @@ function EditProfileTab() {
           >
             <Box>
               <Typography variant="h4" gutterBottom>
-                Account Settings
+              Domicilio
               </Typography>
               <Typography variant="subtitle2">
                 Manage details related to your account
@@ -102,7 +192,7 @@ function EditProfileTab() {
           <CardContent sx={{ p: 4 }}>
             <Typography variant="subtitle2">
               <Grid container spacing={0}>
-                <Grid item xs={12} sm={4} md={3} textAlign={{ sm: 'right' }}>
+                <Grid item xs={12} sm={4} md={3} textAlign={{ sm: "right" }}>
                   <Box pr={3} pb={2}>
                     Language:
                   </Box>
@@ -112,7 +202,7 @@ function EditProfileTab() {
                     <b>English (US)</b>
                   </Text>
                 </Grid>
-                <Grid item xs={12} sm={4} md={3} textAlign={{ sm: 'right' }}>
+                <Grid item xs={12} sm={4} md={3} textAlign={{ sm: "right" }}>
                   <Box pr={3} pb={2}>
                     Timezone:
                   </Box>
@@ -122,7 +212,7 @@ function EditProfileTab() {
                     <b>GMT +2</b>
                   </Text>
                 </Grid>
-                <Grid item xs={12} sm={4} md={3} textAlign={{ sm: 'right' }}>
+                <Grid item xs={12} sm={4} md={3} textAlign={{ sm: "right" }}>
                   <Box pr={3} pb={2}>
                     Account status:
                   </Box>
@@ -162,7 +252,7 @@ function EditProfileTab() {
           <CardContent sx={{ p: 4 }}>
             <Typography variant="subtitle2">
               <Grid container spacing={0}>
-                <Grid item xs={12} sm={4} md={3} textAlign={{ sm: 'right' }}>
+                <Grid item xs={12} sm={4} md={3} textAlign={{ sm: "right" }}>
                   <Box pr={3} pb={2}>
                     Email ID:
                   </Box>
@@ -175,7 +265,7 @@ function EditProfileTab() {
                     <Label color="success">Primary</Label>
                   </Box>
                 </Grid>
-                <Grid item xs={12} sm={4} md={3} textAlign={{ sm: 'right' }}>
+                <Grid item xs={12} sm={4} md={3} textAlign={{ sm: "right" }}>
                   <Box pr={3} pb={2}>
                     Email ID:
                   </Box>
@@ -194,4 +284,4 @@ function EditProfileTab() {
   );
 }
 
-export default EditProfileTab;
+export default CustomerInfoTab;
