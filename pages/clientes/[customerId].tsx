@@ -5,7 +5,6 @@ import PageTitleWrapper from '@/components/PageTitleWrapper';
 import { Container, Tabs, Tab, Grid } from '@mui/material';
 import Footer from '@/components/Footer';
 import { styled } from '@mui/material/styles';
-
 import EditProfileTab from '@/content/Management/Users/settings/EditProfileTab';
 import SecurityTab from '@/content/Management/Users/settings/SecurityTab';
 import SidebarLayout from '@/layouts/SidebarLayout';
