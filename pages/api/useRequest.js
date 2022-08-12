@@ -6,7 +6,6 @@ export const refreshData = async (apiUrl) => {
 async function errorHandler(res) {
   if (!res.ok) {
     const errorBody = await res?.json();
-    console.log("errorBody:", errorBody);
     const error = new Error(
       errorBody?.errorMsg
     );

@@ -44,7 +44,7 @@ const CustomerSchema = new Schema<ICustomer>({
     default: null,
     ref: 'customers'
   },
-  referrals: { type: [Schema.Types.ObjectId], default: [] },
+  referrals: { type: [Schema.Types.ObjectId], default: [], ref: 'customers' },
   freeWeeks: { type: 'number', default: 0 },
   createdAt: { type: Date, required: true },
   updatedAt: { type: Date, required: true }

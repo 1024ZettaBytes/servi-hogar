@@ -193,7 +193,7 @@ function AddCustomerModal(props) {
                         <TextField
                         required  
                           {...params}
-                          label="Cliente que lo recomendó"
+                          label="Referido por"
                         />
                       )}
                     />

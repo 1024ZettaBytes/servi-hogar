@@ -3,6 +3,7 @@ import {CustomerLevel} from "../../../lib/models/CustomerLevel";
 import {
   getCustomersData,
   saveCustomerData,
+  updateCustomerData
 } from "../../../lib/data/Customers";
 async function getCustomersAPI(req, res) {
   try {
@@ -28,6 +29,17 @@ async function saveCustomerAPI(req, res) {
     res.status(500).json({ errorMsg: e.message });
   }
 }
+
+async function updateCustomerAPI(req, res){
+  try {
+    await updateCustomerData({...req.body });
+    res.status(200).json({ msg: "¡Cliente actualizado con éxito!" });
+  } catch (e) {
+    console.log(e);
+    res.status(500).json({ errorMsg: e.message });
+  }
+}
+
 async function handler(req, res) {
   switch (req.method) {
     case "GET":
@@ -37,7 +49,7 @@ async function handler(req, res) {
       await saveCustomerAPI(req, res);
       break;
     case "PUT":
-      return;
+      await updateCustomerAPI(req, res);
       break;
     case "DELETE":
       return;

@@ -12,7 +12,7 @@ import { validateServerSideSession } from 'lib/auth';
 import { useRouter } from 'next/router';
 import NextBreadcrumbs from '@/components/Shared/BreadCrums';
 import PageHeader from '@/components/PageHeader';
-import { getFetcher, useGetCustomerById } from 'pages/api/useRequest';
+import { getFetcher, useGetAllCustomers, useGetCustomerById, useGetCustomerLevels } from 'pages/api/useRequest';
 import CustomerInfoTab from '@/content/customers/InfoTab';
 
 const TabsWrapper = styled(Tabs)(
@@ -27,10 +27,11 @@ function CustomerDetail() {
   const router = useRouter()
   const { customerId } = router.query;
   const { customer, customerByIdError } = useGetCustomerById(getFetcher, customerId);
+  const {customerList} = useGetAllCustomers(getFetcher);
+  const { customerLevelList } = useGetCustomerLevels(getFetcher);
   const [currentTab, setCurrentTab] = useState<string>('info');
   const paths = ["Inicio", "Clientes", customer?.name];
-  
-  
+
 
   const tabs = [
     { value: 'info', label: 'Información general' },
@@ -74,7 +75,7 @@ function CustomerDetail() {
             </TabsWrapper>
           </Grid>
           <Grid item xs={12}>
-            {currentTab === 'info' && <CustomerInfoTab customer={customer}/>}
+            {currentTab === 'info' && <CustomerInfoTab customer={customer} customerList={customerList} customerLevelList={customerLevelList}/>}
             {currentTab === 'history' && <EditProfileTab />}
             {currentTab === 'security' && <SecurityTab />}
           </Grid>
