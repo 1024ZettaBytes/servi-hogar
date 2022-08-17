@@ -12,7 +12,6 @@ import TablaClientes from "./TablaClientes";
 import {
   useGetAllCustomers,
   getFetcher,
-  useGetCustomerLevels,
   useGetCities,
 } from "../api/useRequest";
 import { useSnackbar } from "notistack";
