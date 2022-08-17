@@ -35,9 +35,9 @@ import NextLink from "next/link";
 import GenericModal from '@/components/GenericModal';
 
 interface TablaClientesProps {
+  userRole: string;
   className?: string;
   customerList: any[];
-  levelsList: any[];
 }
 
 const getStatusLabel = (customerLevel: CustomerLevel): JSX.Element => {
@@ -115,7 +115,7 @@ const applyPagination = (
   return customerList.slice(page * limit, page * limit + limit);
 };
 
-const TablaClientes: FC<TablaClientesProps> = ({ customerList }) => {
+const TablaClientes: FC<TablaClientesProps> = ({ userRole, customerList }) => {
   const { enqueueSnackbar } = useSnackbar();
   const [deleteModalIsOpen, setDeleteModalIsOpen] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
@@ -129,7 +129,7 @@ const TablaClientes: FC<TablaClientesProps> = ({ customerList }) => {
   const [page, setPage] = useState<number>(0);
   const [limit, setLimit] = useState<number>(10);
   const [filter, setFilter] = useState<string>("");
-
+  const userCanDelete = userRole === "ADMIN";
   const handleSearchChange = (e: ChangeEvent<HTMLInputElement>): void => {
     const value = e.target.value;
     setFilter(value);
@@ -247,12 +247,12 @@ const TablaClientes: FC<TablaClientesProps> = ({ customerList }) => {
           <TableHead>
             <TableRow>
               <TableCell padding="checkbox">
-                <Checkbox
+              {userCanDelete &&<Checkbox
                   color="primary"
                   checked={selectedAllCustomers}
                   indeterminate={selectedSomeCustomers}
                   onChange={handleSelectAllCustomers}
-                />
+                />}
               </TableCell>
               <TableCell align="center">Cliente</TableCell>
               <TableCell align="center">Celular</TableCell>
@@ -274,14 +274,14 @@ const TablaClientes: FC<TablaClientesProps> = ({ customerList }) => {
                   selected={isCustomerSelected}
                 >
                   <TableCell padding="checkbox">
-                    <Checkbox
+                    {userCanDelete && <Checkbox
                       color="primary"
                       checked={isCustomerSelected}
                       onChange={(event: ChangeEvent<HTMLInputElement>) =>
                         handleSelectOneCustomer(event, customer?._id)
                       }
                       value={isCustomerSelected}
-                    />
+                    />}
                   </TableCell>
                   <TableCell align="center">
                     <Typography
@@ -359,7 +359,7 @@ const TablaClientes: FC<TablaClientesProps> = ({ customerList }) => {
                       </IconButton>
                     </Tooltip>
                     </NextLink>
-                    <Tooltip title="Eliminar Cliente" arrow>
+                    {userCanDelete &&<Tooltip title="Eliminar Cliente" arrow>
                       <IconButton
                       onClick={() =>handleOnDeleteClick([customer._id])}
                         sx={{
@@ -371,7 +371,7 @@ const TablaClientes: FC<TablaClientesProps> = ({ customerList }) => {
                       >
                         <DeleteTwoToneIcon fontSize="small" />
                       </IconButton>
-                    </Tooltip>
+                    </Tooltip>}
                   </TableCell>
                 </TableRow>
               );
@@ -412,13 +412,13 @@ const TablaClientes: FC<TablaClientesProps> = ({ customerList }) => {
 };
 
 TablaClientes.propTypes = {
+  userRole: PropTypes.string.isRequired,
   customerList: PropTypes.array.isRequired,
-  levelsList: PropTypes.array.isRequired
 };
 
 TablaClientes.defaultProps = {
+  userRole: "",
   customerList: [],
-  levelsList: []
 };
 
 export default TablaClientes;

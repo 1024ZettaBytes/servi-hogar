@@ -216,7 +216,7 @@ function AddCustomerModal(props) {
                   required
                   id="street"
                   name="street"
-                  label="Calle"
+                  label="Calle y Número"
                   fullWidth={true}
                 />
               </Grid>
@@ -382,3 +382,4 @@ AddCustomerModal.propTypes = {
 };
 
 export default AddCustomerModal;
+

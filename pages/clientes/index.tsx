@@ -19,18 +19,15 @@ import { useSnackbar } from "notistack";
 
 import NextBreadcrumbs from "@/components/Shared/BreadCrums";
 
-function Clientes({}) {
+function Clientes({session}) {
   const paths = ["Inicio", "Clientes"];
   const { enqueueSnackbar } = useSnackbar();
   const { customerList, customerError } = useGetAllCustomers(getFetcher);
-  const { customerLevelList, customerLevelError } = useGetCustomerLevels(
-    getFetcher
-  );
   const { citiesList, citiesError } = useGetCities(getFetcher);
   const [modalIsOpen, setModalIsOpen] = useState(false);
-  const generalError = customerError || citiesError || customerLevelError;
-  const completeData = customerList && citiesList && customerLevelList;
-
+  const generalError = customerError || citiesError;
+  const completeData = customerList && citiesList;
+const {user} = session;
   
   const handleClickOpen = () => {
     setModalIsOpen(true);
@@ -80,7 +77,6 @@ function Clientes({}) {
                 textAlign="center"
               >
                 {customerError?.message ||
-                  customerLevelError?.message ||
                   citiesError?.message}
               </Typography>
             ) : !completeData ? (
@@ -93,8 +89,8 @@ function Clientes({}) {
             ) : (
               <Card>
                 <TablaClientes
+                  userRole = {user?.role}
                   customerList={customerList}
-                  levelsList={customerLevelList}
                 />
               </Card>
             )}
