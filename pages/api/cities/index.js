@@ -6,7 +6,7 @@ async function getCitiesAPI(req, res) {
     const allCities = await getCitiesData();
     res.status(200).json({ data: allCities });
   } catch (e) {
-    console.log(e);
+    console.error(e);
     res
       .status(500)
       .json({

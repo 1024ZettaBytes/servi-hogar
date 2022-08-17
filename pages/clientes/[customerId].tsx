@@ -1,19 +1,25 @@
-import { useState, ChangeEvent } from 'react';
-import Head from 'next/head';
+import { useState, ChangeEvent } from "react";
+import Head from "next/head";
 import { getSession } from "next-auth/react";
-import PageTitleWrapper from '@/components/PageTitleWrapper';
-import { Container, Tabs, Tab, Grid } from '@mui/material';
-import Footer from '@/components/Footer';
-import { styled } from '@mui/material/styles';
-import EditProfileTab from '@/content/Management/Users/settings/EditProfileTab';
-import SecurityTab from '@/content/Management/Users/settings/SecurityTab';
-import SidebarLayout from '@/layouts/SidebarLayout';
-import { validateServerSideSession } from 'lib/auth';
-import { useRouter } from 'next/router';
-import NextBreadcrumbs from '@/components/Shared/BreadCrums';
-import PageHeader from '@/components/PageHeader';
-import { getFetcher, useGetAllCustomers, useGetCustomerById, useGetCustomerLevels } from 'pages/api/useRequest';
-import CustomerInfoTab from '@/content/customers/InfoTab';
+import PageTitleWrapper from "@/components/PageTitleWrapper";
+import { Container, Tabs, Tab, Grid, Alert } from "@mui/material";
+import Footer from "@/components/Footer";
+import { styled } from "@mui/material/styles";
+import EditProfileTab from "@/content/Management/Users/settings/EditProfileTab";
+//import SecurityTab from "@/content/Management/Users/settings/SecurityTab";
+import SidebarLayout from "@/layouts/SidebarLayout";
+import { validateServerSideSession } from "lib/auth";
+import { useRouter } from "next/router";
+import NextBreadcrumbs from "@/components/Shared/BreadCrums";
+import PageHeader from "@/components/PageHeader";
+import {
+  getFetcher,
+  useGetAllCustomers,
+  useGetCustomerById,
+  useGetCustomerLevels,
+  useGetCities,
+} from "pages/api/useRequest";
+import CustomerInfoTab from "@/content/customers/InfoTab";
 
 const TabsWrapper = styled(Tabs)(
   () => `
@@ -23,34 +29,42 @@ const TabsWrapper = styled(Tabs)(
 `
 );
 
-function CustomerDetail() {
-  const router = useRouter()
+function CustomerDetail({ session }) {
+  const userRole = session.user.role;
+  const router = useRouter();
   const { customerId } = router.query;
-  const { customer, customerByIdError } = useGetCustomerById(getFetcher, customerId);
-  const {customerList} = useGetAllCustomers(getFetcher);
+  const { customer, customerByIdError } = useGetCustomerById(
+    getFetcher,
+    customerId
+  );
+  const { customerList } = useGetAllCustomers(getFetcher);
   const { customerLevelList } = useGetCustomerLevels(getFetcher);
-  const [currentTab, setCurrentTab] = useState<string>('info');
+  const { citiesList } = useGetCities(getFetcher);
+  const [currentTab, setCurrentTab] = useState<string>("info");
   const paths = ["Inicio", "Clientes", customer?.name];
 
-
   const tabs = [
-    { value: 'info', label: 'Información general' },
-    { value: 'history', label: 'Historial' },
-    { value: 'security', label: 'Passwords/Security' }
+    { value: "info", label: "Información general" },
+    { value: "history", label: "Historial" },
+    /* { value: "security", label: "Passwords/Security" },*/
   ];
 
   const handleTabsChange = (_event: ChangeEvent<{}>, value: string): void => {
     setCurrentTab(value);
   };
-
+  const isLoadingCustomer = !customerByIdError && !customer;
+  const foundCustomer = !isLoadingCustomer && customer?._id;
   return (
     <>
       <Head>
         <title>Detalle Cliente</title>
       </Head>
       <PageTitleWrapper>
-        <PageHeader title={"Detalle Cliente"} sutitle={""}/>
-        <NextBreadcrumbs paths={paths} lastLoaded={!customerByIdError && customer}/>
+        <PageHeader title={"Detalle Cliente"} sutitle={""} />
+        <NextBreadcrumbs
+          paths={paths}
+          lastLoaded={!customerByIdError && customer}
+        />
       </PageTitleWrapper>
       <Container maxWidth="lg">
         <Grid
@@ -60,25 +74,46 @@ function CustomerDetail() {
           alignItems="stretch"
           spacing={3}
         >
-          <Grid item xs={12}>
-            <TabsWrapper
-              onChange={handleTabsChange}
-              value={currentTab}
-              variant="scrollable"
-              scrollButtons="auto"
-              textColor="primary"
-              indicatorColor="primary"
-            >
-              {tabs.map((tab) => (
-                <Tab key={tab.value} label={tab.label} value={tab.value} />
-              ))}
-            </TabsWrapper>
-          </Grid>
-          <Grid item xs={12}>
-            {currentTab === 'info' && <CustomerInfoTab customer={customer} customerList={customerList} customerLevelList={customerLevelList}/>}
-            {currentTab === 'history' && <EditProfileTab />}
-            {currentTab === 'security' && <SecurityTab />}
-          </Grid>
+          {isLoadingCustomer || foundCustomer ? (
+            <>
+              <Grid item xs={12}>
+                <TabsWrapper
+                  onChange={handleTabsChange}
+                  value={currentTab}
+                  variant="scrollable"
+                  scrollButtons="auto"
+                  textColor="primary"
+                  indicatorColor="primary"
+                >
+                  {tabs.map((tab) => (
+                    <Tab key={tab.value} label={tab.label} value={tab.value} />
+                  ))}
+                </TabsWrapper>
+              </Grid>
+              <Grid item xs={12}>
+                {currentTab === "info" && (
+                  <CustomerInfoTab
+                    role={userRole}
+                    customer={customer}
+                    customerList={customerList}
+                    customerLevelList={customerLevelList}
+                    citiesList={citiesList}
+                  />
+                )}
+                {currentTab === "history" && <EditProfileTab />}
+                {
+                  //currentTab === "security" && <SecurityTab />
+                }
+              </Grid>
+            </>
+          ) : (
+            <Grid item>
+              <Alert severity="error">
+                No se encontró el cliente, por favor verifique e intente de
+                nuevo.
+              </Alert>
+            </Grid>
+          )}
         </Grid>
       </Container>
       <Footer />

@@ -318,7 +318,7 @@ function SidebarMenu({userRole}) {
             </List>
           </SubMenuWrapper>
         </List>
-        {userRole === "ADMIN" ?
+        {["ADMIN", "AUX"].includes(userRole) ?
         <List
           component="div"
           subheader={
@@ -361,6 +361,7 @@ function SidebarMenu({userRole}) {
                   </Button>
                 </NextLink>
               </ListItem>
+              
               <ListItem component="div">
                 <NextLink href="/clientes" passHref>
                   <Button

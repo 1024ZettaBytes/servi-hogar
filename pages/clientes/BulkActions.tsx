@@ -26,7 +26,7 @@ const ButtonError = styled(Button)(
     `
 );
 
-function BulkActions() {
+function BulkActions({onClickButton, selectedCustomers}) {
   const [onMenuOpen, menuOpen] = useState<boolean>(false);
   const moreRef = useRef<HTMLButtonElement | null>(null);
 
@@ -49,6 +49,7 @@ function BulkActions() {
             sx={{ ml: 1 }}
             startIcon={<DeleteTwoToneIcon />}
             variant="contained"
+            onClick={()=>onClickButton(selectedCustomers)}
           >
             Eliminar Seleccionados
           </ButtonError>

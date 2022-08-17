@@ -86,7 +86,18 @@ const getIdOperation = (type: string) => (
     value={type}
   />
 );
-function CustomerInfoTab({ customer, customerLevelList, customerList }) {
+const getErrorMessage = (message: string) => (
+  <Typography variant="h5" component="h5" color="error" textAlign="left">
+    {message}
+  </Typography>
+);
+function CustomerInfoTab({
+  role,
+  customer,
+  customerLevelList,
+  customerList,
+  citiesList,
+}) {
   const { enqueueSnackbar } = useSnackbar();
   const [isEditing, setIsEditing] = useState<any>({
     info: false,
@@ -102,9 +113,28 @@ function CustomerInfoTab({ customer, customerLevelList, customerList }) {
     residence: { error: false, msg: "" },
   });
   const handleReferredBy = (customerId) => {
-    const referredBy =  customerList.filter((c)=> c._id.toString() === customerId?.id)[0];
-    setCustomerToEdit({...customerToEdit, referredBy});
+    const referredBy = customerList.filter(
+      (c) => c._id.toString() === customerId?.id
+    )[0];
+    setCustomerToEdit({ ...customerToEdit, referredBy });
   };
+  function handleCitySelection(cityId) {
+    const filteredCity = citiesList.filter((c) => c._id === cityId);
+    const city = filteredCity[0];
+    const sector = {};
+    setCustomerToEdit({
+      ...customerToEdit,
+      currentResidence: { ...customerToEdit.currentResidence, city, sector },
+    });
+  }
+
+  function handleSectorSelection(sectorId) {
+    const sector = { _id: sectorId };
+    setCustomerToEdit({
+      ...customerToEdit,
+      currentResidence: { ...customerToEdit.currentResidence, sector },
+    });
+  }
   async function handleUpdateCustomer(event) {
     event.preventDefault();
     const type = event.target.type.value;
@@ -119,11 +149,15 @@ function CustomerInfoTab({ customer, customerLevelList, customerList }) {
     });
     setIsUpdating({ ...isUpdating, [type]: false });
     if (!result.error) {
-      setIsEditing({...isEditing, [type]: false});
-      enqueueSnackbar(result.msg,{variant:"success", anchorOrigin: {
-        vertical: 'top',
-        horizontal: 'center'
-      },autoHideDuration: 1500});
+      setIsEditing({ ...isEditing, [type]: false });
+      enqueueSnackbar(result.msg, {
+        variant: "success",
+        anchorOrigin: {
+          vertical: "top",
+          horizontal: "center",
+        },
+        autoHideDuration: 1500,
+      });
     } else {
       setHasErrorUpdating({
         ...hasErrorUpdating,
@@ -155,10 +189,36 @@ function CustomerInfoTab({ customer, customerLevelList, customerList }) {
     />
   );
 
+  const getResidenceTextField = (
+    field: string,
+    minLength: number,
+    maxLength: number
+  ) => (
+    <TextField
+      fullWidth
+      inputProps={{ minLength, maxLength }}
+      autoComplete="off"
+      required
+      id={field}
+      name={field}
+      variant="outlined"
+      size="small"
+      value={customerToEdit.currentResidence[field]}
+      onChange={(e) => {
+        setCustomerToEdit({
+          ...customerToEdit,
+          currentResidence: {
+            ...customerToEdit.currentResidence,
+            [field]: e.target.value,
+          },
+        });
+      }}
+    />
+  );
+
   if (!customerToEdit.isSet && customer) {
     setCustomerToEdit({ ...customer, isSet: true });
   }
-
   return (
     <Grid container spacing={3}>
       <Grid item xs={12}>
@@ -266,12 +326,12 @@ function CustomerInfoTab({ customer, customerLevelList, customerList }) {
                     </Grid>
                     <Grid item xs={9} sm={6} md={6}>
                       {customer ? (
-                        !isEditing.info ? (
+                        !isEditing.info || role !== "ADMIN" ? (
                           getLevelLabel(
                             customer?.level?.id,
                             customer?.level?.name
                           )
-                        ) : (
+                        ) : customerLevelList ? (
                           <FormControl>
                             <Select
                               size="small"
@@ -297,6 +357,8 @@ function CustomerInfoTab({ customer, customerLevelList, customerList }) {
                                 : null}
                             </Select>
                           </FormControl>
+                        ) : (
+                          getErrorMessage("Error al obtener los niveles")
                         )
                       ) : (
                         <Skeleton
@@ -371,38 +433,45 @@ function CustomerInfoTab({ customer, customerLevelList, customerList }) {
                           </Box>
                         </Grid>
                         <Grid item xs={9} sm={6} md={6}>
-                          <Autocomplete
-                            size="small"
-                            disablePortal
-                            id="combo-box-demo"
-                            options={customerList
-                              .filter((c) => c._id !== customerToEdit._id)
-                              .map((c) => {
-                                return {
-                                  label: `(${c.curp}) ${c.name}`,
-                                  id: c._id,
-                                };
-                              })}
-                            onChange={(event: any, newValue: string | null) => {
-                              event.target;
-                              handleReferredBy(newValue);
-                            }}
-                            defaultValue={
-                              customerToEdit.referredBy
-                                ? {
-                                    label: `(${customerToEdit.referredBy.curp}) ${customerToEdit.referredBy.name}`,
-                                    id: customerToEdit.referredBy._id,
-                                  }
-                                : null
-                            }
-                            fullWidth
-                            isOptionEqualToValue={(option: any, value: any) =>
-                              option.id === value.id
-                            }
-                            renderInput={(params) => (
-                              <TextField required {...params} />
-                            )}
-                          />
+                          {customerList ? (
+                            <Autocomplete
+                              size="small"
+                              disablePortal
+                              id="combo-box-demo"
+                              options={customerList
+                                .filter((c) => c._id !== customerToEdit._id)
+                                .map((c) => {
+                                  return {
+                                    label: `(${c.curp}) ${c.name}`,
+                                    id: c._id,
+                                  };
+                                })}
+                              onChange={(
+                                event: any,
+                                newValue: string | null
+                              ) => {
+                                event.target;
+                                handleReferredBy(newValue);
+                              }}
+                              defaultValue={
+                                customerToEdit.referredBy
+                                  ? {
+                                      label: `(${customerToEdit.referredBy.curp}) ${customerToEdit.referredBy.name}`,
+                                      id: customerToEdit.referredBy._id,
+                                    }
+                                  : null
+                              }
+                              fullWidth
+                              isOptionEqualToValue={(option: any, value: any) =>
+                                option.id === value.id
+                              }
+                              renderInput={(params) => (
+                                <TextField required {...params} />
+                              )}
+                            />
+                          ) : (
+                            getErrorMessage("Error al obtener los clientes")
+                          )}
                         </Grid>
                       </>
                     )}
@@ -439,63 +508,66 @@ function CustomerInfoTab({ customer, customerLevelList, customerList }) {
                         </Grid>
                       </>
                     )}
-                    {isEditing.info && (
-                      <>
-                        {hasErrorUpdating.info.error && (
-                          <Grid item xs={12} sm={12} md={12} textAlign={"right"}>
-                            <br />
-                            <Typography
-                              variant="h5"
-                              component="h5"
-                              color="error"
-                              textAlign="right"
-                            >
-                              {hasErrorUpdating.info.msg}
-                            </Typography>
-                          </Grid>
-                        )}
-                        <Grid
-                          item
-                          xs={0}
-                          sm={6}
-                          md={4}
-                          textAlign={{ sm: "right" }}
-                        ></Grid>
-                        <Grid
-                          item
-                          xs={12}
-                          sm={6}
-                          md={8}
-                          textAlign={"right"}
-                          marginTop={2}
-                        >
-                          <Button
-                            variant="outlined"
-                            size="medium"
-                            onClick={() => {
-                              setIsEditing({ ...isEditing, info: false });
-                              setHasErrorUpdating({...hasErrorUpdating, info: false });
-                              setIsUpdating({...isUpdating, info: false });
-                            }}
-                          >
-                            Cancelar
-                          </Button>
-
-                          <LoadingButton
-                            sx={{ marginLeft: 1 }}
-                            type="submit"
-                            size="medium"
-                            loading={isUpdating.info}
-                            variant="contained"
-                          >
-                            Guardar
-                          </LoadingButton>
-                          {getIdOperation("info")}
-                        </Grid>
-                      </>
-                    )}
                   </Grid>
                 </Grid>
+                {isEditing.info && (
+                  <>
+                    {hasErrorUpdating.info.error && (
+                      <Grid item xs={12} sm={12} md={12} textAlign={"center"}>
+                        <br />
+                        <Typography
+                          variant="h5"
+                          component="h5"
+                          color="error"
+                          textAlign="center"
+                        >
+                          {hasErrorUpdating.info.msg}
+                        </Typography>
+                      </Grid>
+                    )}
+                    <Grid
+                      item
+                      xs={0}
+                      sm={0}
+                      md={0}
+                      textAlign={{ sm: "right" }}
+                    ></Grid>
+                    <Grid
+                      item
+                      xs={12}
+                      sm={12}
+                      md={12}
+                      textAlign={"center"}
+                      marginTop={2}
+                    >
+                      <Button
+                        variant="outlined"
+                        size="medium"
+                        onClick={() => {
+                          setIsEditing({ ...isEditing, info: false });
+                          setHasErrorUpdating({
+                            ...hasErrorUpdating,
+                            info: false,
+                          });
+                          setIsUpdating({ ...isUpdating, info: false });
+                        }}
+                      >
+                        Cancelar
+                      </Button>
+
+                      <LoadingButton
+                        sx={{ marginLeft: 1 }}
+                        type="submit"
+                        size="medium"
+                        loading={isUpdating.info}
+                        variant="contained"
+                      >
+                        Guardar
+                      </LoadingButton>
+                      {getIdOperation("info")}
+                    </Grid>
+                  </>
+                )}
               </Box>
             </Typography>
           </CardContent>
@@ -517,170 +589,364 @@ function CustomerInfoTab({ customer, customerLevelList, customerList }) {
                 Se muestra el domicilio actual del cliente
               </Typography>
             </Box>
-            <Button variant="text" startIcon={<EditTwoToneIcon />}>
-              Modificar
-            </Button>
+            {!isEditing.residence && (
+              <Button
+                variant="text"
+                startIcon={<EditTwoToneIcon />}
+                onClick={() => {
+                  setCustomerToEdit({ ...customer, isSet: true });
+                  setIsEditing({ ...isEditing, residence: true });
+                }}
+              >
+                Modificar
+              </Button>
+            )}
           </Box>
           <Divider />
           <CardContent sx={{ p: 4 }}>
             <Typography variant="subtitle2">
-              <Grid
-                container
-                direction={"row"}
-                alignItems="center"
-                justifyItems="center"
-              >
-                <Grid container item spacing={0} xs={12} sm={6} md={6}>
-                  <Grid item xs={6} sm={6} md={6} textAlign={{ sm: "right" }}>
-                    <Box pr={2} pb={2}>
-                      Calle y número:
-                    </Box>
+              <Box component="form" onSubmit={handleUpdateCustomer}>
+                <Grid
+                  container
+                  direction={"row"}
+                  alignItems="center"
+                  justifyItems="center"
+                >
+                  <Grid container item spacing={0} xs={12} sm={6} md={6}>
+                    <Grid item xs={3} sm={6} md={6} textAlign={{ sm: "right" }}>
+                      <Box pr={2} pb={2}>
+                        Calle y número:
+                      </Box>
+                    </Grid>
+                    <Grid item xs={9} sm={6} md={6}>
+                      {customer ? (
+                        !isEditing.residence ? (
+                          <Text color="black">
+                            {customer?.currentResidence.street}
+                          </Text>
+                        ) : (
+                          getResidenceTextField("street", 1, 100)
+                        )
+                      ) : (
+                        <Skeleton
+                          variant="text"
+                          sx={{ fontSize: "1rem", width: "100px" }}
+                        />
+                      )}
+                    </Grid>
+                    <Grid item xs={3} sm={6} md={6} textAlign={{ sm: "right" }}>
+                      <Box pr={2} pb={2}>
+                        Colonia:
+                      </Box>
+                    </Grid>
+                    <Grid item xs={9} sm={6} md={6}>
+                      {customer ? (
+                        !isEditing.residence ? (
+                          <Text color="black">
+                            {customer?.currentResidence.suburb}
+                          </Text>
+                        ) : (
+                          getResidenceTextField("suburb", 1, 100)
+                        )
+                      ) : (
+                        <Skeleton
+                          variant="text"
+                          sx={{ fontSize: "1rem", width: "100px" }}
+                        />
+                      )}
+                    </Grid>
+                    <Grid item xs={3} sm={6} md={6} textAlign={{ sm: "right" }}>
+                      <Box pr={2} pb={2}>
+                        Ciudad:
+                      </Box>
+                    </Grid>
+                    <Grid item xs={9} sm={6} md={6}>
+                      {customer ? (
+                        !isEditing.residence ? (
+                          <Text color="black">
+                            {customer?.currentResidence?.city.name}
+                          </Text>
+                        ) : (
+                          <FormControl sx={{ width: "50%" }}>
+                            <Select
+                              labelId="city-id"
+                              id="city"
+                              name="city"
+                              required
+                              autoComplete="off"
+                              size="small"
+                              value={
+                                customerToEdit?.currentResidence?.city?._id ||
+                                ""
+                              }
+                              onChange={(event) =>
+                                handleCitySelection(event.target.value)
+                              }
+                            >
+                              {citiesList
+                                ? citiesList.map((city) => (
+                                    <MenuItem key={city._id} value={city._id}>
+                                      {city.name}
+                                    </MenuItem>
+                                  ))
+                                : null}
+                            </Select>
+                          </FormControl>
+                        )
+                      ) : (
+                        <Skeleton
+                          variant="text"
+                          sx={{ fontSize: "1rem", width: "100px" }}
+                        />
+                      )}
+                    </Grid>
+                    <Grid item xs={3} sm={6} md={6} textAlign={{ sm: "right" }}>
+                      <Box pr={2} pb={2}>
+                        Sector:
+                      </Box>
+                    </Grid>
+                    <Grid item xs={9} sm={6} md={6}>
+                      {customer ? (
+                        !isEditing.residence ? (
+                          <Text color="black">
+                            {customer?.currentResidence?.sector.name}
+                          </Text>
+                        ) : (
+                          <FormControl sx={{ width: "50%" }}>
+                            <Select
+                              labelId="sector-id"
+                              id="sector"
+                              name="sector"
+                              required
+                              autoComplete="off"
+                              size="small"
+                              placeholder="Seleccione un valor"
+                              value={
+                                customerToEdit?.currentResidence?.sector._id ||
+                                ""
+                              }
+                              disabled={
+                                !customerToEdit?.currentResidence.sector
+                              }
+                              onChange={(event) =>
+                                handleSectorSelection(event.target.value)
+                              }
+                            >
+                              {customerToEdit?.currentResidence?.city?.sectors
+                                ?.length > 0
+                                ? customerToEdit?.currentResidence?.city?.sectors?.map(
+                                    (sector) => (
+                                      <MenuItem
+                                        key={sector._id}
+                                        value={sector._id}
+                                      >
+                                        {sector.name}
+                                      </MenuItem>
+                                    )
+                                  )
+                                : null}
+                            </Select>
+                          </FormControl>
+                        )
+                      ) : (
+                        <Skeleton
+                          variant="text"
+                          sx={{ fontSize: "1rem", width: "100px" }}
+                        />
+                      )}
+                    </Grid>
                   </Grid>
-                  <Grid item xs={6} sm={6} md={6}>
-                    {customer ? (
-                      <Text color="black">
-                        {customer?.currentResidence?.street}
-                      </Text>
+                  <Grid container item spacing={0} xs={12} sm={6} md={6}>
+                    <Grid item xs={3} sm={6} md={6} textAlign={{ sm: "right" }}>
+                      <Box pr={2} pb={2}>
+                        Domicilio Referencia:
+                      </Box>
+                    </Grid>
+                    <Grid item xs={9} sm={6} md={6}>
+                      {customer ? (
+                        !isEditing.residence ? (
+                          <Text color="black">
+                            {customer?.currentResidence?.residenceRef}
+                          </Text>
+                        ) : (
+                          getResidenceTextField("residenceRef", 1, 100)
+                        )
+                      ) : (
+                        <Skeleton
+                          variant="text"
+                          sx={{ fontSize: "1rem", width: "100px" }}
+                        />
+                      )}
+                    </Grid>
+                    <Grid item xs={3} sm={6} md={6} textAlign={{ sm: "right" }}>
+                      <Box pr={2} pb={2}>
+                        Nombre Referencia:
+                      </Box>
+                    </Grid>
+                    <Grid item xs={9} sm={6} md={6}>
+                      {customer ? (
+                        !isEditing.residence ? (
+                          <Text color="black">
+                            {customer?.currentResidence?.nameRef}
+                          </Text>
+                        ) : (
+                          getResidenceTextField("nameRef", 1, 100)
+                        )
+                      ) : (
+                        <Skeleton
+                          variant="text"
+                          sx={{ fontSize: "1rem", width: "100px" }}
+                        />
+                      )}
+                    </Grid>
+                    <Grid item xs={3} sm={6} md={6} textAlign={{ sm: "right" }}>
+                      <Box pr={2} pb={2}>
+                        Telefono referencia:
+                      </Box>
+                    </Grid>
+                    <Grid item xs={9} sm={6} md={6}>
+                      {customer ? (
+                        !isEditing.residence ? (
+                          <Text color="black">
+                            {customer?.currentResidence?.telRef}
+                          </Text>
+                        ) : (
+                          getResidenceTextField("telRef", 1, 100)
+                        )
+                      ) : (
+                        <Skeleton
+                          variant="text"
+                          sx={{ fontSize: "1rem", width: "100px" }}
+                        />
+                      )}
+                    </Grid>
+
+                    {!isEditing.residence ? (
+                      <Grid
+                        container
+                        item
+                        xs={12}
+                        sm={12}
+                        md={12}
+                        alignItems="center"
+                        justifyItems="center"
+                        direction="column"
+                        textAlign="center"
+                      >
+                        {customer ? (
+                          <Button
+                            variant="outlined"
+                            href={`${customer?.currentResidence?.maps}`}
+                            sx={{ width: "50%" }}
+                            target="_blank"
+                            startIcon={<LocationOnIcon />}
+                          >
+                            Ver Ubicación
+                          </Button>
+                        ) : (
+                          <Skeleton
+                            variant="text"
+                            sx={{ fontSize: "1rem", width: "100px" }}
+                          />
+                        )}
+                      </Grid>
                     ) : (
-                      <Skeleton
-                        variant="text"
-                        sx={{ fontSize: "1rem", width: "100px" }}
-                      />
-                    )}
-                  </Grid>
-                  <Grid item xs={6} sm={6} md={6} textAlign={{ sm: "right" }}>
-                    <Box pr={2} pb={2}>
-                      Colonia:
-                    </Box>
-                  </Grid>
-                  <Grid item xs={6} sm={6} md={6}>
-                    {customer ? (
-                      <Text color="black">
-                        {customer?.currentResidence?.suburb}
-                      </Text>
-                    ) : (
-                      <Skeleton
-                        variant="text"
-                        sx={{ fontSize: "1rem", width: "100px" }}
-                      />
-                    )}
-                  </Grid>
-                  <Grid item xs={6} sm={6} md={6} textAlign={{ sm: "right" }}>
-                    <Box pr={2} pb={2}>
-                      Ciudad:
-                    </Box>
-                  </Grid>
-                  <Grid item xs={6} sm={6} md={6}>
-                    {customer ? (
-                      <Text color="black">
-                        {customer?.currentResidence?.city?.name}
-                      </Text>
-                    ) : (
-                      <Skeleton
-                        variant="text"
-                        sx={{ fontSize: "1rem", width: "100px" }}
-                      />
-                    )}
-                  </Grid>
-                  <Grid item xs={6} sm={6} md={6} textAlign={{ sm: "right" }}>
-                    <Box pr={2} pb={2}>
-                      Sector:
-                    </Box>
-                  </Grid>
-                  <Grid item xs={6} sm={6} md={6}>
-                    {customer ? (
-                      <Text color="black">
-                        {customer?.currentResidence?.sector?.name}
-                      </Text>
-                    ) : (
-                      <Skeleton
-                        variant="text"
-                        sx={{ fontSize: "1rem", width: "100px" }}
-                      />
+                      <>
+                        <Grid
+                          item
+                          xs={3}
+                          sm={6}
+                          md={6}
+                          textAlign={{ sm: "right" }}
+                        >
+                          <Box pr={2} pb={2}>
+                            Maps:
+                          </Box>
+                        </Grid>
+                        <Grid item xs={9} sm={6} md={6}>
+                          <TextField
+                            autoComplete="off"
+                            required
+                            id="maps"
+                            name="maps"
+                            multiline
+                            maxRows={3}
+                            fullWidth={true}
+                            value={customerToEdit?.currentResidence?.maps}
+                            onChange={(e) => {
+                              setCustomerToEdit({
+                                ...customerToEdit,
+                                currentResidence: {
+                                  ...customerToEdit.currentResidence,
+                                  maps: e.target.value,
+                                },
+                              });
+                            }}
+                          />
+                        </Grid>
+                      </>
                     )}
                   </Grid>
                 </Grid>
-                <Grid container item spacing={0} xs={12} sm={6} md={6}>
-                  <Grid item xs={6} sm={6} md={6} textAlign={{ sm: "right" }}>
-                    <Box pr={2} pb={2}>
-                      Domicilio Referencia:
-                    </Box>
-                  </Grid>
-                  <Grid item xs={6} sm={6} md={6}>
-                    {customer ? (
-                      <Text color="black">
-                        {customer?.currentResidence?.residenceRef}
-                      </Text>
-                    ) : (
-                      <Skeleton
-                        variant="text"
-                        sx={{ fontSize: "1rem", width: "100px" }}
-                      />
+                {isEditing.residence && (
+                  <>
+                    {hasErrorUpdating.residence.error && (
+                      <Grid item xs={12} sm={12} md={12} textAlign={"center"}>
+                        <br />
+                        <Typography
+                          variant="h5"
+                          component="h5"
+                          color="error"
+                          textAlign="center"
+                        >
+                          {hasErrorUpdating.residence.msg}
+                        </Typography>
+                      </Grid>
                     )}
-                  </Grid>
-                  <Grid item xs={6} sm={6} md={6} textAlign={{ sm: "right" }}>
-                    <Box pr={2} pb={2}>
-                      Nombre Referencia:
-                    </Box>
-                  </Grid>
-                  <Grid item xs={6} sm={6} md={6}>
-                    {customer ? (
-                      <Text color="black">
-                        {customer?.currentResidence?.nameRef}
-                      </Text>
-                    ) : (
-                      <Skeleton
-                        variant="text"
-                        sx={{ fontSize: "1rem", width: "100px" }}
-                      />
-                    )}
-                  </Grid>
-                  <Grid item xs={6} sm={6} md={6} textAlign={{ sm: "right" }}>
-                    <Box pr={2} pb={2}>
-                      Telefono referencia:
-                    </Box>
-                  </Grid>
-                  <Grid item xs={6} sm={6} md={6}>
-                    {customer ? (
-                      <Text color="black">
-                        {customer?.currentResidence?.telRef}
-                      </Text>
-                    ) : (
-                      <Skeleton
-                        variant="text"
-                        sx={{ fontSize: "1rem", width: "100px" }}
-                      />
-                    )}
-                  </Grid>
-
-                  <Grid
-                    container
-                    item
-                    xs={12}
-                    sm={12}
-                    md={12}
-                    alignItems="center"
-                    justifyItems="center"
-                    direction="column"
-                  >
-                    {customer ? (
+                    <Grid
+                      item
+                      xs={0}
+                      sm={6}
+                      md={4}
+                      textAlign={{ sm: "right" }}
+                    ></Grid>
+                    <Grid
+                      item
+                      xs={12}
+                      sm={12}
+                      md={12}
+                      textAlign={"center"}
+                      marginTop={2}
+                    >
                       <Button
                         variant="outlined"
-                        href={`${customer?.currentResidence?.maps}`}
-                        sx={{ width: "50%" }}
-                        startIcon={<LocationOnIcon />}
+                        size="medium"
+                        onClick={() => {
+                          setIsEditing({ ...isEditing, residence: false });
+                          setHasErrorUpdating({
+                            ...hasErrorUpdating,
+                            residence: false,
+                          });
+                          setIsUpdating({ ...isUpdating, residence: false });
+                        }}
                       >
-                        Ver Ubicación
+                        Cancelar
                       </Button>
-                    ) : (
-                      <Skeleton
-                        variant="text"
-                        sx={{ fontSize: "1rem", width: "100px" }}
-                      />
-                    )}
-                  </Grid>
-                </Grid>
-              </Grid>
+
+                      <LoadingButton
+                        sx={{ marginLeft: 1 }}
+                        type="submit"
+                        size="medium"
+                        loading={isUpdating.residence}
+                        variant="contained"
+                      >
+                        Guardar
+                      </LoadingButton>
+                      {getIdOperation("residence")}
+                    </Grid>
+                  </>
+                )}
+              </Box>
             </Typography>
           </CardContent>
         </Card>

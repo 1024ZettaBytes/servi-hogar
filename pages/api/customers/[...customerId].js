@@ -6,9 +6,10 @@ import {
     const { customerId } = req.query;
     try {
       const customer = await getCustomerByIdData(customerId);
-      res.status(200).json({ data: customer });
+      
+      res.status(200).json( { data: customer || {} });
     } catch (e) {
-      console.log(e);
+      console.error(e);
       res
         .status(500)
         .json({

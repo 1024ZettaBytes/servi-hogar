@@ -6,7 +6,7 @@ async function getCustomersLevelsAPI(req, res) {
     const allCustomers = await getCustomersLevelsData();
     res.status(200).json({ data: allCustomers });
   } catch (e) {
-    console.log(e);
+    console.error(e);
     res
       .status(500)
       .json({

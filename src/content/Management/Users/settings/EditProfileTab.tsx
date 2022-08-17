@@ -1,4 +1,4 @@
-import {
+/*import {
   Grid,
   Typography,
   CardContent,
@@ -11,10 +11,11 @@ import {
 import EditTwoToneIcon from '@mui/icons-material/EditTwoTone';
 import DoneTwoToneIcon from '@mui/icons-material/DoneTwoTone';
 import Text from '@/components/Text';
-import Label from '@/components/Label';
+import Label from '@/components/Label';*/
 
 function EditProfileTab() {
   return (
+    null/*
     <Grid container spacing={3}>
       <Grid item xs={12}>
         <Card>
@@ -190,7 +191,7 @@ function EditProfileTab() {
           </CardContent>
         </Card>
       </Grid>
-    </Grid>
+    </Grid>*/
   );
 }
 

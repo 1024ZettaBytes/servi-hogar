@@ -23,7 +23,8 @@ import {
   InputAdornment,
 } from '@mui/material';
 
-
+import { deleteCustomers } from "../../lib/client/customersFetch";
+import { useSnackbar } from "notistack";
 import Label from '@/components/Label';
 import { CustomerLevel } from '@/models/crypto_order';
 import VisibilityIcon from '@mui/icons-material/Visibility';
@@ -31,6 +32,7 @@ import DeleteTwoToneIcon from '@mui/icons-material/DeleteTwoTone';
 import BulkActions from './BulkActions';
 import SearchIcon from '@mui/icons-material/Search';
 import NextLink from "next/link";
+import GenericModal from '@/components/GenericModal';
 
 interface TablaClientesProps {
   className?: string;
@@ -114,6 +116,12 @@ const applyPagination = (
 };
 
 const TablaClientes: FC<TablaClientesProps> = ({ customerList }) => {
+  const { enqueueSnackbar } = useSnackbar();
+  const [deleteModalIsOpen, setDeleteModalIsOpen] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [customersToDelete, setCustomersToDelete] = useState<string[]>(
+    []
+  );
   const [selectedCustomers, setSelectedCustomers] = useState<string[]>(
     []
   );
@@ -122,34 +130,33 @@ const TablaClientes: FC<TablaClientesProps> = ({ customerList }) => {
   const [limit, setLimit] = useState<number>(10);
   const [filter, setFilter] = useState<string>("");
 
-
   const handleSearchChange = (e: ChangeEvent<HTMLInputElement>): void => {
     const value = e.target.value;
     setFilter(value);
   };
 
-  const handleSelectAllCryptoOrders = (
+  const handleSelectAllCustomers = (
     event: ChangeEvent<HTMLInputElement>
   ): void => {
     setSelectedCustomers(
       event.target.checked
-        ? customerList.map((customer) => customer?.curp)
+        ? customerList.map((customer) => customer?._id)
         : []
     );
   };
 
   const handleSelectOneCustomer = (
     _event: ChangeEvent<HTMLInputElement>,
-    customerCurp: string
+    customerId: string
   ): void => {
-    if (!selectedCustomers.includes(customerCurp)) {
+    if (!selectedCustomers.includes(customerId)) {
       setSelectedCustomers((prevSelected) => [
         ...prevSelected,
-        customerCurp
+        customerId
       ]);
     } else {
       setSelectedCustomers((prevSelected) =>
-        prevSelected.filter((id) => id !== customerCurp)
+        prevSelected.filter((id) => id !== customerId)
       );
     }
   };
@@ -161,24 +168,50 @@ const TablaClientes: FC<TablaClientesProps> = ({ customerList }) => {
   const handleLimitChange = (event: ChangeEvent<HTMLInputElement>): void => {
     setLimit(parseInt(event.target.value));
   };
+  const handleOnDeleteClick= (customers: string[])=>{
+    setCustomersToDelete(customers);
+    setDeleteModalIsOpen(true);
+
+  }
+  const handleOnConfirmDelete = async () => {
+    setIsDeleting(true);
+    const result = await deleteCustomers(customersToDelete);
+    setDeleteModalIsOpen(false);
+    setIsDeleting(false);
+    enqueueSnackbar(result.msg, {
+      variant: !result.error ? "success" : "error",
+      anchorOrigin: {
+        vertical: "top",
+        horizontal: "center",
+      },
+      autoHideDuration: 2000,
+    });
+
+    if(!result.error){
+      const newSelected = selectedCustomers.filter(selected=>!customersToDelete.includes(selected));
+      setSelectedCustomers(newSelected);
+      setCustomersToDelete([]);
+    }
+  };
 
   const filteredCostumers = applyFilters(customerList, filter);
-  const paginatedCryptoOrders = applyPagination(
+  const paginatedCustomers = applyPagination(
     filteredCostumers,
     page,
     limit
   );
-  const selectedSomeCryptoOrders =
+  const selectedSomeCustomers =
     selectedCustomers.length > 0 &&
     selectedCustomers.length < customerList.length;
-  const selectedAllCryptoOrders =
-    selectedCustomers.length === customerList.length;
+  const selectedAllCustomers =
+    (selectedCustomers.length === customerList.length) && customerList.length>0;
   const theme = useTheme();
   return (
+    <>
     <Card>
       {selectedBulkActions && (
         <Box flex={1} p={2}>
-          <BulkActions />
+          <BulkActions onClickButton={handleOnDeleteClick} selectedCustomers={selectedCustomers}/>
         </Box>
       )}
       {!selectedBulkActions && (
@@ -216,9 +249,9 @@ const TablaClientes: FC<TablaClientesProps> = ({ customerList }) => {
               <TableCell padding="checkbox">
                 <Checkbox
                   color="primary"
-                  checked={selectedAllCryptoOrders}
-                  indeterminate={selectedSomeCryptoOrders}
-                  onChange={handleSelectAllCryptoOrders}
+                  checked={selectedAllCustomers}
+                  indeterminate={selectedSomeCustomers}
+                  onChange={handleSelectAllCustomers}
                 />
               </TableCell>
               <TableCell align="center">Cliente</TableCell>
@@ -230,24 +263,24 @@ const TablaClientes: FC<TablaClientesProps> = ({ customerList }) => {
             </TableRow>
           </TableHead>
           <TableBody>
-            {paginatedCryptoOrders.map((customer) => {
-              const isCryptoOrderSelected = selectedCustomers.includes(
-                customer?.curp
+            {paginatedCustomers.map((customer) => {
+              const isCustomerSelected = selectedCustomers.includes(
+                customer?._id
               );
               return (
                 <TableRow
                   hover
                   key={customer?._id}
-                  selected={isCryptoOrderSelected}
+                  selected={isCustomerSelected}
                 >
                   <TableCell padding="checkbox">
                     <Checkbox
                       color="primary"
-                      checked={isCryptoOrderSelected}
+                      checked={isCustomerSelected}
                       onChange={(event: ChangeEvent<HTMLInputElement>) =>
-                        handleSelectOneCustomer(event, customer?.curp)
+                        handleSelectOneCustomer(event, customer?._id)
                       }
-                      value={isCryptoOrderSelected}
+                      value={isCustomerSelected}
                     />
                   </TableCell>
                   <TableCell align="center">
@@ -326,8 +359,9 @@ const TablaClientes: FC<TablaClientesProps> = ({ customerList }) => {
                       </IconButton>
                     </Tooltip>
                     </NextLink>
-                    <Tooltip title="Eliminiar Cliente" arrow>
+                    <Tooltip title="Eliminar Cliente" arrow>
                       <IconButton
+                      onClick={() =>handleOnDeleteClick([customer._id])}
                         sx={{
                           '&:hover': { background: theme.colors.error.lighter },
                           color: theme.palette.error.main
@@ -357,6 +391,23 @@ const TablaClientes: FC<TablaClientesProps> = ({ customerList }) => {
         />
       </Box>
     </Card>
+    <GenericModal
+    open={deleteModalIsOpen}
+    title="Atención"
+    text={
+      "¿Esta seguro de eliminar a" +
+      (customersToDelete.length === 1
+        ? "l cliente seleccionado"
+        : " los clientes seleccionados") +
+      "?"
+    }
+    isLoading={isDeleting}
+    onAccept={handleOnConfirmDelete}
+    onCancel={() => {
+      setDeleteModalIsOpen(false);
+      setIsDeleting(false);
+    }}
+  /></>
   );
 };
 
