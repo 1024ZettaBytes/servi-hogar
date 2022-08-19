@@ -23,6 +23,7 @@ import {
 } from "@mui/material";
 import { LoadingButton } from "@mui/lab";
 import { saveCustomer } from "../../../lib/client/customersFetch";
+import {HOW_FOUND_LIST} from "../../../lib/consts/OBJ_CONTS";
 function AddCustomerModal(props) {
   const { handleOnClose, open, citiesList, customerList } = props;
   const [isLoading, setIsLoading] = useState(false);
@@ -55,7 +56,6 @@ function AddCustomerModal(props) {
     setIsLoading(true);
     setHasError({ error: false, msg: "" });
     const result = await saveCustomer({
-      curp: event.target.curp.value,
       name: event.target.name.value,
       cell: event.target.cell.value,
       howFound: event.target.howFound.value,
@@ -116,18 +116,6 @@ function AddCustomerModal(props) {
               </Grid>
               <Grid item lg={12}>
                 <TextField
-                  inputProps={{ minLength: 18, maxLength: 18 }}
-                  autoComplete="off"
-                  required
-                  id="curp"
-                  name="curp"
-                  label="CURP"
-                  fullWidth={true}
-                  variant="outlined"
-                />
-              </Grid>
-              <Grid item lg={12}>
-                <TextField
                   autoComplete="off"
                   required
                   id="name"
@@ -158,22 +146,13 @@ function AddCustomerModal(props) {
                   onChange={(e) => handleHowFoundSelection(e.target.value)}
                   row
                 >
-                  <FormControlLabel
-                    value="referred"
+                  {Object.entries(HOW_FOUND_LIST).map(how=><FormControlLabel
+                    key={how[0]}
+                    value={how[0]}
                     control={<Radio required={true} />}
-                    label="Referido"
-                  />
-                  <FormControlLabel
-                    value="facebook"
-                    control={<Radio required={true} />}
-                    label="Facebook"
-                  />
-                  <FormControlLabel
-                    value="recomended"
-                    control={<Radio required={true} />}
-                    label="Recomendado"
-                  />
-                </RadioGroup>
+                    label={how[1]}
+                  />)}
+                  </RadioGroup>
               </Grid>
               {wasReferred ? (
                   <Grid item lg={12}>
@@ -181,7 +160,7 @@ function AddCustomerModal(props) {
                       disablePortal
                       id="combo-box-demo"
                       options={customerList.map((customer) => {
-                        return { label: `(${customer.curp}) ${customer.name}`, id: customer._id };
+                        return { label: `${customer.name}`, id: customer._id };
                       })}
                       onChange={(event: any, newValue: string | null) => {
                         event.target;

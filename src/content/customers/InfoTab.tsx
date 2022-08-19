@@ -32,13 +32,11 @@ import Label from "@/components/Label";
 import { useState } from "react";
 import { updateCustomer } from "lib/client/customersFetch";
 import { LoadingButton } from "@mui/lab";
+import { HOW_FOUND_LIST } from "lib/consts/OBJ_CONTS";
 
 const getHowFoundLabel = (howFoundId: string, referrer?: string) => {
-  const map = {
-    facebook: "Facebook",
-    referred: `Referido por ${referrer}`,
-    recomended: "Recomendado",
-  };
+  let map = {...HOW_FOUND_LIST};
+  if (howFoundId === "referred") map.referred = `Referido por ${referrer}`;
   return map[howFoundId];
 };
 const getLevelLabel = (customerLevelId: string, customerLevelName: string) => {
@@ -260,27 +258,6 @@ function CustomerInfoTab({
                   <Grid container item spacing={0} xs={12} sm={6} md={6}>
                     <Grid item xs={3} sm={6} md={6} textAlign={{ sm: "right" }}>
                       <Box pr={2} pb={2}>
-                        CURP:
-                      </Box>
-                    </Grid>
-                    <Grid item xs={9} sm={6} md={6}>
-                      {customer ? (
-                        !isEditing.info ? (
-                          <Text color="black">
-                            <b>{customer?.curp}</b>
-                          </Text>
-                        ) : (
-                          getInfoTextField("curp", 18, 18)
-                        )
-                      ) : (
-                        <Skeleton
-                          variant="text"
-                          sx={{ fontSize: "1rem", width: "100px" }}
-                        />
-                      )}
-                    </Grid>
-                    <Grid item xs={3} sm={6} md={6} textAlign={{ sm: "right" }}>
-                      <Box pr={2} pb={2}>
                         Nombre:
                       </Box>
                     </Grid>
@@ -382,35 +359,26 @@ function CustomerInfoTab({
                             )}
                           </Text>
                         ) : (
-                          <>
-                            <RadioGroup
-                              aria-labelledby="howFound-radiogroup-label"
-                              name="howFound"
-                              defaultValue={customer?.howFound || ""}
-                              onChange={(e) =>
-                                setCustomerToEdit({
-                                  ...customerToEdit,
-                                  howFound: e.target.value,
-                                })
-                              }
-                            >
+                          <RadioGroup
+                            aria-labelledby="howFound-radiogroup-label"
+                            name="howFound"
+                            defaultValue={customer?.howFound || ""}
+                            onChange={(e) =>
+                              setCustomerToEdit({
+                                ...customerToEdit,
+                                howFound: e.target.value,
+                              })
+                            }
+                          >
+                            {Object.entries(HOW_FOUND_LIST).map((how) => (
                               <FormControlLabel
-                                value="referred"
+                                key={how[0]}
+                                value={how[0]}
                                 control={<Radio required={true} />}
-                                label="Referido"
+                                label={how[1]}
                               />
-                              <FormControlLabel
-                                value="facebook"
-                                control={<Radio required={true} />}
-                                label="Facebook"
-                              />
-                              <FormControlLabel
-                                value="recomended"
-                                control={<Radio required={true} />}
-                                label="Recomendado"
-                              />
-                            </RadioGroup>{" "}
-                          </>
+                            ))}
+                          </RadioGroup>
                         )
                       ) : (
                         <Skeleton
@@ -442,7 +410,7 @@ function CustomerInfoTab({
                                 .filter((c) => c._id !== customerToEdit._id)
                                 .map((c) => {
                                   return {
-                                    label: `(${c.curp}) ${c.name}`,
+                                    label: `${c.name}`,
                                     id: c._id,
                                   };
                                 })}
@@ -456,7 +424,7 @@ function CustomerInfoTab({
                               defaultValue={
                                 customerToEdit.referredBy
                                   ? {
-                                      label: `(${customerToEdit.referredBy.curp}) ${customerToEdit.referredBy.name}`,
+                                      label: `${customerToEdit.referredBy.name}`,
                                       id: customerToEdit.referredBy._id,
                                     }
                                   : null

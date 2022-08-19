@@ -97,7 +97,6 @@ const applyFilters = (
           const matchLevel = value['name'] && compareStringsForFilter(filter, value['name']);
           return matchLevel;
         }
-        case 'curp':
         case 'name':
         case "cell": {
           return compareStringsForFilter(filter, value.toString());
@@ -292,9 +291,6 @@ const TablaClientes: FC<TablaClientesProps> = ({ userRole, customerList }) => {
                       noWrap
                     >
                       {customer?.name}
-                    </Typography>
-                    <Typography variant="body2" color="text.secondary" noWrap>
-                      {customer?.curp}
                     </Typography>
                   </TableCell>
                   <TableCell align="center">

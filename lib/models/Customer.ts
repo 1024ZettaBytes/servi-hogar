@@ -1,7 +1,6 @@
 import mongoose, { Model, model, Schema } from 'mongoose';
 
 export interface ICustomer extends Document {
-  curp: string;
   name: string;
   cell: string;
   residences: [Schema.Types.ObjectId];
@@ -19,7 +18,6 @@ export interface ICustomer extends Document {
 }
 
 const CustomerSchema = new Schema<ICustomer>({
-  curp: { type: 'string', required: true },
   name: { type: 'string', required: true },
   cell: { type: 'string', required: true },
   residences: [
