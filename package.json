@@ -42,6 +42,7 @@
     "next": "12.1.6",
     "next-auth": "^4.10.3",
     "next-images": "1.8.4",
+    "next-transpile-modules": "^9.0.0",
     "notistack": "^2.0.5",
     "nprogress": "0.2.0",
     "numeral": "2.0.6",
@@ -68,7 +69,6 @@
     "eslint-config-next": "12.1.6",
     "eslint-config-prettier": "8.5.0",
     "eslint-plugin-prettier": "4.0.0",
-    "next-transpile-modules": "^9.0.0",
     "prettier": "2.6.2"
   }
 }
