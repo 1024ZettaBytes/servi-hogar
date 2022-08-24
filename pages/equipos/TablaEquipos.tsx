@@ -1,5 +1,5 @@
 import { FC, ChangeEvent, useState } from 'react';
-//import numeral from 'numeral';
+import numeral from 'numeral';
 import * as str from "string";
 import PropTypes from 'prop-types';
 import {
@@ -22,64 +22,35 @@ import {
   TextField,
   InputAdornment,
 } from '@mui/material';
-
-import { deleteCustomers } from "../../lib/client/customersFetch";
-import { useSnackbar } from "notistack";
-import Label from '@/components/Label';
-import { CustomerLevel } from '@/models/crypto_order';
+//import { useSnackbar } from "notistack";
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import DeleteTwoToneIcon from '@mui/icons-material/DeleteTwoTone';
-import BulkTableActions from '../../src/components/BulkTableActions';
+import BulkTableActions from "../../src/components/BulkTableActions";
 import SearchIcon from '@mui/icons-material/Search';
 import NextLink from "next/link";
 import GenericModal from '@/components/GenericModal';
+import { capitalizeFirstLetter } from 'lib/client/utils';
+import { format } from 'date-fns';
+import es from 'date-fns/locale/es';
 
-interface TablaClientesProps {
+interface TablaEquiposProps {
   userRole: string;
   className?: string;
-  customerList: any[];
+  machinesList: any[];
 }
 
-const getStatusLabel = (customerLevel: CustomerLevel): JSX.Element => {
-  const map = {
-    nuevo: {
-      text: "Nuevo",
-      color: 'secondary'
-    },
-    regular: {
-      text: "Regular",
-      color: 'info'
-    },
-    permanente: {
-      text: "Permanente",
-      color: 'success'
-    },
-    deudor: {
-      text: "Deudor",
-      color: 'warning'
-    },
-    conflictivo: {
-      text: "Conflictivo",
-      color: 'error'
-    }
-  };
-
-  const { text, color }: any = map[customerLevel];
-
-  return <Label color={color}>{text}</Label>;
-};
 const compareStringsForFilter = (keyWord: string, field: string) => {
   return str(field).latinise().toLowerCase().includes(str(keyWord).latinise().toLowerCase());
 }
 const applyFilters = (
-  customerList: any[],
+  machinesList: any[],
   filter: string
 ): any[] => {
-  return customerList.filter((customer) => {
+  return machinesList.filter((machine) => {
     if (!filter || filter === '') {
       return true;
     }
-    return Object.entries(customer).filter(keyValue => {
+    return Object.entries(machine).filter(keyValue => {
       const key = keyValue[0];
       const value = keyValue[1];
       if (!value) {
@@ -97,8 +68,10 @@ const applyFilters = (
           const matchLevel = value['name'] && compareStringsForFilter(filter, value['name']);
           return matchLevel;
         }
-        case 'name':
-        case "cell": {
+        case 'machineNum':
+        case "brand":
+        case "capacity":
+          case "totalChanges": {
           return compareStringsForFilter(filter, value.toString());
         }
       }
@@ -107,24 +80,24 @@ const applyFilters = (
 };
 
 const applyPagination = (
-  customerList: any[],
+  machinesList: any[],
   page: number,
   limit: number
 ): any[] => {
-  return customerList.slice(page * limit, page * limit + limit);
+  return machinesList.slice(page * limit, page * limit + limit);
 };
 
-const TablaClientes: FC<TablaClientesProps> = ({ userRole, customerList }) => {
-  const { enqueueSnackbar } = useSnackbar();
-  const [deleteModalIsOpen, setDeleteModalIsOpen] = useState(false);
+const TablaEquipos: FC<TablaEquiposProps> = ({ userRole, machinesList }) => {
+  //const { enqueueSnackbar } = useSnackbar();
+  //const [deleteModalIsOpen, setDeleteModalIsOpen] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
-  const [customersToDelete, setCustomersToDelete] = useState<string[]>(
+  const [machinesToDelete, setMachinesToDelete] = useState<string[]>(
     []
   );
-  const [selectedCustomers, setSelectedCustomers] = useState<string[]>(
+  const [selectedMachines, setselectedMachines] = useState<string[]>(
     []
   );
-  const selectedBulkActions = selectedCustomers.length > 0;
+  const selectedBulkActions = selectedMachines.length > 0;
   const [page, setPage] = useState<number>(0);
   const [limit, setLimit] = useState<number>(10);
   const [filter, setFilter] = useState<string>("");
@@ -134,28 +107,28 @@ const TablaClientes: FC<TablaClientesProps> = ({ userRole, customerList }) => {
     setFilter(value);
   };
 
-  const handleSelectAllCustomers = (
+  const handleSelectAllMachines = (
     event: ChangeEvent<HTMLInputElement>
   ): void => {
-    setSelectedCustomers(
+    setselectedMachines(
       event.target.checked
-        ? customerList.map((customer) => customer?._id)
+        ? machinesList.map((machine) => machine?._id)
         : []
     );
   };
 
-  const handleSelectOneCustomer = (
+  const handleSelectOneMachine = (
     _event: ChangeEvent<HTMLInputElement>,
-    customerId: string
+    machineId: string
   ): void => {
-    if (!selectedCustomers.includes(customerId)) {
-      setSelectedCustomers((prevSelected) => [
+    if (!selectedMachines.includes(machineId)) {
+      setselectedMachines((prevSelected) => [
         ...prevSelected,
-        customerId
+        machineId
       ]);
     } else {
-      setSelectedCustomers((prevSelected) =>
-        prevSelected.filter((id) => id !== customerId)
+      setselectedMachines((prevSelected) =>
+        prevSelected.filter((id) => id !== machineId)
       );
     }
   };
@@ -167,14 +140,14 @@ const TablaClientes: FC<TablaClientesProps> = ({ userRole, customerList }) => {
   const handleLimitChange = (event: ChangeEvent<HTMLInputElement>): void => {
     setLimit(parseInt(event.target.value));
   };
-  const handleOnDeleteClick= (customers: string[])=>{
-    setCustomersToDelete(customers);
-    setDeleteModalIsOpen(true);
+  const handleOnDeleteClick= (machines: string[])=>{
+    setMachinesToDelete(machines);
+    //setDeleteModalIsOpen(true);
 
   }
-  const handleOnConfirmDelete = async () => {
+  /*const handleOnConfirmDelete = async () => {
     setIsDeleting(true);
-    const result = await deleteCustomers(customersToDelete);
+    const result = await deleteMachines(machinesToDelete);
     setDeleteModalIsOpen(false);
     setIsDeleting(false);
     enqueueSnackbar(result.msg, {
@@ -187,30 +160,31 @@ const TablaClientes: FC<TablaClientesProps> = ({ userRole, customerList }) => {
     });
 
     if(!result.error){
-      const newSelected = selectedCustomers.filter(selected=>!customersToDelete.includes(selected));
-      setSelectedCustomers(newSelected);
-      setCustomersToDelete([]);
+      const newSelected = selectedMachines.filter(selected=>!machinesToDelete.includes(selected));
+      setselectedMachines(newSelected);
+      setMachinesToDelete([]);
     }
   };
-
-  const filteredCostumers = applyFilters(customerList, filter);
-  const paginatedCustomers = applyPagination(
-    filteredCostumers,
+*/
+  const filteredMachines = applyFilters(machinesList, filter);
+  const paginatedMachines = applyPagination(
+    filteredMachines,
     page,
     limit
   );
-  const selectedSomeCustomers =
-    selectedCustomers.length > 0 &&
-    selectedCustomers.length < customerList.length;
-  const selectedAllCustomers =
-    (selectedCustomers.length === customerList.length) && customerList.length>0;
+  const selectedSomeMachines =
+    selectedMachines.length > 0 &&
+    selectedMachines.length < machinesList.length;
+  const selectedAllMachines =
+    (selectedMachines.length === machinesList.length) && machinesList.length>0;
   const theme = useTheme();
+  console.log("paginated: ", paginatedMachines);
   return (
     <>
     <Card>
       {selectedBulkActions && (
         <Box flex={1} p={2}>
-          <BulkTableActions onClickButton={handleOnDeleteClick} selectedList={selectedCustomers}/>
+          <BulkTableActions onClickButton={handleOnDeleteClick} selectedList={selectedMachines}/>
         </Box>
       )}
       {!selectedBulkActions && (
@@ -219,7 +193,7 @@ const TablaClientes: FC<TablaClientesProps> = ({ userRole, customerList }) => {
             <Box width={200}>
               <TextField
                 size='small'
-                id="input-search-customer"
+                id="input-search-machine"
                 label="Buscar"
                 onChange={handleSearchChange}
                 InputProps={{
@@ -237,7 +211,7 @@ const TablaClientes: FC<TablaClientesProps> = ({ userRole, customerList }) => {
             alignItems: "center",
             justifyContent: "space-between",
             flexWrap: "wrap"}}
-          title="Todos los Clientes"
+          title="Todos los Equipos"
         />
       )}
       <Divider />
@@ -248,38 +222,43 @@ const TablaClientes: FC<TablaClientesProps> = ({ userRole, customerList }) => {
               <TableCell padding="checkbox">
               {userCanDelete &&<Checkbox
                   color="primary"
-                  checked={selectedAllCustomers}
-                  indeterminate={selectedSomeCustomers}
-                  onChange={handleSelectAllCustomers}
+                  checked={selectedAllMachines}
+                  indeterminate={selectedSomeMachines}
+                  onChange={handleSelectAllMachines}
                 />}
               </TableCell>
-              <TableCell align="center">Cliente</TableCell>
-              <TableCell align="center">Celular</TableCell>
-              <TableCell align="center">Domicilio</TableCell>
-              <TableCell align="center">Ciudad</TableCell>
-              <TableCell align="center">Nivel</TableCell>
+              <TableCell align="center"># Equipo</TableCell>
+              <TableCell align="center">Marca</TableCell>
+              <TableCell align="center">Capacidad</TableCell>
+              <TableCell align="center">Costo</TableCell>
+              <TableCell align="center">Gastos</TableCell>
+              <TableCell align="center">Generado</TableCell>
+              <TableCell align="center">Estado</TableCell>
+              <TableCell align="center">Última Renta</TableCell>
+              <TableCell align="center">Cambios</TableCell>
+              <TableCell align="center">Antiguedad</TableCell>
               <TableCell align="center"></TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
-            {paginatedCustomers.map((customer) => {
-              const isCustomerSelected = selectedCustomers.includes(
-                customer?._id
+            {paginatedMachines.map((machine) => {
+              const isMachineSelected = selectedMachines.includes(
+                machine?._id
               );
               return (
                 <TableRow
                   hover
-                  key={customer?._id}
-                  selected={isCustomerSelected}
+                  key={machine?._id}
+                  selected={isMachineSelected}
                 >
                   <TableCell padding="checkbox">
                     {userCanDelete && <Checkbox
                       color="primary"
-                      checked={isCustomerSelected}
+                      checked={isMachineSelected}
                       onChange={(event: ChangeEvent<HTMLInputElement>) =>
-                        handleSelectOneCustomer(event, customer?._id)
+                        handleSelectOneMachine(event, machine?._id)
                       }
-                      value={isCustomerSelected}
+                      value={isMachineSelected}
                     />}
                   </TableCell>
                   <TableCell align="center">
@@ -290,7 +269,7 @@ const TablaClientes: FC<TablaClientesProps> = ({ userRole, customerList }) => {
                       gutterBottom
                       noWrap
                     >
-                      {customer?.name}
+                      {machine?.machineNum}
                     </Typography>
                   </TableCell>
                   <TableCell align="center">
@@ -301,7 +280,7 @@ const TablaClientes: FC<TablaClientesProps> = ({ userRole, customerList }) => {
                       gutterBottom
                       noWrap
                     >
-                      {customer?.cell}
+                      {machine?.brand}
                     </Typography>
                   </TableCell>
                   <TableCell align="center">
@@ -312,10 +291,29 @@ const TablaClientes: FC<TablaClientesProps> = ({ userRole, customerList }) => {
                       gutterBottom
                       noWrap
                     >
-                      {customer?.currentResidence?.street}
+                      {machine?.capacity}
                     </Typography>
-                    <Typography variant="body2" color="text.secondary" noWrap>
-                      {customer?.currentResidence?.suburb}
+                  </TableCell>
+                  <TableCell align="center">
+                  <Typography variant="body2" color="text.secondary" noWrap>
+                      {numeral(machine?.cost).format(
+                        `${machine.cost}0,0.00`
+                      )}
+                    </Typography>
+                  </TableCell>
+                  <TableCell align="center">
+                  <Typography variant="body2" color="text.secondary" noWrap>
+                      {numeral(machine?.expenses).format(
+                        `${machine.expenses}0,0.00`
+                      )}
+                    </Typography>
+                    
+                  </TableCell>
+                  <TableCell align="center">
+                  <Typography variant="body2" color="text.secondary" noWrap>
+                      {numeral(machine?.earnings).format(
+                        `${machine.earnings}0,0.00`
+                      )}
                     </Typography>
                   </TableCell>
                   <TableCell align="center">
@@ -326,20 +324,50 @@ const TablaClientes: FC<TablaClientesProps> = ({ userRole, customerList }) => {
                       gutterBottom
                       noWrap
                     >
-                      {customer?.currentResidence?.city?.name}
-
-                    </Typography>
-                    <Typography variant="body2" color="text.secondary" noWrap>
-                      {/*numeral(customer.amount).format(
-                        `${customer.currency}0,0.00`
-                      )*/customer?.currentResidence?.sector?.name}
+                      {machine?.status?.description}
                     </Typography>
                   </TableCell>
                   <TableCell align="center">
-                    {getStatusLabel(customer?.level?.id)}
+                    <Typography
+                      variant="body1"
+                      fontWeight="bold"
+                      color="text.primary"
+                      gutterBottom
+                      noWrap
+                    >
+                      {machine?.lastRent?.updatedAt}
+                    </Typography>
                   </TableCell>
                   <TableCell align="center">
-                  <NextLink href={`/clientes/${customer?._id}`}>
+                    <Typography
+                      variant="body1"
+                      fontWeight="bold"
+                      color="text.primary"
+                      gutterBottom
+                      noWrap
+                    >
+                      {machine?.totalChanges}
+                    </Typography>
+                  </TableCell>
+                  <TableCell align="center">
+                    <Typography
+                      variant="body1"
+                      fontWeight="bold"
+                      color="text.primary"
+                      gutterBottom
+                      noWrap
+                    >
+                      {capitalizeFirstLetter(
+                                format(
+                                  new Date(machine?.createdAt),
+                                  "MMMM dd yyyy",
+                                  { locale: es }
+                                )
+                              )}
+                    </Typography>
+                  </TableCell>
+                  <TableCell align="center">
+                  <NextLink href={`/equipos/${machine?._id}`}>
                     <Tooltip title="Detalle" arrow>
                       <IconButton
                         sx={{
@@ -357,7 +385,7 @@ const TablaClientes: FC<TablaClientesProps> = ({ userRole, customerList }) => {
                     </NextLink>
                     {userCanDelete &&<Tooltip title="Eliminar Cliente" arrow>
                       <IconButton
-                      onClick={() =>handleOnDeleteClick([customer._id])}
+                      onClick={() =>handleOnDeleteClick([machine._id])}
                         sx={{
                           '&:hover': { background: theme.colors.error.lighter },
                           color: theme.palette.error.main
@@ -378,7 +406,7 @@ const TablaClientes: FC<TablaClientesProps> = ({ userRole, customerList }) => {
       <Box p={2}>
         <TablePagination
           component="div"
-          count={filteredCostumers.length}
+          count={filteredMachines.length}
           onPageChange={handlePageChange}
           onRowsPerPageChange={handleLimitChange}
           page={page}
@@ -388,33 +416,33 @@ const TablaClientes: FC<TablaClientesProps> = ({ userRole, customerList }) => {
       </Box>
     </Card>
     <GenericModal
-    open={deleteModalIsOpen}
+    open={false}
     title="Atención"
     text={
       "¿Esta seguro de eliminar a" +
-      (customersToDelete.length === 1
-        ? "l cliente seleccionado"
-        : " los clientes seleccionados") +
+      (machinesToDelete.length === 1
+        ? "l equipo seleccionado"
+        : " los equipos seleccionados") +
       "?"
     }
     isLoading={isDeleting}
-    onAccept={handleOnConfirmDelete}
+    onAccept={()=>{}}
     onCancel={() => {
-      setDeleteModalIsOpen(false);
+      //setDeleteModalIsOpen(false);
       setIsDeleting(false);
     }}
   /></>
   );
 };
 
-TablaClientes.propTypes = {
+TablaEquipos.propTypes = {
   userRole: PropTypes.string.isRequired,
-  customerList: PropTypes.array.isRequired,
+  machinesList: PropTypes.array.isRequired,
 };
 
-TablaClientes.defaultProps = {
+TablaEquipos.defaultProps = {
   userRole: "",
-  customerList: [],
+  machinesList: [],
 };
 
-export default TablaClientes;
+export default TablaEquipos;

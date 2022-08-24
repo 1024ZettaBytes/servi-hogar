@@ -1,11 +1,9 @@
 import NextAuth from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
-import { User } from "../../../lib/models/User";
 import { Role } from "../../../lib/models/Role";
+import { User } from "../../../lib/models/User";
 import { connectToDatabase, isConnected } from "../../../lib/db";
-
 Role.init();
-
 export default NextAuth({
   session: {
     jwt: true,
@@ -13,6 +11,7 @@ export default NextAuth({
   },
   callbacks: {
     async session({ session, token }) {
+      
       const tokenUser = token.user;
       if(!isConnected()){
         await connectToDatabase();

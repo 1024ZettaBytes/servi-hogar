@@ -47,3 +47,13 @@ export const useGetCities = (fetcher) => {
   return { citiesList: data?.data, citiesError: error };
 }
 //
+// Machines
+export const useGetAllMachines = (fetcher) => {
+  const { data, error } = useSWR(ROUTES.ALL_MACHINES_API, fetcher);
+  return { machinesList: data?.data, machinesError: error };
+};
+
+export const useGetMachinesStatus = (fetcher) => {
+  const { data, error } = useSWR(ROUTES.ALL_MACHINES_STATUS_API, fetcher);
+  return { machinesStatusList: data?.data, machinesStatusError: error };
+};

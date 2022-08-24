@@ -345,10 +345,10 @@ function SidebarMenu({userRole}) {
                 </NextLink>
               </ListItem>
               <ListItem component="div">
-                <NextLink href="/" passHref>
+                <NextLink href="/equipos" passHref>
                   <Button
                     className={
-                      currentRoute === '/management/profile/settings'
+                      currentRoute.includes("/equipos")
                         ? 'active'
                         : ''
                     }
@@ -366,7 +366,7 @@ function SidebarMenu({userRole}) {
                 <NextLink href="/clientes" passHref>
                   <Button
                     className={
-                      currentRoute === '/clientes'
+                      currentRoute.includes("/clientes")
                         ? 'active'
                         : ''
                     }

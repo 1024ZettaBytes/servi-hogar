@@ -1,6 +1,9 @@
 import { getToken } from "next-auth/jwt";
 import { connectToDatabase, isConnected } from "lib/db";
-import {User} from "../../../lib/models/User";
+import { Role } from "../../../lib/models/Role";
+import { User } from "../../../lib/models/User";
+
+Role.init();
 export const validateUserPermissions = async (req, res, validRoles) => {
   const token = await getToken({ req });
   if (token && token?.user?.id) {

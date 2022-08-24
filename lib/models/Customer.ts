@@ -48,8 +48,8 @@ const CustomerSchema = new Schema<ICustomer>({
   freeWeeks: { type: 'number', default: 0 },
   createdAt: { type: Date, required: true },
   updatedAt: { type: Date, required: true },
-  lastUpdatedBy: { type: Schema.Types.ObjectId, required: true, ref: "users"},
-  active: {type: 'boolean', default: true, required: true}
+  lastUpdatedBy: { type: Schema.Types.ObjectId, required: true, ref: 'users' },
+  active: { type: 'boolean', default: true }
 });
 export const Customer: Model<ICustomer> =
   mongoose.models.customers || model('customers', CustomerSchema);

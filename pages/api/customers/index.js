@@ -1,4 +1,3 @@
-import { Customer } from "../../../lib/models/Customer";
 import {CustomerLevel} from "../../../lib/models/CustomerLevel";
 import {validateUserPermissions, getUserId} from "../auth/authUtils";
 import {
@@ -7,7 +6,7 @@ import {
   updateCustomerData,
   deleteCustomersData
 } from "../../../lib/data/Customers";
-async function getCustomersAPI( req, res, next ) {
+async function getCustomersAPI( req, res ) {
   try {
     
     const allCustomers = await getCustomersData();
