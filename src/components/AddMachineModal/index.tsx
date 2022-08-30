@@ -38,10 +38,6 @@ function AddMachineModal(props) {
     typeWarehouse: false,
   });
   const [selectedLocation, setSelectedLocation] = useState();
-  const [citySectors, setCitySectors] = useState([]);
-  const [wasReferred, setWasReferred] = useState(false);
-  const [selectedHowFound, setSelectedHowFound] = useState();
-  const [referredBy, setReferredBy] = useState();
   const isWarehouseStatus = selectedStatus?.typeWarehouse;
   const isVehicleStatus = selectedStatus?.id === MACHINE_STATUS_LIST.VEHI;
   function handleStatusSelection(status) {
@@ -53,13 +49,6 @@ function AddMachineModal(props) {
   }
   function handleLocationSelection(location) {
     setSelectedLocation(location);
-  }
-  function handleHowFoundSelection(howFound) {
-    setSelectedHowFound(howFound);
-    setWasReferred(howFound === "referred");
-  }
-  function handleReferredBySelection(referredBy) {
-    setReferredBy(referredBy);
   }
   async function submitHandler(event) {
     event.preventDefault();
