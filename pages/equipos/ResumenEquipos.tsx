@@ -60,6 +60,8 @@ function ResumenEquipos({
           <Card
             sx={{
               px: 1,
+              height:"150px",
+              overflowY: "auto"
             }}
           >
             <CardContent>
@@ -105,7 +107,10 @@ function ResumenEquipos({
           <Card
             sx={{
               px: 1,
+              height:"150px",
+              overflowY: "auto"
             }}
+
           >
             <CardContent>
               <Grid
@@ -150,6 +155,8 @@ function ResumenEquipos({
           <Card
             sx={{
               px: 1,
+              height:"150px",
+              overflowY: "auto"
             }}
           >
             <CardContent>
@@ -195,6 +202,8 @@ function ResumenEquipos({
           <Card
             sx={{
               px: 1,
+              height:"150px",
+              overflowY: "auto"
             }}
           >
             <CardContent>
@@ -240,6 +249,8 @@ function ResumenEquipos({
           <Card
             sx={{
               px: 1,
+              height:"150px",
+              overflowY: "auto"
             }}
           >
             <CardContent>
@@ -281,9 +292,10 @@ function ResumenEquipos({
             </CardContent>
           </Card>
         </Grid>
-        <Grid xs={12} sm={6} md={3} item></Grid>
-        <Grid xs={12} sm={6} md={3} item></Grid>
-        <Grid xs={12} sm={5} md={3} item>
+      </Grid>
+      <Grid container>
+        <Grid xs={12}  md={4} item></Grid>
+        <Grid xs={12}  md={4} item>
           <Card
             sx={{
               background: "transparent",
@@ -311,6 +323,7 @@ function ResumenEquipos({
             </CardContent>
           </Card>
         </Grid>
+        <Grid xs={12} md={4} item></Grid>
       </Grid>
     </>
   );
