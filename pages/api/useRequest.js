@@ -50,10 +50,20 @@ export const useGetCities = (fetcher) => {
 // Machines
 export const useGetAllMachines = (fetcher) => {
   const { data, error } = useSWR(ROUTES.ALL_MACHINES_API, fetcher);
-  return { machinesList: data?.data, machinesError: error };
+  return { machinesData: data?.data, machinesError: error };
 };
 
 export const useGetMachinesStatus = (fetcher) => {
   const { data, error } = useSWR(ROUTES.ALL_MACHINES_STATUS_API, fetcher);
   return { machinesStatusList: data?.data, machinesStatusError: error };
+};
+// Warehouses
+export const useGetAllWarehousesOverview = (fetcher) => {
+  const { data, error } = useSWR(ROUTES.ALL_WAREHOUSES_OVERVIEW_API, fetcher);
+  return { warehousesList: data?.data, warehousesError: error };
+};
+// Machines
+export const useGetAllVehicles = (fetcher) => {
+  const { data, error } = useSWR(ROUTES.ALL_VEHICLES_API, fetcher);
+  return { vehiclesList: data?.data, vehiclesError: error };
 };

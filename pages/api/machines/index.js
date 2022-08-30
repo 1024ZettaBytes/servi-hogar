@@ -1,9 +1,9 @@
-import { getMachinesData } from "../../../lib/data/Machines";
+import { getMachinesDataWithDetails, saveMachineData } from "../../../lib/data/Machines";
 import {validateUserPermissions, getUserId} from "../auth/authUtils";
 
 async function getMachinesAPI(req, res) {
   try {
-    const allMachines = await getMachinesData();
+    const allMachines = await getMachinesDataWithDetails();
     res.status(200).json({ data: allMachines });
   } catch (e) {
     console.error(e);
@@ -16,7 +16,7 @@ async function getMachinesAPI(req, res) {
 
 async function saveMachineAPI(req, res, userId) {
   try {
-    await saveCustomerData({ ...req.body, lastUpdatedBy: userId });
+    await saveMachineData({ ...req.body, lastUpdatedBy: userId });
     res.status(200).json({ msg: "Equipo guardado con éxito!" });
   } catch (e) {
     console.error(e);

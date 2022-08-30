@@ -15,59 +15,63 @@ import {
   Select,
   FormControl,
   MenuItem,
-  FormLabel,
-  RadioGroup,
-  FormControlLabel,
-  Radio,
-  Autocomplete,
 } from "@mui/material";
 import { LoadingButton } from "@mui/lab";
-import { saveCustomer } from "../../../lib/client/customersFetch";
-import {HOW_FOUND_LIST} from "../../../lib/consts/OBJ_CONTS";
+import {
+  useGetAllWarehousesOverview,
+  getFetcher,
+  useGetAllVehicles,
+} from "../../../pages/api/useRequest";
+import { saveMachine } from "../../../lib/client/machinesFetch";
+import { MACHINE_STATUS_LIST } from "../../../lib/consts/OBJ_CONTS";
 function AddMachineModal(props) {
-  const { handleOnClose, open, citiesList, customerList } = props;
+  const { warehousesList, warehousesError } = useGetAllWarehousesOverview(
+    getFetcher
+  );
+  const { vehiclesList, vehiclesError } = useGetAllVehicles(getFetcher);
+  const { handleOnClose, open, machinesStatusList } = props;
   const [isLoading, setIsLoading] = useState(false);
   const [hasError, setHasError] = useState({ error: false, msg: "" });
-  const [selectedCity, setSelectedCity] = useState();
-  const [selectedSector, setSelectedSector] = useState();
+  const [selectedStatus, setSelectedStatus] = useState({
+    _id: "",
+    id: "",
+    typeWarehouse: false,
+  });
+  const [selectedLocation, setSelectedLocation] = useState();
   const [citySectors, setCitySectors] = useState([]);
   const [wasReferred, setWasReferred] = useState(false);
   const [selectedHowFound, setSelectedHowFound] = useState();
   const [referredBy, setReferredBy] = useState();
-  
-  function handleCitySelection(city) {
-    setSelectedCity(city);
-    setSelectedSector(undefined);
-    const filteredCity = citiesList.filter((c) => c._id === city);
-    setCitySectors(filteredCity[0].sectors);
+  const isWarehouseStatus = selectedStatus?.typeWarehouse;
+  const isVehicleStatus = selectedStatus?.id === MACHINE_STATUS_LIST.VEHI;
+  function handleStatusSelection(status) {
+    const selected = machinesStatusList.find((s) => s._id === status);
+    setSelectedStatus(selected);
+    if (!selected.typeWarehouse) {
+      setSelectedLocation(undefined);
+    }
   }
-  function handleSectorSelection(sector) {
-    setSelectedSector(sector);
+  function handleLocationSelection(location) {
+    setSelectedLocation(location);
   }
   function handleHowFoundSelection(howFound) {
     setSelectedHowFound(howFound);
     setWasReferred(howFound === "referred");
   }
-  function handleReferredBySelection(referredBy){
+  function handleReferredBySelection(referredBy) {
     setReferredBy(referredBy);
   }
   async function submitHandler(event) {
     event.preventDefault();
     setIsLoading(true);
     setHasError({ error: false, msg: "" });
-    const result = await saveCustomer({
-      name: event.target.name.value,
-      cell: event.target.cell.value,
-      howFound: event.target.howFound.value,
-      referredBy: referredBy,
-      street: event.target.street.value,
-      suburb: event.target.suburb.value,
-      city: selectedCity,
-      sector: selectedSector,
-      residenceRef: event.target.residenceRef.value,
-      nameRef: event.target.nameRef.value,
-      telRef: event.target.telRef.value,
-      maps: event.target.maps.value,
+    const result = await saveMachine({
+      machineNum: event.target.machineNum.value,
+      brand: event.target.brand.value,
+      capacity: event.target.capacity.value,
+      cost: event.target.cost.value,
+      status: selectedStatus?._id,
+      location: selectedLocation
     });
     setIsLoading(false);
     if (!result.error) {
@@ -104,203 +108,155 @@ function AddMachineModal(props) {
               maxWidth="lg"
             >
               <Grid item lg={12}>
-                <Typography
-                  variant="h5"
-                  component="h5"
-                  color="secondary"
-                  textAlign="left"
-                  fontWeight="bold"
-                >
-                  Datos personales
-                </Typography>
+                <TextField
+                  autoComplete="off"
+                  required
+                  id="machineNum"
+                  name="machineNum"
+                  label="# de Equipo"
+                  fullWidth={true}
+                />
               </Grid>
               <Grid item lg={12}>
                 <TextField
                   autoComplete="off"
                   required
-                  id="name"
-                  name="name"
-                  label="Nombre"
+                  id="brand"
+                  name="brand"
+                  label="Marca"
                   fullWidth={true}
                 />
               </Grid>
-
               <Grid item lg={12}>
                 <TextField
                   autoComplete="off"
-                  required
-                  id="cell"
-                  name="cell"
-                  label="Celular"
+                  id="capacity"
+                  name="capacity"
+                  label="Capacidad"
                   fullWidth={true}
                 />
               </Grid>
               <Grid item lg={12}>
-                <FormLabel id="howFound-radiogroup-label">
-                  ¿Cómo se enteró del servicio?
-                </FormLabel>
-                <RadioGroup
-                  aria-labelledby="howFound-radiogroup-label"
-                  name="howFound"
-                  value={selectedHowFound || ""}
-                  onChange={(e) => handleHowFoundSelection(e.target.value)}
-                  row
-                >
-                  {Object.entries(HOW_FOUND_LIST).map(how=><FormControlLabel
-                    key={how[0]}
-                    value={how[0]}
-                    control={<Radio required={true} />}
-                    label={how[1]}
-                  />)}
-                  </RadioGroup>
+                <TextField
+                  type="number"
+                  autoComplete="off"
+                  id="cost"
+                  name="cost"
+                  label="Costo ($)"
+                  fullWidth={true}
+                />
               </Grid>
-              {wasReferred ? (
+              <Grid item lg={12}>
+                <FormControl fullWidth>
+                  <InputLabel id="status-id">Estado actual</InputLabel>
+                  <Select
+                    labelId="status-id"
+                    id="status"
+                    name="status"
+                    label="Estado actual"
+                    required
+                    autoComplete="off"
+                    value={selectedStatus?._id || ""}
+                    onChange={(event) =>
+                      handleStatusSelection(event.target.value)
+                    }
+                  >
+                    {machinesStatusList
+                      ? machinesStatusList.map((status) => (
+                          <MenuItem key={status._id} value={status._id}>
+                            {status.description}
+                          </MenuItem>
+                        ))
+                      : null}
+                  </Select>
+                </FormControl>
+              </Grid>
+              {isWarehouseStatus && (
+                <>
+                  {warehousesError && (
+                    <Grid item lg={12}>
+                      <Typography
+                        variant="h5"
+                        component="h5"
+                        color="error"
+                        textAlign="center"
+                      >
+                        {warehousesError.message}
+                      </Typography>
+                    </Grid>
+                  )}
                   <Grid item lg={12}>
-                    <Autocomplete
-                      disablePortal
-                      id="combo-box-demo"
-                      options={customerList.map((customer) => {
-                        return { label: `${customer.name}`, id: customer._id };
-                      })}
-                      onChange={(event: any, newValue: string | null) => {
-                        event.target;
-                        handleReferredBySelection(newValue);
-                      }}
-                      fullWidth
-                      isOptionEqualToValue={(option:any, value:any) => option.id === value.id}
-                      renderInput={(params) => (
-                        <TextField
-                        required  
-                          {...params}
-                          label="Referido por"
-                        />
-                      )}
-                    />
+                    <FormControl fullWidth>
+                      <InputLabel id="warehouse-id">Bodega</InputLabel>
+                      <Select
+                        labelId="warehouse-id"
+                        id="warehouse"
+                        name="warehouse"
+                        label="Bodega"
+                        required
+                        autoComplete="off"
+                        value={selectedLocation || ""}
+                        onChange={(event) =>
+                          handleLocationSelection(event.target.value)
+                        }
+                      >
+                        {warehousesList
+                          ? warehousesList.map((warehouse) => (
+                              <MenuItem
+                                key={warehouse._id}
+                                value={warehouse._id}
+                              >
+                                {warehouse.name}
+                              </MenuItem>
+                            ))
+                          : null}
+                      </Select>
+                    </FormControl>
                   </Grid>
-                ) : null}
+                </>
+              )}
+              {isVehicleStatus && (
+                <>
+                  {vehiclesError && (
+                    <Grid item lg={12}>
+                      <Typography
+                        variant="h5"
+                        component="h5"
+                        color="error"
+                        textAlign="center"
+                      >
+                        {vehiclesError.message}
+                      </Typography>
+                    </Grid>
+                  )}
+                  <Grid item lg={12}>
+                    <FormControl fullWidth>
+                      <InputLabel id="vehicle-id">Vehículo</InputLabel>
+                      <Select
+                        labelId="vehicle-id"
+                        id="vehicle"
+                        name="vehicle"
+                        label="Vehículo"
+                        required
+                        autoComplete="off"
+                        value={selectedLocation || ""}
+                        onChange={(event) =>
+                          handleLocationSelection(event.target.value)
+                        }
+                      >
+                        {vehiclesList
+                          ? vehiclesList.map((vehicle) => (
+                              <MenuItem key={vehicle._id} value={vehicle._id}>
+                                {`${vehicle.brand} ${vehicle.model} ${vehicle.color} ${vehicle.year}`}
+                              </MenuItem>
+                            ))
+                          : null}
+                      </Select>
+                    </FormControl>
+                  </Grid>
+                </>
+              )}
               <Grid item lg={12}>
-                <Typography
-                  variant="h5"
-                  component="h5"
-                  color="secondary"
-                  textAlign="left"
-                  fontWeight="bold"
-                >
-                  Domicilio
-                </Typography>
-              </Grid>
-              <Grid item lg={12}>
-                <TextField
-                  autoComplete="off"
-                  required
-                  id="street"
-                  name="street"
-                  label="Calle y Número"
-                  fullWidth={true}
-                />
-              </Grid>
-              <Grid item lg={12}>
-                <TextField
-                  autoComplete="off"
-                  required
-                  id="suburb"
-                  name="suburb"
-                  label="Colonia"
-                  fullWidth={true}
-                />
-              </Grid>
-              <Grid item lg={12}>
-                <FormControl fullWidth>
-                  <InputLabel id="city-id">Ciudad</InputLabel>
-                  <Select
-                    labelId="city-id"
-                    id="city"
-                    name="city"
-                    label="Ciudad"
-                    required
-                    autoComplete="off"
-                    value={selectedCity || ""}
-                    onChange={(event) =>
-                      handleCitySelection(event.target.value)
-                    }
-                  >
-                    {citiesList
-                      ? citiesList.map((city) => (
-                          <MenuItem key={city._id} value={city._id}>
-                            {city.name}
-                          </MenuItem>
-                        ))
-                      : null}
-                  </Select>
-                </FormControl>
-              </Grid>
-              <Grid item lg={12}>
-                <FormControl fullWidth>
-                  <InputLabel id="sector-id">Sector</InputLabel>
-                  <Select
-                    labelId="sector-id"
-                    id="sector"
-                    name="sector"
-                    label="Sector"
-                    required
-                    autoComplete="off"
-                    value={selectedSector || ""}
-                    disabled={!selectedCity}
-                    onChange={(event) =>
-                      handleSectorSelection(event.target.value)
-                    }
-                  >
-                    {citiesList && selectedCity
-                      ? citySectors.map((sector) => (
-                          <MenuItem key={sector._id} value={sector._id}>
-                            {sector.name}
-                          </MenuItem>
-                        ))
-                      : null}
-                  </Select>
-                </FormControl>
-              </Grid>
-              <Grid item lg={12}>
-                <TextField
-                  autoComplete="off"
-                  required
-                  id="residenceRef"
-                  name="residenceRef"
-                  label="Domicilio Referencia"
-                  fullWidth={true}
-                />
-              </Grid>
-              <Grid item lg={12}>
-                <TextField
-                  autoComplete="off"
-                  required
-                  id="nameRef"
-                  name="nameRef"
-                  label="Nombre Referencia"
-                  fullWidth={true}
-                />
-              </Grid>
-              <Grid item lg={12}>
-                <TextField
-                  autoComplete="off"
-                  required
-                  id="telRef"
-                  name="telRef"
-                  label="Teléfono Referencia"
-                  fullWidth={true}
-                />
-              </Grid>
-              <Grid item lg={12}>
-                <TextField
-                  autoComplete="off"
-                  required
-                  id="maps"
-                  name="maps"
-                  label="Maps"
-                  multiline
-                  maxRows={3}
-                  fullWidth={true}
-                />
                 {hasError.error ? (
                   <Grid item>
                     <br />
@@ -335,6 +291,10 @@ function AddMachineModal(props) {
                   </Grid>
                   <Grid item>
                     <LoadingButton
+                      disabled={
+                        (isWarehouseStatus && warehousesError) ||
+                        (isVehicleStatus && vehiclesError)
+                      }
                       type="submit"
                       loading={isLoading}
                       size="large"
@@ -356,9 +316,7 @@ function AddMachineModal(props) {
 AddMachineModal.propTypes = {
   handleOnClose: PropTypes.func.isRequired,
   open: PropTypes.bool.isRequired,
-  citiesList: PropTypes.array.isRequired,
-  customerList: PropTypes.array.isRequired,
+  machinesStatusList: PropTypes.array.isRequired,
 };
 
 export default AddMachineModal;
-

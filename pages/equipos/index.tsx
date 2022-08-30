@@ -17,17 +17,22 @@ import {
 import { useSnackbar } from "notistack";
 
 import NextBreadcrumbs from "@/components/Shared/BreadCrums";
+import ResumenEquipos from "./ResumenEquipos";
 
-function Equipos({session}) {
+function Equipos({ session }) {
   const paths = ["Inicio", "Equipos"];
   const { enqueueSnackbar } = useSnackbar();
-  const { machinesList, machinesError } = useGetAllMachines(getFetcher);
-  const { machinesStatusList, machinesStatusError } = useGetMachinesStatus(getFetcher);
+  const { machinesData, machinesError } = useGetAllMachines(getFetcher);
+  const { machinesStatusList, machinesStatusError } = useGetMachinesStatus(
+    getFetcher
+  );
   const [modalIsOpen, setModalIsOpen] = useState(false);
+  const machinesList = machinesData ? machinesData?.machinesList : null;
+  const machinesSummary = machinesData ? machinesData?.machinesSummary : null;
   const generalError = machinesError || machinesStatusError;
   const completeData = machinesList && machinesStatusList;
-const {user} = session;
-  
+  const { user } = session;
+
   const handleClickOpen = () => {
     setModalIsOpen(true);
   };
@@ -75,8 +80,7 @@ const {user} = session;
                 color="error"
                 textAlign="center"
               >
-                {machinesError?.message ||
-                  machinesStatusError?.message}
+                {machinesError?.message || machinesStatusError?.message}
               </Typography>
             ) : !completeData ? (
               <Skeleton
@@ -88,20 +92,36 @@ const {user} = session;
             ) : (
               <Card>
                 <TablaEquipos
-                  userRole = {user?.role}
+                  userRole={user?.role}
                   machinesList={machinesList}
                 />
               </Card>
             )}
           </Grid>
         </Grid>
+        {!generalError && (
+          <>
+            <br />
+            {completeData && machinesSummary && (
+              <Grid lg={12} xs={12}>
+                <ResumenEquipos
+                  onRent={machinesSummary?.RENT}
+                  inVehicles={machinesSummary?.VEHI}
+                  ready={machinesSummary.LISTO}
+                  waiting={machinesSummary.ESPE}
+                  onMaintenance={machinesSummary.MANTE}
+                  total={machinesSummary?.total}
+                />
+              </Grid>
+            )}
+          </>
+        )}
       </Container>
       {modalIsOpen && completeData ? (
         <AddMachineModal
           open={modalIsOpen}
           handleOnClose={handleClose}
-          citiesList={machinesStatusList}
-          customerList={machinesList}
+          machinesStatusList={machinesStatusList}
         />
       ) : null}
       <Footer />

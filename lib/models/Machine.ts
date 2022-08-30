@@ -7,6 +7,8 @@ export interface IMachine extends Document {
   cost: number;
   expenses: number;
   earnings: number;
+  currentWarehouse: Schema.Types.ObjectId;
+  currentVehicle: Schema.Types.ObjectId;
   status: Schema.Types.ObjectId;
   lastRent: Schema.Types.ObjectId;
   movements: [Schema.Types.ObjectId];
@@ -21,7 +23,7 @@ export interface IMachine extends Document {
 const MachineSchema = new Schema<IMachine>({
   machineNum: { type: Number, required: true },
   brand: { type: String, required: true },
-  capacity: { type: String, required: true },
+  capacity: { type: String },
   cost: { type: Number, required: true },
   expenses: { type: Number, default: 0 },
   earnings: { type: Number, default: 0 },
@@ -30,6 +32,8 @@ const MachineSchema = new Schema<IMachine>({
     ref: 'machine_statuses',
     required: true
   },
+  currentWarehouse:{ type: Schema.Types.ObjectId, default: null, ref: 'warehouses'},
+  currentVehicle:{ type: Schema.Types.ObjectId, default: null, ref: 'vehicles'},
   lastRent: { type: Schema.Types.ObjectId, ref: 'rents', default: null },
   movements: {
     type: [Schema.Types.ObjectId],
@@ -37,7 +41,6 @@ const MachineSchema = new Schema<IMachine>({
     ref: 'machine_movements'
   },
   totalChanges: { type: Number, default: 0 },
-  imageUrl: { type: String, default: null },
   createdAt: { type: Date, required: true },
   updatedAt: { type: Date, required: true },
   lastUpdatedBy: { type: Schema.Types.ObjectId, required: true, ref: 'users' },
