@@ -11,10 +11,10 @@ const center = {
   lng: -108.4747794,
 };
 
-function MapsComponent({ rentsList }) {
+function MapsComponent({ rentsList, mapsApiKey }) {
   const { isLoaded } = useJsApiLoader({
     id: "google-map-script",
-    googleMapsApiKey: "AIzaSyBF31MNK9sbvcXQOenmF0zLnj74Rn3_buk",
+    googleMapsApiKey: mapsApiKey,
   });
 
   return isLoaded ? (

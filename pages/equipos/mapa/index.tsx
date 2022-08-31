@@ -1,7 +1,7 @@
 import Head from "next/head";
 import { getSession } from "next-auth/react";
 import SidebarLayout from "@/layouts/SidebarLayout";
-import { validateServerSideSession } from "../../../lib/auth";
+import { validateServerSideSession, getMapsAPIKey } from "../../../lib/auth";
 import PageHeader from "@/components/PageHeader";
 import PageTitleWrapper from "@/components/PageTitleWrapper";
 import { Card, Container, Grid, Typography, Skeleton } from "@mui/material";
@@ -14,7 +14,7 @@ import {
 import NextBreadcrumbs from "@/components/Shared/BreadCrums";
 import MachinesMap from "@/components/MachinesMap";
 
-function MapasEquiposRentados() {
+function MapasEquiposRentados({mapsApiKey}) {
   const paths = ["Inicio", "Equipos", "Mapa"];
   const { machinesLocationData, machinesLocationError } = useGetAllMachinesLocations(getFetcher);
   return (
@@ -56,7 +56,7 @@ function MapasEquiposRentados() {
               />
             ) : (
               <Card>
-              <MachinesMap rentsList={machinesLocationData} />
+              <MachinesMap rentsList={machinesLocationData} mapsApiKey={mapsApiKey}/>
               </Card>
             )}
           </Grid>
@@ -71,6 +71,7 @@ MapasEquiposRentados.getLayout = (page) => <SidebarLayout>{page}</SidebarLayout>
 
 export async function getServerSideProps({ req, resolvedUrl }) {
   let props = await validateServerSideSession(getSession, req, resolvedUrl);
+  props.props.mapsApiKey = getMapsAPIKey();
   return props;
 }
 export default MapasEquiposRentados;
