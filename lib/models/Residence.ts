@@ -9,6 +9,7 @@ export interface IResidence extends Document {
   nameRef: string;
   telRef: string;
   maps: string;
+  coordinates: Object;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -30,6 +31,7 @@ const ResidenceSchema = new Schema<IResidence>({
   nameRef: { type: 'string', required: true},
   telRef: { type: 'string', required: true},
   maps: { type: 'string', required: true},
+  coordinates: {type: Object, required: true},
   createdAt: { type: Date, required: true },
   updatedAt: { type: Date, required: true }
 });

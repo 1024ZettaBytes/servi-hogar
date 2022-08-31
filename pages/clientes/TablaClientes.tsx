@@ -1,5 +1,4 @@
 import { FC, ChangeEvent, useState } from 'react';
-//import numeral from 'numeral';
 import * as str from "string";
 import PropTypes from 'prop-types';
 import {
@@ -330,9 +329,7 @@ const TablaClientes: FC<TablaClientesProps> = ({ userRole, customerList }) => {
 
                     </Typography>
                     <Typography variant="body2" color="text.secondary" noWrap>
-                      {/*numeral(customer.amount).format(
-                        `${customer.currency}0,0.00`
-                      )*/customer?.currentResidence?.sector?.name}
+                      {customer?.currentResidence?.sector?.name}
                     </Typography>
                   </TableCell>
                   <TableCell align="center">

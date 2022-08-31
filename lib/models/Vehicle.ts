@@ -16,7 +16,7 @@ const VehicleSchema = new Schema<IVehicle>({
   model: { type: String, required: true },
   year: { type: String, required: true },
   color: { type: String, required: true },
-  machinesOn: { type: [Schema.Types.ObjectId], default: [] },
+  machinesOn: { type: [Schema.Types.ObjectId],ref: 'machines', default: [] },
   city: { type: Schema.Types.ObjectId, ref: 'cities', required: true }
 });
 

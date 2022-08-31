@@ -15,7 +15,6 @@ import {
   useGetMachinesStatus,
 } from "../api/useRequest";
 import { useSnackbar } from "notistack";
-
 import NextBreadcrumbs from "@/components/Shared/BreadCrums";
 import ResumenEquipos from "./ResumenEquipos";
 
@@ -98,24 +97,24 @@ function Equipos({ session }) {
               </Card>
             )}
           </Grid>
+          {!generalError && (
+            <>
+              <br />
+              {completeData && machinesSummary && (
+                <Grid item lg={12} xs={12}>
+                  <ResumenEquipos
+                    onRent={machinesSummary?.RENT}
+                    inVehicles={machinesSummary?.VEHI}
+                    ready={machinesSummary.LISTO}
+                    waiting={machinesSummary.ESPE}
+                    onMaintenance={machinesSummary.MANTE}
+                    total={machinesSummary?.total}
+                  />
+                </Grid>
+              )}
+            </>
+          )}
         </Grid>
-        {!generalError && (
-          <>
-            <br />
-            {completeData && machinesSummary && (
-              <Grid lg={12} xs={12}>
-                <ResumenEquipos
-                  onRent={machinesSummary?.RENT}
-                  inVehicles={machinesSummary?.VEHI}
-                  ready={machinesSummary.LISTO}
-                  waiting={machinesSummary.ESPE}
-                  onMaintenance={machinesSummary.MANTE}
-                  total={machinesSummary?.total}
-                />
-              </Grid>
-            )}
-          </>
-        )}
       </Container>
       {modalIsOpen && completeData ? (
         <AddMachineModal

@@ -9,12 +9,15 @@ import {
   List,
   ListItem,
   ListItemText,
+  Button,
 } from "@mui/material";
 import LocalShippingIcon from "@mui/icons-material/LocalShipping";
 import CurrencyExchangeIcon from "@mui/icons-material/CurrencyExchange";
 import EventAvailableIcon from "@mui/icons-material/EventAvailable";
 import HourglassEmptyIcon from "@mui/icons-material/HourglassEmpty";
 import BuildIcon from "@mui/icons-material/Build";
+import MapIcon from '@mui/icons-material/Map';
+import NextLink from "next/link";
 
 const AvatarWrapperSuccess = styled(Avatar)(
   ({ theme }) => `
@@ -60,8 +63,8 @@ function ResumenEquipos({
           <Card
             sx={{
               px: 1,
-              height:"150px",
-              overflowY: "auto"
+              height: "150px",
+              overflowY: "auto",
             }}
           >
             <CardContent>
@@ -99,6 +102,20 @@ function ResumenEquipos({
                     </List>
                   </Grid>
                 )}
+                <Grid item lg={12} md={12} xs={12} textAlign="center">
+                  <br/>
+                </Grid>
+                <Grid item lg={12} md={12} xs={12} textAlign="center">
+                  <NextLink href="/equipos/mapa">
+                    <Button
+                    fullWidth
+                      variant="outlined"
+                      startIcon={<MapIcon />}
+                    >
+                      Ver Mapa
+                    </Button>
+                  </NextLink>
+                </Grid>
               </Grid>
             </CardContent>
           </Card>
@@ -107,10 +124,9 @@ function ResumenEquipos({
           <Card
             sx={{
               px: 1,
-              height:"150px",
-              overflowY: "auto"
+              height: "150px",
+              overflowY: "auto",
             }}
-
           >
             <CardContent>
               <Grid
@@ -155,8 +171,8 @@ function ResumenEquipos({
           <Card
             sx={{
               px: 1,
-              height:"150px",
-              overflowY: "auto"
+              height: "150px",
+              overflowY: "auto",
             }}
           >
             <CardContent>
@@ -202,8 +218,8 @@ function ResumenEquipos({
           <Card
             sx={{
               px: 1,
-              height:"150px",
-              overflowY: "auto"
+              height: "150px",
+              overflowY: "auto",
             }}
           >
             <CardContent>
@@ -249,8 +265,8 @@ function ResumenEquipos({
           <Card
             sx={{
               px: 1,
-              height:"150px",
-              overflowY: "auto"
+              height: "150px",
+              overflowY: "auto",
             }}
           >
             <CardContent>
@@ -294,8 +310,8 @@ function ResumenEquipos({
         </Grid>
       </Grid>
       <Grid container>
-        <Grid xs={12}  md={4} item></Grid>
-        <Grid xs={12}  md={4} item>
+        <Grid xs={12} md={4} item></Grid>
+        <Grid xs={12} md={4} item>
           <Card
             sx={{
               background: "transparent",
