@@ -1,5 +1,6 @@
 import React from "react";
 import { GoogleMap, Marker, useJsApiLoader } from "@react-google-maps/api";
+import { Skeleton } from "@mui/material";
 
 const containerStyle = {
   width: "100%",
@@ -32,7 +33,12 @@ function MapsComponent({ rentsList, mapsApiKey }) {
       ))}
     </GoogleMap>
   ) : (
-    <></>
+    <Skeleton
+    variant="rectangular"
+    width={"100%"}
+    height={500}
+    animation="wave"
+  />
   );
 }
 
