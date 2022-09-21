@@ -22,7 +22,8 @@ import {
   TextField,
   InputAdornment,
 } from "@mui/material";
-//import { useSnackbar } from "notistack";
+import { deleteMachines } from "../../lib/client/machinesFetch";
+import { useSnackbar } from "notistack";
 import VisibilityIcon from "@mui/icons-material/Visibility";
 import DeleteTwoToneIcon from "@mui/icons-material/DeleteTwoTone";
 import BulkTableActions from "../../src/components/BulkTableActions";
@@ -33,7 +34,6 @@ import { capitalizeFirstLetter } from "lib/client/utils";
 import { format } from "date-fns";
 import es from "date-fns/locale/es";
 import { MACHINE_STATUS_LIST } from "../../lib/consts/OBJ_CONTS";
-
 interface TablaEquiposProps {
   userRole: string;
   className?: string;
@@ -57,6 +57,7 @@ const getStatusDescription = (
       return warehouse ? warehouse?.name : notAvailable;
   }
 };
+
 const compareStringsForFilter = (keyWord: string, field: string) => {
   return str(field)
     .latinise()
@@ -126,8 +127,8 @@ const applyPagination = (
 };
 
 const TablaEquipos: FC<TablaEquiposProps> = ({ userRole, machinesList }) => {
-  //const { enqueueSnackbar } = useSnackbar();
-  //const [deleteModalIsOpen, setDeleteModalIsOpen] = useState(false);
+  const { enqueueSnackbar } = useSnackbar();
+  const [deleteModalIsOpen, setDeleteModalIsOpen] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
   const [machinesToDelete, setMachinesToDelete] = useState<string[]>([]);
   const [selectedMachines, setselectedMachines] = useState<string[]>([]);
@@ -136,6 +137,20 @@ const TablaEquipos: FC<TablaEquiposProps> = ({ userRole, machinesList }) => {
   const [limit, setLimit] = useState<number>(10);
   const [filter, setFilter] = useState<string>("");
   const userCanDelete = userRole === "ADMIN";
+  const machineCanBeDeleted = (machineIsActive, machineStatus) => {
+    return (
+      userCanDelete &&
+      machineIsActive &&
+      machineStatus !== MACHINE_STATUS_LIST.RENTADO &&
+      machineStatus !== MACHINE_STATUS_LIST.MANTE &&
+      machineStatus !== MACHINE_STATUS_LIST.VEHI
+    );
+  };
+  const canSelectAll =
+    machinesList.length > 0 &&
+    machinesList.every((machine) =>
+      machineCanBeDeleted(machine?.active, machine?.status?.id)
+    );
   const handleSearchChange = (e: ChangeEvent<HTMLInputElement>): void => {
     const value = e.target.value;
     setFilter(value);
@@ -171,9 +186,9 @@ const TablaEquipos: FC<TablaEquiposProps> = ({ userRole, machinesList }) => {
   };
   const handleOnDeleteClick = (machines: string[]) => {
     setMachinesToDelete(machines);
-    //setDeleteModalIsOpen(true);
+    setDeleteModalIsOpen(true);
   };
-  /*const handleOnConfirmDelete = async () => {
+  const handleOnConfirmDelete = async () => {
     setIsDeleting(true);
     const result = await deleteMachines(machinesToDelete);
     setDeleteModalIsOpen(false);
@@ -187,13 +202,15 @@ const TablaEquipos: FC<TablaEquiposProps> = ({ userRole, machinesList }) => {
       autoHideDuration: 2000,
     });
 
-    if(!result.error){
-      const newSelected = selectedMachines.filter(selected=>!machinesToDelete.includes(selected));
+    if (!result.error) {
+      const newSelected = selectedMachines.filter(
+        (selected) => !machinesToDelete.includes(selected)
+      );
       setselectedMachines(newSelected);
       setMachinesToDelete([]);
     }
   };
-*/
+
   const filteredMachines = applyFilters(machinesList, filter);
   const paginatedMachines = applyPagination(filteredMachines, page, limit);
   const selectedSomeMachines =
@@ -248,7 +265,7 @@ const TablaEquipos: FC<TablaEquiposProps> = ({ userRole, machinesList }) => {
             <TableHead>
               <TableRow>
                 <TableCell padding="checkbox">
-                  {userCanDelete && (
+                  {canSelectAll && (
                     <Checkbox
                       color="primary"
                       checked={selectedAllMachines}
@@ -277,12 +294,16 @@ const TablaEquipos: FC<TablaEquiposProps> = ({ userRole, machinesList }) => {
                 );
                 return (
                   <TableRow
-                    hover
+                    hover={machine?.active}
                     key={machine?._id}
                     selected={isMachineSelected}
+                    sx={!machine?.active?{backgroundColor: theme.palette.grey[400]}:{}}
                   >
                     <TableCell padding="checkbox">
-                      {userCanDelete && (
+                      {machineCanBeDeleted(
+                        machine?.active,
+                        machine?.status?.id
+                      ) && (
                         <Checkbox
                           color="primary"
                           checked={isMachineSelected}
@@ -395,7 +416,7 @@ const TablaEquipos: FC<TablaEquiposProps> = ({ userRole, machinesList }) => {
                         noWrap
                       >
                         {capitalizeFirstLetter(
-                          format(new Date(machine?.createdAt), "MMMM dd yyyy", {
+                          format(new Date(machine?.createdAt), "LLL dd yyyy", {
                             locale: es,
                           })
                         )}
@@ -418,8 +439,11 @@ const TablaEquipos: FC<TablaEquiposProps> = ({ userRole, machinesList }) => {
                           </IconButton>
                         </Tooltip>
                       </NextLink>
-                      {userCanDelete && (
-                        <Tooltip title="Eliminar Cliente" arrow>
+                      {machineCanBeDeleted(
+                        machine?.active,
+                        machine?.status?.id
+                      ) && (
+                        <Tooltip title="Eliminar Equipo" arrow>
                           <IconButton
                             onClick={() => handleOnDeleteClick([machine._id])}
                             sx={{
@@ -454,9 +478,9 @@ const TablaEquipos: FC<TablaEquiposProps> = ({ userRole, machinesList }) => {
           />
         </Box>
       </Card>
-      
+
       <GenericModal
-        open={false}
+        open={deleteModalIsOpen}
         title="Atención"
         text={
           "¿Esta seguro de eliminar a" +
@@ -466,13 +490,12 @@ const TablaEquipos: FC<TablaEquiposProps> = ({ userRole, machinesList }) => {
           "?"
         }
         isLoading={isDeleting}
-        onAccept={() => {}}
+        onAccept={handleOnConfirmDelete}
         onCancel={() => {
-          //setDeleteModalIsOpen(false);
+          setDeleteModalIsOpen(false);
           setIsDeleting(false);
         }}
       />
-      
     </>
   );
 };

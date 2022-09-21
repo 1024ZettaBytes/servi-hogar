@@ -1,5 +1,9 @@
-import { getMachinesDataWithDetails, saveMachineData } from "../../../lib/data/Machines";
-import {validateUserPermissions, getUserId} from "../auth/authUtils";
+import {
+  getMachinesDataWithDetails,
+  saveMachineData,
+  deleteMachinesData,
+} from "../../../lib/data/Machines";
+import { validateUserPermissions, getUserId } from "../auth/authUtils";
 
 async function getMachinesAPI(req, res) {
   try {
@@ -24,6 +28,19 @@ async function saveMachineAPI(req, res, userId) {
   }
 }
 
+async function deleteMachinesAPI(req, res, userId, userRole) {
+  try {
+    if (userRole !== "ADMIN")
+      res
+        .status(403)
+        .json({ errorMsg: "No tienes permisos para realizar esta acción" });
+    await deleteMachinesData({ arrayOfIds: req.body, lastUpdatedBy: userId });
+    res.status(200).json({ msg: "¡Equipo(s) eliminados con éxito!" });
+  } catch (e) {
+    console.error(e);
+    res.status(500).json({ errorMsg: e.message });
+  }
+}
 async function handler(req, res) {
   const validRole = await validateUserPermissions(req, res, ["ADMIN", "AUX"]);
   const userId = await getUserId(req);
@@ -38,6 +55,7 @@ async function handler(req, res) {
       case "PUT":
         break;
       case "DELETE":
+        await deleteMachinesAPI(req, res, userId, validRole);
     }
 }
 

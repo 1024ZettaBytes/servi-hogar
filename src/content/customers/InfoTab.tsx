@@ -17,6 +17,7 @@ import {
   FormControlLabel,
   Radio,
   Autocomplete,
+  Alert,
 } from "@mui/material";
 import { useSnackbar } from "notistack";
 import { Skeleton } from "@mui/material";
@@ -35,7 +36,7 @@ import { LoadingButton } from "@mui/lab";
 import { HOW_FOUND_LIST } from "lib/consts/OBJ_CONTS";
 
 const getHowFoundLabel = (howFoundId: string, referrer?: string) => {
-  let map = {...HOW_FOUND_LIST};
+  let map = { ...HOW_FOUND_LIST };
   if (howFoundId === "referred") map.referred = `Referido por ${referrer}`;
   return map[howFoundId];
 };
@@ -483,14 +484,9 @@ function CustomerInfoTab({
                     {hasErrorUpdating.info.error && (
                       <Grid item xs={12} sm={12} md={12} textAlign={"center"}>
                         <br />
-                        <Typography
-                          variant="h5"
-                          component="h5"
-                          color="error"
-                          textAlign="center"
-                        >
+                        <Alert severity="error">
                           {hasErrorUpdating.info.msg}
-                        </Typography>
+                        </Alert>
                       </Grid>
                     )}
                     <Grid
@@ -861,14 +857,9 @@ function CustomerInfoTab({
                     {hasErrorUpdating.residence.error && (
                       <Grid item xs={12} sm={12} md={12} textAlign={"center"}>
                         <br />
-                        <Typography
-                          variant="h5"
-                          component="h5"
-                          color="error"
-                          textAlign="center"
-                        >
+                        <Alert severity="error">
                           {hasErrorUpdating.residence.msg}
-                        </Typography>
+                        </Alert>
                       </Grid>
                     )}
                     <Grid

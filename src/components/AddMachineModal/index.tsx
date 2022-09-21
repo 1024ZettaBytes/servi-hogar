@@ -11,10 +11,10 @@ import {
   Grid,
   InputLabel,
   TextField,
-  Typography,
   Select,
   FormControl,
   MenuItem,
+  Alert,
 } from "@mui/material";
 import { LoadingButton } from "@mui/lab";
 import {
@@ -60,7 +60,7 @@ function AddMachineModal(props) {
       capacity: event.target.capacity.value,
       cost: event.target.cost.value,
       status: selectedStatus?._id,
-      location: selectedLocation
+      location: selectedLocation,
     });
     setIsLoading(false);
     if (!result.error) {
@@ -164,14 +164,7 @@ function AddMachineModal(props) {
                 <>
                   {warehousesError && (
                     <Grid item lg={12}>
-                      <Typography
-                        variant="h5"
-                        component="h5"
-                        color="error"
-                        textAlign="center"
-                      >
-                        {warehousesError.message}
-                      </Typography>
+                      <Alert severity="error">{warehousesError?.message}</Alert>
                     </Grid>
                   )}
                   <Grid item lg={12}>
@@ -208,14 +201,7 @@ function AddMachineModal(props) {
                 <>
                   {vehiclesError && (
                     <Grid item lg={12}>
-                      <Typography
-                        variant="h5"
-                        component="h5"
-                        color="error"
-                        textAlign="center"
-                      >
-                        {vehiclesError.message}
-                      </Typography>
+                      <Alert severity="error">{vehiclesError?.message}</Alert>
                     </Grid>
                   )}
                   <Grid item lg={12}>
@@ -249,14 +235,7 @@ function AddMachineModal(props) {
                 {hasError.error ? (
                   <Grid item>
                     <br />
-                    <Typography
-                      variant="h5"
-                      component="h5"
-                      color="error"
-                      textAlign="center"
-                    >
-                      {hasError.msg}
-                    </Typography>
+                    <Alert severity="error">{hasError?.msg}</Alert>
                   </Grid>
                 ) : null}
               </Grid>
