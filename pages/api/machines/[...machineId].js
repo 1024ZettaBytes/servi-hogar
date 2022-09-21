@@ -1,46 +1,49 @@
 import {
-    getCustomerByIdData,
-    updateCustomerData
-  } from "../../../lib/data/Customers";
+    getMachineByIdData,
+    updateMachineData
+  } from "../../../lib/data/Machines";
   import {validateUserPermissions, getUserId} from "../auth/authUtils";
-  async function getCustomerByIdAPI(req, res) {
-    const { customerId } = req.query;
+
+  async function getMachineByIdAPI(req, res) {
+    
+    const { machineId } = req.query;
+    
     try {
-      const customer = await getCustomerByIdData(customerId);
-      
-      res.status(200).json( { data: customer || {} });
+      const machine = await getMachineByIdData(machineId);
+      res.status(200).json( { data: machine || {} });
     } catch (e) {
       console.error(e);
       res
         .status(500)
         .json({
           errorMsg:
-            "Hubo un problema al consultar los datos del cliente. Por favor intente de nuevo.",
+            "Hubo un problema al consultar los datos del equipo. Por favor intente de nuevo.",
         });
     }
   }
-  async function updateCustomerAPI(req, res,userId, userRole){
+
+  async function updateMachineAPI(req, res,userId){
     try {
-      await updateCustomerData({...req.body , lastUpdatedBy: userId}, userRole);
-      res.status(200).json({ msg: "¡Cliente actualizado con éxito!" });
+      await updateMachineData({...req.body , lastUpdatedBy: userId});
+      res.status(200).json({ msg: "¡Equipo actualizado con éxito!" });
     } catch (e) {
       console.error(e);
       res.status(500).json({ errorMsg: e.message });
     }
   }
-
 async function handler(req, res) {
   const validRole = await validateUserPermissions(req, res, ["ADMIN", "AUX"]);
   const userId = await getUserId(req);
+  if(validRole)
     switch (req.method) {
       case "GET":
-        await getCustomerByIdAPI(req, res);
+        await getMachineByIdAPI(req, res);
         break;
       case "POST":
         return;
         break;
       case "PUT":
-        await updateCustomerAPI(req, res,userId, validRole);
+        await updateMachineAPI(req, res,userId);
         break;
       case "DELETE":
         return;

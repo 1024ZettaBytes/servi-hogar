@@ -34,7 +34,6 @@ import { capitalizeFirstLetter } from "lib/client/utils";
 import { format } from "date-fns";
 import es from "date-fns/locale/es";
 import { MACHINE_STATUS_LIST } from "../../lib/consts/OBJ_CONTS";
-import ToggleOffTwoToneIcon from "@mui/icons-material/ToggleOffTwoTone";
 interface TablaEquiposProps {
   userRole: string;
   className?: string;
@@ -295,9 +294,10 @@ const TablaEquipos: FC<TablaEquiposProps> = ({ userRole, machinesList }) => {
                 );
                 return (
                   <TableRow
-                    hover
+                    hover={machine?.active}
                     key={machine?._id}
                     selected={isMachineSelected}
+                    sx={!machine?.active?{backgroundColor: theme.palette.grey[400]}:{}}
                   >
                     <TableCell padding="checkbox">
                       {machineCanBeDeleted(
@@ -323,20 +323,6 @@ const TablaEquipos: FC<TablaEquiposProps> = ({ userRole, machinesList }) => {
                         noWrap
                       >
                         {machine?.machineNum}
-                        {!machine?.active && (
-                          <Tooltip title="Inactivo" arrow>
-                            <IconButton
-                              sx={{
-                                color: theme.palette.error.main,
-                                cursor: "default",
-                              }}
-                              color="inherit"
-                              size="small"
-                            >
-                              <ToggleOffTwoToneIcon fontSize="small" />
-                            </IconButton>
-                          </Tooltip>
-                        )}
                       </Typography>
                     </TableCell>
                     <TableCell align="center">

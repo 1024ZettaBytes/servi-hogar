@@ -5,7 +5,7 @@ import SidebarLayout from "@/layouts/SidebarLayout";
 import { validateServerSideSession } from "../../lib/auth";
 import PageHeader from "@/components/PageHeader";
 import PageTitleWrapper from "@/components/PageTitleWrapper";
-import { Card, Container, Grid, Typography, Skeleton } from "@mui/material";
+import { Card, Container, Grid, Skeleton, Alert } from "@mui/material";
 import Footer from "@/components/Footer";
 import AddCustomerModal from "@/components/AddCustomerModal";
 import TablaClientes from "./TablaClientes";
@@ -18,7 +18,7 @@ import { useSnackbar } from "notistack";
 
 import NextBreadcrumbs from "@/components/Shared/BreadCrums";
 
-function Clientes({session}) {
+function Clientes({ session }) {
   const paths = ["Inicio", "Clientes"];
   const { enqueueSnackbar } = useSnackbar();
   const { customerList, customerError } = useGetAllCustomers(getFetcher);
@@ -26,8 +26,8 @@ function Clientes({session}) {
   const [modalIsOpen, setModalIsOpen] = useState(false);
   const generalError = customerError || citiesError;
   const completeData = customerList && citiesList;
-const {user} = session;
-  
+  const { user } = session;
+
   const handleClickOpen = () => {
     setModalIsOpen(true);
   };
@@ -69,15 +69,9 @@ const {user} = session;
         >
           <Grid item xs={12}>
             {generalError ? (
-              <Typography
-                variant="h5"
-                component="h5"
-                color="error"
-                textAlign="center"
-              >
-                {customerError?.message ||
-                  citiesError?.message}
-              </Typography>
+              <Alert severity="error">
+                {customerError?.message || citiesError?.message}
+              </Alert>
             ) : !completeData ? (
               <Skeleton
                 variant="rectangular"
@@ -88,7 +82,7 @@ const {user} = session;
             ) : (
               <Card>
                 <TablaClientes
-                  userRole = {user?.role}
+                  userRole={user?.role}
                   customerList={customerList}
                 />
               </Card>

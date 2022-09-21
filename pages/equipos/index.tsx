@@ -5,7 +5,13 @@ import SidebarLayout from "@/layouts/SidebarLayout";
 import { validateServerSideSession } from "../../lib/auth";
 import PageHeader from "@/components/PageHeader";
 import PageTitleWrapper from "@/components/PageTitleWrapper";
-import { Card, Container, Grid, Typography, Skeleton } from "@mui/material";
+import {
+  Card,
+  Container,
+  Grid,
+  Skeleton,
+  Alert,
+} from "@mui/material";
 import Footer from "@/components/Footer";
 import AddMachineModal from "@/components/AddMachineModal";
 import TablaEquipos from "./TablaEquipos";
@@ -73,14 +79,9 @@ function Equipos({ session }) {
         >
           <Grid item xs={12}>
             {generalError ? (
-              <Typography
-                variant="h5"
-                component="h5"
-                color="error"
-                textAlign="center"
-              >
+              <Alert severity="error">
                 {machinesError?.message || machinesStatusError?.message}
-              </Typography>
+              </Alert>
             ) : !completeData ? (
               <Skeleton
                 variant="rectangular"

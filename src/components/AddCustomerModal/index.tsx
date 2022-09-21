@@ -20,10 +20,11 @@ import {
   FormControlLabel,
   Radio,
   Autocomplete,
+  Alert,
 } from "@mui/material";
 import { LoadingButton } from "@mui/lab";
 import { saveCustomer } from "../../../lib/client/customersFetch";
-import {HOW_FOUND_LIST} from "../../../lib/consts/OBJ_CONTS";
+import { HOW_FOUND_LIST } from "../../../lib/consts/OBJ_CONTS";
 function AddCustomerModal(props) {
   const { handleOnClose, open, citiesList, customerList } = props;
   const [isLoading, setIsLoading] = useState(false);
@@ -34,7 +35,7 @@ function AddCustomerModal(props) {
   const [wasReferred, setWasReferred] = useState(false);
   const [selectedHowFound, setSelectedHowFound] = useState();
   const [referredBy, setReferredBy] = useState();
-  
+
   function handleCitySelection(city) {
     setSelectedCity(city);
     setSelectedSector(undefined);
@@ -48,7 +49,7 @@ function AddCustomerModal(props) {
     setSelectedHowFound(howFound);
     setWasReferred(howFound === "referred");
   }
-  function handleReferredBySelection(referredBy){
+  function handleReferredBySelection(referredBy) {
     setReferredBy(referredBy);
   }
   async function submitHandler(event) {
@@ -146,38 +147,38 @@ function AddCustomerModal(props) {
                   onChange={(e) => handleHowFoundSelection(e.target.value)}
                   row
                 >
-                  {Object.entries(HOW_FOUND_LIST).map(how=><FormControlLabel
-                    key={how[0]}
-                    value={how[0]}
-                    control={<Radio required={true} />}
-                    label={how[1]}
-                  />)}
-                  </RadioGroup>
+                  {Object.entries(HOW_FOUND_LIST).map((how) => (
+                    <FormControlLabel
+                      key={how[0]}
+                      value={how[0]}
+                      control={<Radio required={true} />}
+                      label={how[1]}
+                    />
+                  ))}
+                </RadioGroup>
               </Grid>
               {wasReferred ? (
-                  <Grid item lg={12}>
-                    <Autocomplete
-                      disablePortal
-                      id="combo-box-demo"
-                      options={customerList.map((customer) => {
-                        return { label: `${customer.name}`, id: customer._id };
-                      })}
-                      onChange={(event: any, newValue: string | null) => {
-                        event.target;
-                        handleReferredBySelection(newValue);
-                      }}
-                      fullWidth
-                      isOptionEqualToValue={(option:any, value:any) => option.id === value.id}
-                      renderInput={(params) => (
-                        <TextField
-                        required  
-                          {...params}
-                          label="Referido por"
-                        />
-                      )}
-                    />
-                  </Grid>
-                ) : null}
+                <Grid item lg={12}>
+                  <Autocomplete
+                    disablePortal
+                    id="combo-box-demo"
+                    options={customerList.map((customer) => {
+                      return { label: `${customer.name}`, id: customer._id };
+                    })}
+                    onChange={(event: any, newValue: string | null) => {
+                      event.target;
+                      handleReferredBySelection(newValue);
+                    }}
+                    fullWidth
+                    isOptionEqualToValue={(option: any, value: any) =>
+                      option.id === value.id
+                    }
+                    renderInput={(params) => (
+                      <TextField required {...params} label="Referido por" />
+                    )}
+                  />
+                </Grid>
+              ) : null}
               <Grid item lg={12}>
                 <Typography
                   variant="h5"
@@ -304,14 +305,7 @@ function AddCustomerModal(props) {
                 {hasError.error ? (
                   <Grid item>
                     <br />
-                    <Typography
-                      variant="h5"
-                      component="h5"
-                      color="error"
-                      textAlign="center"
-                    >
-                      {hasError.msg}
-                    </Typography>
+                    <Alert severity="error">{hasError?.msg}</Alert>
                   </Grid>
                 ) : null}
               </Grid>
@@ -361,4 +355,3 @@ AddCustomerModal.propTypes = {
 };
 
 export default AddCustomerModal;
-

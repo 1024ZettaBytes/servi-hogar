@@ -63,6 +63,11 @@ export const useGetAllMachinesLocations = (fetcher) => {
   return { machinesLocationData: data?.data, machinesLocationError: error };
 
 };
+
+export const useGetMachineById = (fetcher, id) => {
+  const { data, error } = useSWR(id ? ROUTES.MACHINE_BY_ID_API.replace(":id", id): null, fetcher);
+  return { machine: data?.data, machineByIdError: error };
+}
 // Warehouses
 export const useGetAllWarehousesOverview = (fetcher) => {
   const { data, error } = useSWR(ROUTES.ALL_WAREHOUSES_OVERVIEW_API, fetcher);
