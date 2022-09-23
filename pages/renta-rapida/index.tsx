@@ -59,7 +59,6 @@ const getSelectedCustomer = (id, cList) =>{
   return cList.find(c => c._id.toString() === id);
 }
 const selectedCustomer = getSelectedCustomer(selectedId, customerList ? customerList : []) || null;
-console.log("Selected customer", selectedCustomer);
   const handleClose = (addedCustomer, successMessage = null) => {
     setModalIsOpen(false);
     if (addedCustomer && successMessage) {
@@ -120,7 +119,7 @@ console.log("Selected customer", selectedCustomer);
                 <Stepper
                   activeStep={activeStep}
                   orientation="vertical"
-                  sx={{ backgroundColor: "" }}
+                  sx={{ backgroundColor: "transparent" }}
                 >
                   {steps.map((step, index) => (
                     <Step key={step.label}>
