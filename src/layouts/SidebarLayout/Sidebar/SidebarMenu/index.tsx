@@ -203,12 +203,13 @@ function SidebarMenu({userRole}) {
           }
         >
           <SubMenuWrapper>
+          {["ADMIN", "AUX"].includes(userRole) &&
             <List component="div">
               <ListItem component="div">
-                <NextLink href="/" passHref>
+                <NextLink href="/renta-rapida" passHref>
                   <Button
                     className={
-                      currentRoute === '/dashboards/crypto' ? 'active' : ''
+                      currentRoute === '/renta-rapida' ? 'active' : ''
                     }
                     disableRipple
                     component="a"
@@ -235,6 +236,7 @@ function SidebarMenu({userRole}) {
                 </NextLink>
               </ListItem>
             </List>
+            }
           </SubMenuWrapper>
         </List>
         <List

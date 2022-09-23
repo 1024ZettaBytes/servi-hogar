@@ -239,12 +239,12 @@ function MachineInfoTab({ role, machine }) {
                         )}
                       </Box>
                     </Grid>
-                    <Grid item xs={3} sm={6} md={6} textAlign={{ sm: "right" }}>
+                    <Grid item xs={6} sm={6} md={6} textAlign={{ sm: "right" }}>
                       <Box pr={2} pb={2}>
                         Características:
                       </Box>
                     </Grid>
-                    <Grid item xs={9} sm={6} md={6}>
+                    <Grid item xs={6} sm={6} md={6}>
                       <Box sx={{ maxWidth: { xs: "auto", sm: 300 } }}>
                         {machine ? (
                           !isEditing.info ? (
