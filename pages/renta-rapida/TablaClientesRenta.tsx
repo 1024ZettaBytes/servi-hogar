@@ -129,11 +129,64 @@ const TablaClientesRenta: FC<TablaClientesRentaProps> = ({
   const { enqueueSnackbar } = useSnackbar();
   const [deleteModalIsOpen, setDeleteModalIsOpen] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [customerToEdit, setCustomerToEdit] = useState<any>({ isSet: false });
   const [customersToDelete, setCustomersToDelete] = useState<string[]>([]);
   const [selectedCustomers, setSelectedCustomers] = useState<string[]>([]);
+  const [isEditing, setIsEditing] = useState<any>(false);
   const [page, setPage] = useState<number>(0);
   const [limit, setLimit] = useState<number>(10);
   const [filter, setFilter] = useState<string>("");
+  
+  const getInfoTextField = (
+    field: string,
+    minLength: number,
+    maxLength: number
+  ) => (
+    <TextField
+      fullWidth
+      inputProps={{ minLength, maxLength }}
+      autoComplete="off"
+      required
+      id={field}
+      name={field}
+      variant="outlined"
+      size="small"
+      value={customerToEdit[field]}
+      onChange={(e) => {
+        setCustomerToEdit({
+          ...customerToEdit,
+          [field]: e.target.value,
+        });
+      }}
+    />
+  );
+
+  const getResidenceTextField = (
+    field: string,
+    minLength: number,
+    maxLength: number
+  ) => (
+    <TextField
+      fullWidth
+      inputProps={{ minLength, maxLength }}
+      autoComplete="off"
+      required
+      id={field}
+      name={field}
+      variant="outlined"
+      size="small"
+      value={customerToEdit.currentResidence[field]}
+      onChange={(e) => {
+        setCustomerToEdit({
+          ...customerToEdit,
+          currentResidence: {
+            ...customerToEdit.currentResidence,
+            [field]: e.target.value,
+          },
+        });
+      }}
+    />
+  );
   const handleSearchChange = (e: ChangeEvent<HTMLInputElement>): void => {
     const value = e.target.value;
     setFilter(value);
@@ -173,6 +226,9 @@ const TablaClientesRenta: FC<TablaClientesRentaProps> = ({
   const filteredCostumers = applyFilters(customerList, filter);
   const paginatedCustomers = applyPagination(filteredCostumers, page, limit);
   const theme = useTheme();
+  if (!customerToEdit.isSet && selectedCustomer) {
+    setCustomerToEdit({ ...selectedCustomer, isSet: true });
+  }
   return (
     <>
       <Card>
@@ -316,12 +372,13 @@ const TablaClientesRenta: FC<TablaClientesRentaProps> = ({
               action={
                 <Box>
                   <Button
-                    startIcon={<EditTwoToneIcon />}
+                    startIcon={!isEditing ? <EditTwoToneIcon /> : null}
                     size="medium"
                     variant="text"
                     sx={{ marginTop: 1 }}
+                    onClick={() =>{setIsEditing(!isEditing)}}
                   >
-                    Modificar
+                    {isEditing ? "Cancelar":"Modificar"}
                   </Button>
                 </Box>
               }
@@ -330,45 +387,54 @@ const TablaClientesRenta: FC<TablaClientesRentaProps> = ({
             <Grid container p={1}>
               <Grid item sm={3} lg={4} margin={1}>
                 <Typography variant="h5">Celular</Typography>
-                <Typography variant="h5" sx={{ py: 1 }} fontWeight="normal">
+                {!isEditing ? <Typography variant="h5" sx={{ py: 1 }} fontWeight="normal">
                   {selectedCustomer?.cell}
-                </Typography>
+                </Typography> : getInfoTextField("cell", 10, 10)
+                }
               </Grid>
               <Grid item sm={4} lg={7} margin={1}>
                 <Typography variant="h5">Calle y Número</Typography>
-                <Typography variant="h5" sx={{ py: 1 }} fontWeight="normal">
+                {!isEditing ?<Typography variant="h5" sx={{ py: 1 }} fontWeight="normal">
                   {selectedCustomer?.currentResidence?.street}
-                </Typography>
+                </Typography>: getResidenceTextField("street", 1, 100)
+                }
               </Grid>
               <Grid item sm={4} lg={4} margin={1}>
                 <Typography variant="h5">Colonia</Typography>
-                <Typography variant="h5" sx={{ py: 1 }} fontWeight="normal">
+                {!isEditing ?<Typography variant="h5" sx={{ py: 1 }} fontWeight="normal">
                   {selectedCustomer?.currentResidence?.suburb}
-                </Typography>
+                </Typography>: getResidenceTextField("suburb", 1, 100)
+                }
               </Grid>
               <Grid item sm={3} lg={7} margin={1}>
                 <Typography variant="h5">Sector</Typography>
-                <Typography variant="h5" sx={{ py: 1 }} fontWeight="normal">
+                {!isEditing ? <Typography variant="h5" sx={{ py: 1 }} fontWeight="normal">
                   {selectedCustomer?.currentResidence?.sector?.name}
-                </Typography>
+                </Typography>: getResidenceTextField("sector", 1, 100)
+              }
               </Grid>
               <Grid item sm={4} lg={4} margin={1}>
                 <Typography variant="h5">Referencia domicilio</Typography>
-                <Typography variant="h5" sx={{ py: 1 }} fontWeight="normal">
+                {!isEditing ?<Typography variant="h5" sx={{ py: 1 }} fontWeight="normal">
                   {selectedCustomer?.currentResidence?.residenceRef}
-                </Typography>
+                </Typography> : getResidenceTextField("residenceRef", 1, 100)
+                }
               </Grid>
               <Grid item sm={4} lg={4} margin={1}>
                 <Typography variant="h5">Nombre referencia</Typography>
-                <Typography variant="h5" sx={{ py: 1 }} fontWeight="normal">
+                {!isEditing ?<Typography variant="h5" sx={{ py: 1 }} fontWeight="normal">
                   {selectedCustomer?.currentResidence?.nameRef}
-                </Typography>
+                </Typography>: getResidenceTextField("nameRef", 1, 100)
+                }
               </Grid>
               <Grid item sm={4} lg={2} margin={1}>
                 <Typography variant="h5">Teléfono ref.</Typography>
-                <Typography variant="h5" sx={{ py: 1 }} fontWeight="normal">
+                {!isEditing ? <Typography variant="h5" sx={{ py: 1 }} fontWeight="normal">
                   {selectedCustomer?.currentResidence?.telRef}
-                </Typography>
+                </Typography>: getResidenceTextField("telRef", 10, 10)
+                }
+              </Grid>
+              <Grid>
               </Grid>
             </Grid>
           </Card>
