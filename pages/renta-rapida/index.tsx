@@ -17,7 +17,7 @@ import Paper from "@mui/material/Paper";
 import Typography from "@mui/material/Typography";
 import AddIcon from "@mui/icons-material/Add";
 import {
-  useGetAllCustomers,
+  useGetAllCustomersForRent,
   getFetcher,
   useGetCities,
 } from "../api/useRequest";
@@ -25,14 +25,27 @@ import { useSnackbar } from "notistack";
 
 import NextBreadcrumbs from "@/components/Shared/BreadCrums";
 import TablaClientesRenta from "./TablaClientesRenta";
+import RentPeriod from "./RentPeriod";
+import DeliveryTime from "./DeliveryTime";
+const defaultInitialDate = (today: Date) =>{
+  today.setHours(8,0,0);
+  return today;
+}
 
+const defaultEndDate = (today: Date)=>{
+  today.setHours(22,0,0);
+  return today;
+}
 function RentaRapida() {
   const paths = ["Inicio", "Renta Rápida"];
   const { enqueueSnackbar } = useSnackbar();
-  const { customerList, customerError } = useGetAllCustomers(getFetcher);
+  const { customerList, customerError } = useGetAllCustomersForRent(getFetcher);
   const { citiesList, citiesError } = useGetCities(getFetcher);
   const [modalIsOpen, setModalIsOpen] = useState(false);
+  const [rentPeriod, setRentPeriod] = useState({selectedWeeks:1,useFreeWeeks: true});
+  const [deliveryTime, setDeliveryTime] = useState({date:(new Date(Date.now())),timeOption: "any", fromTime: defaultInitialDate(new Date(Date.now())), endTime: defaultEndDate(new Date(Date.now()))});
   const [selectedId, setSelectedId] = useState<any>(null);
+  const [activeStep, setActiveStep] = useState(0);
   const generalError = customerError || citiesError;
   const completeData = customerList && citiesList;
   const steps = [
@@ -52,11 +65,26 @@ function RentaRapida() {
                 they're running and how to resolve approval issues.`,
     },
   ];
+  const checkEnabledButton = (selectedCustomer,rentPeriod)=>{
+    if(activeStep === 0)
+    return selectedCustomer;
+    if(activeStep === 1)
+    return rentPeriod.selectedWeeks > 0
+  }
+  
+  
   const handleClickOpen = () => {
     setModalIsOpen(true);
   };
 const getSelectedCustomer = (id, cList) =>{
   return cList.find(c => c._id.toString() === id);
+}
+const onChangePeriod=(id, value)=>{
+  setRentPeriod({...rentPeriod, [id]:value});
+}
+
+const onChangeDeliverTime=(id, value)=>{
+  setDeliveryTime({...deliveryTime, [id]:value});
 }
 const selectedCustomer = getSelectedCustomer(selectedId, customerList ? customerList : []) || null;
   const handleClose = (addedCustomer, successMessage = null) => {
@@ -72,7 +100,7 @@ const selectedCustomer = getSelectedCustomer(selectedId, customerList ? customer
       });
     }
   };
-  const [activeStep, setActiveStep] = useState(0);
+  const nextButtonEnabled = checkEnabledButton(selectedCustomer,rentPeriod);
 
   const handleNext = () => {
     setActiveStep((prevActiveStep) => prevActiveStep + 1);
@@ -124,13 +152,6 @@ const selectedCustomer = getSelectedCustomer(selectedId, customerList ? customer
                   {steps.map((step, index) => (
                     <Step key={step.label}>
                       <StepLabel
-                        optional={
-                          index === 2 ? (
-                            <Typography variant="caption">
-                              Último paso
-                            </Typography>
-                          ) : null
-                        }
                       >
                         {step.label}
                       </StepLabel>
@@ -165,10 +186,40 @@ const selectedCustomer = getSelectedCustomer(selectedId, customerList ? customer
                             
                           </>
                         )}
+                        {
+                          index === 1 && (
+                            <RentPeriod
+                            selectedWeeks={rentPeriod.selectedWeeks}
+                            useFreeWeeks={rentPeriod.useFreeWeeks} 
+                            freeWeeks={selectedCustomer.freeWeeks}
+                            weekPrice={139.00}
+                            onChangePeriod={onChangePeriod}
+                            />
+                          )
+                        }
+                        {
+                          index === 2 && (
+                            <DeliveryTime
+                            date={deliveryTime.date}
+                            timeOption={deliveryTime.timeOption}
+                            fromTime={deliveryTime.fromTime}
+                            endTime={deliveryTime.endTime}
+                            onChangeTime={onChangeDeliverTime}
+                            />
+                          )
+                        }
                         <Box sx={{ mb: 2 }}>
                           <div>
+                            {index > 0 && (
+                              <Button
+                                onClick={handleBack}
+                                sx={{ mt: 1, mr: 1 }}
+                              >
+                                Atrás
+                              </Button>
+                            )}
                             <Button
-                              disabled={!selectedCustomer}
+                              disabled={!nextButtonEnabled}
                               variant="contained"
                               onClick={handleNext}
                               sx={{ mt: 1, mr: 1 }}
@@ -177,14 +228,6 @@ const selectedCustomer = getSelectedCustomer(selectedId, customerList ? customer
                                 ? "Rentar"
                                 : "Siguiente"}
                             </Button>
-                            {index > 0 && (
-                              <Button
-                                onClick={handleBack}
-                                sx={{ mt: 1, mr: 1 }}
-                              >
-                                Back
-                              </Button>
-                            )}
                           </div>
                         </Box>
                       </StepContent>
