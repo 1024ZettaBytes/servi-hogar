@@ -156,7 +156,7 @@ const selectedCustomer = getSelectedCustomer(selectedId, customerList ? customer
                         {step.label}
                       </StepLabel>
                       <StepContent>
-                        {index === 0 && (
+                        {activeStep === 0 && (
                           <>
                             <Grid container >
                               <Grid item xs={12} md={4} lg={4}></Grid>
@@ -187,7 +187,7 @@ const selectedCustomer = getSelectedCustomer(selectedId, customerList ? customer
                           </>
                         )}
                         {
-                          index === 1 && (
+                          activeStep === 1 && (
                             <RentPeriod
                             selectedWeeks={rentPeriod.selectedWeeks}
                             useFreeWeeks={rentPeriod.useFreeWeeks} 
@@ -198,7 +198,7 @@ const selectedCustomer = getSelectedCustomer(selectedId, customerList ? customer
                           )
                         }
                         {
-                          index === 2 && (
+                          activeStep === 2 && (
                             <DeliveryTime
                             date={deliveryTime.date}
                             timeOption={deliveryTime.timeOption}
