@@ -9,8 +9,7 @@ import { styled } from '@mui/material/styles';
 const Anchor = styled('a')({});
 
 interface NextLinkComposedProps
-  extends Omit<React.AnchorHTMLAttributes<HTMLAnchorElement>, 'href'>,
-    Omit<NextLinkProps, 'href' | 'as' | 'onClick' | 'onMouseEnter'> {
+  extends Omit<React.AnchorHTMLAttributes<HTMLAnchorElement>, 'href'> {
   to: NextLinkProps['href'];
   linkAs?: NextLinkProps['as'];
 }
@@ -19,19 +18,17 @@ export const NextLinkComposed = React.forwardRef<
   HTMLAnchorElement,
   NextLinkComposedProps
 >(function NextLinkComposed(props, ref) {
-  const { to, linkAs, replace, scroll, shallow, prefetch, locale, ...other } =
+  const { to, linkAs, ...other } =
     props;
 
   return (
     <NextLink
       href={to}
-      prefetch={prefetch}
+      
       as={linkAs}
-      replace={replace}
-      scroll={scroll}
-      shallow={shallow}
+      
+      
       passHref
-      locale={locale}
     >
       <Anchor ref={ref} {...other} />
     </NextLink>
@@ -59,13 +56,11 @@ const Link = React.forwardRef<HTMLAnchorElement, LinkProps>(function Link(
     className: classNameProps,
     href,
     linkAs: linkAsProp,
-    locale,
+   
     noLinkStyle,
-    prefetch,
-    replace,
+   
     role, // Link don't have roles.
-    scroll,
-    shallow,
+
     ...other
   } = props;
 
@@ -91,11 +86,9 @@ const Link = React.forwardRef<HTMLAnchorElement, LinkProps>(function Link(
   const nextjsProps = {
     to: href,
     linkAs,
-    replace,
-    scroll,
-    shallow,
-    prefetch,
-    locale
+
+    scroll:{},
+
   };
 
   if (noLinkStyle) {
