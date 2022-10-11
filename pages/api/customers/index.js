@@ -1,13 +1,11 @@
-import { Customer } from "../../../lib/models/Customer";
 import {CustomerLevel} from "../../../lib/models/CustomerLevel";
 import {validateUserPermissions, getUserId} from "../auth/authUtils";
 import {
   getCustomersData,
   saveCustomerData,
-  updateCustomerData,
   deleteCustomersData
 } from "../../../lib/data/Customers";
-async function getCustomersAPI( req, res, next ) {
+async function getCustomersAPI( req, res ) {
   try {
     
     const allCustomers = await getCustomersData();
@@ -33,15 +31,6 @@ async function saveCustomerAPI(req, res, userId) {
   }
 }
 
-async function updateCustomerAPI(req, res,userId, userRole){
-  try {
-    await updateCustomerData({...req.body , lastUpdatedBy: userId}, userRole);
-    res.status(200).json({ msg: "¡Cliente actualizado con éxito!" });
-  } catch (e) {
-    console.error(e);
-    res.status(500).json({ errorMsg: e.message });
-  }
-}
 async function deleteCustomersAPI(req, res,userId, userRole){
   try {
     if(userRole!=="ADMIN")
@@ -65,7 +54,7 @@ async function handler(req, res) {
       await saveCustomerAPI(req, res, userId);
       break;
     case "PUT":
-      await updateCustomerAPI(req, res,userId, validRole);
+      return;
       break;
     case "DELETE":
       await deleteCustomersAPI(req, res,userId, validRole)

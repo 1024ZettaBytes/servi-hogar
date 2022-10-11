@@ -5,27 +5,37 @@ import SidebarLayout from "@/layouts/SidebarLayout";
 import { validateServerSideSession } from "../../lib/auth";
 import PageHeader from "@/components/PageHeader";
 import PageTitleWrapper from "@/components/PageTitleWrapper";
-import { Card, Container, Grid, Skeleton, Alert } from "@mui/material";
-import Footer from "@/components/Footer";
-import AddCustomerModal from "@/components/AddCustomerModal";
-import TablaClientes from "./TablaClientes";
 import {
-  useGetAllCustomers,
+  Card,
+  Container,
+  Grid,
+  Skeleton,
+  Alert,
+} from "@mui/material";
+import Footer from "@/components/Footer";
+import AddMachineModal from "@/components/AddMachineModal";
+import TablaEquipos from "./TablaEquipos";
+import {
+  useGetAllMachines,
   getFetcher,
-  useGetCities,
+  useGetMachinesStatus,
 } from "../api/useRequest";
 import { useSnackbar } from "notistack";
-
 import NextBreadcrumbs from "@/components/Shared/BreadCrums";
+import ResumenEquipos from "./ResumenEquipos";
 
-function Clientes({ session }) {
-  const paths = ["Inicio", "Clientes"];
+function Equipos({ session }) {
+  const paths = ["Inicio", "Equipos"];
   const { enqueueSnackbar } = useSnackbar();
-  const { customerList, customerError } = useGetAllCustomers(getFetcher);
-  const { citiesList, citiesError } = useGetCities(getFetcher);
+  const { machinesData, machinesError } = useGetAllMachines(getFetcher);
+  const { machinesStatusList, machinesStatusError } = useGetMachinesStatus(
+    getFetcher
+  );
   const [modalIsOpen, setModalIsOpen] = useState(false);
-  const generalError = customerError || citiesError;
-  const completeData = customerList && citiesList;
+  const machinesList = machinesData ? machinesData?.machinesList : null;
+  const machinesSummary = machinesData ? machinesData?.machinesSummary : null;
+  const generalError = machinesError || machinesStatusError;
+  const completeData = machinesList && machinesStatusList;
   const { user } = session;
 
   const handleClickOpen = () => {
@@ -45,15 +55,15 @@ function Clientes({ session }) {
       });
     }
   };
-  const button = { text: "Agregar cliente", onClick: handleClickOpen };
+  const button = { text: "Agregar equipo", onClick: handleClickOpen };
   return (
     <>
       <Head>
-        <title>Clientes</title>
+        <title>Equipos</title>
       </Head>
       <PageTitleWrapper>
         <PageHeader
-          title={"Clientes"}
+          title={"Equipos"}
           sutitle={""}
           button={!generalError && completeData ? button : null}
         />
@@ -70,7 +80,7 @@ function Clientes({ session }) {
           <Grid item xs={12}>
             {generalError ? (
               <Alert severity="error">
-                {customerError?.message || citiesError?.message}
+                {machinesError?.message || machinesStatusError?.message}
               </Alert>
             ) : !completeData ? (
               <Skeleton
@@ -81,21 +91,37 @@ function Clientes({ session }) {
               />
             ) : (
               <Card>
-                <TablaClientes
+                <TablaEquipos
                   userRole={user?.role}
-                  customerList={customerList}
+                  machinesList={machinesList}
                 />
               </Card>
             )}
           </Grid>
+          {!generalError && (
+            <>
+              <br />
+              {completeData && machinesSummary && (
+                <Grid item lg={12} xs={12}>
+                  <ResumenEquipos
+                    onRent={machinesSummary?.RENT}
+                    inVehicles={machinesSummary?.VEHI}
+                    ready={machinesSummary.LISTO}
+                    waiting={machinesSummary.ESPE}
+                    onMaintenance={machinesSummary.MANTE}
+                    total={machinesSummary?.total}
+                  />
+                </Grid>
+              )}
+            </>
+          )}
         </Grid>
       </Container>
       {modalIsOpen && completeData ? (
-        <AddCustomerModal
+        <AddMachineModal
           open={modalIsOpen}
           handleOnClose={handleClose}
-          citiesList={citiesList}
-          customerList={customerList}
+          machinesStatusList={machinesStatusList}
         />
       ) : null}
       <Footer />
@@ -103,10 +129,10 @@ function Clientes({ session }) {
   );
 }
 
-Clientes.getLayout = (page) => <SidebarLayout>{page}</SidebarLayout>;
+Equipos.getLayout = (page) => <SidebarLayout>{page}</SidebarLayout>;
 
 export async function getServerSideProps({ req, resolvedUrl }) {
   let props = await validateServerSideSession(getSession, req, resolvedUrl);
   return props;
 }
-export default Clientes;
+export default Equipos;

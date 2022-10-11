@@ -11,6 +11,7 @@ export interface ICustomer extends Document {
   referrals: [Schema.Types.ObjectId];
   referredBy: Schema.Types.ObjectId;
   freeWeeks: number;
+  hasRent: boolean;
   createdAt: Date;
   updatedAt: Date;
   lastUpdatedBy: Schema.Types.ObjectId;
@@ -46,10 +47,11 @@ const CustomerSchema = new Schema<ICustomer>({
   },
   referrals: { type: [Schema.Types.ObjectId], default: [], ref: 'customers' },
   freeWeeks: { type: 'number', default: 0 },
+  hasRent: {type: 'boolean', default: false},
   createdAt: { type: Date, required: true },
   updatedAt: { type: Date, required: true },
-  lastUpdatedBy: { type: Schema.Types.ObjectId, required: true, ref: "users"},
-  active: {type: 'boolean', default: true, required: true}
+  lastUpdatedBy: { type: Schema.Types.ObjectId, required: true, ref: 'users' },
+  active: { type: 'boolean', default: true }
 });
 export const Customer: Model<ICustomer> =
   mongoose.models.customers || model('customers', CustomerSchema);

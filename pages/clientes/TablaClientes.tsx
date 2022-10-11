@@ -1,5 +1,4 @@
 import { FC, ChangeEvent, useState } from 'react';
-//import numeral from 'numeral';
 import * as str from "string";
 import PropTypes from 'prop-types';
 import {
@@ -29,7 +28,7 @@ import Label from '@/components/Label';
 import { CustomerLevel } from '@/models/crypto_order';
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import DeleteTwoToneIcon from '@mui/icons-material/DeleteTwoTone';
-import BulkActions from './BulkActions';
+import BulkTableActions from '../../src/components/BulkTableActions';
 import SearchIcon from '@mui/icons-material/Search';
 import NextLink from "next/link";
 import GenericModal from '@/components/GenericModal';
@@ -210,7 +209,7 @@ const TablaClientes: FC<TablaClientesProps> = ({ userRole, customerList }) => {
     <Card>
       {selectedBulkActions && (
         <Box flex={1} p={2}>
-          <BulkActions onClickButton={handleOnDeleteClick} selectedCustomers={selectedCustomers}/>
+          <BulkTableActions onClickButton={handleOnDeleteClick} selectedList={selectedCustomers}/>
         </Box>
       )}
       {!selectedBulkActions && (
@@ -330,9 +329,7 @@ const TablaClientes: FC<TablaClientesProps> = ({ userRole, customerList }) => {
 
                     </Typography>
                     <Typography variant="body2" color="text.secondary" noWrap>
-                      {/*numeral(customer.amount).format(
-                        `${customer.currency}0,0.00`
-                      )*/customer?.currentResidence?.sector?.name}
+                      {customer?.currentResidence?.sector?.name}
                     </Typography>
                   </TableCell>
                   <TableCell align="center">

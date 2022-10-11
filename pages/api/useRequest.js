@@ -31,6 +31,10 @@ export const useGetAllCustomers = (fetcher) => {
   return { customerList: data?.data, customerError: error };
 };
 
+export const useGetAllCustomersForRent = (fetcher) => {
+  const { data, error } = useSWR(ROUTES.ALL_CUSTOMERS_FOR_RENT_API, fetcher);
+  return { customerList: data?.data, customerError: error };
+}; 
 export const useGetCustomerLevels = (fetcher) => {
   const { data, error } = useSWR(ROUTES.ALL_CUSTOMERS_LEVELS_API, fetcher);
   return { customerLevelList: data?.data, customerLevelError: error };
@@ -47,3 +51,35 @@ export const useGetCities = (fetcher) => {
   return { citiesList: data?.data, citiesError: error };
 }
 //
+// Machines
+export const useGetAllMachines = (fetcher) => {
+  const { data, error } = useSWR(ROUTES.ALL_MACHINES_API, fetcher);
+  return { machinesData: data?.data, machinesError: error };
+};
+
+export const useGetMachinesStatus = (fetcher) => {
+  const { data, error } = useSWR(ROUTES.ALL_MACHINES_STATUS_API, fetcher);
+  return { machinesStatusList: data?.data, machinesStatusError: error };
+};
+
+export const useGetAllMachinesLocations = (fetcher) => {
+  const { data, error } = useSWR(ROUTES.ALL_MACHINES_LOCATIONS_API, fetcher);
+  return { machinesLocationData: data?.data, machinesLocationError: error };
+
+};
+
+export const useGetMachineById = (fetcher, id) => {
+  const { data, error } = useSWR(id ? ROUTES.MACHINE_BY_ID_API.replace(":id", id): null, fetcher);
+  return { machine: data?.data, machineByIdError: error };
+}
+// Warehouses
+export const useGetAllWarehousesOverview = (fetcher) => {
+  const { data, error } = useSWR(ROUTES.ALL_WAREHOUSES_OVERVIEW_API, fetcher);
+  return { warehousesList: data?.data, warehousesError: error };
+};
+// Vehicles
+export const useGetAllVehicles = (fetcher) => {
+  const { data, error } = useSWR(ROUTES.ALL_VEHICLES_API, fetcher);
+  return { vehiclesList: data?.data, vehiclesError: error };
+};
+
