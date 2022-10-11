@@ -38,7 +38,7 @@ function TokyoApp(props: TokyoAppProps) {
   Router.events.on('routeChangeComplete', nProgress.done);
 
   return (
-    <SessionProvider session={pageProps.session}>
+    <SessionProvider session={pageProps["session"]}>
      
     <CacheProvider value={emotionCache}>
       <Head>

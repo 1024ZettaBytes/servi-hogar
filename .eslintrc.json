@@ -1,6 +1,7 @@
 {
   "extends": ["next/core-web-vitals", "plugin:prettier/recommended"],
   "rules": {
+    "@typescript-eslint/no-redeclare":"off",
     "prettier/prettier": "off",
     "@next/next/no-img-element": "off",
     "jsx-a11y/alt-text": "off",
