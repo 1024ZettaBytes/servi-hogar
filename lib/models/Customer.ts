@@ -12,6 +12,8 @@ export interface ICustomer extends Document {
   referredBy: Schema.Types.ObjectId;
   freeWeeks: number;
   hasRent: boolean;
+  currentRent: Schema.Types.ObjectId;
+  movements: [Schema.Types.ObjectId];
   createdAt: Date;
   updatedAt: Date;
   lastUpdatedBy: Schema.Types.ObjectId;
@@ -47,7 +49,13 @@ const CustomerSchema = new Schema<ICustomer>({
   },
   referrals: { type: [Schema.Types.ObjectId], default: [], ref: 'customers' },
   freeWeeks: { type: 'number', default: 0 },
-  hasRent: {type: 'boolean', default: false},
+  hasRent: { type: 'boolean', default: false },
+  currentRent: { type: Schema.Types.ObjectId, default: null, ref: 'rents' },
+  movements: {
+    type: [Schema.Types.ObjectId],
+    default: [],
+    ref: 'customer_movements'
+  },
   createdAt: { type: Date, required: true },
   updatedAt: { type: Date, required: true },
   lastUpdatedBy: { type: Schema.Types.ObjectId, required: true, ref: 'users' },

@@ -9,7 +9,7 @@ export interface IMachineMovement extends Document {
 }
 
 const MachineMovementSchema = new Schema<IMachineMovement>({
-  machine: { type: Schema.Types.ObjectId, required: true },
+  machine: { type: Schema.Types.ObjectId, required: true, ref: 'machines' },
   type: { type: String, required: true },
   description: { type: String, required: true },
   amount: { type: Number, required: true },

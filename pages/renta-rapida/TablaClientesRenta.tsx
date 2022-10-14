@@ -19,20 +19,25 @@ import {
   InputAdornment,
   Button,
   Grid,
+  FormControl,
+  Select,
+  MenuItem,
+  Alert,
 } from "@mui/material";
 import EditTwoToneIcon from "@mui/icons-material/EditTwoTone";
-
-import { deleteCustomers } from "../../lib/client/customersFetch";
+import LocationOnIcon from "@mui/icons-material/LocationOn";
+import { updateCustomerResidence } from "../../lib/client/customersFetch";
 import { useSnackbar } from "notistack";
 import Label from "@/components/Label";
 import { CustomerLevel } from "@/models/crypto_order";
 import SearchIcon from "@mui/icons-material/Search";
-import GenericModal from "@/components/GenericModal";
+import { LoadingButton } from "@mui/lab";
 
 interface TablaClientesRentaProps {
   className?: string;
   customerList: any[];
   selectedCustomer?: any;
+  citiesList: any[];
   onSelectCustomer: Function;
 }
 
@@ -123,20 +128,19 @@ const applyPagination = (
 
 const TablaClientesRenta: FC<TablaClientesRentaProps> = ({
   customerList,
+  citiesList,
   selectedCustomer,
   onSelectCustomer,
 }) => {
   const { enqueueSnackbar } = useSnackbar();
-  const [deleteModalIsOpen, setDeleteModalIsOpen] = useState(false);
-  const [isDeleting, setIsDeleting] = useState(false);
   const [customerToEdit, setCustomerToEdit] = useState<any>({ isSet: false });
-  const [customersToDelete, setCustomersToDelete] = useState<string[]>([]);
-  const [selectedCustomers, setSelectedCustomers] = useState<string[]>([]);
   const [isEditing, setIsEditing] = useState<any>(false);
+  const [isUpdating, setIsUpdating] = useState<any>(false);
+  const [hasErrorUpdating, setHasErrorUpdating] = useState<any>({ error: false, msg: "" });
   const [page, setPage] = useState<number>(0);
   const [limit, setLimit] = useState<number>(10);
   const [filter, setFilter] = useState<string>("");
-  
+
   const getInfoTextField = (
     field: string,
     minLength: number,
@@ -160,7 +164,23 @@ const TablaClientesRenta: FC<TablaClientesRentaProps> = ({
       }}
     />
   );
+  function handleCitySelection(cityId) {
+    const filteredCity = citiesList.filter((c) => c._id === cityId);
+    const city = filteredCity[0];
+    const sector = {};
+    setCustomerToEdit({
+      ...customerToEdit,
+      currentResidence: { ...customerToEdit.currentResidence, city, sector },
+    });
+  }
 
+  function handleSectorSelection(sectorId) {
+    const sector = { _id: sectorId };
+    setCustomerToEdit({
+      ...customerToEdit,
+      currentResidence: { ...customerToEdit.currentResidence, sector },
+    });
+  }
   const getResidenceTextField = (
     field: string,
     minLength: number,
@@ -200,33 +220,35 @@ const TablaClientesRenta: FC<TablaClientesRentaProps> = ({
     setLimit(parseInt(event.target.value));
   };
 
-  const handleOnConfirmDelete = async () => {
-    setIsDeleting(true);
-    const result = await deleteCustomers(customersToDelete);
-    setDeleteModalIsOpen(false);
-    setIsDeleting(false);
-    enqueueSnackbar(result.msg, {
-      variant: !result.error ? "success" : "error",
-      anchorOrigin: {
-        vertical: "top",
-        horizontal: "center",
-      },
-      autoHideDuration: 2000,
-    });
-
+  const handleUpdateResidence = async (event) => {
+    event.preventDefault();
+    setHasErrorUpdating({ error: false, msg: "" });
+    setIsUpdating(true);
+    const result = await updateCustomerResidence(customerToEdit);
+    setIsUpdating(false);
     if (!result.error) {
-      const newSelected = selectedCustomers.filter(
-        (selected) => !customersToDelete.includes(selected)
-      );
-      setSelectedCustomers(newSelected);
-      setCustomersToDelete([]);
+      setIsEditing(false);
+      enqueueSnackbar(result.msg, {
+        variant: "success",
+        anchorOrigin: {
+          vertical: "top",
+          horizontal: "center",
+        },
+        autoHideDuration: 1500,
+      });
+    } else {
+      setHasErrorUpdating({ error: true, msg: result.msg });
     }
   };
 
   const filteredCostumers = applyFilters(customerList, filter);
   const paginatedCustomers = applyPagination(filteredCostumers, page, limit);
   const theme = useTheme();
-  if (!customerToEdit.isSet && selectedCustomer) {
+  if (
+    (!customerToEdit.isSet && selectedCustomer) ||
+    customerToEdit?._id?.toString() !== selectedCustomer?._id?.toString()
+  ) {
+    setHasErrorUpdating({ error: false, msg: ""});
     setCustomerToEdit({ ...selectedCustomer, isSet: true });
   }
   return (
@@ -289,7 +311,7 @@ const TablaClientesRenta: FC<TablaClientesRentaProps> = ({
                       cursor: "pointer",
                     }}
                     onClick={() => {
-                      onSelectCustomer(customer?._id);
+                      !isUpdating && onSelectCustomer(customer?._id);
                     }}
                   >
                     <TableCell align="center">
@@ -363,113 +385,243 @@ const TablaClientesRenta: FC<TablaClientesRentaProps> = ({
           />
         </Box>
       </Card>
-      { selectedCustomer &&
-      <Grid container marginTop={1}>
-        <Grid item sm={12} md={12} lg={6}>
-          <Card>
-            <CardHeader
-              title="Domicilio del cliente"
-              action={
-                <Box>
-                  <Button
-                    startIcon={!isEditing ? <EditTwoToneIcon /> : null}
-                    size="medium"
-                    variant="text"
-                    sx={{ marginTop: 1 }}
-                    onClick={() =>{setIsEditing(!isEditing)}}
+      {selectedCustomer && (
+        <Grid container marginTop={1}>
+          <Grid item sm={12} md={12} lg={5}>
+            <Card>
+              <CardHeader
+                title="Domicilio del cliente"
+                action={
+                  <Box>
+                    <Button
+                      startIcon={!isEditing ? <EditTwoToneIcon /> : null}
+                      size="medium"
+                      variant="text"
+                      sx={{ marginTop: 1 }}
+                      onClick={() => {
+                        setHasErrorUpdating({ error: false, msg: ""});
+                        setCustomerToEdit({ ...selectedCustomer });
+                        setIsEditing(!isEditing);
+                      }}
+                    >
+                      {isEditing ? "Cancelar" : "Modificar"}
+                    </Button>
+                  </Box>
+                }
+              />
+              <Divider />
+              <Box component="form" onSubmit={handleUpdateResidence}>
+              <Grid container p={1}>
+                <Grid item xs={4} sm={3} lg={4} margin={1}>
+                  <Typography variant="h5">Celular</Typography>
+                  {!isEditing ? (
+                    <Typography variant="h5" sx={{ py: 1 }} fontWeight="normal">
+                      {selectedCustomer?.cell}
+                    </Typography>
+                  ) : (
+                    getInfoTextField("cell", 10, 10)
+                  )}
+                </Grid>
+                <Grid item xs={6} sm={4} lg={7} margin={1}>
+                  <Typography variant="h5">Calle y Número</Typography>
+                  {!isEditing ? (
+                    <Typography variant="h5" sx={{ py: 1 }} fontWeight="normal">
+                      {selectedCustomer?.currentResidence?.street}
+                    </Typography>
+                  ) : (
+                    getResidenceTextField("street", 1, 100)
+                  )}
+                </Grid>
+                <Grid item xs={4} sm={4} lg={4} margin={1}>
+                  <Typography variant="h5">Colonia</Typography>
+                  {!isEditing ? (
+                    <Typography variant="h5" sx={{ py: 1 }} fontWeight="normal">
+                      {selectedCustomer?.currentResidence?.suburb}
+                    </Typography>
+                  ) : (
+                    getResidenceTextField("suburb", 1, 100)
+                  )}
+                </Grid>
+                <Grid item xs={6} sm={3} lg={5} margin={1}>
+                  <Typography variant="h5">Sector</Typography>
+                  {!isEditing ? (
+                    <Typography variant="h5" sx={{ py: 1 }} fontWeight="normal">
+                      {selectedCustomer?.currentResidence?.sector?.name}
+                    </Typography>
+                  ) : (
+                    <FormControl sx={{ width: "100%" }}>
+                      <Select
+                        labelId="sector-id"
+                        id="sector"
+                        name="sector"
+                        required
+                        autoComplete="off"
+                        size="small"
+                        placeholder="Seleccione un valor"
+                        value={
+                          customerToEdit?.currentResidence?.sector._id || ""
+                        }
+                        onChange={(event) =>
+                          handleSectorSelection(event.target.value)
+                        }
+                      >
+                        {customerToEdit?.currentResidence?.city?.sectors
+                          ?.length > 0
+                          ? customerToEdit?.currentResidence?.city?.sectors?.map(
+                              (sector) => (
+                                <MenuItem key={sector._id} value={sector._id}>
+                                  {sector.name}
+                                </MenuItem>
+                              )
+                            )
+                          : null}
+                      </Select>
+                    </FormControl>
+                  )}
+                </Grid>
+                <Grid item xs={4} sm={4} lg={4} margin={1}>
+                  <Typography variant="h5">Ciudad</Typography>
+                  {!isEditing ? (
+                    <Typography variant="h5" sx={{ py: 1 }} fontWeight="normal">
+                      {selectedCustomer?.currentResidence?.sector?.name}
+                    </Typography>
+                  ) : (
+                    <FormControl sx={{ width: "100%" }}>
+                      <Select
+                        labelId="city-id"
+                        id="city"
+                        name="city"
+                        required
+                        autoComplete="off"
+                        size="small"
+                        value={
+                          customerToEdit?.currentResidence?.city?._id || ""
+                        }
+                        onChange={(event) =>
+                          handleCitySelection(event.target.value)
+                        }
+                      >
+                        {citiesList
+                          ? citiesList.map((city) => (
+                              <MenuItem key={city._id} value={city._id}>
+                                {city.name}
+                              </MenuItem>
+                            ))
+                          : null}
+                      </Select>
+                    </FormControl>
+                  )}
+                </Grid>
+                <Grid item xs={6} sm={4} lg={5} margin={1}>
+                  <Typography variant="h5">Referencia domicilio</Typography>
+                  {!isEditing ? (
+                    <Typography variant="h5" sx={{ py: 1 }} fontWeight="normal">
+                      {selectedCustomer?.currentResidence?.residenceRef}
+                    </Typography>
+                  ) : (
+                    getResidenceTextField("residenceRef", 1, 100)
+                  )}
+                </Grid>
+                <Grid item xs={4} sm={3} lg={4} margin={1}>
+                  <Typography variant="h5">Nombre ref.</Typography>
+                  {!isEditing ? (
+                    <Typography variant="h5" sx={{ py: 1 }} fontWeight="normal">
+                      {selectedCustomer?.currentResidence?.nameRef}
+                    </Typography>
+                  ) : (
+                    getResidenceTextField("nameRef", 1, 100)
+                  )}
+                </Grid>
+                <Grid item xs={6} sm={6} lg={5} margin={1}>
+                  <Typography variant="h5">Teléfono ref.</Typography>
+                  {!isEditing ? (
+                    <Typography variant="h5" sx={{ py: 1 }} fontWeight="normal">
+                      {selectedCustomer?.currentResidence?.telRef}
+                    </Typography>
+                  ) : (
+                    getResidenceTextField("telRef", 10, 10)
+                  )}
+                </Grid>
+                <Grid item xs={12} sm={12} lg={12} margin={1}>
+                  {!isEditing ? (
+                   <Button
+                   fullWidth
+                   variant="text"
+                   href={`${selectedCustomer?.currentResidence?.maps}`}
+                   target="_blank"
+                   startIcon={<LocationOnIcon />}
+                 >
+                   Ver Ubicación
+                 </Button>
+                  ) : (
+                    <>
+                    <Typography variant="h5">Ubicación</Typography>
+                    <TextField
+                            autoComplete="off"
+                            required
+                            id="maps"
+                            name="maps"
+                            multiline
+                            maxRows={3}
+                            fullWidth={true}
+                            value={customerToEdit?.currentResidence?.maps}
+                            onChange={(e) => {
+                              setCustomerToEdit({
+                                ...customerToEdit,
+                                currentResidence: {
+                                  ...customerToEdit.currentResidence,
+                                  maps: e.target.value,
+                                },
+                              });
+                            }}
+                          />
+                    </>
+                  )}
+                </Grid>
+                {isEditing && hasErrorUpdating.error && (
+                      <Grid item xs={12} sm={12} md={12} p={1}>
+                        <Alert severity="error">
+                          {hasErrorUpdating.msg}
+                        </Alert>
+                      </Grid>
+                    )}
+                    {isEditing && <>
+                <Grid item sm={4} lg={4}></Grid>
+                <Grid item xs={12} sm={4} lg={4}>
+                  <LoadingButton
+                    loading={isUpdating}
+                    fullWidth
+                    variant="outlined"
+                    type="submit"
                   >
-                    {isEditing ? "Cancelar":"Modificar"}
-                  </Button>
-                </Box>
-              }
-            />
-            <Divider />
-            <Grid container p={1}>
-              <Grid item sm={3} lg={4} margin={1}>
-                <Typography variant="h5">Celular</Typography>
-                {!isEditing ? <Typography variant="h5" sx={{ py: 1 }} fontWeight="normal">
-                  {selectedCustomer?.cell}
-                </Typography> : getInfoTextField("cell", 10, 10)
-                }
+                    Guardar
+                  </LoadingButton>
+                </Grid>
+                <Grid item  sm={4} lg={4}></Grid>
+                </>}
+                <Grid>
+
+                </Grid>
               </Grid>
-              <Grid item sm={4} lg={7} margin={1}>
-                <Typography variant="h5">Calle y Número</Typography>
-                {!isEditing ?<Typography variant="h5" sx={{ py: 1 }} fontWeight="normal">
-                  {selectedCustomer?.currentResidence?.street}
-                </Typography>: getResidenceTextField("street", 1, 100)
-                }
-              </Grid>
-              <Grid item sm={4} lg={4} margin={1}>
-                <Typography variant="h5">Colonia</Typography>
-                {!isEditing ?<Typography variant="h5" sx={{ py: 1 }} fontWeight="normal">
-                  {selectedCustomer?.currentResidence?.suburb}
-                </Typography>: getResidenceTextField("suburb", 1, 100)
-                }
-              </Grid>
-              <Grid item sm={3} lg={7} margin={1}>
-                <Typography variant="h5">Sector</Typography>
-                {!isEditing ? <Typography variant="h5" sx={{ py: 1 }} fontWeight="normal">
-                  {selectedCustomer?.currentResidence?.sector?.name}
-                </Typography>: getResidenceTextField("sector", 1, 100)
-              }
-              </Grid>
-              <Grid item sm={4} lg={4} margin={1}>
-                <Typography variant="h5">Referencia domicilio</Typography>
-                {!isEditing ?<Typography variant="h5" sx={{ py: 1 }} fontWeight="normal">
-                  {selectedCustomer?.currentResidence?.residenceRef}
-                </Typography> : getResidenceTextField("residenceRef", 1, 100)
-                }
-              </Grid>
-              <Grid item sm={4} lg={4} margin={1}>
-                <Typography variant="h5">Nombre referencia</Typography>
-                {!isEditing ?<Typography variant="h5" sx={{ py: 1 }} fontWeight="normal">
-                  {selectedCustomer?.currentResidence?.nameRef}
-                </Typography>: getResidenceTextField("nameRef", 1, 100)
-                }
-              </Grid>
-              <Grid item sm={4} lg={2} margin={1}>
-                <Typography variant="h5">Teléfono ref.</Typography>
-                {!isEditing ? <Typography variant="h5" sx={{ py: 1 }} fontWeight="normal">
-                  {selectedCustomer?.currentResidence?.telRef}
-                </Typography>: getResidenceTextField("telRef", 10, 10)
-                }
-              </Grid>
-              <Grid>
-              </Grid>
-            </Grid>
-          </Card>
+              </Box>
+            </Card>
+          </Grid>
         </Grid>
-      </Grid>
-}
-      <GenericModal
-        open={deleteModalIsOpen}
-        title="Atención"
-        text={
-          "¿Esta seguro de eliminar a" +
-          (customersToDelete.length === 1
-            ? "l cliente seleccionado"
-            : " los clientes seleccionados") +
-          "?"
-        }
-        isLoading={isDeleting}
-        onAccept={handleOnConfirmDelete}
-        onCancel={() => {
-          setDeleteModalIsOpen(false);
-          setIsDeleting(false);
-        }}
-      />
+      )}
     </>
   );
 };
 
 TablaClientesRenta.propTypes = {
   customerList: PropTypes.array.isRequired,
+  citiesList: PropTypes.array.isRequired,
   selectedCustomer: PropTypes.object,
   onSelectCustomer: PropTypes.func.isRequired,
 };
 
 TablaClientesRenta.defaultProps = {
   selectedCustomer: {},
+  citiesList: [],
   customerList: [],
 };
 

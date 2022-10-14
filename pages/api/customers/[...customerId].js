@@ -19,6 +19,7 @@ import {
         });
     }
   }
+
   async function updateCustomerAPI(req, res,userId, userRole){
     try {
       await updateCustomerData({...req.body , lastUpdatedBy: userId}, userRole);
@@ -38,13 +39,11 @@ async function handler(req, res) {
         break;
       case "POST":
         return;
-        break;
       case "PUT":
         await updateCustomerAPI(req, res,userId, validRole);
         break;
       case "DELETE":
         return;
-        break;
     }
   }
   

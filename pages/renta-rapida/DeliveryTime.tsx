@@ -13,8 +13,8 @@ interface DeliveryTimeProps {
   className?: string;
   date: any;
   timeOption: string;
-  fromTime: any;
-  endTime: any;
+  fromTime?: any;
+  endTime?: any;
   onChangeTime: Function;
 }
 const DeliveryTime: FC<DeliveryTimeProps> = ({
@@ -63,6 +63,7 @@ const DeliveryTime: FC<DeliveryTimeProps> = ({
         <Grid item md={12} lg={12} />
         <Grid item>
         <DesktopTimePicker
+          maxTime={endTime}
           label="Desde"
           value={fromTime}
           onChange={(newValue) => {
@@ -74,6 +75,7 @@ const DeliveryTime: FC<DeliveryTimeProps> = ({
         </Grid>
         <Grid item>
         <DesktopTimePicker
+          minTime={fromTime}
           label="Hasta"
           value={endTime}
           onChange={(newValue) => {
@@ -94,8 +96,8 @@ DeliveryTime.propTypes = {
   date: PropTypes.object.isRequired,
   timeOption: PropTypes.string.isRequired,
   onChangeTime: PropTypes.func.isRequired,
-  fromTime: PropTypes.object.isRequired,
-  endTime: PropTypes.object.isRequired,
+  fromTime: PropTypes.object,
+  endTime: PropTypes.object,
 };
 
 export default DeliveryTime;
