@@ -17,5 +17,5 @@ const CustomerMovementSchema = new Schema<ICustomerMovement>({
 });
 
 export const CustomerMovement: Model<ICustomerMovement> =
-  mongoose.models.machine_movements ||
+  mongoose.models.customer_movements ||
   model('customer_movements', CustomerMovementSchema);

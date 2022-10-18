@@ -5,12 +5,15 @@ export interface IRent extends Document {
   status: Schema.Types.ObjectId;
   customer: Schema.Types.ObjectId;
   machine: Schema.Types.ObjectId;
+  initialWeeks: Number;
+  usedFreeWeeks: Number;
   startDate: Date;
   endDate: Date;
   payDayChanged: boolean;
   extendedTimes: number;
   consecutiveWeeks: number;
   lastUpdatedBy: Schema.Types.ObjectId;
+  createdBy: Schema.Types.ObjectId;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -38,6 +41,8 @@ const RentSchema = new Schema<IRent>({
       default: null
     }
   ,
+  initialWeeks: { type: 'number', required: true },
+  usedFreeWeeks: { type: 'number', required: true },
   startDate: { type: Date, required: true },
   endDate: { type: Date, required: true },
   payDayChanged: { type: 'boolean', default: false },
@@ -45,6 +50,7 @@ const RentSchema = new Schema<IRent>({
   consecutiveWeeks: { type: 'number', default: 0 },
   createdAt: { type: Date, required: true },
   updatedAt: { type: Date, required: true },
+  createdBy: { type: Schema.Types.ObjectId, required: true, ref: 'users' },
   lastUpdatedBy: { type: Schema.Types.ObjectId, required: true, ref: 'users' },
 });
 export const Rent: Model<IRent> =

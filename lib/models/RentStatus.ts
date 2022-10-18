@@ -13,5 +13,5 @@ const RentStatusSchema = new Schema<IRentStatus>({
 });
 
 export const RentStatus: Model<IRentStatus> =
-  mongoose.models.machine_statuses ||
+  mongoose.models.rent_statuses ||
   model('rent_statuses', RentStatusSchema);
