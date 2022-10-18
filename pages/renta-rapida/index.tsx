@@ -49,7 +49,7 @@ const defaultData = {
     fromTime: defaultInitialDate(addDays(new Date(), 1)),
     endTime: defaultEndDate(addDays(new Date(), 1)),
   },
-  selectedId: null,
+  selectedCustomer: null,
 };
 function addDays(date: Date, days: number) {
   var result = new Date(date);
@@ -64,7 +64,7 @@ function RentaRapida() {
   const [modalIsOpen, setModalIsOpen] = useState(false);
   const [rentPeriod, setRentPeriod] = useState(defaultData.rentPeriod);
   const [deliveryTime, setDeliveryTime] = useState(defaultData.deliveryTime);
-  const [selectedId, setSelectedId] = useState<any>(defaultData.selectedId);
+  const [selectedCustomer, setSelectedCustomer] = useState<any>(defaultData.selectedCustomer);
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
   const [hasErrorSubmitting, setHasErrorSubmitting] = useState<any>({
     error: false,
@@ -99,9 +99,7 @@ function RentaRapida() {
   const handleClickOpen = () => {
     setModalIsOpen(true);
   };
-  const getSelectedCustomer = (id, cList) => {
-    return cList.find((c) => c._id.toString() === id);
-  };
+
   const onChangePeriod = (id, value) => {
     setRentPeriod({ ...rentPeriod, [id]: value });
   };
@@ -116,8 +114,7 @@ function RentaRapida() {
 
     setDeliveryTime({ ...deliveryTime, [id]: value });
   };
-  const selectedCustomer =
-    getSelectedCustomer(selectedId, customerList ? customerList : []) || null;
+
   const handleClose = (addedCustomer, successMessage = null) => {
     setModalIsOpen(false);
     if (addedCustomer && successMessage) {
@@ -137,7 +134,7 @@ function RentaRapida() {
     setHasErrorSubmitting({ error: false, msg: "" });
     setIsSubmitting(true);
     const result = await saveRent({
-      customerId : selectedId,
+      customerId : selectedCustomer._id,
       rentPeriod,
       deliveryTime,
     });
@@ -158,7 +155,7 @@ function RentaRapida() {
 
   const handleReset = () => {
     setActiveStep(0);
-    setSelectedId(defaultData.selectedId);
+    setSelectedCustomer(defaultData.selectedCustomer);
     setRentPeriod(defaultData.rentPeriod);
     setDeliveryTime(defaultData.deliveryTime);
   };
@@ -226,7 +223,7 @@ function RentaRapida() {
                                   customerList={customerList}
                                   citiesList={citiesList}
                                   selectedCustomer={selectedCustomer}
-                                  onSelectCustomer={setSelectedId}
+                                  onSelectCustomer={setSelectedCustomer}
                                 />
                               </Grid>
                             </Grid>
