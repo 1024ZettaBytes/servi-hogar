@@ -5,7 +5,15 @@ import SidebarLayout from "@/layouts/SidebarLayout";
 import { validateServerSideSession } from "../../lib/auth";
 import PageHeader from "@/components/PageHeader";
 import PageTitleWrapper from "@/components/PageTitleWrapper";
-import { Card, Container, Grid, Skeleton, Alert, Box } from "@mui/material";
+import {
+  Card,
+  Container,
+  Grid,
+  Skeleton,
+  Alert,
+  Box,
+  Typography,
+} from "@mui/material";
 import Footer from "@/components/Footer";
 import AddCustomerModal from "@/components/AddCustomerModal";
 import Stepper from "@mui/material/Stepper";
@@ -21,7 +29,7 @@ import {
   useGetCities,
 } from "../api/useRequest";
 import { useSnackbar } from "notistack";
-
+import {addDaysToDate} from "../../lib/client/utils";
 import NextBreadcrumbs from "@/components/Shared/BreadCrums";
 import TablaClientesRenta from "./TablaClientesRenta";
 import RentPeriod from "./RentPeriod";
@@ -38,34 +46,34 @@ const defaultEndDate = (today: Date) => {
   today.setHours(22, 0, 0);
   return today;
 };
-const defaultData = {
-  rentPeriod: {
-    selectedWeeks: 1,
-    useFreeWeeks: true,
-  },
-  deliveryTime: {
-    date: addDays(new Date(), 1),
-    timeOption: "any",
-    fromTime: defaultInitialDate(addDays(new Date(), 1)),
-    endTime: defaultEndDate(addDays(new Date(), 1)),
-  },
-  selectedCustomer: null,
+const defaultData = () => {
+  return {
+    rentPeriod: {
+      selectedWeeks: 1,
+      useFreeWeeks: true,
+    },
+    deliveryTime: {
+      date: addDaysToDate(new Date(), 1),
+      timeOption: "any",
+      fromTime: defaultInitialDate(addDaysToDate(new Date(), 1)),
+      endTime: defaultEndDate(addDaysToDate(new Date(), 1)),
+    },
+    selectedCustomer: null,
+  };
 };
-function addDays(date: Date, days: number) {
-  var result = new Date(date);
-  result.setDate(result.getDate() + days);
-  return result;
-}
 function RentaRapida() {
   const paths = ["Inicio", "Renta Rápida"];
   const { enqueueSnackbar } = useSnackbar();
   const { customerList, customerError } = useGetAllCustomersForRent(getFetcher);
   const { citiesList, citiesError } = useGetCities(getFetcher);
   const [modalIsOpen, setModalIsOpen] = useState(false);
-  const [rentPeriod, setRentPeriod] = useState(defaultData.rentPeriod);
-  const [deliveryTime, setDeliveryTime] = useState(defaultData.deliveryTime);
-  const [selectedCustomer, setSelectedCustomer] = useState<any>(defaultData.selectedCustomer);
+  const [rentPeriod, setRentPeriod] = useState(defaultData().rentPeriod);
+  const [deliveryTime, setDeliveryTime] = useState(defaultData().deliveryTime);
+  const [selectedId, setSelectedCustomer] = useState<any>(
+    defaultData().selectedCustomer
+  );
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
+  const [customerRent, setCustomerRent] = useState<any>(null);
   const [hasErrorSubmitting, setHasErrorSubmitting] = useState<any>({
     error: false,
     msg: "",
@@ -86,13 +94,15 @@ function RentaRapida() {
   ];
   const checkEnabledButton = (selectedCustomer, rentPeriod) => {
     if (activeStep === 0) return selectedCustomer;
-    if (activeStep === 1) return rentPeriod.selectedWeeks > 0;
+    if (activeStep === 1)
+      return selectedCustomer && rentPeriod.selectedWeeks > 0;
     if (activeStep === 2)
       return (
-        deliveryTime.timeOption === "any" ||
-        (deliveryTime.fromTime &&
-          deliveryTime.endTime &&
-          deliveryTime.fromTime.getTime() <= deliveryTime.endTime.getTime())
+        selectedCustomer &&
+        (deliveryTime.timeOption === "any" ||
+          (deliveryTime.fromTime &&
+            deliveryTime.endTime &&
+            deliveryTime.fromTime.getTime() <= deliveryTime.endTime.getTime()))
       );
   };
 
@@ -114,6 +124,11 @@ function RentaRapida() {
 
     setDeliveryTime({ ...deliveryTime, [id]: value });
   };
+  const getSelectedCustomer = (id, cList) => {
+    return cList.find((c) => c._id.toString() === id);
+  };
+  const selectedCustomer =
+    getSelectedCustomer(selectedId, customerList ? customerList : []) || null;
 
   const handleClose = (addedCustomer, successMessage = null) => {
     setModalIsOpen(false);
@@ -133,8 +148,9 @@ function RentaRapida() {
   const handleOnRentSubmit = async () => {
     setHasErrorSubmitting({ error: false, msg: "" });
     setIsSubmitting(true);
+    setCustomerRent(selectedCustomer);
     const result = await saveRent({
-      customerId : selectedCustomer._id,
+      customerId: selectedId,
       rentPeriod,
       deliveryTime,
     });
@@ -145,6 +161,7 @@ function RentaRapida() {
       setHasErrorSubmitting({ error: true, msg: result.msg });
     }
   };
+
   const handleNext = () => {
     setActiveStep((prevActiveStep) => prevActiveStep + 1);
   };
@@ -155,9 +172,10 @@ function RentaRapida() {
 
   const handleReset = () => {
     setActiveStep(0);
-    setSelectedCustomer(defaultData.selectedCustomer);
-    setRentPeriod(defaultData.rentPeriod);
-    setDeliveryTime(defaultData.deliveryTime);
+    setSelectedCustomer(defaultData().selectedCustomer);
+    setRentPeriod(defaultData().rentPeriod);
+    setDeliveryTime(defaultData().deliveryTime);
+    setCustomerRent(null)
   };
   return (
     <>
@@ -229,31 +247,46 @@ function RentaRapida() {
                             </Grid>
                           </>
                         )}
-                        {activeStep === 1 && (
-                          <RentPeriod
-                            selectedWeeks={rentPeriod.selectedWeeks}
-                            useFreeWeeks={rentPeriod.useFreeWeeks}
-                            freeWeeks={selectedCustomer.freeWeeks}
-                            weekPrice={139.0}
-                            onChangePeriod={onChangePeriod}
-                          />
-                        )}
-                        {activeStep === 2 && (
-                          <>
-                            <DeliveryTime
-                              date={deliveryTime.date}
-                              timeOption={deliveryTime.timeOption}
-                              fromTime={deliveryTime.fromTime}
-                              endTime={deliveryTime.endTime}
-                              onChangeTime={onChangeDeliverTime}
+                        {activeStep === 1 ? (
+                          selectedCustomer ? (
+                            <RentPeriod
+                              selectedWeeks={rentPeriod.selectedWeeks}
+                              useFreeWeeks={rentPeriod.useFreeWeeks}
+                              freeWeeks={selectedCustomer.freeWeeks}
+                              weekPrice={139.0}
+                              onChangePeriod={onChangePeriod}
                             />
-                            {hasErrorSubmitting.error && (
-                              <Alert severity="error">
-                                {hasErrorSubmitting.msg}
-                              </Alert>
-                            )}
-                          </>
-                        )}
+                          ) : (
+                            <Typography>
+                              El cliente seleccionado ya no está disponible,
+                              seleccione otro por favor.
+                            </Typography>
+                          )
+                        ) : null}
+                        {activeStep === 2 ? (
+                          selectedCustomer ? (
+                            <>
+                              <DeliveryTime
+                                date={deliveryTime.date}
+                                minDate={new Date()}
+                                timeOption={deliveryTime.timeOption}
+                                fromTime={deliveryTime.fromTime}
+                                endTime={deliveryTime.endTime}
+                                onChangeTime={onChangeDeliverTime}
+                              />
+                              {hasErrorSubmitting.error && (
+                                <Alert severity="error">
+                                  {hasErrorSubmitting.msg}
+                                </Alert>
+                              )}
+                            </>
+                          ) : (
+                            <Typography>
+                              El cliente seleccionado ya no está disponible,
+                              seleccione otro por favor.
+                            </Typography>
+                          )
+                        ) : null}
                         <Box sx={{ mb: 2 }}>
                           <div>
                             {index > 0 && (
@@ -291,7 +324,7 @@ function RentaRapida() {
                   <Paper square elevation={0} sx={{ p: 3 }}>
                     <Alert severity="success">
                       Se generó una renta nueva para el cliente{" "}
-                      {selectedCustomer.name}
+                      {customerRent.name}
                     </Alert>
                     <Button onClick={handleReset} sx={{ mt: 1, mr: 1 }}>
                       Agendar nueva

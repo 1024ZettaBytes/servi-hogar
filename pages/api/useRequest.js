@@ -83,3 +83,9 @@ export const useGetAllVehicles = (fetcher) => {
   return { vehiclesList: data?.data, vehiclesError: error };
 };
 
+// Rents
+export const useGetPendingDeliveries = (fetcher) => {
+  const { data, error } = useSWR(ROUTES.ALL_PENDING_DELIVERIES_API, fetcher);
+  return { deliveriesList: data?.data, deliveriesError: error };
+};
+

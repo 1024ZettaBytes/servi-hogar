@@ -311,7 +311,7 @@ const TablaClientesRenta: FC<TablaClientesRentaProps> = ({
                       cursor: "pointer",
                     }}
                     onClick={() => {
-                      !isUpdating && onSelectCustomer(customer);
+                      !isUpdating && onSelectCustomer(customer._id);
                     }}
                   >
                     <TableCell align="center">

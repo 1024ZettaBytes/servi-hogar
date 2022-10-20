@@ -15,6 +15,7 @@ import { SidebarContext } from 'src/contexts/SidebarContext';
 
 import AddBusinessIcon from '@mui/icons-material/AddBusiness';
 import HomeIcon from '@mui/icons-material/Home';
+import PendingActionsIcon from '@mui/icons-material/PendingActions';
 import ListIcon from '@mui/icons-material/List';
 import LocalShippingIcon from '@mui/icons-material/LocalShipping';
 import ArrowCircleUpIcon from '@mui/icons-material/ArrowCircleUp';
@@ -221,10 +222,29 @@ function SidebarMenu({userRole}) {
                 </NextLink>
               </ListItem>
               <ListItem component="div">
-                <NextLink href="/" passHref>
+                <NextLink href="/entregas-pendientes" passHref>
                   <Button
                     className={
-                      currentRoute === '/applications/messenger' ? 'active' : ''
+                      currentRoute === "/entregas-pendientes"
+                        ? 'active'
+                        : ''
+                    }
+                    disableRipple
+                    component="a"
+                    onClick={closeSidebar}
+                    startIcon={<PendingActionsIcon />}
+                  >
+                    Entregas pendientes
+                  </Button>
+                </NextLink>
+              </ListItem>
+              <ListItem component="div">
+                <NextLink href="/rentas" passHref>
+                  <Button
+                    className={
+                      !currentRoute.includes("/rentas-") && currentRoute.includes("/rentas")
+                        ? 'active'
+                        : ''
                     }
                     disableRipple
                     component="a"

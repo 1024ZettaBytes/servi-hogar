@@ -1,11 +1,10 @@
 import { validateUserPermissions, getUserId } from "../auth/authUtils";
-import {saveRentData} from "../../../lib/data/Rents";
+import { saveRentData } from "../../../lib/data/Rents";
 
 
 async function saveRentAPI(req, res, userId) {
   try{
    const newRent = await saveRentData({...req.body, lastUpdatedBy: userId});
-   //res.status(500).json({ errorMsg: "El periodo seleccionado no es valido" });
    res.status(200).json({ msg: "¡Renta guardada con éxito!", rent: newRent });
   }catch(e){
     console.error(e);

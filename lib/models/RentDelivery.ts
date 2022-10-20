@@ -5,6 +5,10 @@ export interface IRentDelivery extends Document {
   status: string;
   takenAt: Date;
   takenBy: Schema.Types.ObjectId;
+  date: Date,
+  timeOption: string,
+  fromTime: Date,
+  endTime:Date,
   finishedAt: Date;
   createdAt: Date;
   updatedAt: Date;
@@ -24,7 +28,11 @@ const RentDeliverySchema = new Schema<IRentDelivery>({
     ref: 'operators',
     default: null
   },
-  finishedAt: { type: Date, deafult: null },
+  date: { type: Date, required: true },
+  timeOption: { type: String, required:true },
+  fromTime: { type: Date, required: true },
+  endTime:{ type: Date, required: true },
+  finishedAt: { type: Date, default: null },
   createdAt: { type: Date, required: true },
   updatedAt: { type: Date, required: true },
   lastUpdatedBy: { type: Schema.Types.ObjectId, required: true, ref: 'users' }

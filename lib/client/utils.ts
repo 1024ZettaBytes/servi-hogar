@@ -16,11 +16,30 @@ export const getCoordinatesFromUrl = (
 ): { lat: number; lng: number } => {
   const lowerUrl = url.toLowerCase();
   const _3dSplit = lowerUrl.split('!3d');
-  let _4dSplit = _3dSplit[_3dSplit.length-1].split('!4d');
+  let _4dSplit = _3dSplit[_3dSplit.length - 1].split('!4d');
   if (_4dSplit[1].includes('?hl')) {
     const index = _4dSplit[1].indexOf('?hl');
     const toReplace = _4dSplit[1].substring(index);
     _4dSplit[1] = _4dSplit[1].replace(toReplace, '');
   }
-  return { lat: Number.parseFloat(_4dSplit[0]), lng: Number.parseFloat(_4dSplit[1]) };
+  return {
+    lat: Number.parseFloat(_4dSplit[0]),
+    lng: Number.parseFloat(_4dSplit[1])
+  };
 };
+
+export const getTimeFromDate = (
+  date: Date
+): { hours: number; minutes: number; seconds: number } => {
+  return {
+    hours: date.getHours(),
+    minutes: date.getMinutes(),
+    seconds: date.getSeconds()
+  };
+};
+
+export const addDaysToDate = (date: Date, days: number):Date => {
+  var result = new Date(date);
+  result.setDate(result.getDate() + days);
+  return result;
+}
