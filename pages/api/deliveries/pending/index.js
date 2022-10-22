@@ -1,8 +1,6 @@
-import { validateUserPermissions, getUserId } from "../../auth/authUtils";
+import { validateUserPermissions } from "../../auth/authUtils";
 import {
   getPendingDeliveriesData,
-  updateDeliveryTimeData,
-  cancelDeliveryData,
 } from "../../../../lib/data/Deliveries";
 import formidable from "formidable";
 export const config = {
@@ -20,29 +18,8 @@ async function getPendingDeliveriesAPI(req, res) {
   }
 }
 
-async function updateDeliveryTimeAPI(req, res, userId) {
-  try {
-    await updateDeliveryTimeData({ ...req.body, lastUpdatedBy: userId });
-    res.status(200).json({ msg: "¡Horario de entrega actualizado con éxito!" });
-  } catch (e) {
-    console.error(e);
-    res.status(500).json({ errorMsg: e.message });
-  }
-}
-
-async function cancelDeliveryAPI(req, res, userId) {
-  try {
-    await cancelDeliveryData({ ...req.body, lastUpdatedBy: userId });
-    res.status(200).json({ msg: "Entrega cancelada" });
-  } catch (e) {
-    console.error(e);
-    res.status(500).json({ errorMsg: e.message });
-  }
-}
-
 async function handler(req, res) {
   const validRole = await validateUserPermissions(req, res, ["ADMIN", "AUX"]);
-  const userId = await getUserId(req);
   if (validRole)
     switch (req.method) {
       case "GET":
@@ -60,10 +37,8 @@ async function handler(req, res) {
         }
         break;
       case "PUT":
-        await updateDeliveryTimeAPI(req, res, userId);
         break;
       case "DELETE":
-        await cancelDeliveryAPI(req, res, userId);
         break;
     }
 }
