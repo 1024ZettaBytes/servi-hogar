@@ -7,6 +7,7 @@ import styles from "./breadcrum.module.css";
 const getUrlPaths = (paths) => {
   let pathsArray = ["/"];
   for (let i = 1; i < paths.length; i++) {
+    if(paths[i])
     pathsArray.push("/"+paths[i]?.toLowerCase());
   }
   return pathsArray;

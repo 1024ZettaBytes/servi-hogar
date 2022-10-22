@@ -225,7 +225,7 @@ function SidebarMenu({userRole}) {
                 <NextLink href="/entregas-pendientes" passHref>
                   <Button
                     className={
-                      currentRoute === "/entregas-pendientes"
+                      currentRoute.includes("/entregas-pendientes")
                         ? 'active'
                         : ''
                     }

@@ -5,6 +5,7 @@ export interface IRentDelivery extends Document {
   status: string;
   takenAt: Date;
   takenBy: Schema.Types.ObjectId;
+  leftAccesories: object;
   date: Date,
   timeOption: string,
   fromTime: Date,
@@ -28,6 +29,7 @@ const RentDeliverySchema = new Schema<IRentDelivery>({
     ref: 'operators',
     default: null
   },
+  leftAccesories: {type: Object, default: {}},
   date: { type: Date, required: true },
   timeOption: { type: String, required:true },
   fromTime: { type: Date, required: true },

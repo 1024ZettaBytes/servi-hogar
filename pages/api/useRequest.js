@@ -57,6 +57,11 @@ export const useGetAllMachines = (fetcher) => {
   return { machinesData: data?.data, machinesError: error };
 };
 
+export const useGetMachinesForRent = (fetcher) => {
+  const { data, error } = useSWR(ROUTES.ALL_MACHINES_FOR_RENT_API, fetcher);
+  return { machinesData: data?.data, machinesError: error };
+};
+
 export const useGetMachinesStatus = (fetcher) => {
   const { data, error } = useSWR(ROUTES.ALL_MACHINES_STATUS_API, fetcher);
   return { machinesStatusList: data?.data, machinesStatusError: error };
@@ -83,9 +88,13 @@ export const useGetAllVehicles = (fetcher) => {
   return { vehiclesList: data?.data, vehiclesError: error };
 };
 
-// Rents
+// Deliveries
 export const useGetPendingDeliveries = (fetcher) => {
   const { data, error } = useSWR(ROUTES.ALL_PENDING_DELIVERIES_API, fetcher);
   return { deliveriesList: data?.data, deliveriesError: error };
 };
+export const useGetDeliveryById = (fetcher, id) => {
+  const { data, error } = useSWR(id ? ROUTES.DELIVERY_BY_ID_API.replace(":id", id): null, fetcher);
+  return { delivery: data?.data, deliveryByIdError: error };
+}
 
