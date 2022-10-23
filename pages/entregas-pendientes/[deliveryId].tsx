@@ -188,7 +188,7 @@ function RentaRapida() {
     //setCustomerRent(selectedCustomer);
     const result = await completeDelivery(attached.contract.file, {
       deliveryId,
-      customer: customerToEdit,
+      customerData: customerToEdit,
       deliveredMachine,
       leftAccesories,
       isOk,
@@ -664,6 +664,7 @@ function RentaRapida() {
                               )}
                               <Grid item lg={4} m={1}>
                                 <MuiFileInput
+                                required={!attached.contract.file}
                                   placeholder={"No seleccionada"}
                                   label={"Foto de contrato"}
                                   value={attached.contract?.file}
@@ -702,7 +703,7 @@ function RentaRapida() {
                                 </Grid>
                               )}
                               {hasErrorSubmitting.error && (
-                                <Grid item lg={4} m={1}>
+                                <Grid item lg={6} m={1}>
                                   <Alert severity="error">
                                     {hasErrorSubmitting.msg}
                                   </Alert>
