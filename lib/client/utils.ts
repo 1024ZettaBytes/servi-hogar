@@ -43,3 +43,8 @@ export const addDaysToDate = (date: Date, days: number):Date => {
   result.setDate(result.getDate() + days);
   return result;
 }
+
+export const getFileExtension = (fileName: string): string =>{
+  const splited = fileName.split(".");
+  return splited[splited.length-1];
+}

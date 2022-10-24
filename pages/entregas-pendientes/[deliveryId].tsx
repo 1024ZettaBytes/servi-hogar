@@ -7,6 +7,7 @@ import PageHeader from "@/components/PageHeader";
 import PageTitleWrapper from "@/components/PageTitleWrapper";
 import Image from "next/image";
 import { MuiFileInput } from "mui-file-input";
+import NextLink from "next/link";
 import {
   Card,
   Container,
@@ -75,7 +76,7 @@ function RentaRapida() {
   });
 
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
-  const [customerRent, setCustomerRent] = useState<any>(null);
+
   const [hasErrorSubmitting, setHasErrorSubmitting] = useState<any>({
     error: false,
     msg: "",
@@ -181,11 +182,8 @@ function RentaRapida() {
 
   const handleOnSubmit = async (event) => {
     event.preventDefault();
-
     setHasErrorSubmitting({ error: false, msg: "" });
     setIsSubmitting(true);
-
-    //setCustomerRent(selectedCustomer);
     const result = await completeDelivery(attached.contract.file, {
       deliveryId,
       customerData: customerToEdit,
@@ -193,10 +191,9 @@ function RentaRapida() {
       leftAccesories,
       isOk,
     });
-    console.log(result);
     setIsSubmitting(false);
     if (!result.error) {
-      //handleNext(event);
+      handleNext(event);
     } else {
       setHasErrorSubmitting({ error: true, msg: result.msg });
     }
@@ -209,11 +206,6 @@ function RentaRapida() {
 
   const handleBack = () => {
     setActiveStep((prevActiveStep) => prevActiveStep - 1);
-  };
-
-  const handleReset = () => {
-    setActiveStep(0);
-    setCustomerRent(null);
   };
 
   const onChangeOk = (id, value) => {
@@ -292,7 +284,7 @@ function RentaRapida() {
                               </Grid>
                               <Grid item xs={12} sm={12} lg={12} m={1}>
                                 <FormLabel id="demo-controlled-radio-buttons-group">
-                                  ¿Son correctos?
+                                  ¿Es la persona correcta?
                                 </FormLabel>
                                 <RadioGroup
                                   row
@@ -744,12 +736,13 @@ function RentaRapida() {
                 {activeStep === steps.length && (
                   <Paper square elevation={0} sx={{ p: 3 }}>
                     <Alert severity="success">
-                      Se generó una renta nueva para el cliente{" "}
-                      {customerRent.name}
+                      La entrega fue completada
                     </Alert>
-                    <Button onClick={handleReset} sx={{ mt: 1, mr: 1 }}>
-                      Agendar nueva
+                    <NextLink href="/entregas-pendientes">
+                    <Button  sx={{ mt: 1, mr: 1 }}>
+                      Lista de entregas pendientes
                     </Button>
+                    </NextLink>
                   </Paper>
                 )}
               </Card>

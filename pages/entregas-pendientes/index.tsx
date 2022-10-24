@@ -20,8 +20,7 @@ function Rentas({ session }) {
   const generalError = deliveriesError;
   const completeData = deliveriesList;
   const { user } = session;
-
-
+  
   return (
     <>
       <Head>

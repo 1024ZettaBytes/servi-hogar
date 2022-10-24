@@ -1,7 +1,7 @@
 import { validateUserPermissions, getUserId } from "../../auth/authUtils";
 import {
   getPendingDeliveriesData,
-  markCompleteDEliveryData
+  markCompleteDeliveryData
 } from "../../../../lib/data/Deliveries";
 import formidable from "formidable";
 export const config = {
@@ -19,7 +19,7 @@ async function getPendingDeliveriesAPI(req, res) {
   }
 }
 
-async function completeDeliveryAPI(req, res) {
+async function completeDeliveryAPI(req, res, userId) {
   try{
     const form = new formidable.IncomingForm();
     const {fields, files} = await new Promise(function (resolve, reject) {
@@ -34,8 +34,8 @@ async function completeDeliveryAPI(req, res) {
   });
 
   const body = JSON.parse(fields?.body);
-  const completeRent = await markCompleteDEliveryData({...body, files});
-  res.status(200).json({ msg: "ok" });
+  const completeRent = await markCompleteDeliveryData({...body, files, lastUpdatedBy: userId});
+  res.status(200).json({ msg: "La entrega ha sido completada." });
 }catch(e){
   console.error(e);
   res.status(500).json({ errorMsg: e.message });

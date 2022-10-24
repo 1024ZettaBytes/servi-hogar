@@ -6,6 +6,7 @@ export interface IRent extends Document {
   customer: Schema.Types.ObjectId;
   machine: Schema.Types.ObjectId;
   accesories: object;
+  contractUrl: string;
   initialWeeks: Number;
   initialPay: Number;
   usedFreeWeeks: Number;
@@ -41,6 +42,7 @@ const RentSchema = new Schema<IRent>({
     type: Object,
     default:{}
   },
+  contractUrl:{ type:String, default: ''},
   initialWeeks: { type: 'number', required: true },
   initialPay: { type: 'number', required: true },
   usedFreeWeeks: { type: 'number', required: true },
