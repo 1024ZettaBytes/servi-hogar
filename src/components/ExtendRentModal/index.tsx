@@ -13,17 +13,20 @@ import {
   Container,
   Skeleton,
   Typography,
-
 } from "@mui/material";
+import AddPaymentModal from "../AddPaymentModal";
 import RentPeriod from "../../../pages/renta-rapida/RentPeriod";
 import { LoadingButton } from "@mui/lab";
-import { useGetRentById, getFetcher } from "../../../pages/api/useRequest";
+import { useGetRentById, getFetcher, refreshData } from "../../../pages/api/useRequest";
 import { extendRent } from "../../../lib/client/rentsFetch";
 import { capitalizeFirstLetter, addDaysToDate } from "lib/client/utils";
 import { format } from "date-fns";
 import es from "date-fns/locale/es";
 import numeral from "numeral";
+import { useSnackbar } from "notistack";
+import { ROUTES } from "lib/consts/API_URL_CONST";
 function ExtendRentModal(props) {
+  const { enqueueSnackbar } = useSnackbar();
   const { rentId, handleOnClose, open } = props;
   const { rent, rentByIdError } = useGetRentById(getFetcher, rentId);
   const [rentPeriod, setRentPeriod] = useState({
@@ -36,18 +39,18 @@ function ExtendRentModal(props) {
     error: false,
     msg: "",
   });
+  const [paymentModalIsOpen, setPaymentModalIsOpen] = useState<boolean>(false);
 
-  
   const onChangePeriod = (id, value) => {
     setRentPeriod({ ...rentPeriod, [id]: value });
   };
   const checkCustomerBalance = () => {
-    return rent ? (
-      rent.customer?.balance >=
-      (rentPeriod.selectedWeeks -
-        (rentPeriod.useFreeWeeks ? rent.customer.freeWeeks : 0)) *
-        139.0
-    ): 0;
+    return rent
+      ? rent.customer?.balance >=
+          (rentPeriod.selectedWeeks -
+            (rentPeriod.useFreeWeeks ? rent.customer.freeWeeks : 0)) *
+            139.0
+      : 0;
   };
   const checkEnabledButton = () => {
     return (
@@ -58,14 +61,21 @@ function ExtendRentModal(props) {
   };
   const customerHasBalance = checkCustomerBalance();
   const submitButtonEnabled = checkEnabledButton();
-
+  const getToPay = (): number => {
+    return (
+      (rentPeriod.selectedWeeks -
+        (rentPeriod.useFreeWeeks ? rent.customer.freeWeeks : 0)) *
+        139.0 -
+      rent.customer?.balance
+    );
+  };
   const handleOnSubmit = async (event) => {
     event.preventDefault();
     setHasErrorSubmitting({ error: false, msg: "" });
     setIsSubmitting(true);
     const result = await extendRent({
       rentId,
-      rentPeriod
+      rentPeriod,
     });
     setIsSubmitting(false);
     if (!result.error) {
@@ -74,7 +84,20 @@ function ExtendRentModal(props) {
       setHasErrorSubmitting({ error: true, msg: result.msg });
     }
   };
-
+  const handleClosePaymentModal = (addedPayment, successMessage = null) => {
+    setPaymentModalIsOpen(false);
+    if (addedPayment && successMessage) {
+      enqueueSnackbar(successMessage, {
+        variant: "success",
+        anchorOrigin: {
+          vertical: "top",
+          horizontal: "center",
+        },
+        autoHideDuration: 1500,
+      });
+    }
+    refreshData(ROUTES.RENT_BY_ID_API.replace(":id", rentId))
+  };
   const handleClose = () => {
     setHasErrorSubmitting({ error: false, msg: "" });
     setIsSubmitting(false);
@@ -110,184 +133,190 @@ function ExtendRentModal(props) {
                       animation="wave"
                     />
                   ) : (
-                    <Grid container>
-                      <Grid
-                        item
-                        xs={12}
-                        sm={12}
-                        lg={2}
-                        mt={1}
-                        sx={{ textAlign: { lg: "center" } }}
-                      >
-                        <Box>
-                          <Typography gutterBottom variant="subtitle2">
-                            # renta
-                          </Typography>
-                          <Typography color="black" gutterBottom>
-                            {rent.num}
-                          </Typography>
-                        </Box>
-                      </Grid>
-                      <Grid
-                        item
-                        xs={12}
-                        sm={12}
-                        lg={4}
-                        mt={1}
-                        sx={{ textAlign: "left" }}
-                      >
-                        <Box>
-                          <Typography gutterBottom variant="subtitle2">
-                            Cliente
-                          </Typography>
-                          <Typography color="black" gutterBottom>
-                            {rent?.customer?.name}
-                          </Typography>
-                        </Box>
-                      </Grid>
-                      <Grid
-                        item
-                        xs={12}
-                        sm={12}
-                        lg={2}
-                        mt={1}
-                        sx={{ textAlign: "left" }}
-                      >
-                        <Box>
-                          <Typography gutterBottom variant="subtitle2">
-                            Vencimiento
-                          </Typography>
-                          <Typography color="black" gutterBottom>
-                            {capitalizeFirstLetter(
-                              format(new Date(rent?.endDate), "LLLL dd yyyy", {
-                                locale: es,
-                              })
-                            )}
-                          </Typography>
-                        </Box>
-                      </Grid>
-                      <Grid
-                        item
-                        xs={12}
-                        sm={12}
-                        lg={4}
-                        mt={1}
-                        sx={{ textAlign: { lg: "center" } }}
-                      >
-                        <Box>
-                          <Typography gutterBottom variant="subtitle2">
-                            Semanas consecutivas
-                          </Typography>
-                          <Typography color="black" gutterBottom>
-                            {rent.totalWeeks}
-                          </Typography>
-                        </Box>
-                      </Grid>
-                      <Grid
-                        item
-                        xs={12}
-                        sm={12}
-                        lg={2}
-                        mt={1}
-                        sx={{ textAlign: { lg: "center" } }}
-                      >
-                        <Box>
-                          <Typography gutterBottom variant="subtitle2">
-                            Saldo de cliente
-                          </Typography>
-                          <Typography color="black" gutterBottom>
-                            {numeral(rent.customer?.balance).format(
-                              `$${rent.customer?.balance}0,0.00`
-                            )}
-                          </Typography>
-                        </Box>
-                      </Grid>
-                      <Grid item xs={0} sm={0} lg={6} mt={1} />
-                      <Grid
-                        item
-                        xs={12}
-                        sm={12}
-                        lg={4}
-                        mt={1}
-                        sx={{ textAlign: { lg: "center" } }}
-                      >
-                        <Box>
-                          <Typography gutterBottom variant="subtitle2">
-                            Semanas totales
-                          </Typography>
-                          <Typography color="black" gutterBottom>
-                            {rent.customer?.totalRentWeeks}
-                          </Typography>
-                        </Box>
-                      </Grid>
-
-                      <Grid item lg={12} mt={4}>
-                        <RentPeriod
-                          label={"Extender"}
-                          selectedWeeks={rentPeriod.selectedWeeks}
-                          useFreeWeeks={rentPeriod.useFreeWeeks}
-                          freeWeeks={rent.customer?.freeWeeks}
-                          weekPrice={139.0}
-                          onChangePeriod={onChangePeriod}
-                        />
-                      </Grid>
-                      {!customerHasBalance && (
-                        <Grid item lg={12}>
-                          <Alert
-                            severity="warning"
-                            action={
-                              <Button
-                                fullWidth
-                                size="medium"
-                                variant="outlined"
-                                onClick={() => handleClose()}
-                              >
-                                NUEVO PAGO
-                              </Button>
-                            }
-                          >
-                            El cliente no tiene el saldo suficiente, por favor
-                            agregue un pago nuevo
-                          </Alert>
+                    <>
+                      <Grid container>
+                        <Grid
+                          item
+                          xs={12}
+                          sm={12}
+                          lg={2}
+                          mt={1}
+                          sx={{ textAlign: { lg: "center" } }}
+                        >
+                          <Box>
+                            <Typography gutterBottom variant="subtitle2">
+                              # renta
+                            </Typography>
+                            <Typography color="black" gutterBottom>
+                              {rent.num}
+                            </Typography>
+                          </Box>
                         </Grid>
-                      )}
-                      <Grid item lg={9}></Grid>
-                      <Grid
-                        item
-                        xs={12}
-                        sm={12}
-                        lg={3}
-                        mt={1}
-                        sx={{ textAlign: { lg: "center" } }}
-                      >
-                        <Box>
-                          <Typography gutterBottom variant="h5">
-                            Nueva fecha de vencimiento
-                          </Typography>
-                          <Typography color="black" gutterBottom>
-                            {capitalizeFirstLetter(
-                              format(
-                                addDaysToDate(
+                        <Grid
+                          item
+                          xs={12}
+                          sm={12}
+                          lg={4}
+                          mt={1}
+                          sx={{ textAlign: "left" }}
+                        >
+                          <Box>
+                            <Typography gutterBottom variant="subtitle2">
+                              Cliente
+                            </Typography>
+                            <Typography color="black" gutterBottom>
+                              {rent?.customer?.name}
+                            </Typography>
+                          </Box>
+                        </Grid>
+                        <Grid
+                          item
+                          xs={12}
+                          sm={12}
+                          lg={2}
+                          mt={1}
+                          sx={{ textAlign: "left" }}
+                        >
+                          <Box>
+                            <Typography gutterBottom variant="subtitle2">
+                              Vencimiento
+                            </Typography>
+                            <Typography color="black" gutterBottom>
+                              {capitalizeFirstLetter(
+                                format(
                                   new Date(rent?.endDate),
-                                  rentPeriod.selectedWeeks * 7
-                                ),
-                                "LLLL dd yyyy",
-                                {
-                                  locale: es,
-                                }
-                              )
-                            )}
-                          </Typography>
-                        </Box>
+                                  "LLLL dd yyyy",
+                                  {
+                                    locale: es,
+                                  }
+                                )
+                              )}
+                            </Typography>
+                          </Box>
+                        </Grid>
+                        <Grid
+                          item
+                          xs={12}
+                          sm={12}
+                          lg={4}
+                          mt={1}
+                          sx={{ textAlign: { lg: "center" } }}
+                        >
+                          <Box>
+                            <Typography gutterBottom variant="subtitle2">
+                              Semanas consecutivas
+                            </Typography>
+                            <Typography color="black" gutterBottom>
+                              {rent.totalWeeks}
+                            </Typography>
+                          </Box>
+                        </Grid>
+                        <Grid
+                          item
+                          xs={12}
+                          sm={12}
+                          lg={2}
+                          mt={1}
+                          sx={{ textAlign: { lg: "center" } }}
+                        >
+                          <Box>
+                            <Typography gutterBottom variant="subtitle2">
+                              Saldo de cliente
+                            </Typography>
+                            <Typography color="black" gutterBottom>
+                              {numeral(rent.customer?.balance).format(
+                                `$${rent.customer?.balance}0,0.00`
+                              )}
+                            </Typography>
+                          </Box>
+                        </Grid>
+                        <Grid item xs={0} sm={0} lg={6} mt={1} />
+                        <Grid
+                          item
+                          xs={12}
+                          sm={12}
+                          lg={4}
+                          mt={1}
+                          sx={{ textAlign: { lg: "center" } }}
+                        >
+                          <Box>
+                            <Typography gutterBottom variant="subtitle2">
+                              Semanas totales
+                            </Typography>
+                            <Typography color="black" gutterBottom>
+                              {rent.customer?.totalRentWeeks}
+                            </Typography>
+                          </Box>
+                        </Grid>
+
+                        <Grid item lg={12} mt={4}>
+                          <RentPeriod
+                            label={"Extender"}
+                            selectedWeeks={rentPeriod.selectedWeeks}
+                            useFreeWeeks={rentPeriod.useFreeWeeks}
+                            freeWeeks={rent.customer?.freeWeeks}
+                            weekPrice={139.0}
+                            onChangePeriod={onChangePeriod}
+                          />
+                        </Grid>
+                        {!customerHasBalance && (
+                          <Grid item lg={12}>
+                            <Alert
+                              severity="warning"
+                              action={
+                                <Button
+                                  fullWidth
+                                  size="medium"
+                                  variant="outlined"
+                                  onClick={() => setPaymentModalIsOpen(true)}
+                                >
+                                  NUEVO PAGO
+                                </Button>
+                              }
+                            >
+                              El cliente no tiene el saldo suficiente, por favor
+                              agregue un pago nuevo
+                            </Alert>
+                          </Grid>
+                        )}
+                        <Grid item lg={9}></Grid>
+                        <Grid
+                          item
+                          xs={12}
+                          sm={12}
+                          lg={3}
+                          mt={1}
+                          sx={{ textAlign: { lg: "center" } }}
+                        >
+                          <Box>
+                            <Typography gutterBottom variant="h5">
+                              Nueva fecha de vencimiento
+                            </Typography>
+                            <Typography color="black" gutterBottom>
+                              {capitalizeFirstLetter(
+                                format(
+                                  addDaysToDate(
+                                    new Date(rent?.endDate),
+                                    rentPeriod.selectedWeeks * 7
+                                  ),
+                                  "LLLL dd yyyy",
+                                  {
+                                    locale: es,
+                                  }
+                                )
+                              )}
+                            </Typography>
+                          </Box>
+                        </Grid>
                       </Grid>
-                    </Grid>
+                    </>
                   )}
                 </Grid>
-                {hasErrorSubmitting.error &&
-                <Grid item lg={12}>
-                <Alert severity="error">{hasErrorSubmitting.msg}</Alert>
-                </Grid>
-}
+                {hasErrorSubmitting.error && (
+                  <Grid item lg={12}>
+                    <Alert severity="error">{hasErrorSubmitting.msg}</Alert>
+                  </Grid>
+                )}
                 <Grid item lg={12}>
                   <Grid
                     container
@@ -321,6 +350,15 @@ function ExtendRentModal(props) {
               </Grid>
             </Container>
           </Box>
+          {paymentModalIsOpen && (
+            <AddPaymentModal
+              handleOnClose={handleClosePaymentModal}
+              open={paymentModalIsOpen}
+              customerId={rent.customer?._id}
+              reason={"RENT_EXT"}
+              amount={getToPay()}
+            />
+          )}
         </CardContent>
       </Card>
     </Dialog>

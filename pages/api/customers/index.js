@@ -9,6 +9,7 @@ async function getCustomersAPI( req, res ) {
   try {
     
     const allCustomers = await getCustomersData();
+    throw new Error("Error en clientes");
     res.status(200).json({ data: allCustomers });
   } catch (e) {
     console.error(e);

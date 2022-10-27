@@ -168,7 +168,6 @@ const TablaRentasActuales: FC<TablaRentasActualesProps> = ({
     <>
       <Card>
         <CardHeader
-        tit
           action={
             <Box width={200}>
               <TextField

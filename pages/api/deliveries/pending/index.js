@@ -34,7 +34,7 @@ async function completeDeliveryAPI(req, res, userId) {
   });
 
   const body = JSON.parse(fields?.body);
-  const completeRent = await markCompleteDeliveryData({...body, files, lastUpdatedBy: userId});
+  await markCompleteDeliveryData({...body, files, lastUpdatedBy: userId});
   res.status(200).json({ msg: "La entrega ha sido completada." });
 }catch(e){
   console.error(e);
