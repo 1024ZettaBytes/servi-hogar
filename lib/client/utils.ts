@@ -1,3 +1,9 @@
+function startOfWeek(dt):Date {
+  const day = 24 * 60 * 60 * 1000;
+  const weekday = dt.getDay();
+  return new Date(dt.getTime() - Math.abs(0 - weekday) * day);
+}
+
 export const capitalizeFirstLetter = (str: string) => {
   const capitalizedDate = str.charAt(0).toUpperCase() + str.slice(1);
   return capitalizedDate;
@@ -44,7 +50,27 @@ export const addDaysToDate = (date: Date, days: number):Date => {
   return result;
 }
 
+export const setDateToInitial = (date: Date):Date => {
+  var result = new Date(date);
+  result.setHours(0, 0, 0, 0);
+  return result;
+}
+
 export const getFileExtension = (fileName: string): string =>{
   const splited = fileName.split(".");
   return splited[splited.length-1];
+}
+
+export const dateDiffInDays = (initial: Date, end: Date):number =>{
+  const _MS_PER_DAY = 1000 * 60 * 60 * 24;
+  // Discard the time and time-zone information.
+  const utc1 = Date.UTC(initial.getFullYear(), initial.getMonth(), initial.getDate());
+  const utc2 = Date.UTC(end.getFullYear(), end.getMonth(), end.getDate());
+
+  return Math.floor((utc2 - utc1) / _MS_PER_DAY);
+}
+
+export const dateDiffInWeeks = (initial: Date, end: Date):number =>{
+  const week = 7 * 24 * 60 * 60 * 1000;
+return Math.ceil((startOfWeek(initial).getTime() - startOfWeek(end).getTime()) / week);
 }

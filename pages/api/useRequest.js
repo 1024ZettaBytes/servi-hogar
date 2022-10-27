@@ -87,7 +87,15 @@ export const useGetAllVehicles = (fetcher) => {
   const { data, error } = useSWR(ROUTES.ALL_VEHICLES_API, fetcher);
   return { vehiclesList: data?.data, vehiclesError: error };
 };
-
+// Rents
+export const useGetRents = (fetcher) => {
+  const { data, error } = useSWR(ROUTES.ALL_RENTS_API, fetcher);
+  return { rentsData: data?.data, rentsError: error };
+};
+export const useGetRentById = (fetcher, id) => {
+  const { data, error } = useSWR(id ? ROUTES.RENT_BY_ID_API.replace(":id", id): null, fetcher);
+  return { rent: data?.data, rentByIdError: error };
+}
 // Deliveries
 export const useGetPendingDeliveries = (fetcher) => {
   const { data, error } = useSWR(ROUTES.ALL_PENDING_DELIVERIES_API, fetcher);

@@ -5,6 +5,7 @@ import SidebarLayout from "@/layouts/SidebarLayout";
 import { validateServerSideSession } from "../../lib/auth";
 import PageHeader from "@/components/PageHeader";
 import PageTitleWrapper from "@/components/PageTitleWrapper";
+import numeral from "numeral";
 import {
   Card,
   Container,
@@ -29,13 +30,15 @@ import {
   useGetCities,
 } from "../api/useRequest";
 import { useSnackbar } from "notistack";
-import {addDaysToDate} from "../../lib/client/utils";
+import { addDaysToDate } from "../../lib/client/utils";
 import NextBreadcrumbs from "@/components/Shared/BreadCrums";
 import TablaClientesRenta from "./TablaClientesRenta";
 import RentPeriod from "./RentPeriod";
 import DeliveryTime from "./DeliveryTime";
 import { LoadingButton } from "@mui/lab";
 import { saveRent } from "lib/client/rentsFetch";
+import FormatModal from "@/components/FormatModal";
+import {DELIVERY_FORMAT} from "../../lib/consts/OBJ_CONTS"
 
 const defaultInitialDate = (today: Date) => {
   today.setHours(8, 0, 0);
@@ -61,12 +64,25 @@ const defaultData = () => {
     selectedCustomer: null,
   };
 };
+
+const getFormatForDelivery = (rent)=>{
+  let format = DELIVERY_FORMAT;
+  format = format.replace("_dNum", rent?.num);
+  format = format.replace("_cName", rent?.customer?.name);
+  format = format.replace("_cCell", rent?.customer?.cell);
+  format = format.replace("_cStreet", rent?.customer?.currentResidence?.street);
+  format = format.replace("_cSuburb", rent?.customer?.currentResidence?.suburb);
+  format = format.replace("_cRef", rent?.customer?.currentResidence?.residenceRef);
+  format = format.replace("_rPay", numeral(rent?.initialPay).format(`${rent?.initialPay}0,0.00`));
+  return format;
+};
 function RentaRapida() {
   const paths = ["Inicio", "Renta Rápida"];
   const { enqueueSnackbar } = useSnackbar();
   const { customerList, customerError } = useGetAllCustomersForRent(getFetcher);
   const { citiesList, citiesError } = useGetCities(getFetcher);
   const [modalIsOpen, setModalIsOpen] = useState(false);
+  const [formatIsOpen, setFormatIsOpen] = useState(false);
   const [rentPeriod, setRentPeriod] = useState(defaultData().rentPeriod);
   const [deliveryTime, setDeliveryTime] = useState(defaultData().deliveryTime);
   const [selectedId, setSelectedCustomer] = useState<any>(
@@ -154,9 +170,12 @@ function RentaRapida() {
       rentPeriod,
       deliveryTime,
     });
+    const rent = {...result.rent, customer:selectedCustomer};
+    setCustomerRent(rent);
     setIsSubmitting(false);
     if (!result.error) {
       handleNext();
+      setFormatIsOpen(true);
     } else {
       setHasErrorSubmitting({ error: true, msg: result.msg });
     }
@@ -175,7 +194,7 @@ function RentaRapida() {
     setSelectedCustomer(defaultData().selectedCustomer);
     setRentPeriod(defaultData().rentPeriod);
     setDeliveryTime(defaultData().deliveryTime);
-    setCustomerRent(null)
+    setCustomerRent(null);
   };
   return (
     <>
@@ -250,6 +269,7 @@ function RentaRapida() {
                         {activeStep === 1 ? (
                           selectedCustomer ? (
                             <RentPeriod
+                              label="Se rentará por"
                               selectedWeeks={rentPeriod.selectedWeeks}
                               useFreeWeeks={rentPeriod.useFreeWeeks}
                               freeWeeks={selectedCustomer.freeWeeks}
@@ -324,7 +344,7 @@ function RentaRapida() {
                   <Paper square elevation={0} sx={{ p: 3 }}>
                     <Alert severity="success">
                       Se generó una renta nueva para el cliente{" "}
-                      {customerRent.name}
+                      {customerRent?.customer?.name}
                     </Alert>
                     <Button onClick={handleReset} sx={{ mt: 1, mr: 1 }}>
                       Agendar nueva
@@ -344,6 +364,18 @@ function RentaRapida() {
           customerList={customerList}
         />
       ) : null}
+
+      {formatIsOpen && (
+        <FormatModal
+          open={formatIsOpen}
+          title="Formato de entrega"
+          text=""
+          formatText={getFormatForDelivery(customerRent)}
+          onAccept={() => {
+            setFormatIsOpen(false);
+          }}
+        />
+      )}
       <Footer />
     </>
   );

@@ -11,6 +11,7 @@ import PropTypes from "prop-types";
 import numeral from "numeral";
 interface RentPeriodProps {
   className?: string;
+  label: string;
   selectedWeeks: number;
   useFreeWeeks: boolean;
   weekPrice: number;
@@ -18,6 +19,7 @@ interface RentPeriodProps {
   onChangePeriod: Function;
 }
 const RentPeriod: FC<RentPeriodProps> = ({
+  label,
   freeWeeks,
   onChangePeriod,
   weekPrice,
@@ -35,7 +37,7 @@ const RentPeriod: FC<RentPeriodProps> = ({
       <Grid container p={1} spacing={1}>
         <Grid item lg={2}>
         <TextField
-              label="Se rentará por"
+              label={label}
               type="number"
               value={selectedWeeks}
               variant="outlined"
@@ -77,6 +79,7 @@ const RentPeriod: FC<RentPeriodProps> = ({
   );
 };
 RentPeriod.propTypes = {
+  label: PropTypes.string.isRequired,
   selectedWeeks: PropTypes.number.isRequired,
   useFreeWeeks: PropTypes.bool.isRequired,
   weekPrice: PropTypes.number.isRequired,
