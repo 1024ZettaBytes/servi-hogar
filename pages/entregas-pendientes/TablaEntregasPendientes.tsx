@@ -217,9 +217,9 @@ const TablaEntregasPendientes: FC<TablaEntregasPendientesProps> = ({
             <TableHead>
               <TableRow>
                 <TableCell align="center"># de renta</TableCell>
-                {
-                  //<TableCell align="center">Operador</TableCell>
-                }
+                
+                <TableCell align="center">Cliente</TableCell>
+                
                 <TableCell align="center">Estado</TableCell>
                 <TableCell align="center">Fecha solicitada</TableCell>
                 <TableCell align="center">Horario Especial</TableCell>
@@ -241,7 +241,7 @@ const TablaEntregasPendientes: FC<TablaEntregasPendientesProps> = ({
                         {delivery?.rent?.num}
                       </Typography>
                     </TableCell>
-                    {/*<TableCell align="center">
+                    <TableCell align="center">
                     <Typography
                       variant="body1"
                       fontWeight="bold"
@@ -249,9 +249,9 @@ const TablaEntregasPendientes: FC<TablaEntregasPendientesProps> = ({
                       gutterBottom
                       noWrap
                     >
-                      {delivery?.takenBy?.name}
+                      {delivery?.rent?.customer?.name}
                     </Typography>
-              </TableCell>*/}
+              </TableCell>
                     <TableCell align="center">
                       {getStatusLabel(delivery?.status)}
                     </TableCell>

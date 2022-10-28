@@ -30,7 +30,7 @@ async function savePaymentAPI(req, res, userId) {
       files: Object.keys(files).length > 0 ? files : null,
       lastUpdatedBy: userId,
     });
-    res.status(200).json({ msg: "¡Renta guardada con éxito!"});
+    res.status(200).json({ msg: "¡Pago guardado con éxito!"});
   } catch (e) {
     console.error(e);
     res.status(500).json({ errorMsg: e.message });

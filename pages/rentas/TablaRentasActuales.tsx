@@ -23,14 +23,13 @@ import {
 import { capitalizeFirstLetter } from "lib/client/utils";
 import { format } from "date-fns";
 import es from "date-fns/locale/es";
-import { cancelDelivery } from "../../lib/client/deliveriesFetch";
 import { useSnackbar } from "notistack";
 import PlusOneIcon from '@mui/icons-material/PlusOne';
 import CurrencyExchangeIcon from '@mui/icons-material/CurrencyExchange';
 import LocalShippingIcon from '@mui/icons-material/LocalShipping';
 import SearchIcon from "@mui/icons-material/Search";
-import GenericModal from "@/components/GenericModal";
 import ExtendRentModal from "../../src/components/ExtendRentModal";
+import ChangePayDaymodal from "@/components/ChangePayDayModal";
 
 interface TablaRentasActualesProps {
   className?: string;
@@ -103,16 +102,16 @@ const TablaRentasActuales: FC<TablaRentasActualesProps> = ({
 }) => {
   const { enqueueSnackbar } = useSnackbar();
   const [extendModalIsOpen, setExtendModalIsOpen] = useState(false);
-  const [cancelModalIsOpen, setCancelModalIsOpen] = useState(false);
-  const [isDeleting, setIsDeleting] = useState(false);
+  const [payDayModallIsOpen, setPayDayModalIsOpen] = useState(false);
+  
   const [selectedId, setSelectedId] = useState<any>(null);
-  const [idToCancel, setIdToCancel] = useState<string>(null);
   const [page, setPage] = useState<number>(0);
   const [limit, setLimit] = useState<number>(10);
   const [filter, setFilter] = useState<string>("");
-  const handleModifyClose = (modifiedDelivery, successMessage = null) => {
+  const handleCloseModal = (wasSuccess, successMessage = null) => {
     setExtendModalIsOpen(false);
-    if (modifiedDelivery && successMessage) {
+    setPayDayModalIsOpen(false);
+    if (wasSuccess && successMessage) {
       enqueueSnackbar(successMessage, {
         variant: "success",
         anchorOrigin: {
@@ -141,24 +140,11 @@ const TablaRentasActuales: FC<TablaRentasActualesProps> = ({
     setExtendModalIsOpen(true);
   };
 
-  const handleOnDeleteClick = (deliveryId: string) => {
-    setIdToCancel(deliveryId);
-    setCancelModalIsOpen(true);
+  const handleOnDayChangeClick = (rentId: string) => {
+    setSelectedId(rentId);
+    setPayDayModalIsOpen(true);
   };
-  const handleOnConfirmDelete = async () => {
-    setIsDeleting(true);
-    const result = await cancelDelivery(idToCancel);
-    setCancelModalIsOpen(false);
-    setIsDeleting(false);
-    enqueueSnackbar(result.msg, {
-      variant: !result.error ? "success" : "error",
-      anchorOrigin: {
-        vertical: "top",
-        horizontal: "center",
-      },
-      autoHideDuration: 2000,
-    });
-  };
+
 
   const filteredRents = applyFilters(rentList, filter);
   const paginatedRents = applyPagination(filteredRents, page, limit);
@@ -276,7 +262,7 @@ const TablaRentasActuales: FC<TablaRentasActualesProps> = ({
                         </Tooltip>
                       <Tooltip title="Cambiar día de pago" arrow>
                         <IconButton
-                          onClick={() => {}}
+                          onClick={() => {handleOnDayChangeClick(rent?._id)}}
                           sx={{
                             "&:hover": {
                               background: theme.colors.primary.lighter,
@@ -293,7 +279,7 @@ const TablaRentasActuales: FC<TablaRentasActualesProps> = ({
 
                         <Tooltip title="Retirar" arrow>
                           <IconButton
-                            onClick={() => handleOnDeleteClick(rent._id)}
+                            onClick={() => {}}
                             sx={{
                               "&:hover": {
                                 background: theme.colors.error.lighter,
@@ -329,21 +315,17 @@ const TablaRentasActuales: FC<TablaRentasActualesProps> = ({
       {extendModalIsOpen && (
         <ExtendRentModal
           open={extendModalIsOpen}
-          handleOnClose={handleModifyClose}
+          handleOnClose={handleCloseModal}
           rentId={selectedId}
         />
       )}
-      <GenericModal
-        open={cancelModalIsOpen}
-        title="Atención"
-        text={"¿Está seguro de cancelar la entrega seleccionada?"}
-        isLoading={isDeleting}
-        onAccept={handleOnConfirmDelete}
-        onCancel={() => {
-          setCancelModalIsOpen(false);
-          setIsDeleting(false);
-        }}
-      />
+      {payDayModallIsOpen && (
+        <ChangePayDaymodal
+          open={payDayModallIsOpen}
+          handleOnClose={handleCloseModal}
+          rentId={selectedId}
+        />
+      )}
     </>
   );
 };

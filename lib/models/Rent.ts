@@ -12,7 +12,7 @@ export interface IRent extends Document {
   usedFreeWeeks: Number;
   startDate: Date;
   endDate: Date;
-  payDayChanged: boolean;
+  acumulatedDays: number;
   extendedTimes: number;
   totalWeeks: number;
   lastUpdatedBy: Schema.Types.ObjectId;
@@ -48,7 +48,7 @@ const RentSchema = new Schema<IRent>({
   usedFreeWeeks: { type: 'number', required: true },
   startDate: { type: Date, default: null },
   endDate: { type: Date, default: null },
-  payDayChanged: { type: 'boolean', default: false },
+  acumulatedDays: { type: 'number', default: 0 },
   extendedTimes: { type: 'number', default: 0 },
   totalWeeks: { type: 'number', default: 0 },
   createdAt: { type: Date, required: true },
