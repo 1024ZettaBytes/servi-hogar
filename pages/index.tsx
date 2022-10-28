@@ -6,7 +6,6 @@ import PageHeader from '@/components/PageHeader';
 import PageTitleWrapper from '@/components/PageTitleWrapper';
 import { Container, Grid } from '@mui/material';
 import Footer from '@/components/Footer';
-import Calendar from '../src/components/Calendar'
 import AccountBalance from '@/content/Dashboards/Crypto/AccountBalance';
 import Wallets from '@/content/Dashboards/Crypto/Wallets';
 import WatchList from '@/content/Dashboards/Crypto/WatchList';
@@ -22,7 +21,6 @@ function Home({session}) {
       <PageHeader title={"¡Bienvenido(a) "+user?.name+"!"} sutitle={"Esta es la página de inicio"} showAvatar={true}/>
       </PageTitleWrapper>
       <Container maxWidth="lg">
-        <Calendar />
         <Grid
           container
           direction="row"
