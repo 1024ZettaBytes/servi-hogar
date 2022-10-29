@@ -9,7 +9,7 @@ import {
 import { FC } from "react";
 import PropTypes from "prop-types";
 import { DesktopDatePicker, DesktopTimePicker } from "@mui/x-date-pickers";
-interface DeliveryTimeProps {
+interface OperationTimeProps {
   fullWidth?:boolean;
   className?: string;
   date: any;
@@ -19,7 +19,7 @@ interface DeliveryTimeProps {
   endTime?: any;
   onChangeTime: Function;
 }
-const DeliveryTime: FC<DeliveryTimeProps> = ({
+const OperationTime: FC<OperationTimeProps> = ({
   fullWidth,
   minDate,
   date,
@@ -33,7 +33,7 @@ const DeliveryTime: FC<DeliveryTimeProps> = ({
       <Grid container p={1} spacing={1}>
         <Grid item lg={fullWidth ? 12: 2}>
           <DesktopDatePicker
-            label="Fecha de entrega"
+            label="Fecha"
             inputFormat="dd/MM/yyyy"
             minDate={minDate}
             value={date}
@@ -97,7 +97,7 @@ const DeliveryTime: FC<DeliveryTimeProps> = ({
     </>
   );
 };
-DeliveryTime.propTypes = {
+OperationTime.propTypes = {
   fullWidth: PropTypes.bool.isRequired,
   date: PropTypes.object.isRequired,
   minDate: PropTypes.object.isRequired,
@@ -107,4 +107,4 @@ DeliveryTime.propTypes = {
   endTime: PropTypes.object,
 };
 
-export default DeliveryTime;
+export default OperationTime;

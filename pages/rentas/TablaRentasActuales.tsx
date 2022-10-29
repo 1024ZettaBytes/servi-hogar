@@ -29,7 +29,8 @@ import CurrencyExchangeIcon from '@mui/icons-material/CurrencyExchange';
 import LocalShippingIcon from '@mui/icons-material/LocalShipping';
 import SearchIcon from "@mui/icons-material/Search";
 import ExtendRentModal from "../../src/components/ExtendRentModal";
-import ChangePayDaymodal from "@/components/ChangePayDayModal";
+import ChangePayDayModal from "@/components/ChangePayDayModal";
+import SchedulePickupModal from "@/components/SchedulePickupModal";
 
 interface TablaRentasActualesProps {
   className?: string;
@@ -102,7 +103,8 @@ const TablaRentasActuales: FC<TablaRentasActualesProps> = ({
 }) => {
   const { enqueueSnackbar } = useSnackbar();
   const [extendModalIsOpen, setExtendModalIsOpen] = useState(false);
-  const [payDayModallIsOpen, setPayDayModalIsOpen] = useState(false);
+  const [payDayModalIsOpen, setPayDayModalIsOpen] = useState(false);
+  const [pickupModalIsOpen, setPickupModalIsOpen] = useState(false);
   
   const [selectedId, setSelectedId] = useState<any>(null);
   const [page, setPage] = useState<number>(0);
@@ -111,6 +113,7 @@ const TablaRentasActuales: FC<TablaRentasActualesProps> = ({
   const handleCloseModal = (wasSuccess, successMessage = null) => {
     setExtendModalIsOpen(false);
     setPayDayModalIsOpen(false);
+    setPickupModalIsOpen(false);
     if (wasSuccess && successMessage) {
       enqueueSnackbar(successMessage, {
         variant: "success",
@@ -144,6 +147,12 @@ const TablaRentasActuales: FC<TablaRentasActualesProps> = ({
     setSelectedId(rentId);
     setPayDayModalIsOpen(true);
   };
+
+  const handleOnPickupClick = (rentId: string) => {
+    setSelectedId(rentId);
+    setPickupModalIsOpen(true);
+  };
+
 
 
   const filteredRents = applyFilters(rentList, filter);
@@ -279,7 +288,7 @@ const TablaRentasActuales: FC<TablaRentasActualesProps> = ({
 
                         <Tooltip title="Retirar" arrow>
                           <IconButton
-                            onClick={() => {}}
+                            onClick={() => {handleOnPickupClick(rent?._id)}}
                             sx={{
                               "&:hover": {
                                 background: theme.colors.error.lighter,
@@ -319,13 +328,22 @@ const TablaRentasActuales: FC<TablaRentasActualesProps> = ({
           rentId={selectedId}
         />
       )}
-      {payDayModallIsOpen && (
-        <ChangePayDaymodal
-          open={payDayModallIsOpen}
+      {payDayModalIsOpen && (
+        <ChangePayDayModal
+          open={payDayModalIsOpen}
           handleOnClose={handleCloseModal}
           rentId={selectedId}
         />
       )}
+      {
+        pickupModalIsOpen && (
+          <SchedulePickupModal
+          open={pickupModalIsOpen}
+          handleOnClose={handleCloseModal}
+          rentId={selectedId}
+          />
+        )
+      }
     </>
   );
 };

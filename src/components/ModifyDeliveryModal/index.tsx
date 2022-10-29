@@ -12,8 +12,9 @@ import {
   Alert,
 } from "@mui/material";
 import { LoadingButton } from "@mui/lab";
-import DeliveryTime from "../../../pages/renta-rapida/DeliveryTime";
+import OperationTime from "../../../pages/renta-rapida/OperationTime";
 import { updateDeliveryTime } from "../../../lib/client/deliveriesFetch";
+import { dateDiffInDays } from "lib/client/utils";
 
 function ModifyDeliveryModal(props) {
   const { handleOnClose, open, deliveryToEdit } = props;
@@ -28,7 +29,9 @@ function ModifyDeliveryModal(props) {
 
   const saveButtonEnabled =
     deliveryTime.timeOption === "any" ||
-    (deliveryTime.fromTime &&
+    (deliveryTime.date &&
+      dateDiffInDays(new Date(), new Date(deliveryTime.date)) >= 0 &&
+      deliveryTime.fromTime &&
       deliveryTime.endTime &&
       new Date(deliveryTime.fromTime).getTime() <=
         new Date(deliveryTime.endTime).getTime());
@@ -78,7 +81,7 @@ function ModifyDeliveryModal(props) {
         <Divider />
         <CardContent>
           <Box component="form" onSubmit={submitHandler}>
-            <DeliveryTime
+            <OperationTime
               fullWidth
               date={deliveryTime.date}
               minDate={new Date()}

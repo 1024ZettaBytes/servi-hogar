@@ -30,15 +30,15 @@ import {
   useGetCities,
 } from "../api/useRequest";
 import { useSnackbar } from "notistack";
-import { addDaysToDate } from "../../lib/client/utils";
+import { addDaysToDate, dateDiffInDays } from "../../lib/client/utils";
 import NextBreadcrumbs from "@/components/Shared/BreadCrums";
 import TablaClientesRenta from "./TablaClientesRenta";
 import RentPeriod from "./RentPeriod";
-import DeliveryTime from "./DeliveryTime";
+import OperationTime from "./OperationTime";
 import { LoadingButton } from "@mui/lab";
 import { saveRent } from "lib/client/rentsFetch";
 import FormatModal from "@/components/FormatModal";
-import {DELIVERY_FORMAT} from "../../lib/consts/OBJ_CONTS"
+import { DELIVERY_FORMAT } from "../../lib/consts/OBJ_CONTS";
 
 const defaultInitialDate = (today: Date) => {
   today.setHours(8, 0, 0);
@@ -65,15 +65,21 @@ const defaultData = () => {
   };
 };
 
-const getFormatForDelivery = (rent)=>{
+const getFormatForDelivery = (rent) => {
   let format = DELIVERY_FORMAT;
   format = format.replace("_dNum", rent?.num);
   format = format.replace("_cName", rent?.customer?.name);
   format = format.replace("_cCell", rent?.customer?.cell);
   format = format.replace("_cStreet", rent?.customer?.currentResidence?.street);
   format = format.replace("_cSuburb", rent?.customer?.currentResidence?.suburb);
-  format = format.replace("_cRef", rent?.customer?.currentResidence?.residenceRef);
-  format = format.replace("_rPay", numeral(rent?.initialPay).format(`${rent?.initialPay}0,0.00`));
+  format = format.replace(
+    "_cRef",
+    rent?.customer?.currentResidence?.residenceRef
+  );
+  format = format.replace(
+    "_rPay",
+    numeral(rent?.initialPay).format(`${rent?.initialPay}0,0.00`)
+  );
   return format;
 };
 function RentaRapida() {
@@ -115,6 +121,8 @@ function RentaRapida() {
     if (activeStep === 2)
       return (
         selectedCustomer &&
+        deliveryTime.date &&
+        dateDiffInDays(new Date(), new Date(deliveryTime.date)) >= 0 &&
         (deliveryTime.timeOption === "any" ||
           (deliveryTime.fromTime &&
             deliveryTime.endTime &&
@@ -170,7 +178,7 @@ function RentaRapida() {
       rentPeriod,
       deliveryTime,
     });
-    const rent = {...result.rent, customer:selectedCustomer};
+    const rent = { ...result.rent, customer: selectedCustomer };
     setCustomerRent(rent);
     setIsSubmitting(false);
     if (!result.error) {
@@ -286,7 +294,7 @@ function RentaRapida() {
                         {activeStep === 2 ? (
                           selectedCustomer ? (
                             <>
-                              <DeliveryTime
+                              <OperationTime
                                 date={deliveryTime.date}
                                 minDate={new Date()}
                                 timeOption={deliveryTime.timeOption}
