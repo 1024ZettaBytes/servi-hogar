@@ -41,5 +41,5 @@ const RentPickupSchema = new Schema<IRentPickup>({
 });
 
 export const RentPickup: Model<IRentPickup> =
-  mongoose.models.rent_deliveries ||
+  mongoose.models.rent_pickups ||
   model('rent_pickups', RentPickupSchema);

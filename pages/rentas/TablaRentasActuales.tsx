@@ -31,7 +31,45 @@ import SearchIcon from "@mui/icons-material/Search";
 import ExtendRentModal from "../../src/components/ExtendRentModal";
 import ChangePayDayModal from "@/components/ChangePayDayModal";
 import SchedulePickupModal from "@/components/SchedulePickupModal";
+import FormatModal from "@/components/FormatModal";
+import { PICKUP_FORMAT } from "lib/consts/OBJ_CONTS";
+import numeral from "numeral";
 
+
+const getFormatForPickup = (rent, delTime) => {
+  let f = PICKUP_FORMAT;
+  f = f.replace("_rNum", rent?.num);
+  f = f.replace("_cName", rent?.customer?.name);
+  f = f.replace("_cCell", rent?.customer?.cell);
+  f = f.replace("_cStreet", rent?.customer?.currentResidence?.street);
+  f = f.replace("_cSuburb", rent?.customer?.currentResidence?.suburb);
+  f = f.replace("_maps", rent?.customer?.currentResidence?.maps);
+  f = f.replace(
+    "_cRef",
+    rent?.customer?.currentResidence?.residenceRef
+  );
+  f = f.replace("_date",
+    capitalizeFirstLetter(format(new Date(delTime?.date), "LLL dd yyyy", {
+      locale: es,
+    })))
+  f = f.replace(
+    "_rPay",
+    numeral(rent?.initialPay).format(`${rent?.initialPay}0,0.00`)
+  );
+  if (delTime.timeOption === "specific") {
+    const time = `\nHorario especial: ${format(new Date(delTime?.fromTime), "h:mm a", {
+      locale: es,
+    })} - ${format(
+      new Date(delTime?.endTime),
+      "h:mm a",
+      {
+        locale: es,
+      }
+    )}`;
+    f = f.replace("_spec", time);
+  }
+  return f;
+};
 interface TablaRentasActualesProps {
   className?: string;
   rentList: any[];
@@ -45,6 +83,7 @@ const compareStringsForFilter = (keyWord: string, field: string) => {
     .toLowerCase()
     .includes(str(keyWord).latinise().toLowerCase());
 };
+
 const applyFilters = (rentList: any[], filter: string): any[] => {
   return rentList.filter((rent) => {
     if (!filter || filter === "") {
@@ -60,17 +99,17 @@ const applyFilters = (rentList: any[], filter: string): any[] => {
         switch (key) {
           case "num": {
             const matchNumber =
-              compareStringsForFilter(filter, value+"");
+              compareStringsForFilter(filter, value + "");
             return matchNumber;
           }
           case "customer": {
             const matchText =
-              value["name"] && compareStringsForFilter(filter, value["name"] );
+              value["name"] && compareStringsForFilter(filter, value["name"]);
             return matchText;
           }
           case "machine": {
             const matchText =
-              value["machineNum"] && compareStringsForFilter(filter, value["machineNum"] );
+              value["machineNum"] && compareStringsForFilter(filter, value["machineNum"]);
             return matchText;
           }
           case "endDate": {
@@ -105,7 +144,8 @@ const TablaRentasActuales: FC<TablaRentasActualesProps> = ({
   const [extendModalIsOpen, setExtendModalIsOpen] = useState(false);
   const [payDayModalIsOpen, setPayDayModalIsOpen] = useState(false);
   const [pickupModalIsOpen, setPickupModalIsOpen] = useState(false);
-  
+  const [formatIsOpen, setFormatIsOpen] = useState(false);
+  const [createdPickup, setCreatedPickup] = useState<any>(null);
   const [selectedId, setSelectedId] = useState<any>(null);
   const [page, setPage] = useState<number>(0);
   const [limit, setLimit] = useState<number>(10);
@@ -123,6 +163,13 @@ const TablaRentasActuales: FC<TablaRentasActualesProps> = ({
         },
         autoHideDuration: 1500,
       });
+    }
+  };
+  const handleClosePickupModal = (wasSuccess, pickUpCompleteData, successMessage = null) => {
+    handleCloseModal(wasSuccess, successMessage);
+    if (wasSuccess) {
+      setCreatedPickup(pickUpCompleteData);
+      setFormatIsOpen(true);
     }
   };
   const handleSearchChange = (e: ChangeEvent<HTMLInputElement>): void => {
@@ -254,24 +301,24 @@ const TablaRentasActuales: FC<TablaRentasActualesProps> = ({
                       {rent?.remaining >= 0 ? rent.remaining : <Typography color="error">VENCIDA</Typography>}
                     </TableCell>
                     <TableCell align="center">
-                        <Tooltip title="Extender Renta" arrow>
-                          <IconButton
-                          onClick={()=> handleOnExtendClick(rent?._id)}
-                            sx={{
-                              "&:hover": {
-                                background: theme.colors.primary.lighter,
-                              },
-                              color: theme.colors.success.light,
-                            }}
-                            color="inherit"
-                            size="small"
-                          >
-                            <PlusOneIcon fontSize="medium" />
-                          </IconButton>
-                        </Tooltip>
+                      <Tooltip title="Extender Renta" arrow>
+                        <IconButton
+                          onClick={() => handleOnExtendClick(rent?._id)}
+                          sx={{
+                            "&:hover": {
+                              background: theme.colors.primary.lighter,
+                            },
+                            color: theme.colors.success.light,
+                          }}
+                          color="inherit"
+                          size="small"
+                        >
+                          <PlusOneIcon fontSize="medium" />
+                        </IconButton>
+                      </Tooltip>
                       <Tooltip title="Cambiar día de pago" arrow>
                         <IconButton
-                          onClick={() => {handleOnDayChangeClick(rent?._id)}}
+                          onClick={() => { handleOnDayChangeClick(rent?._id) }}
                           sx={{
                             "&:hover": {
                               background: theme.colors.primary.lighter,
@@ -284,11 +331,11 @@ const TablaRentasActuales: FC<TablaRentasActualesProps> = ({
                           <CurrencyExchangeIcon fontSize="small" />
                         </IconButton>
                       </Tooltip>
-
-
-                        <Tooltip title="Retirar" arrow>
+                      <Tooltip title="Retirar" arrow>
+                        <span>
                           <IconButton
-                            onClick={() => {handleOnPickupClick(rent?._id)}}
+                            disabled={rent.status.id === "EN_RECOLECCION"}
+                            onClick={() => { handleOnPickupClick(rent?._id) }}
                             sx={{
                               "&:hover": {
                                 background: theme.colors.error.lighter,
@@ -300,7 +347,8 @@ const TablaRentasActuales: FC<TablaRentasActualesProps> = ({
                           >
                             <LocalShippingIcon fontSize="small" />
                           </IconButton>
-                        </Tooltip>
+                        </span>
+                      </Tooltip>
 
                     </TableCell>
                   </TableRow>
@@ -338,12 +386,24 @@ const TablaRentasActuales: FC<TablaRentasActualesProps> = ({
       {
         pickupModalIsOpen && (
           <SchedulePickupModal
-          open={pickupModalIsOpen}
-          handleOnClose={handleCloseModal}
-          rentId={selectedId}
+            open={pickupModalIsOpen}
+            handleOnClose={handleClosePickupModal}
+            rentId={selectedId}
           />
         )
       }
+      {formatIsOpen && createdPickup && (
+        <FormatModal
+          open={formatIsOpen}
+          title="Formato de Recolección"
+          text=""
+          formatText={getFormatForPickup(createdPickup.rent, createdPickup.pickupTime)}
+          onAccept={() => {
+            setFormatIsOpen(false);
+            setCreatedPickup(null);
+          }}
+        />
+      )}
     </>
   );
 };

@@ -1,8 +1,8 @@
-import { getDeliveryData } from "../../../lib/data/Deliveries";
+import { savePickupData } from "../../../lib/data/Pickups";
 import { validateUserPermissions, getUserId } from "../auth/authUtils";
-async function savePickupAPI(req, res) {
+async function savePickupAPI(req, res, userId) {
   try {
-    await savePickupData({ ...req.body, lastUpdatedBy: userId });
+    //await savePickupData({ ...req.body, lastUpdatedBy: userId });
     res.status(200).json({ msg: "¡Recolección creada!" });
   } catch (e) {
     console.error(e);

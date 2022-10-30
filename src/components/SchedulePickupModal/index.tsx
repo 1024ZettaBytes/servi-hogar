@@ -13,18 +13,13 @@ import {
   Container,
   Skeleton,
   Typography,
-  FormControl,
-  InputLabel,
-  Select,
-  MenuItem,
 } from "@mui/material";
 import { LoadingButton } from "@mui/lab";
 import { useGetRentById, getFetcher } from "../../../pages/api/useRequest";
-import { changePayday } from "../../../lib/client/rentsFetch";
+import { savePickup } from "../../../lib/client/pickupsFetch";
 import { capitalizeFirstLetter, addDaysToDate, dateDiffInDays } from "lib/client/utils";
 import { format } from "date-fns";
 import es from "date-fns/locale/es";
-import { WEEK_DAYS, PRICES } from "lib/consts/OBJ_CONTS";
 import numeral from "numeral";
 import OperationTime from "pages/renta-rapida/OperationTime";
 const defaultInitialDate = (today: Date) => {
@@ -56,18 +51,20 @@ function SchedulePickupModal(props) {
   const submitButtonEnabled =
     rent &&
     pickupTime.date &&
-    dateDiffInDays(new Date(), new Date(pickupTime.date)) >=0 &&
+    dateDiffInDays(new Date(), new Date(pickupTime.date)) >= 0 &&
     (pickupTime.timeOption === "any" ||
       (pickupTime.fromTime &&
         pickupTime.endTime &&
         pickupTime.fromTime.getTime() <= pickupTime.endTime.getTime()));
+
+
   const handleOnSubmit = async () => {
     setHasErrorSubmitting({ error: false, msg: "" });
     setIsSubmitting(true);
-    const result = await changePayday(rentId, selectedDay);
+    const result = await savePickup({ rentId, pickupTime });
     setIsSubmitting(false);
     if (!result.error) {
-      handleChangedDay(result.msg);
+      handleSavedPickup(result.msg);
     } else {
       setHasErrorSubmitting({ error: true, msg: result.msg });
     }
@@ -78,28 +75,14 @@ function SchedulePickupModal(props) {
     setIsSubmitting(false);
     handleOnClose(false);
   };
-  const handleChangedDay = (successMessage) => {
-    handleOnClose(true, successMessage);
+  const handleSavedPickup = (successMessage) => {
+    handleOnClose(true, {rent, pickupTime},successMessage);
   };
   if (rent && !selectedDay) {
     const dayName = format(new Date(rent?.endDate), "eeee").toLowerCase();
     setSelectedDay(dayName);
   }
-  const plusDays = () => {
-    if (rent) {
-      const day = format(new Date(rent?.endDate), "eeee").toLowerCase();
-      if (selectedDay !== day) {
-        const list = Object.keys(WEEK_DAYS);
-        const currentIndex = list.indexOf(day);
-        const newIndex = list.indexOf(selectedDay);
-        return newIndex > currentIndex
-          ? newIndex - currentIndex
-          : list.length - (currentIndex - newIndex);
-      }
-      return 0;
-    }
-    return 0;
-  };
+
   const onChangePickupTime = (id, value) => {
     if (
       (id === "fromTime" || id === "endTime") &&
@@ -125,31 +108,6 @@ function SchedulePickupModal(props) {
     return `VENCIDA (${Math.abs(rent.remaining)} día(s))`;
   };
 
-  const addedDays = plusDays();
-  const daysCost = addedDays * PRICES.day;
-  const getTotalDebt = () => {
-    let usedFree = false;
-    let newBalance = 0;
-    if (!rent) return { debt: 0, usedFree, newBalance: 0 };
-    newBalance = rent.customer.balance;
-    let debt = rent.customer.balance - daysCost; // deuda total despues de agregar recorrido
-    if (debt < 0) {
-      const toPay = daysCost;
-      newBalance = debt;
-      debt = daysCost;
-      //if will use free week
-      if (toPay >= 4 * PRICES.day && rent.customer.freeWeeks > 0) {
-        usedFree = true;
-        debt = debt - PRICES.week > 0 ? debt - PRICES.week : 0;
-        newBalance = newBalance + PRICES.week;
-      }
-    } else {
-      debt = daysCost;
-      newBalance = rent.customer.balance - daysCost;
-    }
-    return { debt, usedFree, newBalance };
-  };
-  const totalDebt = getTotalDebt();
 
   return (
     <Dialog open={open} fullWidth={true} maxWidth={"md"} scroll={"body"}>
@@ -173,7 +131,7 @@ function SchedulePickupModal(props) {
                     <Skeleton
                       variant="rectangular"
                       width={"100%"}
-                      height={500}
+                      height={300}
                       animation="wave"
                     />
                   ) : (
@@ -317,6 +275,7 @@ function SchedulePickupModal(props) {
                       <Button
                         size="large"
                         variant="outlined"
+                        disabled={isSubmitting}
                         onClick={() => handleClose()}
                       >
                         Cancelar
