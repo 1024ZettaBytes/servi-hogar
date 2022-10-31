@@ -56,18 +56,20 @@ const getFormatForPickup = (rent, delTime) => {
     "_rPay",
     numeral(rent?.initialPay).format(`${rent?.initialPay}0,0.00`)
   );
+  let time = "";
   if (delTime.timeOption === "specific") {
-    const time = `\nHorario especial: ${format(new Date(delTime?.fromTime), "h:mm a", {
+    alert("spe")
+    time = `\nHorario especial: ${format(new Date(delTime?.fromTime), "h:mm a", {
       locale: es,
     })} - ${format(
-      new Date(delTime?.endTime),
+      new Date(delTime?.endTime), 
       "h:mm a",
       {
         locale: es,
       }
     )}`;
-    f = f.replace("_spec", time);
   }
+  f = f.replace("_spec", time);
   return f;
 };
 interface TablaRentasActualesProps {

@@ -8,27 +8,27 @@ import { Card, Container, Grid, Skeleton, Alert } from "@mui/material";
 import Footer from "@/components/Footer";
 import TablaEntregasPendientes from "./TablaEntregasPendientes";
 import {
-  useGetPendingDeliveries,
+  useGetPendingPickups,
   getFetcher,
 } from "../api/useRequest";
 
 import NextBreadcrumbs from "@/components/Shared/BreadCrums";
 
-function EntregasPendientes({ session }) {
-  const paths = ["Inicio", "Entregas pendientes"];
-  const { deliveriesList, deliveriesError } = useGetPendingDeliveries(getFetcher);
-  const generalError = deliveriesError;
-  const completeData = deliveriesList;
+function Rentas({ session }) {
+  const paths = ["Inicio", "Recolecciones pendientes"];
+  const { pickupsList, pickupsError } = useGetPendingPickups(getFetcher);
+  const generalError = pickupsError;
+  const completeData = pickupsList;
   const { user } = session;
   
   return (
     <>
       <Head>
-        <title>Entregas pendientes</title>
+        <title>Recolecciones pendientes</title>
       </Head>
       <PageTitleWrapper>
         <PageHeader
-          title={"Entregas pendientes"}
+          title={"Recolecciones pendientes"}
           sutitle={""}
         />
         <NextBreadcrumbs paths={paths} lastLoaded={true} />
@@ -44,7 +44,7 @@ function EntregasPendientes({ session }) {
           <Grid item xs={12}>
             {generalError ? (
               <Alert severity="error">
-                {deliveriesList?.message}
+                {pickupsList?.message}
               </Alert>
             ) : !completeData ? (
               <Skeleton
@@ -57,7 +57,7 @@ function EntregasPendientes({ session }) {
               <Card>
                 <TablaEntregasPendientes
                   userRole={user?.role}
-                  deliveriesList={deliveriesList}
+                  deliveriesList={pickupsList}
                 />
               </Card>
             )}
@@ -69,10 +69,10 @@ function EntregasPendientes({ session }) {
   );
 }
 
-EntregasPendientes.getLayout = (page) => <SidebarLayout>{page}</SidebarLayout>;
+Rentas.getLayout = (page) => <SidebarLayout>{page}</SidebarLayout>;
 
 export async function getServerSideProps({ req, resolvedUrl }) {
   let props = await validateServerSideSession(getSession, req, resolvedUrl);
   return props;
 }
-export default EntregasPendientes;
+export default Rentas;
