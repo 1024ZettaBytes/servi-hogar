@@ -6,20 +6,20 @@ export const refreshData = async (apiUrl) => {
 async function errorHandler(res) {
   if (!res.ok) {
     const errorBody = await res?.json();
-    const error = new Error(
-      errorBody?.errorMsg
-    );
+    const error = new Error(errorBody?.errorMsg);
     throw error;
   }
 }
 export const getFetcher = async (url) => {
-  const res = await fetch(url).catch(err => {
+  const res = await fetch(url).catch((err) => {
     return {
       json: () => {
         return {
-          ok: false, errorMsg: "Hubo un problema de conexión. Si persiste contacte al administrador."
-        }
-      }
+          ok: false,
+          errorMsg:
+            "Hubo un problema de conexión. Si persiste contacte al administrador.",
+        };
+      },
     };
   });
   await errorHandler(res);
@@ -34,22 +34,25 @@ export const useGetAllCustomers = (fetcher) => {
 export const useGetAllCustomersForRent = (fetcher) => {
   const { data, error } = useSWR(ROUTES.ALL_CUSTOMERS_FOR_RENT_API, fetcher);
   return { customerList: data?.data, customerError: error };
-}; 
+};
 export const useGetCustomerLevels = (fetcher) => {
   const { data, error } = useSWR(ROUTES.ALL_CUSTOMERS_LEVELS_API, fetcher);
   return { customerLevelList: data?.data, customerLevelError: error };
 };
 
 export const useGetCustomerById = (fetcher, id) => {
-  const { data, error } = useSWR(id ?ROUTES.CUSTOMER_BY_ID_API.replace(":id", id): null, fetcher);
+  const { data, error } = useSWR(
+    id ? ROUTES.CUSTOMER_BY_ID_API.replace(":id", id) : null,
+    fetcher
+  );
   return { customer: data?.data, customerByIdError: error };
-}
+};
 //
 // Cities
 export const useGetCities = (fetcher) => {
-  const { data, error } = useSWR( ROUTES.ALL_CITIES, fetcher);
+  const { data, error } = useSWR(ROUTES.ALL_CITIES, fetcher);
   return { citiesList: data?.data, citiesError: error };
-}
+};
 //
 // Machines
 export const useGetAllMachines = (fetcher) => {
@@ -70,13 +73,15 @@ export const useGetMachinesStatus = (fetcher) => {
 export const useGetAllMachinesLocations = (fetcher) => {
   const { data, error } = useSWR(ROUTES.ALL_MACHINES_LOCATIONS_API, fetcher);
   return { machinesLocationData: data?.data, machinesLocationError: error };
-
 };
 
 export const useGetMachineById = (fetcher, id) => {
-  const { data, error } = useSWR(id ? ROUTES.MACHINE_BY_ID_API.replace(":id", id): null, fetcher);
+  const { data, error } = useSWR(
+    id ? ROUTES.MACHINE_BY_ID_API.replace(":id", id) : null,
+    fetcher
+  );
   return { machine: data?.data, machineByIdError: error };
-}
+};
 // Warehouses
 export const useGetAllWarehousesOverview = (fetcher) => {
   const { data, error } = useSWR(ROUTES.ALL_WAREHOUSES_OVERVIEW_API, fetcher);
@@ -93,26 +98,34 @@ export const useGetRents = (fetcher) => {
   return { rentsData: data?.data, rentsError: error };
 };
 export const useGetRentById = (fetcher, id) => {
-  const { data, error } = useSWR(id ? ROUTES.RENT_BY_ID_API.replace(":id", id): null, fetcher);
+  const { data, error } = useSWR(
+    id ? ROUTES.RENT_BY_ID_API.replace(":id", id) : null,
+    fetcher
+  );
   return { rent: data?.data, rentByIdError: error };
-}
+};
 // Deliveries
 export const useGetPendingDeliveries = (fetcher) => {
   const { data, error } = useSWR(ROUTES.ALL_PENDING_DELIVERIES_API, fetcher);
   return { deliveriesList: data?.data, deliveriesError: error };
 };
 export const useGetDeliveryById = (fetcher, id) => {
-  const { data, error } = useSWR(id ? ROUTES.DELIVERY_BY_ID_API.replace(":id", id): null, fetcher);
+  const { data, error } = useSWR(
+    id ? ROUTES.DELIVERY_BY_ID_API.replace(":id", id) : null,
+    fetcher
+  );
   return { delivery: data?.data, deliveryByIdError: error };
-}
+};
 
 // Pickups
 export const useGetPendingPickups = (fetcher) => {
   const { data, error } = useSWR(ROUTES.ALL_PENDING_PICKUPS_API, fetcher);
-  return { pickupsList: data?.data,pickupsError: error };
-}
-  export const useGetPickupById = (fetcher, id) => {
-    const { data, error } = useSWR(id ? ROUTES.PICKUP_BY_ID_API.replace(":id", id): null, fetcher);
-    return { pickup: data?.data, pickupByIdError: error };
-  
+  return { pickupsList: data?.data, pickupsError: error };
+};
+export const useGetPickupById = (fetcher, id) => {
+  const { data, error } = useSWR(
+    id ? ROUTES.PICKUP_BY_ID_API.replace(":id", id) : null,
+    fetcher
+  );
+  return { pickup: data?.data, pickupByIdError: error };
 };

@@ -13,28 +13,28 @@ import {
 } from "@mui/material";
 import { LoadingButton } from "@mui/lab";
 import OperationTime from "../../../pages/renta-rapida/OperationTime";
-import { updateDeliveryTime } from "../../../lib/client/deliveriesFetch";
+import { updatePickupTime } from "../../../lib/client/pickupsFetch";
 import { dateDiffInDays } from "lib/client/utils";
 
 function ModifyPickupModal(props) {
-  const { handleOnClose, open, deliveryToEdit } = props;
+  const { handleOnClose, open, pickupToEdit } = props;
   const [isLoading, setIsLoading] = useState(false);
-  const [deliveryTime, setDeliveryTime] = useState({
-    date: new Date(deliveryToEdit.date),
-    timeOption: deliveryToEdit.timeOption,
-    fromTime: new Date(deliveryToEdit.fromTime),
-    endTime: new Date(deliveryToEdit.endTime),
+  const [pickupTime, setDeliveryTime] = useState({
+    date: new Date(pickupToEdit.date),
+    timeOption: pickupToEdit.timeOption,
+    fromTime: new Date(pickupToEdit.fromTime),
+    endTime: new Date(pickupToEdit.endTime),
   });
   const [hasError, setHasError] = useState({ error: false, msg: "" });
 
   const saveButtonEnabled =
-    deliveryTime.timeOption === "any" ||
-    (deliveryTime.date &&
-      dateDiffInDays(new Date(), new Date(deliveryTime.date)) >= 0 &&
-      deliveryTime.fromTime &&
-      deliveryTime.endTime &&
-      new Date(deliveryTime.fromTime).getTime() <=
-        new Date(deliveryTime.endTime).getTime());
+    pickupTime.timeOption === "any" ||
+    (pickupTime.date &&
+      dateDiffInDays(new Date(), new Date(pickupTime.date)) >= 0 &&
+      pickupTime.fromTime &&
+      pickupTime.endTime &&
+      new Date(pickupTime.fromTime).getTime() <=
+        new Date(pickupTime.endTime).getTime());
 
   const onChangeDeliverTime = (id, value) => {
     if (
@@ -44,15 +44,15 @@ function ModifyPickupModal(props) {
       value = null;
     }
 
-    setDeliveryTime({ ...deliveryTime, [id]: value });
+    setDeliveryTime({ ...pickupTime, [id]: value });
   };
   async function submitHandler(event) {
     event.preventDefault();
     setIsLoading(true);
     setHasError({ error: false, msg: "" });
-    const result = await updateDeliveryTime({
-      deliveryId: deliveryToEdit._id,
-      deliveryTime,
+    const result = await updatePickupTime({
+      pickupId: pickupToEdit._id,
+      pickupTime,
     });
     setIsLoading(false);
     if (!result.error) {
@@ -77,17 +77,17 @@ function ModifyPickupModal(props) {
   return (
     <Dialog open={open} fullWidth={true} scroll={"body"}>
       <Card>
-        <CardHeader title="Modificar horario de entrega" />
+        <CardHeader title="Modificar horario de recolección" />
         <Divider />
         <CardContent>
           <Box component="form" onSubmit={submitHandler}>
             <OperationTime
               fullWidth
-              date={deliveryTime.date}
+              date={pickupTime.date}
               minDate={new Date()}
-              timeOption={deliveryTime.timeOption}
-              fromTime={deliveryTime.fromTime}
-              endTime={deliveryTime.endTime}
+              timeOption={pickupTime.timeOption}
+              fromTime={pickupTime.fromTime}
+              endTime={pickupTime.endTime}
               onChangeTime={onChangeDeliverTime}
             />
             <Grid
@@ -147,7 +147,7 @@ function ModifyPickupModal(props) {
 ModifyPickupModal.propTypes = {
   handleOnClose: PropTypes.func.isRequired,
   open: PropTypes.bool.isRequired,
-  deliveryToEdit: PropTypes.object.isRequired,
+  pickupToEdit: PropTypes.object.isRequired,
 };
 
 export default ModifyPickupModal;

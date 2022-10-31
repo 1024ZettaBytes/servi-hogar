@@ -1,7 +1,7 @@
 import { validateUserPermissions, getUserId } from "../../auth/authUtils";
 import {
   getPendingPickupsData,
-  markCompleteDeliveryData
+  markCompletePickupData
 } from "../../../../lib/data/Pickups";
 
 async function getPendingPickupsAPI(req, res) {
@@ -16,7 +16,7 @@ async function getPendingPickupsAPI(req, res) {
 
 async function completePickupAPI(req, res, userId) {
   try {
-    await markCompleteDeliveryData({ ...req.body, lastUpdatedBy: userId });
+    await markCompletePickupData({ ...req.body, lastUpdatedBy: userId });
     res.status(200).json({ msg: "La recolección ha sido completada." });
   } catch (e) {
     console.error(e);

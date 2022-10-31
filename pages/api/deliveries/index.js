@@ -4,7 +4,6 @@ import {
   cancelDeliveryData,
 } from "../../../lib/data/Deliveries";
 
-
 async function updateDeliveryTimeAPI(req, res, userId) {
   try {
     await updateDeliveryTimeData({ ...req.body, lastUpdatedBy: userId });

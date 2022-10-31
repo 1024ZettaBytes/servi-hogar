@@ -24,7 +24,7 @@ import NextLink from "next/link";
 import { capitalizeFirstLetter } from "lib/client/utils";
 import { format } from "date-fns";
 import es from "date-fns/locale/es";
-import { cancelDelivery } from "../../lib/client/deliveriesFetch";
+import { cancelPickup } from "../../lib/client/pickupsFetch";
 import { useSnackbar } from "notistack";
 import Label from "@/components/Label";
 import WhatsAppIcon from '@mui/icons-material/WhatsApp';
@@ -164,7 +164,7 @@ const TablaEntregasPendientes: FC<TablaEntregasPendientesProps> = ({
   };
   const handleOnConfirmDelete = async () => {
     setIsDeleting(true);
-    const result = await cancelDelivery(idToCancel);
+    const result = await cancelPickup(idToCancel);
     setCancelModalIsOpen(false);
     setIsDeleting(false);
     enqueueSnackbar(result.msg, {
@@ -383,13 +383,13 @@ const TablaEntregasPendientes: FC<TablaEntregasPendientesProps> = ({
         <ModifyPickupModal
           open={modifyModalIsOpen}
           handleOnClose={handleModifyClose}
-          deliveryToEdit={pickupToEdit}
+          pickupToEdit={pickupToEdit}
         />
       )}
       <GenericModal
         open={cancelModalIsOpen}
         title="Atención"
-        text={"¿Está seguro de cancelar la entrega seleccionada?"}
+        text={"¿Está seguro de cancelar la recolección seleccionada?"}
         isLoading={isDeleting}
         onAccept={handleOnConfirmDelete}
         onCancel={() => {

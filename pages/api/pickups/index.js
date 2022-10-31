@@ -1,4 +1,8 @@
-import { savePickupData } from "../../../lib/data/Pickups";
+import {
+  savePickupData,
+  updatePickupTimeData,
+  cancelPickupData,
+} from "../../../lib/data/Pickups";
 import { validateUserPermissions, getUserId } from "../auth/authUtils";
 async function savePickupAPI(req, res, userId) {
   try {
@@ -10,6 +14,27 @@ async function savePickupAPI(req, res, userId) {
       errorMsg:
         "Hubo un problema al crear la recolección. Por favor intente de nuevo.",
     });
+  }
+}
+async function updatePickupTimeAPI(req, res, userId) {
+  try {
+    await updatePickupTimeData({ ...req.body, lastUpdatedBy: userId });
+    res
+      .status(200)
+      .json({ msg: "¡Horario de recolección actualizado con éxito!" });
+  } catch (e) {
+    console.error(e);
+    res.status(500).json({ errorMsg: e.message });
+  }
+}
+
+async function cancelPickupAPI(req, res, userId) {
+  try {
+    await cancelPickupData({ ...req.body, lastUpdatedBy: userId });
+    res.status(200).json({ msg: "Recolección cancelada" });
+  } catch (e) {
+    console.error(e);
+    res.status(500).json({ errorMsg: e.message });
   }
 }
 
@@ -24,8 +49,10 @@ async function handler(req, res) {
         await savePickupAPI(req, res, userId);
         return;
       case "PUT":
+        await updatePickupTimeAPI(req, res, userId);
         break;
       case "DELETE":
+        await cancelPickupAPI(req, res, userId);
         return;
     }
 }
