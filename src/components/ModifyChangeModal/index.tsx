@@ -13,30 +13,30 @@ import {
 } from "@mui/material";
 import { LoadingButton } from "@mui/lab";
 import OperationTime from "../../../pages/renta-rapida/OperationTime";
-import { updateDeliveryTime } from "../../../lib/client/deliveriesFetch";
+import { updateChangeTime } from "../../../lib/client/changesFetch";
 import { dateDiffInDays } from "lib/client/utils";
 
-function ModifyDeliveryModal(props) {
-  const { handleOnClose, open, deliveryToEdit } = props;
+function ModifyChangeModal(props) {
+  const { handleOnClose, open, changeToEdit } = props;
   const [isLoading, setIsLoading] = useState(false);
-  const [deliveryTime, setDeliveryTime] = useState({
-    date: new Date(deliveryToEdit.date),
-    timeOption: deliveryToEdit.timeOption,
-    fromTime: new Date(deliveryToEdit.fromTime),
-    endTime: new Date(deliveryToEdit.endTime),
+  const [changeTime, setChangeTime] = useState({
+    date: new Date(changeToEdit.date),
+    timeOption: changeToEdit.timeOption,
+    fromTime: new Date(changeToEdit.fromTime),
+    endTime: new Date(changeToEdit.endTime),
   });
   const [hasError, setHasError] = useState({ error: false, msg: "" });
 
   const saveButtonEnabled =
-    deliveryTime.timeOption === "any" ||
-    (deliveryTime.date &&
-      dateDiffInDays(new Date(), new Date(deliveryTime.date)) >= 0 &&
-      deliveryTime.fromTime &&
-      deliveryTime.endTime &&
-      new Date(deliveryTime.fromTime).getTime() <=
-        new Date(deliveryTime.endTime).getTime());
+    changeTime.timeOption === "any" ||
+    (changeTime.date &&
+      dateDiffInDays(new Date(), new Date(changeTime.date)) >= 0 &&
+      changeTime.fromTime &&
+      changeTime.endTime &&
+      new Date(changeTime.fromTime).getTime() <=
+        new Date(changeTime.endTime).getTime());
 
-  const onChangeDeliverTime = (id, value) => {
+  const onChangeTime = (id, value) => {
     if (
       (id === "fromTime" || id === "endTime") &&
       value.toString() === "Invalid Date"
@@ -44,15 +44,15 @@ function ModifyDeliveryModal(props) {
       value = null;
     }
 
-    setDeliveryTime({ ...deliveryTime, [id]: value });
+    setChangeTime({ ...changeTime, [id]: value });
   };
   async function submitHandler(event) {
     event.preventDefault();
     setIsLoading(true);
     setHasError({ error: false, msg: "" });
-    const result = await updateDeliveryTime({
-      deliveryId: deliveryToEdit._id,
-      deliveryTime,
+    const result = await updateChangeTime({
+      changeId: changeToEdit._id,
+      changeTime,
     });
     setIsLoading(false);
     if (!result.error) {
@@ -77,18 +77,18 @@ function ModifyDeliveryModal(props) {
   return (
     <Dialog open={open} fullWidth={true} scroll={"body"}>
       <Card>
-        <CardHeader title="Modificar horario de entrega" />
+        <CardHeader title="Modificar horario de recolección" />
         <Divider />
         <CardContent>
           <Box component="form" onSubmit={submitHandler}>
             <OperationTime
               fullWidth
-              date={deliveryTime.date}
+              date={changeTime.date}
               minDate={new Date()}
-              timeOption={deliveryTime.timeOption}
-              fromTime={deliveryTime.fromTime}
-              endTime={deliveryTime.endTime}
-              onChangeTime={onChangeDeliverTime}
+              timeOption={changeTime.timeOption}
+              fromTime={changeTime.fromTime}
+              endTime={changeTime.endTime}
+              onChangeTime={onChangeTime}
             />
             <Grid
               container
@@ -144,10 +144,10 @@ function ModifyDeliveryModal(props) {
   );
 }
 
-ModifyDeliveryModal.propTypes = {
+ModifyChangeModal.propTypes = {
   handleOnClose: PropTypes.func.isRequired,
   open: PropTypes.bool.isRequired,
-  deliveryToEdit: PropTypes.object.isRequired,
+  changeToEdit: PropTypes.object.isRequired,
 };
 
-export default ModifyDeliveryModal;
+export default ModifyChangeModal;

@@ -24,19 +24,23 @@ import { capitalizeFirstLetter } from "lib/client/utils";
 import { format } from "date-fns";
 import es from "date-fns/locale/es";
 import { useSnackbar } from "notistack";
-import PlusOneIcon from '@mui/icons-material/PlusOne';
-import CurrencyExchangeIcon from '@mui/icons-material/CurrencyExchange';
-import LocalShippingIcon from '@mui/icons-material/LocalShipping';
+import PlusOneIcon from "@mui/icons-material/PlusOne";
+import CurrencyExchangeIcon from "@mui/icons-material/CurrencyExchange";
+import LocalShippingIcon from "@mui/icons-material/LocalShipping";
 import SearchIcon from "@mui/icons-material/Search";
+import ChangeCircleIcon from "@mui/icons-material/ChangeCircle";
 import ExtendRentModal from "../../src/components/ExtendRentModal";
-import ChangePayDaymodal from "@/components/ChangePayDayModal";
+import ChangePayDayModal from "@/components/ChangePayDayModal";
+import SchedulePickupModal from "@/components/SchedulePickupModal";
+import FormatModal from "@/components/FormatModal";
+import { getFormatForPickup, getFormatForChange } from "lib/consts/OBJ_CONTS";
+import ScheduleChangeModal from "@/components/ScheduleChangeModal";
+import Label from "@/components/Label";
 
 interface TablaRentasActualesProps {
   className?: string;
   rentList: any[];
 }
-
-
 
 const compareStringsForFilter = (keyWord: string, field: string) => {
   return str(field)
@@ -44,6 +48,7 @@ const compareStringsForFilter = (keyWord: string, field: string) => {
     .toLowerCase()
     .includes(str(keyWord).latinise().toLowerCase());
 };
+
 const applyFilters = (rentList: any[], filter: string): any[] => {
   return rentList.filter((rent) => {
     if (!filter || filter === "") {
@@ -58,18 +63,24 @@ const applyFilters = (rentList: any[], filter: string): any[] => {
         }
         switch (key) {
           case "num": {
-            const matchNumber =
-              compareStringsForFilter(filter, value+"");
+            const matchNumber = compareStringsForFilter(filter, value + "");
             return matchNumber;
+          }
+          case "status": {
+            const matchText =
+              value["id"] &&
+              compareStringsForFilter(filter, statusMap[value["id"]].text);
+            return matchText;
           }
           case "customer": {
             const matchText =
-              value["name"] && compareStringsForFilter(filter, value["name"] );
+              value["name"] && compareStringsForFilter(filter, value["name"]);
             return matchText;
           }
           case "machine": {
             const matchText =
-              value["machineNum"] && compareStringsForFilter(filter, value["machineNum"] );
+              value["machineNum"] &&
+              compareStringsForFilter(filter, value["machineNum"]);
             return matchText;
           }
           case "endDate": {
@@ -96,14 +107,50 @@ const applyPagination = (
 ): any[] => {
   return rentList.slice(page * limit, page * limit + limit);
 };
+const statusMap = {
+  PENDIENTE: {
+    text: "Pendiente de entrega",
+    color: "warning",
+  },
+  ENTREGA: {
+    text: "En proceso de entrega",
+    color: "warning",
+  },
+  RENTADO: {
+    text: "Rentado",
+    color: "success",
+  },
+  EN_CAMBIO: {
+    text: "Cambio solicitado",
+    color: "warning",
+  },
+  EN_RECOLECCION: {
+    text: "En proceso de recolección",
+    color: "error",
+  },
+  FINALIZADA: {
+    text: "Renta finalizada",
+    color: "primary",
+  },
+  CANCELADA: {
+    text: "Cancelada (no entregada)",
+    color: "secondary",
+  },
+};
+const getStatusLabel = (deliverStatus: string): JSX.Element => {
+  const { text, color }: any = statusMap[deliverStatus];
 
-const TablaRentasActuales: FC<TablaRentasActualesProps> = ({
-  rentList,
-}) => {
+  return <Label color={color}>{text}</Label>;
+};
+const TablaRentasActuales: FC<TablaRentasActualesProps> = ({ rentList }) => {
   const { enqueueSnackbar } = useSnackbar();
   const [extendModalIsOpen, setExtendModalIsOpen] = useState(false);
-  const [payDayModallIsOpen, setPayDayModalIsOpen] = useState(false);
-  
+  const [payDayModalIsOpen, setPayDayModalIsOpen] = useState(false);
+  const [pickupModalIsOpen, setPickupModalIsOpen] = useState(false);
+  const [changeModalIsOpen, setChangeModalIsOpen] = useState(false);
+  const [formatIsOpen, setFormatIsOpen] = useState(false);
+  const [createdPickup, setCreatedPickup] = useState<any>(null);
+  const [createdChange, setCreatedChange] = useState<any>(null);
   const [selectedId, setSelectedId] = useState<any>(null);
   const [page, setPage] = useState<number>(0);
   const [limit, setLimit] = useState<number>(10);
@@ -111,6 +158,8 @@ const TablaRentasActuales: FC<TablaRentasActualesProps> = ({
   const handleCloseModal = (wasSuccess, successMessage = null) => {
     setExtendModalIsOpen(false);
     setPayDayModalIsOpen(false);
+    setPickupModalIsOpen(false);
+    setChangeModalIsOpen(false);
     if (wasSuccess && successMessage) {
       enqueueSnackbar(successMessage, {
         variant: "success",
@@ -120,6 +169,29 @@ const TablaRentasActuales: FC<TablaRentasActualesProps> = ({
         },
         autoHideDuration: 1500,
       });
+    }
+  };
+  const handleClosePickupModal = (
+    wasSuccess,
+    pickUpCompleteData,
+    successMessage = null
+  ) => {
+    handleCloseModal(wasSuccess, successMessage);
+    if (wasSuccess) {
+      setCreatedPickup(pickUpCompleteData);
+      setFormatIsOpen(true);
+    }
+  };
+
+  const handleCloseChangeModal = (
+    wasSuccess,
+    changeCompleteData,
+    successMessage = null
+  ) => {
+    handleCloseModal(wasSuccess, successMessage);
+    if (wasSuccess) {
+      setCreatedChange(changeCompleteData);
+      setFormatIsOpen(true);
     }
   };
   const handleSearchChange = (e: ChangeEvent<HTMLInputElement>): void => {
@@ -145,6 +217,14 @@ const TablaRentasActuales: FC<TablaRentasActualesProps> = ({
     setPayDayModalIsOpen(true);
   };
 
+  const handleOnPickupClick = (rentId: string) => {
+    setSelectedId(rentId);
+    setPickupModalIsOpen(true);
+  };
+  const handleOnChangeClick = (rentId: string) => {
+    setSelectedId(rentId);
+    setChangeModalIsOpen(true);
+  };
 
   const filteredRents = applyFilters(rentList, filter);
   const paginatedRents = applyPagination(filteredRents, page, limit);
@@ -190,6 +270,7 @@ const TablaRentasActuales: FC<TablaRentasActualesProps> = ({
                 <TableCell align="center">Equipo</TableCell>
                 <TableCell align="center">Cliente</TableCell>
                 <TableCell align="center">Vencimiento</TableCell>
+                <TableCell align="center">Estado</TableCell>
                 <TableCell align="center">Días Restantes</TableCell>
                 <TableCell align="center"></TableCell>
               </TableRow>
@@ -223,9 +304,7 @@ const TablaRentasActuales: FC<TablaRentasActualesProps> = ({
                     <TableCell align="center">
                       {rent?.machine?.machineNum}
                     </TableCell>
-                    <TableCell align="center">
-                      {rent?.customer?.name}
-                    </TableCell>
+                    <TableCell align="center">{rent?.customer?.name}</TableCell>
                     <TableCell align="center">
                       <Typography
                         variant="body1"
@@ -242,27 +321,61 @@ const TablaRentasActuales: FC<TablaRentasActualesProps> = ({
                       </Typography>
                     </TableCell>
                     <TableCell align="center">
-                      {rent?.remaining >= 0 ? rent.remaining : <Typography color="error">VENCIDA</Typography>}
+                      {getStatusLabel(rent?.status.id)}
                     </TableCell>
                     <TableCell align="center">
-                        <Tooltip title="Extender Renta" arrow>
+                      {rent?.remaining >= 0 ? (
+                        rent.remaining
+                      ) : (
+                        <Typography color="error">VENCIDA</Typography>
+                      )}
+                    </TableCell>
+                    <TableCell align="center">
+                      <Tooltip title="Extender Renta" arrow>
+                        <IconButton
+                          onClick={() => handleOnExtendClick(rent?._id)}
+                          sx={{
+                            "&:hover": {
+                              background: theme.colors.primary.lighter,
+                            },
+                            color: theme.colors.success.light,
+                          }}
+                          color="inherit"
+                          size="small"
+                        >
+                          <PlusOneIcon fontSize="medium" />
+                        </IconButton>
+                      </Tooltip>
+                      <Tooltip title="Cambio de equipo" arrow>
+                        <span>
                           <IconButton
-                          onClick={()=> handleOnExtendClick(rent?._id)}
+                            disabled={
+                              rent.remaining < 0 ||
+                              ["EN_CAMBIO", "EN_RECOLECCION"].includes(
+                                rent.status.id
+                              )
+                            }
+                            onClick={() => {
+                              handleOnChangeClick(rent?._id);
+                            }}
                             sx={{
                               "&:hover": {
-                                background: theme.colors.primary.lighter,
+                                background: theme.colors.error.lighter,
                               },
-                              color: theme.colors.success.light,
+                              color: theme.palette.warning.light,
                             }}
                             color="inherit"
                             size="small"
                           >
-                            <PlusOneIcon fontSize="medium" />
+                            <ChangeCircleIcon fontSize="small" />
                           </IconButton>
-                        </Tooltip>
+                        </span>
+                      </Tooltip>
                       <Tooltip title="Cambiar día de pago" arrow>
                         <IconButton
-                          onClick={() => {handleOnDayChangeClick(rent?._id)}}
+                          onClick={() => {
+                            handleOnDayChangeClick(rent?._id);
+                          }}
                           sx={{
                             "&:hover": {
                               background: theme.colors.primary.lighter,
@@ -275,11 +388,13 @@ const TablaRentasActuales: FC<TablaRentasActualesProps> = ({
                           <CurrencyExchangeIcon fontSize="small" />
                         </IconButton>
                       </Tooltip>
-
-
-                        <Tooltip title="Retirar" arrow>
+                      <Tooltip title="Retirar" arrow>
+                        <span>
                           <IconButton
-                            onClick={() => {}}
+                            disabled={rent.status.id !== "RENTADO"}
+                            onClick={() => {
+                              handleOnPickupClick(rent?._id);
+                            }}
                             sx={{
                               "&:hover": {
                                 background: theme.colors.error.lighter,
@@ -291,8 +406,8 @@ const TablaRentasActuales: FC<TablaRentasActualesProps> = ({
                           >
                             <LocalShippingIcon fontSize="small" />
                           </IconButton>
-                        </Tooltip>
-
+                        </span>
+                      </Tooltip>
                     </TableCell>
                   </TableRow>
                 );
@@ -319,11 +434,55 @@ const TablaRentasActuales: FC<TablaRentasActualesProps> = ({
           rentId={selectedId}
         />
       )}
-      {payDayModallIsOpen && (
-        <ChangePayDaymodal
-          open={payDayModallIsOpen}
+      {changeModalIsOpen && (
+        <ScheduleChangeModal
+          open={changeModalIsOpen}
+          handleOnClose={handleCloseChangeModal}
+          rentId={selectedId}
+        />
+      )}
+      {payDayModalIsOpen && (
+        <ChangePayDayModal
+          open={payDayModalIsOpen}
           handleOnClose={handleCloseModal}
           rentId={selectedId}
+        />
+      )}
+      {pickupModalIsOpen && (
+        <SchedulePickupModal
+          open={pickupModalIsOpen}
+          handleOnClose={handleClosePickupModal}
+          rentId={selectedId}
+        />
+      )}
+      {formatIsOpen && createdPickup && (
+        <FormatModal
+          open={formatIsOpen}
+          title="Formato de Recolección"
+          text=""
+          formatText={getFormatForPickup(
+            createdPickup.rent,
+            createdPickup.pickupTime
+          )}
+          onAccept={() => {
+            setFormatIsOpen(false);
+            setCreatedPickup(null);
+          }}
+        />
+      )}
+      {formatIsOpen && createdChange && (
+        <FormatModal
+          open={formatIsOpen}
+          title="Formato de Cambio"
+          text=""
+          formatText={getFormatForChange(
+            createdChange.rent,
+            createdChange.changeTime
+          )}
+          onAccept={() => {
+            setFormatIsOpen(false);
+            setCreatedChange(null);
+          }}
         />
       )}
     </>

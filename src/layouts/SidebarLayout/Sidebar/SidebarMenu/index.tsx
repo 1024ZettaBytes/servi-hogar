@@ -222,23 +222,6 @@ function SidebarMenu({userRole}) {
                 </NextLink>
               </ListItem>
               <ListItem component="div">
-                <NextLink href="/entregas-pendientes" passHref>
-                  <Button
-                    className={
-                      currentRoute.includes("/entregas-pendientes")
-                        ? 'active'
-                        : ''
-                    }
-                    disableRipple
-                    component="a"
-                    onClick={closeSidebar}
-                    startIcon={<PendingActionsIcon />}
-                  >
-                    Entregas pendientes
-                  </Button>
-                </NextLink>
-              </ListItem>
-              <ListItem component="div">
                 <NextLink href="/rentas" passHref>
                   <Button
                     className={
@@ -257,6 +240,147 @@ function SidebarMenu({userRole}) {
               </ListItem>
             </List>
             }
+          </SubMenuWrapper>
+        </List>
+        <List
+          component="div"
+          subheader={
+            <ListSubheader component="div" disableSticky>
+              ENTREGAS
+            </ListSubheader>
+          }
+        >
+          <SubMenuWrapper>
+            <List component="div">
+            <ListItem component="div">
+                <NextLink href="/entregas-pendientes" passHref>
+                  <Button
+                    className={
+                      currentRoute.includes("/entregas-pendientes")
+                        ? 'active'
+                        : ''
+                    }
+                    disableRipple
+                    component="a"
+                    onClick={closeSidebar}
+                    startIcon={<PendingActionsIcon />}
+                  >
+                    Entregas pendientes
+                  </Button>
+                </NextLink>
+              </ListItem>
+              <ListItem component="div">
+                <NextLink href="/entregas" passHref>
+                  <Button
+                    className={
+                      currentRoute === "/entregas"
+                        ? 'active'
+                        : ''
+                    }
+                    disableRipple
+                    component="a"
+                    onClick={closeSidebar}
+                    startIcon={<LocalShippingIcon />}
+                  >
+                    Lista de entregas
+                  </Button>
+                </NextLink>
+              </ListItem>
+            </List>
+          </SubMenuWrapper>
+        </List>
+        <List
+          component="div"
+          subheader={
+            <ListSubheader component="div" disableSticky>
+              CAMBIOS
+            </ListSubheader>
+          }
+        >
+          <SubMenuWrapper>
+            <List component="div">
+            <ListItem component="div">
+                <NextLink href="/cambios-pendientes" passHref>
+                  <Button
+                    className={
+                      currentRoute.includes("/cambios-pendientes")
+                        ? 'active'
+                        : ''
+                    }
+                    disableRipple
+                    component="a"
+                    onClick={closeSidebar}
+                    startIcon={<PendingActionsIcon />}
+                  >
+                    Cambios pendientes
+                  </Button>
+                </NextLink>
+              </ListItem>
+              <ListItem component="div">
+                <NextLink href="/cambios" passHref>
+                  <Button
+                    className={
+                      currentRoute === "/cambios"
+                        ? 'active'
+                        : ''
+                    }
+                    disableRipple
+                    component="a"
+                    onClick={closeSidebar}
+                    startIcon={<ChangeCircleIcon />}
+                  >
+                    Lista de cambios
+                  </Button>
+                </NextLink>
+              </ListItem>
+            </List>
+          </SubMenuWrapper>
+        </List>
+        <List
+          component="div"
+          subheader={
+            <ListSubheader component="div" disableSticky>
+              RECOLECCIONES
+            </ListSubheader>
+          }
+        >
+          <SubMenuWrapper>
+            <List component="div">
+            <ListItem component="div">
+                <NextLink href="/recolecciones-pendientes" passHref>
+                  <Button
+                    className={
+                      currentRoute.includes("/recolecciones-pendientes")
+                        ? 'active'
+                        : ''
+                    }
+                    disableRipple
+                    component="a"
+                    onClick={closeSidebar}
+                    startIcon={<PendingActionsIcon />}
+                  >
+                    Recolecciones pendientes
+                  </Button>
+                </NextLink>
+              </ListItem>
+              <ListItem component="div">
+                <NextLink href="/recolecciones" passHref>
+                  <Button
+                    className={
+                      currentRoute === "/recolecciones"
+                        ? 'active'
+                        : ''
+                    }
+                    disableRipple
+                    component="a"
+                    onClick={closeSidebar}
+                    startIcon={<HailIcon />}
+                  >
+                    Lista de recolecciones
+                  </Button>
+                </NextLink>
+              </ListItem>
+            </List>
           </SubMenuWrapper>
         </List>
         <List

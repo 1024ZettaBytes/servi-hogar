@@ -6,30 +6,25 @@ import PageHeader from "@/components/PageHeader";
 import PageTitleWrapper from "@/components/PageTitleWrapper";
 import { Card, Container, Grid, Skeleton, Alert } from "@mui/material";
 import Footer from "@/components/Footer";
-import TablaRentasActuales from "./TablaRentasActuales";
-import TablaRentasPasadas from "./TablaRentasPasadas";
-
-import {
-  useGetRents,
-  getFetcher,
-} from "../api/useRequest";
+import TablaRecoleccionesPendientes from "./TablaRecoleccionesPendientes";
+import { useGetPendingPickups, getFetcher } from "../api/useRequest";
 
 import NextBreadcrumbs from "@/components/Shared/BreadCrums";
 
+function Rentas({ session }) {
+  const paths = ["Inicio", "Recolecciones pendientes"];
+  const { pickupsList, pickupsError } = useGetPendingPickups(getFetcher);
+  const generalError = pickupsError;
+  const completeData = pickupsList;
+  const { user } = session;
 
-function Rentas() {
-  const paths = ["Inicio", "Rentas"];
-  const { rentsData, rentsError } = useGetRents(getFetcher);  
   return (
     <>
       <Head>
-        <title>Rentas</title>
+        <title>Recolecciones pendientes</title>
       </Head>
       <PageTitleWrapper>
-        <PageHeader
-          title={"Rentas"}
-          sutitle={""}
-        />
+        <PageHeader title={"Recolecciones pendientes"} sutitle={""} />
         <NextBreadcrumbs paths={paths} lastLoaded={true} />
       </PageTitleWrapper>
       <Container maxWidth="lg">
@@ -41,11 +36,9 @@ function Rentas() {
           spacing={4}
         >
           <Grid item xs={12}>
-            {rentsError ? (
-              <Alert severity="error">
-                {rentsError?.message}
-              </Alert>
-            ) : !rentsData ? (
+            {generalError ? (
+              <Alert severity="error">{pickupsError?.message}</Alert>
+            ) : !completeData ? (
               <Skeleton
                 variant="rectangular"
                 width={"100%"}
@@ -54,38 +47,9 @@ function Rentas() {
               />
             ) : (
               <Card>
-                <TablaRentasActuales
-                  rentList={rentsData.current}
-                />
-              </Card>
-            )}
-          </Grid>
-        </Grid>
-      </Container>
-      <Container maxWidth="lg" sx={{marginTop: 5}}>
-        <Grid
-          container
-          direction="row"
-          justifyContent="center"
-          alignItems="stretch"
-          spacing={4}
-        >
-          <Grid item xs={12}>
-            {rentsError ? (
-              <Alert severity="error">
-                {rentsError?.message}
-              </Alert>
-            ) : !rentsData ? (
-              <Skeleton
-                variant="rectangular"
-                width={"100%"}
-                height={500}
-                animation="wave"
-              />
-            ) : (
-              <Card>
-                <TablaRentasPasadas
-                  rentList={rentsData.past}
+                <TablaRecoleccionesPendientes
+                  userRole={user?.role}
+                  pickupList={pickupsList}
                 />
               </Card>
             )}

@@ -14,7 +14,7 @@ import {
 
 import NextBreadcrumbs from "@/components/Shared/BreadCrums";
 
-function Rentas({ session }) {
+function EntregasPendientes({ session }) {
   const paths = ["Inicio", "Entregas pendientes"];
   const { deliveriesList, deliveriesError } = useGetPendingDeliveries(getFetcher);
   const generalError = deliveriesError;
@@ -24,7 +24,7 @@ function Rentas({ session }) {
   return (
     <>
       <Head>
-        <title>Rentas</title>
+        <title>Entregas pendientes</title>
       </Head>
       <PageTitleWrapper>
         <PageHeader
@@ -44,7 +44,7 @@ function Rentas({ session }) {
           <Grid item xs={12}>
             {generalError ? (
               <Alert severity="error">
-                {deliveriesList?.message}
+                {deliveriesError?.message}
               </Alert>
             ) : !completeData ? (
               <Skeleton
@@ -69,10 +69,10 @@ function Rentas({ session }) {
   );
 }
 
-Rentas.getLayout = (page) => <SidebarLayout>{page}</SidebarLayout>;
+EntregasPendientes.getLayout = (page) => <SidebarLayout>{page}</SidebarLayout>;
 
 export async function getServerSideProps({ req, resolvedUrl }) {
   let props = await validateServerSideSession(getSession, req, resolvedUrl);
   return props;
 }
-export default Rentas;
+export default EntregasPendientes;

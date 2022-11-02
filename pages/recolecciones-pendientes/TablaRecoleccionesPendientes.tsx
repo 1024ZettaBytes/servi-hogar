@@ -24,23 +24,23 @@ import NextLink from "next/link";
 import { capitalizeFirstLetter } from "lib/client/utils";
 import { format } from "date-fns";
 import es from "date-fns/locale/es";
-import { cancelDelivery } from "../../lib/client/deliveriesFetch";
+import { cancelPickup } from "../../lib/client/pickupsFetch";
 import { useSnackbar } from "notistack";
 import Label from "@/components/Label";
+import WhatsAppIcon from '@mui/icons-material/WhatsApp';
 import CheckIcon from "@mui/icons-material/Check";
 import EditIcon from "@mui/icons-material/Edit";
 import CancelIcon from "@mui/icons-material/Cancel";
-import WhatsAppIcon from "@mui/icons-material/WhatsApp";
 import SearchIcon from "@mui/icons-material/Search";
 import GenericModal from "@/components/GenericModal";
-import ModifyDeliveryModal from "../../src/components/ModifyDeliveryModal";
+import ModifyPickupModal from "../../src/components/ModifyPickupModal";
 import FormatModal from "@/components/FormatModal";
-import {getFormatForDelivery} from "../../lib/consts/OBJ_CONTS"
+import { getFormatForPickup} from "../../lib/consts/OBJ_CONTS";
 
-interface TablaEntregasPendientesProps {
+interface TablaRecoleccionesPendientesProps {
   userRole: string;
   className?: string;
-  deliveriesList: any[];
+  pickupList: any[];
 }
 const statusMap = {
   ESPERA: {
@@ -67,13 +67,13 @@ const compareStringsForFilter = (keyWord: string, field: string) => {
     .toLowerCase()
     .includes(str(keyWord).latinise().toLowerCase());
 };
-const applyFilters = (deliveriesList: any[], filter: string): any[] => {
-  return deliveriesList.filter((delivery) => {
+const applyFilters = (pickupsList: any[], filter: string): any[] => {
+  return pickupsList.filter((pickup) => {
     if (!filter || filter === "") {
       return true;
     }
     return (
-      Object.entries(delivery).filter((keyValue) => {
+      Object.entries(pickup).filter((keyValue) => {
         const key = keyValue[0];
         const value = keyValue[1];
         if (!value) {
@@ -98,7 +98,7 @@ const applyFilters = (deliveriesList: any[], filter: string): any[] => {
               value &&
               compareStringsForFilter(
                 filter,
-                format(new Date(delivery?.fromTime), "LLL dd yyyy", {
+                format(new Date(pickup?.fromTime), "LLL dd yyyy", {
                   locale: es,
                 })
               );
@@ -111,16 +111,16 @@ const applyFilters = (deliveriesList: any[], filter: string): any[] => {
 };
 
 const applyPagination = (
-  deliveriesList: any[],
+  pickupsList: any[],
   page: number,
   limit: number
 ): any[] => {
-  return deliveriesList.slice(page * limit, page * limit + limit);
+  return pickupsList.slice(page * limit, page * limit + limit);
 };
 
-const TablaEntregasPendientes: FC<TablaEntregasPendientesProps> = ({
+const TablaRecoleccionesPendientes: FC<TablaRecoleccionesPendientesProps> = ({
   userRole,
-  deliveriesList,
+  pickupList,
 }) => {
   const { enqueueSnackbar } = useSnackbar();
   const [modifyModalIsOpen, setModifyModalIsOpen] = useState(false);
@@ -128,7 +128,7 @@ const TablaEntregasPendientes: FC<TablaEntregasPendientesProps> = ({
   const [formatIsOpen, setFormatIsOpen] = useState(false);
   const [formatText, setFormatText] = useState<string>("");
   const [isDeleting, setIsDeleting] = useState(false);
-  const [deliveryToEdit, setDeliveryToEdit] = useState<any>(null);
+  const [pickupToEdit, setDeliveryToEdit] = useState<any>(null);
   const [idToCancel, setIdToCancel] = useState<string>(null);
   const [page, setPage] = useState<number>(0);
   const [limit, setLimit] = useState<number>(10);
@@ -159,17 +159,17 @@ const TablaEntregasPendientes: FC<TablaEntregasPendientesProps> = ({
   const handleLimitChange = (event: ChangeEvent<HTMLInputElement>): void => {
     setLimit(parseInt(event.target.value));
   };
-  const handleOnModifyClick = (delivery: any) => {
-    setDeliveryToEdit(delivery);
+  const handleOnModifyClick = (pickup: any) => {
+    setDeliveryToEdit(pickup);
     setModifyModalIsOpen(true);
   };
-  const handleOnDeleteClick = (deliveryId: string) => {
-    setIdToCancel(deliveryId);
+  const handleOnDeleteClick = (pickupId: string) => {
+    setIdToCancel(pickupId);
     setCancelModalIsOpen(true);
   };
   const handleOnConfirmDelete = async () => {
     setIsDeleting(true);
-    const result = await cancelDelivery(idToCancel);
+    const result = await cancelPickup(idToCancel);
     setCancelModalIsOpen(false);
     setIsDeleting(false);
     enqueueSnackbar(result.msg, {
@@ -182,8 +182,8 @@ const TablaEntregasPendientes: FC<TablaEntregasPendientesProps> = ({
     });
   };
 
-  const filteredDeliveries = applyFilters(deliveriesList, filter);
-  const paginatedDeliveries = applyPagination(filteredDeliveries, page, limit);
+  const filteredPickups = applyFilters(pickupList, filter);
+  const paginatedPickups = applyPagination(filteredPickups, page, limit);
 
   const theme = useTheme();
   return (
@@ -233,9 +233,9 @@ const TablaEntregasPendientes: FC<TablaEntregasPendientesProps> = ({
               </TableRow>
             </TableHead>
             <TableBody>
-              {paginatedDeliveries.map((delivery) => {
+              {paginatedPickups.map((pickup) => {
                 return (
-                  <TableRow hover key={delivery?._id}>
+                  <TableRow hover key={pickup?._id}>
                     <TableCell align="center">
                       <Typography
                         variant="body1"
@@ -244,7 +244,7 @@ const TablaEntregasPendientes: FC<TablaEntregasPendientesProps> = ({
                         gutterBottom
                         noWrap
                       >
-                        {delivery?.rent?.num}
+                        {pickup?.rent?.num}
                       </Typography>
                     </TableCell>
                     <TableCell align="center">
@@ -255,11 +255,11 @@ const TablaEntregasPendientes: FC<TablaEntregasPendientesProps> = ({
                       gutterBottom
                       noWrap
                     >
-                      {delivery?.rent?.customer?.name}
+                      {pickup?.rent?.customer?.name}
                     </Typography>
               </TableCell>
                     <TableCell align="center">
-                      {getStatusLabel(delivery?.status)}
+                      {getStatusLabel(pickup?.status)}
                     </TableCell>
                     <TableCell align="center">
                       <Typography
@@ -269,8 +269,9 @@ const TablaEntregasPendientes: FC<TablaEntregasPendientesProps> = ({
                         gutterBottom
                         noWrap
                       >
-                        {capitalizeFirstLetter(
-                          format(new Date(delivery?.fromTime), "LLL dd yyyy", {
+                        {
+                        capitalizeFirstLetter(
+                          format(new Date(pickup?.fromTime), "LLL dd yyyy", {
                             locale: es,
                           })
                         )}
@@ -285,11 +286,11 @@ const TablaEntregasPendientes: FC<TablaEntregasPendientesProps> = ({
                         gutterBottom
                         noWrap
                       >
-                        {delivery?.timeOption === "specific"
-                          ? `${format(new Date(delivery?.fromTime), "h:mm a", {
+                        {pickup?.timeOption === "specific"
+                          ? `${format(new Date(pickup?.fromTime), "h:mm a", {
                               locale: es,
                             })} - ${format(
-                              new Date(delivery?.endTime),
+                              new Date(pickup?.endTime),
                               "h:mm a",
                               {
                                 locale: es,
@@ -300,8 +301,8 @@ const TablaEntregasPendientes: FC<TablaEntregasPendientesProps> = ({
                     </TableCell>
 
                     <TableCell align="center">
-                      <NextLink href={`/entregas-pendientes/${delivery?._id}`}>
-                        <Tooltip title="Marcar entregada" arrow>
+                      <NextLink href={`/recolecciones-pendientes/${pickup?._id}`}>
+                        <Tooltip title="Marcar recolectada" arrow>
                           <IconButton
                             sx={{
                               "&:hover": {
@@ -318,7 +319,7 @@ const TablaEntregasPendientes: FC<TablaEntregasPendientesProps> = ({
                       </NextLink>
                       <Tooltip title="Modificar" arrow>
                         <IconButton
-                          onClick={() => handleOnModifyClick(delivery)}
+                          onClick={() => handleOnModifyClick(pickup)}
                           sx={{
                             "&:hover": {
                               background: theme.colors.primary.lighter,
@@ -333,9 +334,9 @@ const TablaEntregasPendientes: FC<TablaEntregasPendientesProps> = ({
                       </Tooltip>
 
                       {userCanDelete && (
-                        <Tooltip title="Cancelar entrega" arrow>
+                        <Tooltip title="Cancelar recolección" arrow>
                           <IconButton
-                            onClick={() => handleOnDeleteClick(delivery._id)}
+                            onClick={() => handleOnDeleteClick(pickup._id)}
                             sx={{
                               "&:hover": {
                                 background: theme.colors.error.lighter,
@@ -352,7 +353,7 @@ const TablaEntregasPendientes: FC<TablaEntregasPendientesProps> = ({
                       <Tooltip title="Ver formato" arrow>
                         <IconButton
                           onClick={() => {
-                            setFormatText(getFormatForDelivery(delivery.rent, delivery));
+                            setFormatText(getFormatForPickup(pickup.rent, pickup));
                             setFormatIsOpen(true);
                           }}
                           sx={{
@@ -377,7 +378,7 @@ const TablaEntregasPendientes: FC<TablaEntregasPendientesProps> = ({
         <Box p={2}>
           <TablePagination
             component="div"
-            count={filteredDeliveries.length}
+            count={filteredPickups.length}
             onPageChange={handlePageChange}
             onRowsPerPageChange={handleLimitChange}
             page={page}
@@ -387,16 +388,16 @@ const TablaEntregasPendientes: FC<TablaEntregasPendientesProps> = ({
         </Box>
       </Card>
       {modifyModalIsOpen && (
-        <ModifyDeliveryModal
+        <ModifyPickupModal
           open={modifyModalIsOpen}
           handleOnClose={handleModifyClose}
-          deliveryToEdit={deliveryToEdit}
+          pickupToEdit={pickupToEdit}
         />
       )}
       {formatIsOpen && (
         <FormatModal
           open={formatIsOpen}
-          title="Formato de entrega"
+          title="Formato de recolección"
           text=""
           formatText={formatText}
           onAccept={() => {
@@ -408,7 +409,7 @@ const TablaEntregasPendientes: FC<TablaEntregasPendientesProps> = ({
       <GenericModal
         open={cancelModalIsOpen}
         title="Atención"
-        text={"¿Está seguro de cancelar la entrega seleccionada?"}
+        text={"¿Está seguro de cancelar la recolección seleccionada?"}
         isLoading={isDeleting}
         onAccept={handleOnConfirmDelete}
         onCancel={() => {
@@ -420,14 +421,14 @@ const TablaEntregasPendientes: FC<TablaEntregasPendientesProps> = ({
   );
 };
 
-TablaEntregasPendientes.propTypes = {
+TablaRecoleccionesPendientes.propTypes = {
   userRole: PropTypes.string.isRequired,
-  deliveriesList: PropTypes.array.isRequired,
+  pickupList: PropTypes.array.isRequired,
 };
 
-TablaEntregasPendientes.defaultProps = {
+TablaRecoleccionesPendientes.defaultProps = {
   userRole: "",
-  deliveriesList: [],
+  pickupList: [],
 };
 
-export default TablaEntregasPendientes;
+export default TablaRecoleccionesPendientes;

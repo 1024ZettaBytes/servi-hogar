@@ -13,23 +13,33 @@ import {
   Container,
   Skeleton,
   Typography,
-  FormControl,
-  InputLabel,
-  Select,
-  MenuItem,
 } from "@mui/material";
 import { LoadingButton } from "@mui/lab";
 import { useGetRentById, getFetcher } from "../../../pages/api/useRequest";
-import { changePayday } from "../../../lib/client/rentsFetch";
-import { capitalizeFirstLetter, addDaysToDate } from "lib/client/utils";
+import { savePickup } from "../../../lib/client/pickupsFetch";
+import { capitalizeFirstLetter, addDaysToDate, dateDiffInDays } from "lib/client/utils";
 import { format } from "date-fns";
 import es from "date-fns/locale/es";
-import { WEEK_DAYS, PRICES } from "lib/consts/OBJ_CONTS";
 import numeral from "numeral";
-function ChangePayDayModal(props) {
+import OperationTime from "pages/renta-rapida/OperationTime";
+const defaultInitialDate = (today: Date) => {
+  today.setHours(8, 0, 0);
+  return today;
+};
+
+const defaultEndDate = (today: Date) => {
+  today.setHours(23, 0, 0);
+  return today;
+};
+function SchedulePickupModal(props) {
   const { rentId, handleOnClose, open } = props;
   const { rent, rentByIdError } = useGetRentById(getFetcher, rentId);
-
+  const [pickupTime, setPickupTime] = useState<any>({
+    date: addDaysToDate(new Date(), 1),
+    timeOption: "any",
+    fromTime: defaultInitialDate(addDaysToDate(new Date(), 1)),
+    endTime: defaultEndDate(addDaysToDate(new Date(), 1)),
+  });
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
 
   const [hasErrorSubmitting, setHasErrorSubmitting] = useState<any>({
@@ -38,17 +48,23 @@ function ChangePayDayModal(props) {
   });
   const [selectedDay, setSelectedDay] = useState<any>(null);
 
-  const submitButtonEnabled = rent?.endDate
-    ? selectedDay !== format(new Date(rent?.endDate), "eeee").toLowerCase()
-    : false;
+  const submitButtonEnabled =
+    rent &&
+    pickupTime.date &&
+    dateDiffInDays(new Date(), new Date(pickupTime.date)) >= 0 &&
+    (pickupTime.timeOption === "any" ||
+      (pickupTime.fromTime &&
+        pickupTime.endTime &&
+        pickupTime.fromTime.getTime() <= pickupTime.endTime.getTime()));
+
 
   const handleOnSubmit = async () => {
     setHasErrorSubmitting({ error: false, msg: "" });
     setIsSubmitting(true);
-    const result = await changePayday(rentId, selectedDay);
+    const result = await savePickup({ rentId, pickupTime });
     setIsSubmitting(false);
     if (!result.error) {
-      handleChangedDay(result.msg);
+      handleSavedPickup(result.msg);
     } else {
       setHasErrorSubmitting({ error: true, msg: result.msg });
     }
@@ -59,54 +75,24 @@ function ChangePayDayModal(props) {
     setIsSubmitting(false);
     handleOnClose(false);
   };
-  const handleChangedDay = (successMessage) => {
-    handleOnClose(true, successMessage);
+  const handleSavedPickup = (successMessage) => {
+    handleOnClose(true, {rent, pickupTime},successMessage);
   };
   if (rent && !selectedDay) {
     const dayName = format(new Date(rent?.endDate), "eeee").toLowerCase();
     setSelectedDay(dayName);
   }
-  const plusDays = () => {
-    if (rent) {
-      const day = format(new Date(rent?.endDate), "eeee").toLowerCase();
-      if (selectedDay !== day) {
-        const list = Object.keys(WEEK_DAYS);
-        const currentIndex = list.indexOf(day);
-        const newIndex = list.indexOf(selectedDay);
-        return newIndex > currentIndex
-          ? newIndex - currentIndex
-          : list.length - (currentIndex - newIndex);
-      }
-      return 0;
-    }
-    return 0;
-  };
 
-  const addedDays = plusDays();
-  const daysCost = addedDays * PRICES.day;
-  const getTotalDebt = () => {
-    let usedFree = false;
-    let newBalance = 0;
-    if (!rent) return { debt: 0, usedFree, newBalance: 0 };
-    newBalance = rent.customer.balance;
-    let debt = rent.customer.balance - daysCost; // deuda total despues de agregar recorrido
-    if (debt < 0) {
-      const toPay = daysCost;
-      newBalance = debt;
-      debt = daysCost;
-      //if will use free week
-      if (toPay >= 4 * PRICES.day && rent.customer.freeWeeks > 0) {
-        usedFree = true;
-        debt = debt - PRICES.week > 0 ? debt - PRICES.week : 0;
-        newBalance = newBalance + PRICES.week;
-      }
-    } else {
-      debt = daysCost;
-      newBalance = rent.customer.balance - daysCost;
+  const onChangePickupTime = (id, value) => {
+    if (
+      (id === "fromTime" || id === "endTime") &&
+      value.toString() === "Invalid Date"
+    ) {
+      value = null;
     }
-    return { debt, usedFree, newBalance };
+
+    setPickupTime({ ...pickupTime, [id]: value });
   };
-  const totalDebt = getTotalDebt();
   const getExpiration = () => {
     if (!rent) return "";
     if (rent.remaining > 0) {
@@ -122,10 +108,11 @@ function ChangePayDayModal(props) {
     return `VENCIDA (${Math.abs(rent.remaining)} día(s))`;
   };
 
+
   return (
     <Dialog open={open} fullWidth={true} maxWidth={"md"} scroll={"body"}>
       <Card>
-        <CardHeader title="Cambiar día de pago" />
+        <CardHeader title="Programar recolección" />
         <Divider />
         <CardContent>
           <Box>
@@ -144,7 +131,7 @@ function ChangePayDayModal(props) {
                     <Skeleton
                       variant="rectangular"
                       width={"100%"}
-                      height={500}
+                      height={300}
                       animation="wave"
                     />
                   ) : (
@@ -190,7 +177,7 @@ function ChangePayDayModal(props) {
                           sm={12}
                           lg={2}
                           mt={1}
-                          sx={{ textAlign: "left" }}
+                          sx={{ textAlign: "center" }}
                         >
                           <Box>
                             <Typography gutterBottom variant="subtitle2">
@@ -218,23 +205,7 @@ function ChangePayDayModal(props) {
                             </Typography>
                           </Box>
                         </Grid>
-                        <Grid
-                          item
-                          xs={12}
-                          sm={12}
-                          lg={2}
-                          mt={1}
-                          sx={{ textAlign: { lg: "center" } }}
-                        >
-                          <Box>
-                            <Typography gutterBottom variant="subtitle2">
-                              Semanas gratis
-                            </Typography>
-                            <Typography color="black" gutterBottom>
-                              {rent.customer?.freeWeeks}
-                            </Typography>
-                          </Box>
-                        </Grid>
+
                         <Grid
                           item
                           xs={12}
@@ -255,24 +226,7 @@ function ChangePayDayModal(props) {
                           </Box>
                         </Grid>
 
-                        <Grid
-                          item
-                          xs={12}
-                          sm={12}
-                          lg={3}
-                          mt={1}
-                          sx={{ textAlign: { lg: "left" } }}
-                        >
-                          <Box>
-                            <Typography gutterBottom variant="subtitle2">
-                              ¿Ha cambiado el dia de pago anteriormente?
-                            </Typography>
-                            <Typography color="black" gutterBottom>
-                              {rent.customer.payDayChanged ? "Sí" : "No"}
-                            </Typography>
-                          </Box>
-                        </Grid>
-                        <Grid item xs={0} sm={0} lg={1} mt={1} />
+                        <Grid item xs={0} sm={0} lg={6} mt={1} />
                         <Grid
                           item
                           xs={12}
@@ -290,84 +244,16 @@ function ChangePayDayModal(props) {
                             </Typography>
                           </Box>
                         </Grid>
-
-                        <Grid item lg={2} mt={4}>
-                          {rent?.endDate ? (
-                            <FormControl sx={{ width: "100%" }}>
-                              <InputLabel id="day-id">Día de pago*</InputLabel>
-                              <Select
-                                labelId="day-id"
-                                label="Día de pago*"
-                                id="day"
-                                name="day"
-                                required
-                                autoComplete="off"
-                                size="medium"
-                                value={selectedDay || ""}
-                                onChange={(event) => {
-                                  setSelectedDay(event.target.value);
-                                }}
-                              >
-                                {Object.keys(WEEK_DAYS).map((dayKey) => (
-                                  <MenuItem key={dayKey} value={dayKey}>
-                                    {WEEK_DAYS[dayKey]}
-                                  </MenuItem>
-                                ))}
-                              </Select>
-                            </FormControl>
-                          ) : (
-                            <Skeleton
-                              variant="text"
-                              sx={{ fontSize: "1rem", width: "100px" }}
-                            />
-                          )}
-                        </Grid>
-                        {addedDays > 0 && (
-                          <>
-                            <Grid item xs={12} sm={12} lg={12} mt={1}>
-                              <Alert severity="warning">
-                                {totalDebt.usedFree
-                                  ? "Se utilizará 1 semana gratis para cubrir el costo "
-                                  : `Se quitarán $${totalDebt.debt} del saldo del cliente para compensar los días restantes.`}
-                                <br />
-                                El nuevo saldo será de $
-                                {totalDebt.debt >= 0
-                                  ? rent.customer.balance - totalDebt.debt
-                                  : totalDebt.debt}
-                              </Alert>
-                            </Grid>
-                            <Grid item lg={10} />
-                            <Grid item lg={9}></Grid>
-                            <Grid
-                              item
-                              xs={12}
-                              sm={12}
-                              lg={3}
-                              mt={1}
-                              sx={{ textAlign: { lg: "center" } }}
-                            >
-                              <Box>
-                                <Typography gutterBottom variant="h5">
-                                  Nueva fecha de vencimiento
-                                </Typography>
-                                <Typography color="black" gutterBottom>
-                                  {capitalizeFirstLetter(
-                                    format(
-                                      addDaysToDate(
-                                        new Date(rent?.endDate),
-                                        addedDays
-                                      ),
-                                      "LLLL dd yyyy",
-                                      {
-                                        locale: es,
-                                      }
-                                    )
-                                  )}
-                                </Typography>
-                              </Box>
-                            </Grid>
-                          </>
-                        )}
+                        <Grid item lg={2} mt={4}></Grid>
+                        <OperationTime
+                          fullWidth
+                          date={pickupTime.date}
+                          minDate={new Date()}
+                          timeOption={pickupTime.timeOption}
+                          fromTime={pickupTime.fromTime}
+                          endTime={pickupTime.endTime}
+                          onChangeTime={onChangePickupTime}
+                        />
                       </Grid>
                     </>
                   )}
@@ -389,6 +275,7 @@ function ChangePayDayModal(props) {
                       <Button
                         size="large"
                         variant="outlined"
+                        disabled={isSubmitting}
                         onClick={() => handleClose()}
                       >
                         Cancelar
@@ -416,10 +303,10 @@ function ChangePayDayModal(props) {
   );
 }
 
-ChangePayDayModal.propTypes = {
+SchedulePickupModal.propTypes = {
   handleOnClose: PropTypes.func.isRequired,
   open: PropTypes.bool.isRequired,
   rentId: PropTypes.string.isRequired,
 };
 
-export default ChangePayDayModal;
+export default SchedulePickupModal;
