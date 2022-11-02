@@ -24,60 +24,23 @@ import { capitalizeFirstLetter } from "lib/client/utils";
 import { format } from "date-fns";
 import es from "date-fns/locale/es";
 import { useSnackbar } from "notistack";
-import PlusOneIcon from '@mui/icons-material/PlusOne';
-import CurrencyExchangeIcon from '@mui/icons-material/CurrencyExchange';
-import LocalShippingIcon from '@mui/icons-material/LocalShipping';
+import PlusOneIcon from "@mui/icons-material/PlusOne";
+import CurrencyExchangeIcon from "@mui/icons-material/CurrencyExchange";
+import LocalShippingIcon from "@mui/icons-material/LocalShipping";
 import SearchIcon from "@mui/icons-material/Search";
+import ChangeCircleIcon from "@mui/icons-material/ChangeCircle";
 import ExtendRentModal from "../../src/components/ExtendRentModal";
 import ChangePayDayModal from "@/components/ChangePayDayModal";
 import SchedulePickupModal from "@/components/SchedulePickupModal";
 import FormatModal from "@/components/FormatModal";
-import { PICKUP_FORMAT } from "lib/consts/OBJ_CONTS";
-import numeral from "numeral";
+import { getFormatForPickup, getFormatForChange } from "lib/consts/OBJ_CONTS";
+import ScheduleChangeModal from "@/components/ScheduleChangeModal";
+import Label from "@/components/Label";
 
-
-const getFormatForPickup = (rent, delTime) => {
-  let f = PICKUP_FORMAT;
-  f = f.replace("_rNum", rent?.num);
-  f = f.replace("_cName", rent?.customer?.name);
-  f = f.replace("_cCell", rent?.customer?.cell);
-  f = f.replace("_cStreet", rent?.customer?.currentResidence?.street);
-  f = f.replace("_cSuburb", rent?.customer?.currentResidence?.suburb);
-  f = f.replace("_maps", rent?.customer?.currentResidence?.maps);
-  f = f.replace(
-    "_cRef",
-    rent?.customer?.currentResidence?.residenceRef
-  );
-  f = f.replace("_date",
-    capitalizeFirstLetter(format(new Date(delTime?.date), "LLL dd yyyy", {
-      locale: es,
-    })))
-  f = f.replace(
-    "_rPay",
-    numeral(rent?.initialPay).format(`${rent?.initialPay}0,0.00`)
-  );
-  let time = "";
-  if (delTime.timeOption === "specific") {
-    alert("spe")
-    time = `\nHorario especial: ${format(new Date(delTime?.fromTime), "h:mm a", {
-      locale: es,
-    })} - ${format(
-      new Date(delTime?.endTime), 
-      "h:mm a",
-      {
-        locale: es,
-      }
-    )}`;
-  }
-  f = f.replace("_spec", time);
-  return f;
-};
 interface TablaRentasActualesProps {
   className?: string;
   rentList: any[];
 }
-
-
 
 const compareStringsForFilter = (keyWord: string, field: string) => {
   return str(field)
@@ -100,9 +63,14 @@ const applyFilters = (rentList: any[], filter: string): any[] => {
         }
         switch (key) {
           case "num": {
-            const matchNumber =
-              compareStringsForFilter(filter, value + "");
+            const matchNumber = compareStringsForFilter(filter, value + "");
             return matchNumber;
+          }
+          case "status": {
+            const matchText =
+              value["id"] &&
+              compareStringsForFilter(filter, statusMap[value["id"]].text);
+            return matchText;
           }
           case "customer": {
             const matchText =
@@ -111,7 +79,8 @@ const applyFilters = (rentList: any[], filter: string): any[] => {
           }
           case "machine": {
             const matchText =
-              value["machineNum"] && compareStringsForFilter(filter, value["machineNum"]);
+              value["machineNum"] &&
+              compareStringsForFilter(filter, value["machineNum"]);
             return matchText;
           }
           case "endDate": {
@@ -138,16 +107,50 @@ const applyPagination = (
 ): any[] => {
   return rentList.slice(page * limit, page * limit + limit);
 };
+const statusMap = {
+  PENDIENTE: {
+    text: "Pendiente de entrega",
+    color: "warning",
+  },
+  ENTREGA: {
+    text: "En proceso de entrega",
+    color: "warning",
+  },
+  RENTADO: {
+    text: "Rentado",
+    color: "success",
+  },
+  EN_CAMBIO: {
+    text: "Cambio solicitado",
+    color: "warning",
+  },
+  EN_RECOLECCION: {
+    text: "En proceso de recolección",
+    color: "error",
+  },
+  FINALIZADA: {
+    text: "Renta finalizada",
+    color: "primary",
+  },
+  CANCELADA: {
+    text: "Cancelada (no entregada)",
+    color: "secondary",
+  },
+};
+const getStatusLabel = (deliverStatus: string): JSX.Element => {
+  const { text, color }: any = statusMap[deliverStatus];
 
-const TablaRentasActuales: FC<TablaRentasActualesProps> = ({
-  rentList,
-}) => {
+  return <Label color={color}>{text}</Label>;
+};
+const TablaRentasActuales: FC<TablaRentasActualesProps> = ({ rentList }) => {
   const { enqueueSnackbar } = useSnackbar();
   const [extendModalIsOpen, setExtendModalIsOpen] = useState(false);
   const [payDayModalIsOpen, setPayDayModalIsOpen] = useState(false);
   const [pickupModalIsOpen, setPickupModalIsOpen] = useState(false);
+  const [changeModalIsOpen, setChangeModalIsOpen] = useState(false);
   const [formatIsOpen, setFormatIsOpen] = useState(false);
   const [createdPickup, setCreatedPickup] = useState<any>(null);
+  const [createdChange, setCreatedChange] = useState<any>(null);
   const [selectedId, setSelectedId] = useState<any>(null);
   const [page, setPage] = useState<number>(0);
   const [limit, setLimit] = useState<number>(10);
@@ -156,6 +159,7 @@ const TablaRentasActuales: FC<TablaRentasActualesProps> = ({
     setExtendModalIsOpen(false);
     setPayDayModalIsOpen(false);
     setPickupModalIsOpen(false);
+    setChangeModalIsOpen(false);
     if (wasSuccess && successMessage) {
       enqueueSnackbar(successMessage, {
         variant: "success",
@@ -167,10 +171,26 @@ const TablaRentasActuales: FC<TablaRentasActualesProps> = ({
       });
     }
   };
-  const handleClosePickupModal = (wasSuccess, pickUpCompleteData, successMessage = null) => {
+  const handleClosePickupModal = (
+    wasSuccess,
+    pickUpCompleteData,
+    successMessage = null
+  ) => {
     handleCloseModal(wasSuccess, successMessage);
     if (wasSuccess) {
       setCreatedPickup(pickUpCompleteData);
+      setFormatIsOpen(true);
+    }
+  };
+
+  const handleCloseChangeModal = (
+    wasSuccess,
+    changeCompleteData,
+    successMessage = null
+  ) => {
+    handleCloseModal(wasSuccess, successMessage);
+    if (wasSuccess) {
+      setCreatedChange(changeCompleteData);
       setFormatIsOpen(true);
     }
   };
@@ -201,8 +221,10 @@ const TablaRentasActuales: FC<TablaRentasActualesProps> = ({
     setSelectedId(rentId);
     setPickupModalIsOpen(true);
   };
-
-
+  const handleOnChangeClick = (rentId: string) => {
+    setSelectedId(rentId);
+    setChangeModalIsOpen(true);
+  };
 
   const filteredRents = applyFilters(rentList, filter);
   const paginatedRents = applyPagination(filteredRents, page, limit);
@@ -248,6 +270,7 @@ const TablaRentasActuales: FC<TablaRentasActualesProps> = ({
                 <TableCell align="center">Equipo</TableCell>
                 <TableCell align="center">Cliente</TableCell>
                 <TableCell align="center">Vencimiento</TableCell>
+                <TableCell align="center">Estado</TableCell>
                 <TableCell align="center">Días Restantes</TableCell>
                 <TableCell align="center"></TableCell>
               </TableRow>
@@ -281,9 +304,7 @@ const TablaRentasActuales: FC<TablaRentasActualesProps> = ({
                     <TableCell align="center">
                       {rent?.machine?.machineNum}
                     </TableCell>
-                    <TableCell align="center">
-                      {rent?.customer?.name}
-                    </TableCell>
+                    <TableCell align="center">{rent?.customer?.name}</TableCell>
                     <TableCell align="center">
                       <Typography
                         variant="body1"
@@ -300,7 +321,14 @@ const TablaRentasActuales: FC<TablaRentasActualesProps> = ({
                       </Typography>
                     </TableCell>
                     <TableCell align="center">
-                      {rent?.remaining >= 0 ? rent.remaining : <Typography color="error">VENCIDA</Typography>}
+                      {getStatusLabel(rent?.status.id)}
+                    </TableCell>
+                    <TableCell align="center">
+                      {rent?.remaining >= 0 ? (
+                        rent.remaining
+                      ) : (
+                        <Typography color="error">VENCIDA</Typography>
+                      )}
                     </TableCell>
                     <TableCell align="center">
                       <Tooltip title="Extender Renta" arrow>
@@ -318,9 +346,36 @@ const TablaRentasActuales: FC<TablaRentasActualesProps> = ({
                           <PlusOneIcon fontSize="medium" />
                         </IconButton>
                       </Tooltip>
+                      <Tooltip title="Cambio de equipo" arrow>
+                        <span>
+                          <IconButton
+                            disabled={
+                              rent.remaining < 0 ||
+                              ["EN_CAMBIO", "EN_RECOLECCION"].includes(
+                                rent.status.id
+                              )
+                            }
+                            onClick={() => {
+                              handleOnChangeClick(rent?._id);
+                            }}
+                            sx={{
+                              "&:hover": {
+                                background: theme.colors.error.lighter,
+                              },
+                              color: theme.palette.warning.light,
+                            }}
+                            color="inherit"
+                            size="small"
+                          >
+                            <ChangeCircleIcon fontSize="small" />
+                          </IconButton>
+                        </span>
+                      </Tooltip>
                       <Tooltip title="Cambiar día de pago" arrow>
                         <IconButton
-                          onClick={() => { handleOnDayChangeClick(rent?._id) }}
+                          onClick={() => {
+                            handleOnDayChangeClick(rent?._id);
+                          }}
                           sx={{
                             "&:hover": {
                               background: theme.colors.primary.lighter,
@@ -336,8 +391,10 @@ const TablaRentasActuales: FC<TablaRentasActualesProps> = ({
                       <Tooltip title="Retirar" arrow>
                         <span>
                           <IconButton
-                            disabled={rent.status.id === "EN_RECOLECCION"}
-                            onClick={() => { handleOnPickupClick(rent?._id) }}
+                            disabled={rent.status.id !== "RENTADO"}
+                            onClick={() => {
+                              handleOnPickupClick(rent?._id);
+                            }}
                             sx={{
                               "&:hover": {
                                 background: theme.colors.error.lighter,
@@ -351,7 +408,6 @@ const TablaRentasActuales: FC<TablaRentasActualesProps> = ({
                           </IconButton>
                         </span>
                       </Tooltip>
-
                     </TableCell>
                   </TableRow>
                 );
@@ -378,6 +434,13 @@ const TablaRentasActuales: FC<TablaRentasActualesProps> = ({
           rentId={selectedId}
         />
       )}
+      {changeModalIsOpen && (
+        <ScheduleChangeModal
+          open={changeModalIsOpen}
+          handleOnClose={handleCloseChangeModal}
+          rentId={selectedId}
+        />
+      )}
       {payDayModalIsOpen && (
         <ChangePayDayModal
           open={payDayModalIsOpen}
@@ -385,24 +448,40 @@ const TablaRentasActuales: FC<TablaRentasActualesProps> = ({
           rentId={selectedId}
         />
       )}
-      {
-        pickupModalIsOpen && (
-          <SchedulePickupModal
-            open={pickupModalIsOpen}
-            handleOnClose={handleClosePickupModal}
-            rentId={selectedId}
-          />
-        )
-      }
+      {pickupModalIsOpen && (
+        <SchedulePickupModal
+          open={pickupModalIsOpen}
+          handleOnClose={handleClosePickupModal}
+          rentId={selectedId}
+        />
+      )}
       {formatIsOpen && createdPickup && (
         <FormatModal
           open={formatIsOpen}
           title="Formato de Recolección"
           text=""
-          formatText={getFormatForPickup(createdPickup.rent, createdPickup.pickupTime)}
+          formatText={getFormatForPickup(
+            createdPickup.rent,
+            createdPickup.pickupTime
+          )}
           onAccept={() => {
             setFormatIsOpen(false);
             setCreatedPickup(null);
+          }}
+        />
+      )}
+      {formatIsOpen && createdChange && (
+        <FormatModal
+          open={formatIsOpen}
+          title="Formato de Cambio"
+          text=""
+          formatText={getFormatForChange(
+            createdChange.rent,
+            createdChange.changeTime
+          )}
+          onAccept={() => {
+            setFormatIsOpen(false);
+            setCreatedChange(null);
           }}
         />
       )}

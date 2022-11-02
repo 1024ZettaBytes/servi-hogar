@@ -239,7 +239,7 @@ function RecoleccionPendiente() {
                 {activeStep === steps.length && (
                   <Paper square elevation={0} sx={{ p: 3 }}>
                     <Alert severity="success">
-                      Larecolección fue completada
+                      La recolección fue completada
                     </Alert>
                     <NextLink href="/recolecciones-pendientes">
                       <Button sx={{ mt: 1, mr: 1 }}>

@@ -129,3 +129,16 @@ export const useGetPickupById = (fetcher, id) => {
   );
   return { pickup: data?.data, pickupByIdError: error };
 };
+
+// Changes
+export const useGetPendingChanges = (fetcher) => {
+  const { data, error } = useSWR(ROUTES.ALL_PENDING_CHANGES_API, fetcher);
+  return { changesList: data?.data, changesError: error };
+};
+export const useGetChangeById = (fetcher, id) => {
+  const { data, error } = useSWR(
+    id ? ROUTES.CHANGE_BY_ID_API.replace(":id", id) : null,
+    fetcher
+  );
+  return { change: data?.data, changeByIdError: error };
+};

@@ -24,21 +24,23 @@ import NextLink from "next/link";
 import { capitalizeFirstLetter } from "lib/client/utils";
 import { format } from "date-fns";
 import es from "date-fns/locale/es";
-import { cancelPickup } from "../../lib/client/pickupsFetch";
+import { cancelChange } from "../../lib/client/changesFetch";
 import { useSnackbar } from "notistack";
 import Label from "@/components/Label";
-import WhatsAppIcon from '@mui/icons-material/WhatsApp';
+import WhatsAppIcon from "@mui/icons-material/WhatsApp";
 import CheckIcon from "@mui/icons-material/Check";
 import EditIcon from "@mui/icons-material/Edit";
 import CancelIcon from "@mui/icons-material/Cancel";
 import SearchIcon from "@mui/icons-material/Search";
 import GenericModal from "@/components/GenericModal";
-import ModifyPickupModal from "../../src/components/ModifyPickupModal";
+import ModifyChangeModal from "../../src/components/ModifyChangeModal";
+import {getFormatForChange} from "../../lib/consts/OBJ_CONTS";
+import FormatModal from "@/components/FormatModal";
 
-interface TablaEntregasPendientesProps {
+interface TablaCambiosPendientesProps {
   userRole: string;
   className?: string;
-  deliveriesList: any[];
+  changesList: any[];
 }
 const statusMap = {
   ESPERA: {
@@ -49,13 +51,13 @@ const statusMap = {
     text: "En espera",
     color: "warning",
   },
-  ENTREGADA: {
-    text: "Entregada",
+  FINALIZADO: {
+    text: "Finalizado",
     color: "success",
   },
 };
-const getStatusLabel = (deliverStatus: string): JSX.Element => {
-  const { text, color }: any = statusMap[deliverStatus];
+const getStatusLabel = (changeStatus: string): JSX.Element => {
+  const { text, color }: any = statusMap[changeStatus];
 
   return <Label color={color}>{text}</Label>;
 };
@@ -65,13 +67,13 @@ const compareStringsForFilter = (keyWord: string, field: string) => {
     .toLowerCase()
     .includes(str(keyWord).latinise().toLowerCase());
 };
-const applyFilters = (deliveriesList: any[], filter: string): any[] => {
-  return deliveriesList.filter((pickup) => {
+const applyFilters = (changesList: any[], filter: string): any[] => {
+  return changesList.filter((change) => {
     if (!filter || filter === "") {
       return true;
     }
     return (
-      Object.entries(pickup).filter((keyValue) => {
+      Object.entries(change).filter((keyValue) => {
         const key = keyValue[0];
         const value = keyValue[1];
         if (!value) {
@@ -79,9 +81,10 @@ const applyFilters = (deliveriesList: any[], filter: string): any[] => {
         }
         switch (key) {
           case "rent": {
+            const matchCustomerName  = value["customer"] && value["customer"].name && compareStringsForFilter(filter, value["customer"].name);
             const matchNumber =
               value["num"] && compareStringsForFilter(filter, value["num"]);
-            return matchNumber;
+            return matchNumber || matchCustomerName;
           }
           case "status": {
             const matchText =
@@ -95,7 +98,7 @@ const applyFilters = (deliveriesList: any[], filter: string): any[] => {
               value &&
               compareStringsForFilter(
                 filter,
-                format(new Date(pickup?.fromTime), "LLL dd yyyy", {
+                format(new Date(change?.fromTime), "LLL dd yyyy", {
                   locale: es,
                 })
               );
@@ -108,22 +111,24 @@ const applyFilters = (deliveriesList: any[], filter: string): any[] => {
 };
 
 const applyPagination = (
-  deliveriesList: any[],
+  changesList: any[],
   page: number,
   limit: number
 ): any[] => {
-  return deliveriesList.slice(page * limit, page * limit + limit);
+  return changesList.slice(page * limit, page * limit + limit);
 };
 
-const TablaEntregasPendientes: FC<TablaEntregasPendientesProps> = ({
+const TablaCambiosPendientes: FC<TablaCambiosPendientesProps> = ({
   userRole,
-  deliveriesList,
+  changesList,
 }) => {
   const { enqueueSnackbar } = useSnackbar();
   const [modifyModalIsOpen, setModifyModalIsOpen] = useState(false);
   const [cancelModalIsOpen, setCancelModalIsOpen] = useState(false);
+  const [formatIsOpen, setFormatIsOpen] = useState(false);
+  const [formatText, setFormatText] = useState<string>("");
   const [isDeleting, setIsDeleting] = useState(false);
-  const [pickupToEdit, setDeliveryToEdit] = useState<any>(null);
+  const [changeToEdit, setChangeToEdit] = useState<any>(null);
   const [idToCancel, setIdToCancel] = useState<string>(null);
   const [page, setPage] = useState<number>(0);
   const [limit, setLimit] = useState<number>(10);
@@ -154,17 +159,17 @@ const TablaEntregasPendientes: FC<TablaEntregasPendientesProps> = ({
   const handleLimitChange = (event: ChangeEvent<HTMLInputElement>): void => {
     setLimit(parseInt(event.target.value));
   };
-  const handleOnModifyClick = (pickup: any) => {
-    setDeliveryToEdit(pickup);
+  const handleOnModifyClick = (change: any) => {
+    setChangeToEdit(change);
     setModifyModalIsOpen(true);
   };
-  const handleOnDeleteClick = (pickupId: string) => {
-    setIdToCancel(pickupId);
+  const handleOnDeleteClick = (changeId: string) => {
+    setIdToCancel(changeId);
     setCancelModalIsOpen(true);
   };
   const handleOnConfirmDelete = async () => {
     setIsDeleting(true);
-    const result = await cancelPickup(idToCancel);
+    const result = await cancelChange(idToCancel);
     setCancelModalIsOpen(false);
     setIsDeleting(false);
     enqueueSnackbar(result.msg, {
@@ -177,7 +182,7 @@ const TablaEntregasPendientes: FC<TablaEntregasPendientesProps> = ({
     });
   };
 
-  const filteredDeliveries = applyFilters(deliveriesList, filter);
+  const filteredDeliveries = applyFilters(changesList, filter);
   const paginatedDeliveries = applyPagination(filteredDeliveries, page, limit);
 
   const theme = useTheme();
@@ -218,9 +223,9 @@ const TablaEntregasPendientes: FC<TablaEntregasPendientesProps> = ({
             <TableHead>
               <TableRow>
                 <TableCell align="center"># de renta</TableCell>
-                
+
                 <TableCell align="center">Cliente</TableCell>
-                
+
                 <TableCell align="center">Estado</TableCell>
                 <TableCell align="center">Fecha solicitada</TableCell>
                 <TableCell align="center">Horario Especial</TableCell>
@@ -228,9 +233,9 @@ const TablaEntregasPendientes: FC<TablaEntregasPendientesProps> = ({
               </TableRow>
             </TableHead>
             <TableBody>
-              {paginatedDeliveries.map((pickup) => {
+              {paginatedDeliveries.map((change) => {
                 return (
-                  <TableRow hover key={pickup?._id}>
+                  <TableRow hover key={change?._id}>
                     <TableCell align="center">
                       <Typography
                         variant="body1"
@@ -239,22 +244,22 @@ const TablaEntregasPendientes: FC<TablaEntregasPendientesProps> = ({
                         gutterBottom
                         noWrap
                       >
-                        {pickup?.rent?.num}
+                        {change?.rent?.num}
                       </Typography>
                     </TableCell>
                     <TableCell align="center">
-                    <Typography
-                      variant="body1"
-                      fontWeight="bold"
-                      color="text.primary"
-                      gutterBottom
-                      noWrap
-                    >
-                      {pickup?.rent?.customer?.name}
-                    </Typography>
-              </TableCell>
+                      <Typography
+                        variant="body1"
+                        fontWeight="bold"
+                        color="text.primary"
+                        gutterBottom
+                        noWrap
+                      >
+                        {change?.rent?.customer?.name}
+                      </Typography>
+                    </TableCell>
                     <TableCell align="center">
-                      {getStatusLabel(pickup?.status)}
+                      {getStatusLabel(change?.status)}
                     </TableCell>
                     <TableCell align="center">
                       <Typography
@@ -264,9 +269,8 @@ const TablaEntregasPendientes: FC<TablaEntregasPendientesProps> = ({
                         gutterBottom
                         noWrap
                       >
-                        {
-                        capitalizeFirstLetter(
-                          format(new Date(pickup?.fromTime), "LLL dd yyyy", {
+                        {capitalizeFirstLetter(
+                          format(new Date(change?.fromTime), "LLL dd yyyy", {
                             locale: es,
                           })
                         )}
@@ -281,11 +285,11 @@ const TablaEntregasPendientes: FC<TablaEntregasPendientesProps> = ({
                         gutterBottom
                         noWrap
                       >
-                        {pickup?.timeOption === "specific"
-                          ? `${format(new Date(pickup?.fromTime), "h:mm a", {
+                        {change?.timeOption === "specific"
+                          ? `${format(new Date(change?.fromTime), "h:mm a", {
                               locale: es,
                             })} - ${format(
-                              new Date(pickup?.endTime),
+                              new Date(change?.endTime),
                               "h:mm a",
                               {
                                 locale: es,
@@ -296,8 +300,8 @@ const TablaEntregasPendientes: FC<TablaEntregasPendientesProps> = ({
                     </TableCell>
 
                     <TableCell align="center">
-                      <NextLink href={`/recolecciones-pendientes/${pickup?._id}`}>
-                        <Tooltip title="Marcar recolectada" arrow>
+                      <NextLink href={`/cambios-pendientes/${change?._id}`}>
+                        <Tooltip title="Marcar completado" arrow>
                           <IconButton
                             sx={{
                               "&:hover": {
@@ -314,7 +318,7 @@ const TablaEntregasPendientes: FC<TablaEntregasPendientesProps> = ({
                       </NextLink>
                       <Tooltip title="Modificar" arrow>
                         <IconButton
-                          onClick={() => handleOnModifyClick(pickup)}
+                          onClick={() => handleOnModifyClick(change)}
                           sx={{
                             "&:hover": {
                               background: theme.colors.primary.lighter,
@@ -329,9 +333,9 @@ const TablaEntregasPendientes: FC<TablaEntregasPendientesProps> = ({
                       </Tooltip>
 
                       {userCanDelete && (
-                        <Tooltip title="Cancelar entrega" arrow>
+                        <Tooltip title="Cancelar cambio" arrow>
                           <IconButton
-                            onClick={() => handleOnDeleteClick(pickup._id)}
+                            onClick={() => handleOnDeleteClick(change._id)}
                             sx={{
                               "&:hover": {
                                 background: theme.colors.error.lighter,
@@ -347,7 +351,10 @@ const TablaEntregasPendientes: FC<TablaEntregasPendientesProps> = ({
                       )}
                       <Tooltip title="Ver formato" arrow>
                         <IconButton
-                          onClick={() => {console.log(pickup)}}
+                          onClick={() => {
+                            setFormatText(getFormatForChange(change.rent, change));
+                            setFormatIsOpen(true);
+                          }}
                           sx={{
                             "&:hover": {
                               background: theme.colors.primary.lighter,
@@ -380,16 +387,28 @@ const TablaEntregasPendientes: FC<TablaEntregasPendientesProps> = ({
         </Box>
       </Card>
       {modifyModalIsOpen && (
-        <ModifyPickupModal
+        <ModifyChangeModal
           open={modifyModalIsOpen}
           handleOnClose={handleModifyClose}
-          pickupToEdit={pickupToEdit}
+          changeToEdit={changeToEdit}
+        />
+      )}
+      {formatIsOpen && (
+        <FormatModal
+          open={formatIsOpen}
+          title="Formato de cambio"
+          text=""
+          formatText={formatText}
+          onAccept={() => {
+            setFormatIsOpen(false);
+            setFormatText("");
+          }}
         />
       )}
       <GenericModal
         open={cancelModalIsOpen}
         title="Atención"
-        text={"¿Está seguro de cancelar la recolección seleccionada?"}
+        text={"¿Está seguro de cancelar el cambio seleccionado?"}
         isLoading={isDeleting}
         onAccept={handleOnConfirmDelete}
         onCancel={() => {
@@ -401,14 +420,14 @@ const TablaEntregasPendientes: FC<TablaEntregasPendientesProps> = ({
   );
 };
 
-TablaEntregasPendientes.propTypes = {
+TablaCambiosPendientes.propTypes = {
   userRole: PropTypes.string.isRequired,
-  deliveriesList: PropTypes.array.isRequired,
+  changesList: PropTypes.array.isRequired,
 };
 
-TablaEntregasPendientes.defaultProps = {
+TablaCambiosPendientes.defaultProps = {
   userRole: "",
-  deliveriesList: [],
+  changesList: [],
 };
 
-export default TablaEntregasPendientes;
+export default TablaCambiosPendientes;

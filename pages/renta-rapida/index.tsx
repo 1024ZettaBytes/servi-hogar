@@ -5,7 +5,6 @@ import SidebarLayout from "@/layouts/SidebarLayout";
 import { validateServerSideSession } from "../../lib/auth";
 import PageHeader from "@/components/PageHeader";
 import PageTitleWrapper from "@/components/PageTitleWrapper";
-import numeral from "numeral";
 import {
   Card,
   Container,
@@ -30,7 +29,7 @@ import {
   useGetCities,
 } from "../api/useRequest";
 import { useSnackbar } from "notistack";
-import { addDaysToDate, capitalizeFirstLetter, dateDiffInDays } from "../../lib/client/utils";
+import { addDaysToDate, dateDiffInDays } from "../../lib/client/utils";
 import NextBreadcrumbs from "@/components/Shared/BreadCrums";
 import TablaClientesRenta from "./TablaClientesRenta";
 import RentPeriod from "./RentPeriod";
@@ -38,9 +37,7 @@ import OperationTime from "./OperationTime";
 import { LoadingButton } from "@mui/lab";
 import { saveRent } from "lib/client/rentsFetch";
 import FormatModal from "@/components/FormatModal";
-import { DELIVERY_FORMAT } from "../../lib/consts/OBJ_CONTS";
-import es from "date-fns/locale/es";
-import { format } from "date-fns";
+import { getFormatForDelivery } from "../../lib/consts/OBJ_CONTS";
 
 const defaultInitialDate = (today: Date) => {
   today.setHours(8, 0, 0);
@@ -65,42 +62,6 @@ const defaultData = () => {
     },
     selectedCustomer: null,
   };
-};
-
-const getFormatForDelivery = (rent, delTime) => {
-  let f = DELIVERY_FORMAT;
-  f = f.replace("_dNum", rent?.num);
-  f = f.replace("_cName", rent?.customer?.name);
-  f = f.replace("_cCell", rent?.customer?.cell);
-  f = f.replace("_cStreet", rent?.customer?.currentResidence?.street);
-  f = f.replace("_cSuburb", rent?.customer?.currentResidence?.suburb);
-  f = f.replace("_maps", rent?.customer?.currentResidence?.maps);
-  f = f.replace(
-    "_cRef",
-    rent?.customer?.currentResidence?.residenceRef
-  );
-  f = f.replace("_date",
-    capitalizeFirstLetter(format(new Date(delTime?.date), "LLL dd yyyy", {
-      locale: es,
-    })))
-  f = f.replace(
-    "_rPay",
-    numeral(rent?.initialPay).format(`${rent?.initialPay}0,0.00`)
-  );
-  let time = "";
-  if (delTime.timeOption === "specific") {
-     time = `\nHorario especial: ${format(new Date(delTime?.fromTime), "h:mm a", {
-      locale: es,
-    })} - ${format(
-      new Date(delTime?.endTime),
-      "h:mm a",
-      {
-        locale: es,
-      }
-    )}`;
-  }
-  f = f.replace("_spec", time);
-  return f;
 };
 function RentaRapida() {
   const paths = ["Inicio", "Renta Rápida"];

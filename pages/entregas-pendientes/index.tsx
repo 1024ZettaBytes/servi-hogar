@@ -44,7 +44,7 @@ function EntregasPendientes({ session }) {
           <Grid item xs={12}>
             {generalError ? (
               <Alert severity="error">
-                {deliveriesList?.message}
+                {deliveriesError?.message}
               </Alert>
             ) : !completeData ? (
               <Skeleton

@@ -10,10 +10,7 @@ async function savePickupAPI(req, res, userId) {
     res.status(200).json({ msg: "¡Recolección creada!" });
   } catch (e) {
     console.error(e);
-    res.status(500).json({
-      errorMsg:
-        "Hubo un problema al crear la recolección. Por favor intente de nuevo.",
-    });
+    res.status(500).json({ errorMsg: e.message });
   }
 }
 async function updatePickupTimeAPI(req, res, userId) {

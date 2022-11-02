@@ -6,11 +6,8 @@ import PageHeader from "@/components/PageHeader";
 import PageTitleWrapper from "@/components/PageTitleWrapper";
 import { Card, Container, Grid, Skeleton, Alert } from "@mui/material";
 import Footer from "@/components/Footer";
-import TablaEntregasPendientes from "./TablaEntregasPendientes";
-import {
-  useGetPendingPickups,
-  getFetcher,
-} from "../api/useRequest";
+import TablaRecoleccionesPendientes from "./TablaRecoleccionesPendientes";
+import { useGetPendingPickups, getFetcher } from "../api/useRequest";
 
 import NextBreadcrumbs from "@/components/Shared/BreadCrums";
 
@@ -20,17 +17,14 @@ function Rentas({ session }) {
   const generalError = pickupsError;
   const completeData = pickupsList;
   const { user } = session;
-  
+
   return (
     <>
       <Head>
         <title>Recolecciones pendientes</title>
       </Head>
       <PageTitleWrapper>
-        <PageHeader
-          title={"Recolecciones pendientes"}
-          sutitle={""}
-        />
+        <PageHeader title={"Recolecciones pendientes"} sutitle={""} />
         <NextBreadcrumbs paths={paths} lastLoaded={true} />
       </PageTitleWrapper>
       <Container maxWidth="lg">
@@ -43,9 +37,7 @@ function Rentas({ session }) {
         >
           <Grid item xs={12}>
             {generalError ? (
-              <Alert severity="error">
-                {pickupsList?.message}
-              </Alert>
+              <Alert severity="error">{pickupsError?.message}</Alert>
             ) : !completeData ? (
               <Skeleton
                 variant="rectangular"
@@ -55,9 +47,9 @@ function Rentas({ session }) {
               />
             ) : (
               <Card>
-                <TablaEntregasPendientes
+                <TablaRecoleccionesPendientes
                   userRole={user?.role}
-                  deliveriesList={pickupsList}
+                  pickupList={pickupsList}
                 />
               </Card>
             )}
