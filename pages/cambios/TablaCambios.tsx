@@ -23,23 +23,23 @@ import es from "date-fns/locale/es";
 import Label from "@/components/Label";
 import SearchIcon from "@mui/icons-material/Search";
 
-interface TablaEntregasProps {
+interface TablaCambiosProps {
   userRole: string;
   className?: string;
-  deliveriesList: any[];
+  changesList: any[];
 }
 const statusMap = {
-  CANCELADA: {
-    text: "Cancelada",
+  CANCELADO: {
+    text: "Cancelado",
     color: "error",
   },
-  ENTREGADA: {
-    text: "Entregada",
+  FINALIZADO: {
+    text: "Realizado",
     color: "success",
   },
 };
-const getStatusLabel = (deliverStatus: string): JSX.Element => {
-  const { text, color }: any = statusMap[deliverStatus];
+const getStatusLabel = (changeStatus: string): JSX.Element => {
+  const { text, color }: any = statusMap[changeStatus];
 
   return <Label color={color}>{text}</Label>;
 };
@@ -49,13 +49,13 @@ const compareStringsForFilter = (keyWord: string, field: string) => {
     .toLowerCase()
     .includes(str(keyWord).latinise().toLowerCase());
 };
-const applyFilters = (deliveriesList: any[], filter: string): any[] => {
-  return deliveriesList.filter((delivery) => {
+const applyFilters = (changesList: any[], filter: string): any[] => {
+  return changesList.filter((change) => {
     if (!filter || filter === "") {
       return true;
     }
     return (
-      Object.entries(delivery).filter((keyValue) => {
+      Object.entries(change).filter((keyValue) => {
         const key = keyValue[0];
         const value = keyValue[1];
         if (!value) {
@@ -80,7 +80,7 @@ const applyFilters = (deliveriesList: any[], filter: string): any[] => {
               value &&
               compareStringsForFilter(
                 filter,
-                format(new Date(delivery?.createdAt), "LLL dd yyyy", {
+                format(new Date(change?.createdAt), "LLL dd yyyy", {
                   locale: es,
                 })
               );
@@ -92,7 +92,7 @@ const applyFilters = (deliveriesList: any[], filter: string): any[] => {
               value &&
               compareStringsForFilter(
                 filter,
-                format(new Date(delivery?.finishedAt), "LLL dd yyyy", {
+                format(new Date(change?.finishedAt), "LLL dd yyyy", {
                   locale: es,
                 })
               );
@@ -105,15 +105,15 @@ const applyFilters = (deliveriesList: any[], filter: string): any[] => {
 };
 
 const applyPagination = (
-  deliveriesList: any[],
+  changesList: any[],
   page: number,
   limit: number
 ): any[] => {
-  return deliveriesList.slice(page * limit, page * limit + limit);
+  return changesList.slice(page * limit, page * limit + limit);
 };
 
-const TablaEntregas: FC<TablaEntregasProps> = ({
-  deliveriesList,
+const TablaCambios: FC<TablaCambiosProps> = ({
+  changesList,
 }) => {
   const [page, setPage] = useState<number>(0);
   const [limit, setLimit] = useState<number>(10);
@@ -133,8 +133,8 @@ const TablaEntregas: FC<TablaEntregasProps> = ({
   };
   
 
-  const filteredDeliveries = applyFilters(deliveriesList, filter);
-  const paginatedDeliveries = applyPagination(filteredDeliveries, page, limit);
+  const filteredChanges = applyFilters(changesList, filter);
+  const paginatedDeliveries = applyPagination(filteredChanges, page, limit);
 
   return (
     <>
@@ -174,15 +174,17 @@ const TablaEntregas: FC<TablaEntregasProps> = ({
               <TableRow>
                 <TableCell align="center"># de renta</TableCell>
                 <TableCell align="center">Cliente</TableCell>
-                <TableCell align="center">Solicitada</TableCell>
-                <TableCell align="center">Entregada</TableCell>
+                <TableCell align="center">Solicitado</TableCell>
+                <TableCell align="center">Realizado</TableCell>
+                <TableCell align="center">Equipo recogido</TableCell>
+                <TableCell align="center">Equipo dejado</TableCell>
                 <TableCell align="center">Resultado</TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
-              {paginatedDeliveries.map((delivery) => {
+              {paginatedDeliveries.map((change) => {
                 return (
-                  <TableRow hover key={delivery?._id}>
+                  <TableRow hover key={change?._id}>
                     <TableCell align="center">
                       <Typography
                         variant="body1"
@@ -191,7 +193,7 @@ const TablaEntregas: FC<TablaEntregasProps> = ({
                         gutterBottom
                         noWrap
                       >
-                        {delivery?.rent?.num}
+                        {change?.rent?.num}
                       </Typography>
                     </TableCell>
                     <TableCell align="center">
@@ -202,7 +204,7 @@ const TablaEntregas: FC<TablaEntregasProps> = ({
                         gutterBottom
                         noWrap
                       >
-                        {delivery?.rent?.customer?.name}
+                        {change?.rent?.customer?.name}
                       </Typography>
                     </TableCell>
 
@@ -215,7 +217,7 @@ const TablaEntregas: FC<TablaEntregasProps> = ({
                         noWrap
                       >
                         {capitalizeFirstLetter(
-                          format(new Date(delivery?.createdAt), "LLL dd yyyy", {
+                          format(new Date(change?.createdAt), "LLL dd yyyy", {
                             locale: es,
                           })
                         )}
@@ -229,15 +231,21 @@ const TablaEntregas: FC<TablaEntregasProps> = ({
                         gutterBottom
                         noWrap
                       >
-                        {delivery?.finishedAt ? capitalizeFirstLetter(
-                          format(new Date(delivery?.finishedAt), "LLL dd yyyy", {
+                        {change?.finishedAt ? capitalizeFirstLetter(
+                          format(new Date(change?.finishedAt), "LLL dd yyyy", {
                             locale: es,
                           })
                         ) : "N/A"}
                       </Typography>
                     </TableCell>
                     <TableCell align="center">
-                      {getStatusLabel(delivery?.status)}
+                      {change.pickedMachine ? change.pickedMachine.machineNum : "N/A"}
+                    </TableCell>
+                    <TableCell align="center">
+                      {change.leftMachine ? change.leftMachine.machineNum : "N/A"}
+                    </TableCell>
+                    <TableCell align="center">
+                      {getStatusLabel(change?.status)}
                     </TableCell>
                   </TableRow>
                 );
@@ -248,7 +256,7 @@ const TablaEntregas: FC<TablaEntregasProps> = ({
         <Box p={2}>
           <TablePagination
             component="div"
-            count={filteredDeliveries.length}
+            count={filteredChanges.length}
             onPageChange={handlePageChange}
             onRowsPerPageChange={handleLimitChange}
             page={page}
@@ -261,14 +269,14 @@ const TablaEntregas: FC<TablaEntregasProps> = ({
   );
 };
 
-TablaEntregas.propTypes = {
+TablaCambios.propTypes = {
   userRole: PropTypes.string.isRequired,
-  deliveriesList: PropTypes.array.isRequired,
+  changesList: PropTypes.array.isRequired,
 };
 
-TablaEntregas.defaultProps = {
+TablaCambios.defaultProps = {
   userRole: "",
-  deliveriesList: [],
+  changesList: [],
 };
 
-export default TablaEntregas;
+export default TablaCambios;

@@ -1,9 +1,21 @@
 import {
+  getPastChangesData,
   saveChangeData,
   updateChangeTimeData,
   cancelChangeData,
 } from "../../../lib/data/Changes";
 import { validateUserPermissions, getUserId } from "../auth/authUtils";
+
+async function getChangesAPI(req, res) {
+  try {
+    const rents = await getPastChangesData();
+    res.status(200).json({ data: rents });
+  } catch (e) {
+    console.error(e);
+    res.status(500).json({ errorMsg: e.message });
+  }
+}
+
 async function saveChangeAPI(req, res, userId) {
   try {
     await saveChangeData({ ...req.body, lastUpdatedBy: userId });
@@ -41,6 +53,7 @@ async function handler(req, res) {
   if (validRole)
     switch (req.method) {
       case "GET":
+        await getChangesAPI(req, res);
         break;
       case "POST":
         await saveChangeAPI(req, res, userId);

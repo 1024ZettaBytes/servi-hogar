@@ -137,6 +137,10 @@ export const useGetPickupById = (fetcher, id) => {
 // Changes
 export const useGetPendingChanges = (fetcher) => {
   const { data, error } = useSWR(ROUTES.ALL_PENDING_CHANGES_API, fetcher);
+  return { pendingChangesList: data?.data, pendingChangesError: error };
+};
+export const useGetChanges = (fetcher) => {
+  const { data, error } = useSWR(ROUTES.ALL_CHANGES_API, fetcher);
   return { changesList: data?.data, changesError: error };
 };
 export const useGetChangeById = (fetcher, id) => {

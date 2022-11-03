@@ -6,25 +6,25 @@ import PageHeader from "@/components/PageHeader";
 import PageTitleWrapper from "@/components/PageTitleWrapper";
 import { Card, Container, Grid, Skeleton, Alert } from "@mui/material";
 import Footer from "@/components/Footer";
-import TablaCambiosPendientes from "./TablaCambiosPendientes";
-import { useGetPendingChanges, getFetcher } from "../api/useRequest";
+import TablaCambios from "./TablaCambios";
+import { useGetChanges, getFetcher } from "../api/useRequest";
 
 import NextBreadcrumbs from "@/components/Shared/BreadCrums";
 
 function Rentas({ session }) {
-  const paths = ["Inicio", "Cambios pendientes"];
-  const { pendingChangesList, pendingChangesError } = useGetPendingChanges(getFetcher);
-  const generalError = pendingChangesError;
-  const completeData = pendingChangesList;
+  const paths = ["Inicio", "Cambios"];
+  const { changesList, changesError } = useGetChanges(getFetcher);
+  const generalError = changesError;
+  const completeData = changesList;
   const { user } = session;
 
   return (
     <>
       <Head>
-        <title>Cambios pendientes</title>
+        <title>Cambios</title>
       </Head>
       <PageTitleWrapper>
-        <PageHeader title={"Cambios pendientes"} sutitle={""} />
+        <PageHeader title={"Cambios"} sutitle={""} />
         <NextBreadcrumbs paths={paths} lastLoaded={true} />
       </PageTitleWrapper>
       <Container maxWidth="lg">
@@ -37,7 +37,7 @@ function Rentas({ session }) {
         >
           <Grid item xs={12}>
             {generalError ? (
-              <Alert severity="error">{pendingChangesError?.message}</Alert>
+              <Alert severity="error">{changesError?.message}</Alert>
             ) : !completeData ? (
               <Skeleton
                 variant="rectangular"
@@ -47,9 +47,9 @@ function Rentas({ session }) {
               />
             ) : (
               <Card>
-                <TablaCambiosPendientes
+                <TablaCambios
                   userRole={user?.role}
-                  changesList={pendingChangesList}
+                  changesList={changesList}
                 />
               </Card>
             )}
