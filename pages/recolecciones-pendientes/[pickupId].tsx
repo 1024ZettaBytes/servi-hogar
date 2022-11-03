@@ -176,6 +176,7 @@ function RecoleccionPendiente() {
                                   </FormLabel>
                                   <FormGroup>
                                     {Object.keys(pickup.rent.accesories).map((key) => (
+                                      pickup.rent.accesories[key] ? 
                                       <FormControlLabel
                                         key={key}
                                         control={
@@ -192,7 +193,7 @@ function RecoleccionPendiente() {
                                           />
                                         }
                                         label={ACCESORIES_LIST[key]}
-                                      />
+                                      /> : null
                                     ))}
                                   </FormGroup>
                                 </FormControl>
