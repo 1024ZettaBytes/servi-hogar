@@ -37,19 +37,15 @@ import ModifyDeliveryModal from "../../src/components/ModifyDeliveryModal";
 import FormatModal from "@/components/FormatModal";
 import { getFormatForDelivery } from "../../lib/consts/OBJ_CONTS"
 
-interface TablaEntregasPendientesProps {
+interface TablaEntregasProps {
   userRole: string;
   className?: string;
   deliveriesList: any[];
 }
 const statusMap = {
-  ESPERA: {
-    text: "En espera",
-    color: "warning",
-  },
-  EN_CAMINO: {
-    text: "En espera",
-    color: "warning",
+  CANCELADA: {
+    text: "Cancelada",
+    color: "error",
   },
   ENTREGADA: {
     text: "Entregada",
@@ -93,12 +89,24 @@ const applyFilters = (deliveriesList: any[], filter: string): any[] => {
               compareStringsForFilter(filter, statusMap["" + value].text);
             return matchText;
           }
-          case "date": {
+          case "createdAt": {
             const matchFormatedDate =
               value &&
               compareStringsForFilter(
                 filter,
-                format(new Date(delivery?.fromTime), "LLL dd yyyy", {
+                format(new Date(delivery?.createdAt), "LLL dd yyyy", {
+                  locale: es,
+                })
+              );
+            return matchFormatedDate;
+          }
+
+          case "finishedAt": {
+            const matchFormatedDate =
+              value &&
+              compareStringsForFilter(
+                filter,
+                format(new Date(delivery?.finishedAt), "LLL dd yyyy", {
                   locale: es,
                 })
               );
@@ -118,7 +126,7 @@ const applyPagination = (
   return deliveriesList.slice(page * limit, page * limit + limit);
 };
 
-const TablaEntregasPendientes: FC<TablaEntregasPendientesProps> = ({
+const TablaEntregas: FC<TablaEntregasProps> = ({
   userRole,
   deliveriesList,
 }) => {
@@ -223,13 +231,10 @@ const TablaEntregasPendientes: FC<TablaEntregasPendientesProps> = ({
             <TableHead>
               <TableRow>
                 <TableCell align="center"># de renta</TableCell>
-
                 <TableCell align="center">Cliente</TableCell>
-
-                <TableCell align="center">Estado</TableCell>
-                <TableCell align="center">Fecha de entrega</TableCell>
-                <TableCell align="center">Horario Especial</TableCell>
-                <TableCell align="center"></TableCell>
+                <TableCell align="center">Solicitada</TableCell>
+                <TableCell align="center">Entregada</TableCell>
+                <TableCell align="center">Resultado</TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
@@ -258,9 +263,7 @@ const TablaEntregasPendientes: FC<TablaEntregasPendientesProps> = ({
                         {delivery?.rent?.customer?.name}
                       </Typography>
                     </TableCell>
-                    <TableCell align="center">
-                      {getStatusLabel(delivery?.status)}
-                    </TableCell>
+
                     <TableCell align="center">
                       <Typography
                         variant="body1"
@@ -270,13 +273,12 @@ const TablaEntregasPendientes: FC<TablaEntregasPendientesProps> = ({
                         noWrap
                       >
                         {capitalizeFirstLetter(
-                          format(new Date(delivery?.fromTime), "LLL dd yyyy", {
+                          format(new Date(delivery?.createdAt), "LLL dd yyyy", {
                             locale: es,
                           })
                         )}
                       </Typography>
                     </TableCell>
-
                     <TableCell align="center">
                       <Typography
                         variant="body1"
@@ -285,88 +287,15 @@ const TablaEntregasPendientes: FC<TablaEntregasPendientesProps> = ({
                         gutterBottom
                         noWrap
                       >
-                        {delivery?.timeOption === "specific"
-                          ? `${format(new Date(delivery?.fromTime), "h:mm a", {
+                        {delivery?.finishedAt ? capitalizeFirstLetter(
+                          format(new Date(delivery?.finishedAt), "LLL dd yyyy", {
                             locale: es,
-                          })} - ${format(
-                            new Date(delivery?.endTime),
-                            "h:mm a",
-                            {
-                              locale: es,
-                            }
-                          )}`
-                          : "-"}
+                          })
+                        ) : "N/A"}
                       </Typography>
                     </TableCell>
-
                     <TableCell align="center">
-                      <NextLink href={`/entregas-pendientes/${delivery?._id}`}>
-                        <Tooltip title="Marcar entregada" arrow>
-                          <IconButton
-                            sx={{
-                              "&:hover": {
-                                background: theme.colors.primary.lighter,
-                              },
-                              color: theme.colors.success.light,
-                            }}
-                            color="inherit"
-                            size="small"
-                          >
-                            <CheckIcon fontSize="medium" />
-                          </IconButton>
-                        </Tooltip>
-                      </NextLink>
-                      <Tooltip title="Modificar" arrow>
-                        <IconButton
-                          onClick={() => handleOnModifyClick(delivery)}
-                          sx={{
-                            "&:hover": {
-                              background: theme.colors.primary.lighter,
-                            },
-                            color: theme.palette.primary.main,
-                          }}
-                          color="inherit"
-                          size="small"
-                        >
-                          <EditIcon fontSize="small" />
-                        </IconButton>
-                      </Tooltip>
-
-                      {userCanDelete && (
-                        <Tooltip title="Cancelar entrega" arrow>
-                          <IconButton
-                            onClick={() => handleOnDeleteClick(delivery._id)}
-                            sx={{
-                              "&:hover": {
-                                background: theme.colors.error.lighter,
-                              },
-                              color: theme.palette.error.main,
-                            }}
-                            color="inherit"
-                            size="small"
-                          >
-                            <CancelIcon fontSize="small" />
-                          </IconButton>
-                        </Tooltip>
-                      )}
-                      <Tooltip title="Ver formato" arrow>
-                        <IconButton
-                          onClick={() => {
-                            setFormatText(getFormatForDelivery(delivery.rent, delivery));
-                            setFormatIsOpen(true);
-                          }}
-                          sx={{
-                            "&:hover": {
-                              background: theme.colors.primary.lighter,
-                            },
-                            color: theme.colors.success.light,
-                          }}
-                          color="inherit"
-                          size="small"
-                        >
-                          <WhatsAppIcon fontSize="small" />
-                        </IconButton>
-                      </Tooltip>
+                      {getStatusLabel(delivery?.status)}
                     </TableCell>
                   </TableRow>
                 );
@@ -420,14 +349,14 @@ const TablaEntregasPendientes: FC<TablaEntregasPendientesProps> = ({
   );
 };
 
-TablaEntregasPendientes.propTypes = {
+TablaEntregas.propTypes = {
   userRole: PropTypes.string.isRequired,
   deliveriesList: PropTypes.array.isRequired,
 };
 
-TablaEntregasPendientes.defaultProps = {
+TablaEntregas.defaultProps = {
   userRole: "",
   deliveriesList: [],
 };
 
-export default TablaEntregasPendientes;
+export default TablaEntregas;

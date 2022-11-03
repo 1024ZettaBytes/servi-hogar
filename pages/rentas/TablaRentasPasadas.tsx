@@ -57,7 +57,7 @@ const applyFilters = (rentList: any[], filter: string): any[] => {
               compareStringsForFilter(filter, value + "");
             return matchNumber;
           }
-          case "status":{
+          case "status": {
             const matchText =
               value["id"] && compareStringsForFilter(filter, statusMap[value["id"]].text);
             return matchText;
@@ -253,11 +253,11 @@ const TablaRentasPasadas: FC<TablaRentasPasadasProps> = ({
                         gutterBottom
                         noWrap
                       >
-                        {capitalizeFirstLetter(
+                        {rent?.startDate ? capitalizeFirstLetter(
                           format(new Date(rent?.startDate), "LLL dd yyyy", {
                             locale: es,
                           })
-                        )}
+                        ) : "N/A"}
                       </Typography>
                     </TableCell>
                     <TableCell align="center">
@@ -268,16 +268,16 @@ const TablaRentasPasadas: FC<TablaRentasPasadasProps> = ({
                         gutterBottom
                         noWrap
                       >
-                        {capitalizeFirstLetter(
+                        {rent?.endDate ? capitalizeFirstLetter(
                           format(new Date(rent?.endDate), "LLL dd yyyy", {
                             locale: es,
                           })
-                        )}
+                        ) : "N/A"}
                       </Typography>
                     </TableCell>
                     <TableCell align="center">
                       <Typography fontWeight="bold">
-                      {rent?.totalWeeks}
+                        {rent?.totalWeeks}
                       </Typography>
                     </TableCell>
                     <TableCell align="center">

@@ -107,6 +107,10 @@ export const useGetRentById = (fetcher, id) => {
 // Deliveries
 export const useGetPendingDeliveries = (fetcher) => {
   const { data, error } = useSWR(ROUTES.ALL_PENDING_DELIVERIES_API, fetcher);
+  return { pendingDeliveriesList: data?.data, pendingDeliveriesError: error };
+};
+export const useGetDeliveries = (fetcher) => {
+  const { data, error } = useSWR(ROUTES.ALL_DELIVERIES_API, fetcher);
   return { deliveriesList: data?.data, deliveriesError: error };
 };
 export const useGetDeliveryById = (fetcher, id) => {

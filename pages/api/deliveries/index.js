@@ -1,9 +1,20 @@
 import { validateUserPermissions, getUserId } from "../auth/authUtils";
 import {
+  getPastDeliveriesData,
   updateDeliveryTimeData,
   cancelDeliveryData,
 } from "../../../lib/data/Deliveries";
 
+
+async function getDeliveriesAPI(req, res) {
+  try {
+    const rents = await getPastDeliveriesData();
+    res.status(200).json({ data: rents });
+  } catch (e) {
+    console.error(e);
+    res.status(500).json({ errorMsg: e.message });
+  }
+}
 async function updateDeliveryTimeAPI(req, res, userId) {
   try {
     await updateDeliveryTimeData({ ...req.body, lastUpdatedBy: userId });
@@ -30,6 +41,7 @@ async function handler(req, res) {
   if (validRole)
     switch (req.method) {
       case "GET":
+        await getDeliveriesAPI(req, res);
         break;
       case "POST":
         break;

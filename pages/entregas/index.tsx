@@ -6,29 +6,29 @@ import PageHeader from "@/components/PageHeader";
 import PageTitleWrapper from "@/components/PageTitleWrapper";
 import { Card, Container, Grid, Skeleton, Alert } from "@mui/material";
 import Footer from "@/components/Footer";
-import TablaEntregasPendientes from "./TablaEntregasPendientes";
+import TablaEntregas from "./TablaEntregas";
 import {
-  useGetPendingDeliveries,
+  useGetDeliveries,
   getFetcher,
 } from "../api/useRequest";
 
 import NextBreadcrumbs from "@/components/Shared/BreadCrums";
 
 function EntregasPendientes({ session }) {
-  const paths = ["Inicio", "Entregas pendientes"];
-  const { pendingDeliveriesList, pendingDeliveriesError } = useGetPendingDeliveries(getFetcher);
-  const generalError = pendingDeliveriesError;
-  const completeData = pendingDeliveriesList;
+  const paths = ["Inicio", "Entregas"];
+  const { deliveriesList, deliveriesError } = useGetDeliveries(getFetcher);
+  const generalError = deliveriesError;
+  const completeData = deliveriesList;
   const { user } = session;
   
   return (
     <>
       <Head>
-        <title>Entregas pendientes</title>
+        <title>Entregas</title>
       </Head>
       <PageTitleWrapper>
         <PageHeader
-          title={"Entregas pendientes"}
+          title={"Entregas"}
           sutitle={""}
         />
         <NextBreadcrumbs paths={paths} lastLoaded={true} />
@@ -44,7 +44,7 @@ function EntregasPendientes({ session }) {
           <Grid item xs={12}>
             {generalError ? (
               <Alert severity="error">
-                {pendingDeliveriesError?.message}
+                {deliveriesError?.message}
               </Alert>
             ) : !completeData ? (
               <Skeleton
@@ -55,9 +55,9 @@ function EntregasPendientes({ session }) {
               />
             ) : (
               <Card>
-                <TablaEntregasPendientes
+                <TablaEntregas
                   userRole={user?.role}
-                  deliveriesList={pendingDeliveriesList}
+                  deliveriesList={deliveriesList}
                 />
               </Card>
             )}
