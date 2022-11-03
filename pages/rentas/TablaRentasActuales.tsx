@@ -327,7 +327,7 @@ const TablaRentasActuales: FC<TablaRentasActualesProps> = ({ rentList }) => {
                       {rent?.remaining >= 0 ? (
                         rent.remaining
                       ) : (
-                        <Typography color="error">VENCIDA</Typography>
+                        <Typography color="error">VENCIDA (Hace {Math.abs(rent.remaining)} día(s))</Typography>
                       )}
                     </TableCell>
                     <TableCell align="center">
