@@ -52,15 +52,9 @@ function ExtendRentModal(props) {
             139.0
       : 0;
   };
-  const checkEnabledButton = () => {
-    return (
-      rentPeriod.selectedWeeks &&
-      rentPeriod.selectedWeeks > 0 &&
-      customerHasBalance
-    );
-  };
+
   const customerHasBalance = checkCustomerBalance();
-  const submitButtonEnabled = checkEnabledButton();
+  
   const getToPay = (): number => {
     return (
       (rentPeriod.selectedWeeks -
@@ -69,6 +63,15 @@ function ExtendRentModal(props) {
       rent.customer?.balance
     );
   };
+  const checkEnabledButton = () => {
+    return (
+      rent &&
+      rentPeriod.selectedWeeks &&
+      rentPeriod.selectedWeeks > 0 &&
+      (customerHasBalance ||rent.customer.balance + getToPay() === 0)
+    );
+  };
+  const submitButtonEnabled = checkEnabledButton();
   const handleOnSubmit = async (event) => {
     event.preventDefault();
     setHasErrorSubmitting({ error: false, msg: "" });
@@ -259,7 +262,7 @@ function ExtendRentModal(props) {
                             onChangePeriod={onChangePeriod}
                           />
                         </Grid>
-                        {!customerHasBalance && (
+                        {!customerHasBalance && (Math.abs(rent.customer?.balance) !== getToPay() || rent.customer.balance > 0) && (
                           <Grid item lg={12}>
                             <Alert
                               severity="warning"
@@ -275,7 +278,7 @@ function ExtendRentModal(props) {
                               }
                             >
                               El cliente no tiene el saldo suficiente, por favor
-                              agregue un pago nuevo
+                              agregue un pago nuevo de ${getToPay()}
                             </Alert>
                           </Grid>
                         )}
