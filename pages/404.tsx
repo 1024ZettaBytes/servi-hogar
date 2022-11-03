@@ -51,15 +51,15 @@ function Status404() {
   return (
     <>
       <Head>
-        <title>Status - 404</title>
+        <title>No se encontró - 404</title>
       </Head>
       <MainContent>
         <TopWrapper>
           <Container maxWidth="md">
             <Box textAlign="center">
-              <img alt="404" height={180} src="/static/images/status/404.svg" />
+              <img alt="404" height={180} src="/static/images/status/404.png" />
               <Typography variant="h2" sx={{ my: 2 }}>
-                La pagina que estas buscando no existe :/
+                La pagina que estás buscando no existe :/
               </Typography>
               <Typography
                 variant="h4"
@@ -67,35 +67,15 @@ function Status404() {
                 fontWeight="normal"
                 sx={{ mb: 4 }}
               >
-                It's on us, we moved the content to a different page. The search
-                below should help!
+               Si fuiste redirigido por el propio sistema por favor contacta al administrador, en caso contrario verifica la URL 🧐
               </Typography>
             </Box>
-            <Container maxWidth="sm">
-              <Card sx={{ textAlign: 'center', mt: 3, p: 4 }}>
-                <FormControl variant="outlined" fullWidth>
-                  <OutlinedInputWrapper
-                    type="text"
-                    placeholder="Search terms here..."
-                    endAdornment={
-                      <InputAdornment position="end">
-                        <ButtonSearch variant="contained" size="small">
-                          Search
-                        </ButtonSearch>
-                      </InputAdornment>
-                    }
-                    startAdornment={
-                      <InputAdornment position="start">
-                        <SearchTwoToneIcon />
-                      </InputAdornment>
-                    }
-                  />
-                </FormControl>
-                <Divider sx={{ my: 4 }}>OR</Divider>
+            <Container maxWidth="sm" sx={{ textAlign: 'center', mt: 3, p: 4 }}>
+
                 <Button href="/" variant="outlined">
-                  Go to homepage
+                  Ir a la página de Inicio
                 </Button>
-              </Card>
+             
             </Container>
           </Container>
         </TopWrapper>
