@@ -1,9 +1,21 @@
 import {
+  getPastPickupsData,
   savePickupData,
   updatePickupTimeData,
   cancelPickupData,
 } from "../../../lib/data/Pickups";
 import { validateUserPermissions, getUserId } from "../auth/authUtils";
+
+async function getPickupsAPI(req, res) {
+  try {
+    const rents = await getPastPickupsData();
+    res.status(200).json({ data: rents });
+  } catch (e) {
+    console.error(e);
+    res.status(500).json({ errorMsg: e.message });
+  }
+}
+
 async function savePickupAPI(req, res, userId) {
   try {
     await savePickupData({ ...req.body, lastUpdatedBy: userId });
@@ -41,6 +53,7 @@ async function handler(req, res) {
   if (validRole)
     switch (req.method) {
       case "GET":
+        await getPickupsAPI(req, res);
         break;
       case "POST":
         await savePickupAPI(req, res, userId);

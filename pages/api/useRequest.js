@@ -124,6 +124,10 @@ export const useGetDeliveryById = (fetcher, id) => {
 // Pickups
 export const useGetPendingPickups = (fetcher) => {
   const { data, error } = useSWR(ROUTES.ALL_PENDING_PICKUPS_API, fetcher);
+  return { pendingPickupsList: data?.data, pendingPickupsError: error };
+};
+export const useGetPickups = (fetcher) => {
+  const { data, error } = useSWR(ROUTES.ALL_PICKUP_API, fetcher);
   return { pickupsList: data?.data, pickupsError: error };
 };
 export const useGetPickupById = (fetcher, id) => {

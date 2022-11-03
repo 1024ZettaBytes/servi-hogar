@@ -23,23 +23,23 @@ import es from "date-fns/locale/es";
 import Label from "@/components/Label";
 import SearchIcon from "@mui/icons-material/Search";
 
-interface TablaCambiosProps {
+interface TablaRecoleccionesProps {
   userRole: string;
   className?: string;
-  changesList: any[];
+  pickupsList: any[];
 }
 const statusMap = {
-  CANCELADO: {
-    text: "Cancelado",
+  CANCELADA: {
+    text: "Cancelada",
     color: "error",
   },
-  FINALIZADO: {
-    text: "Realizado",
+  RECOLECTADA: {
+    text: "Recolectada",
     color: "success",
   },
 };
-const getStatusLabel = (changeStatus: string): JSX.Element => {
-  const { text, color }: any = statusMap[changeStatus];
+const getStatusLabel = (pickupStatus: string): JSX.Element => {
+  const { text, color }: any = statusMap[pickupStatus];
 
   return <Label color={color}>{text}</Label>;
 };
@@ -49,13 +49,13 @@ const compareStringsForFilter = (keyWord: string, field: string) => {
     .toLowerCase()
     .includes(str(keyWord).latinise().toLowerCase());
 };
-const applyFilters = (changesList: any[], filter: string): any[] => {
-  return changesList.filter((change) => {
+const applyFilters = (pickupsList: any[], filter: string): any[] => {
+  return pickupsList.filter((pickup) => {
     if (!filter || filter === "") {
       return true;
     }
     return (
-      Object.entries(change).filter((keyValue) => {
+      Object.entries(pickup).filter((keyValue) => {
         const key = keyValue[0];
         const value = keyValue[1];
         if (!value) {
@@ -80,7 +80,7 @@ const applyFilters = (changesList: any[], filter: string): any[] => {
               value &&
               compareStringsForFilter(
                 filter,
-                format(new Date(change?.createdAt), "LLL dd yyyy", {
+                format(new Date(pickup?.createdAt), "LLL dd yyyy", {
                   locale: es,
                 })
               );
@@ -92,7 +92,7 @@ const applyFilters = (changesList: any[], filter: string): any[] => {
               value &&
               compareStringsForFilter(
                 filter,
-                format(new Date(change?.finishedAt), "LLL dd yyyy", {
+                format(new Date(pickup?.finishedAt), "LLL dd yyyy", {
                   locale: es,
                 })
               );
@@ -105,15 +105,15 @@ const applyFilters = (changesList: any[], filter: string): any[] => {
 };
 
 const applyPagination = (
-  changesList: any[],
+  pickupsList: any[],
   page: number,
   limit: number
 ): any[] => {
-  return changesList.slice(page * limit, page * limit + limit);
+  return pickupsList.slice(page * limit, page * limit + limit);
 };
 
-const TablaCambios: FC<TablaCambiosProps> = ({
-  changesList,
+const TablaRecolecciones: FC<TablaRecoleccionesProps> = ({
+  pickupsList,
 }) => {
   const [page, setPage] = useState<number>(0);
   const [limit, setLimit] = useState<number>(10);
@@ -133,8 +133,8 @@ const TablaCambios: FC<TablaCambiosProps> = ({
   };
   
 
-  const filteredChanges = applyFilters(changesList, filter);
-  const paginatedChanges = applyPagination(filteredChanges, page, limit);
+  const filteredPickups = applyFilters(pickupsList, filter);
+  const paginatedPickups = applyPagination(filteredPickups, page, limit);
 
   return (
     <>
@@ -174,17 +174,15 @@ const TablaCambios: FC<TablaCambiosProps> = ({
               <TableRow>
                 <TableCell align="center"># de renta</TableCell>
                 <TableCell align="center">Cliente</TableCell>
-                <TableCell align="center">Solicitado</TableCell>
-                <TableCell align="center">Realizado</TableCell>
-                <TableCell align="center">Equipo recogido</TableCell>
-                <TableCell align="center">Equipo dejado</TableCell>
+                <TableCell align="center">Solicitada</TableCell>
+                <TableCell align="center">Recolectada</TableCell>
                 <TableCell align="center">Resultado</TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
-              {paginatedChanges.map((change) => {
+              {paginatedPickups.map((pickup) => {
                 return (
-                  <TableRow hover key={change?._id}>
+                  <TableRow hover key={pickup?._id}>
                     <TableCell align="center">
                       <Typography
                         variant="body1"
@@ -193,7 +191,7 @@ const TablaCambios: FC<TablaCambiosProps> = ({
                         gutterBottom
                         noWrap
                       >
-                        {change?.rent?.num}
+                        {pickup?.rent?.num}
                       </Typography>
                     </TableCell>
                     <TableCell align="center">
@@ -204,7 +202,7 @@ const TablaCambios: FC<TablaCambiosProps> = ({
                         gutterBottom
                         noWrap
                       >
-                        {change?.rent?.customer?.name}
+                        {pickup?.rent?.customer?.name}
                       </Typography>
                     </TableCell>
 
@@ -217,7 +215,7 @@ const TablaCambios: FC<TablaCambiosProps> = ({
                         noWrap
                       >
                         {capitalizeFirstLetter(
-                          format(new Date(change?.createdAt), "LLL dd yyyy", {
+                          format(new Date(pickup?.createdAt), "LLL dd yyyy", {
                             locale: es,
                           })
                         )}
@@ -231,21 +229,15 @@ const TablaCambios: FC<TablaCambiosProps> = ({
                         gutterBottom
                         noWrap
                       >
-                        {change?.finishedAt ? capitalizeFirstLetter(
-                          format(new Date(change?.finishedAt), "LLL dd yyyy", {
+                        {pickup?.finishedAt ? capitalizeFirstLetter(
+                          format(new Date(pickup?.finishedAt), "LLL dd yyyy", {
                             locale: es,
                           })
                         ) : "N/A"}
                       </Typography>
                     </TableCell>
                     <TableCell align="center">
-                      {change.pickedMachine ? change.pickedMachine.machineNum : "N/A"}
-                    </TableCell>
-                    <TableCell align="center">
-                      {change.leftMachine ? change.leftMachine.machineNum : "N/A"}
-                    </TableCell>
-                    <TableCell align="center">
-                      {getStatusLabel(change?.status)}
+                      {getStatusLabel(pickup?.status)}
                     </TableCell>
                   </TableRow>
                 );
@@ -256,7 +248,7 @@ const TablaCambios: FC<TablaCambiosProps> = ({
         <Box p={2}>
           <TablePagination
             component="div"
-            count={filteredChanges.length}
+            count={filteredPickups.length}
             onPageChange={handlePageChange}
             onRowsPerPageChange={handleLimitChange}
             page={page}
@@ -269,14 +261,14 @@ const TablaCambios: FC<TablaCambiosProps> = ({
   );
 };
 
-TablaCambios.propTypes = {
+TablaRecolecciones.propTypes = {
   userRole: PropTypes.string.isRequired,
-  changesList: PropTypes.array.isRequired,
+  pickupsList: PropTypes.array.isRequired,
 };
 
-TablaCambios.defaultProps = {
+TablaRecolecciones.defaultProps = {
   userRole: "",
-  changesList: [],
+  pickupsList: [],
 };
 
-export default TablaCambios;
+export default TablaRecolecciones;
