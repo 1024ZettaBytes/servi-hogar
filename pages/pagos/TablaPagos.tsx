@@ -22,10 +22,10 @@ import {
   InputAdornment,
 } from "@mui/material";
 
-import ImageSearchIcon from '@mui/icons-material/ImageSearch';
+import ImageSearchIcon from "@mui/icons-material/ImageSearch";
 import SearchIcon from "@mui/icons-material/Search";
 import { capitalizeFirstLetter } from "lib/client/utils";
-import {PAYMENT_METHODS} from "../../lib/consts/OBJ_CONTS"
+import { PAYMENT_METHODS } from "../../lib/consts/OBJ_CONTS";
 import { format } from "date-fns";
 import es from "date-fns/locale/es";
 interface TablaPagosProps {
@@ -52,40 +52,38 @@ const applyFilters = (paymentsList: any[], filter: string): any[] => {
           return false;
         }
         switch (key) {
-          case "status": {
+          case "number": {
+            const matchNumber =
+              value && compareStringsForFilter(filter, payment.number + "");
+            return matchNumber;
+          }
+          case "date": {
+            const matchFormatedDate =
+              value &&
+              compareStringsForFilter(
+                filter,
+                format(new Date(payment.date), "LLL dd yyyy", {
+                  locale: es,
+                })
+              );
+            return matchFormatedDate;
+          }
+          case "customer": {
+            const matchCustomerName =
+              payment.customer &&
+              compareStringsForFilter(filter, payment.customer.name);
+            return matchCustomerName;
+          }
+          case "description": {
             const matchDescription =
-              value["description"] &&
-              compareStringsForFilter(filter, value["description"]);
+              value && compareStringsForFilter(filter, payment.description);
             return matchDescription;
           }
-          case "currentWarehouse": {
-            const matchWarehouse =
+          case "method": {
+            const matchMethod =
               value &&
-              value["name"] &&
-              compareStringsForFilter(filter, value["name"]);
-            return matchWarehouse;
-          }
-          case "currentVehicle": {
-            const vehicleDesc = value
-              ? "".concat(
-                  value["brand"] || "",
-                  " ",
-                  value["model"] || "",
-                  " ",
-                  value["color"] || "",
-                  " ",
-                  value["year"] || ""
-                )
-              : "";
-            const matchVehicle =
-              value && compareStringsForFilter(filter, vehicleDesc);
-            return matchVehicle;
-          }
-          case "paymentNum":
-          case "brand":
-          case "capacity":
-          case "totalChanges": {
-            return compareStringsForFilter(filter, value.toString());
+              compareStringsForFilter(filter, PAYMENT_METHODS[payment.method]);
+            return matchMethod;
           }
         }
       }).length > 0
@@ -243,22 +241,28 @@ const TablaPagos: FC<TablaPagosProps> = ({ paymentsList }) => {
                       </Typography>
                     </TableCell>
                     <TableCell align="center">
-                    {payment.voucherUrl ? <a href={payment.voucherUrl} target="_blank" rel="noopener noreferrer">
-                        <Tooltip title="Ver comprobante" arrow>
-                          <IconButton
-                            sx={{
-                              "&:hover": {
-                                background: theme.colors.primary.lighter,
-                              },
-                              color: theme.palette.primary.main,
-                            }}
-                            color="inherit"
-                            size="small"
-                          >
-                            <ImageSearchIcon fontSize="small" />
-                          </IconButton>
-                        </Tooltip>
-                      </a>: null}
+                      {payment.voucherUrl ? (
+                        <a
+                          href={payment.voucherUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                        >
+                          <Tooltip title="Ver comprobante" arrow>
+                            <IconButton
+                              sx={{
+                                "&:hover": {
+                                  background: theme.colors.primary.lighter,
+                                },
+                                color: theme.palette.primary.main,
+                              }}
+                              color="inherit"
+                              size="small"
+                            >
+                              <ImageSearchIcon fontSize="small" />
+                            </IconButton>
+                          </Tooltip>
+                        </a>
+                      ) : null}
                     </TableCell>
                     <TableCell align="center">
                       <Typography variant="body2" color="green" noWrap>

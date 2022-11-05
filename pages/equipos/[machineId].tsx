@@ -13,6 +13,7 @@ import PageHeader from "@/components/PageHeader";
 import {
   getFetcher,
   useGetMachineById,
+  useGetMachinesStatus
 } from "pages/api/useRequest";
 import MachineInfoTab from "@/content/machines/InfoTab";
 
@@ -32,6 +33,7 @@ function MachineDetail({ session }) {
     getFetcher,
     machineId
   );
+  const { machinesStatusList } = useGetMachinesStatus(getFetcher);
   const [currentTab, setCurrentTab] = useState<string>("info");
   const paths = ["Inicio", "Equipos", "# "+ machine?.machineNum];
 
@@ -85,6 +87,7 @@ function MachineDetail({ session }) {
                   <MachineInfoTab
                     role={userRole}
                     machine={machine}
+                    statusList = {machinesStatusList}
                   />
                 )}
               </Grid>

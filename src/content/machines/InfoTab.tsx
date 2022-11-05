@@ -11,6 +11,10 @@ import {
   Button,
   TextField,
   Alert,
+  FormControl,
+  Select,
+  MenuItem,
+  InputLabel,
 } from "@mui/material";
 import { MACHINE_STATUS_LIST } from "../../../lib/consts/OBJ_CONTS";
 import { useSnackbar } from "notistack";
@@ -28,7 +32,29 @@ import { useState } from "react";
 import { updateMachine } from "lib/client/machinesFetch";
 import { LoadingButton } from "@mui/lab";
 import numeral from "numeral";
-
+import {
+  getFetcher,
+  useGetAllVehicles,
+  useGetAllWarehousesOverview,
+} from "pages/api/useRequest";
+const getStatusDescription = (
+  status: String,
+  rent: any,
+  vehicle: any,
+  warehouse: any
+) => {
+  const notAvailable = "Información no disponible";
+  switch (status) {
+    case MACHINE_STATUS_LIST.RENTADO:
+      return rent ? `Renta #${rent?.num}` : notAvailable;
+    case MACHINE_STATUS_LIST.VEHI:
+      return vehicle
+        ? `${vehicle?.brand} ${vehicle?.model} ${vehicle?.color} ${vehicle?.year}`
+        : notAvailable;
+    default:
+      return warehouse ? warehouse?.name : notAvailable;
+  }
+};
 const getStatusLabel = (
   status: String,
   rent: any,
@@ -41,7 +67,7 @@ const getStatusLabel = (
       return (
         <Label color="secondary">
           <CurrencyExchangeIcon fontSize="small" />
-          <b>{rent ? `Rentado (Renta ${rent?.rentNum})` : notAvailable}</b>
+          <b>{rent ? `Rentado (Renta ${rent?.num})` : notAvailable}</b>
         </Label>
       );
     case MACHINE_STATUS_LIST.VEHI:
@@ -76,6 +102,15 @@ const getStatusLabel = (
           </b>
         </Label>
       );
+      case MACHINE_STATUS_LIST.REC:
+        return (
+          <Label color="warning">
+            <HourglassEmptyIcon fontSize="small" />
+            <b>
+              Recolectada (en vehículo)
+            </b>
+          </Label>
+        );
   }
 };
 const getIdOperation = (type: string) => (
@@ -89,13 +124,20 @@ const getIdOperation = (type: string) => (
   />
 );
 
-function MachineInfoTab({ role, machine }) {
+function MachineInfoTab({ role, machine, statusList }) {
   const { enqueueSnackbar } = useSnackbar();
+  const { warehousesList, warehousesError } = useGetAllWarehousesOverview(
+    getFetcher
+  );
+  const { vehiclesList, vehiclesError } = useGetAllVehicles(getFetcher);
   const [isEditing, setIsEditing] = useState<any>({
     info: false,
     residence: false,
   });
   const [machineToEdit, setMachineToEdit] = useState<any>({ isSet: false });
+  const [selectedLocation, setSelectedLocation] = useState();
+  const isWarehouseStatus = machineToEdit.status?.typeWarehouse;
+  const isVehicleStatus = machineToEdit.status?.id === MACHINE_STATUS_LIST.VEHI;
   const [isUpdating, setIsUpdating] = useState<any>({ info: false });
   const [hasErrorUpdating, setHasErrorUpdating] = useState<any>({
     info: { error: false, msg: "" },
@@ -111,6 +153,7 @@ function MachineInfoTab({ role, machine }) {
     setIsUpdating({ ...isUpdating, [type]: true });
     const result = await updateMachine({
       ...machineToEdit,
+      location: selectedLocation,
       [type]: true,
     });
     setIsUpdating({ ...isUpdating, [type]: false });
@@ -130,7 +173,17 @@ function MachineInfoTab({ role, machine }) {
         [type]: { error: true, msg: result.msg },
       });
     }
-    
+  }
+  function handleStatusSelection(status) {
+    const selected = statusList.find((s) => s._id === status);
+    setMachineToEdit({
+      ...machineToEdit,
+      status: selected,
+    });
+      setSelectedLocation(undefined);
+  }
+  function handleLocationSelection(location) {
+    setSelectedLocation(location);
   }
   const getInfoTextField = (
     field: string,
@@ -156,10 +209,14 @@ function MachineInfoTab({ role, machine }) {
     />
   );
 
-
   if (!machineToEdit.isSet && machine) {
     setMachineToEdit({ ...machine, isSet: true });
   }
+  const getErrorMessage = (message: string) => (
+    <Typography variant="h5" component="h5" color="error" textAlign="left">
+      {message}
+    </Typography>
+  );
   return (
     <Grid container spacing={3}>
       <Grid item xs={12}>
@@ -260,18 +317,50 @@ function MachineInfoTab({ role, machine }) {
                         )}
                       </Box>
                     </Grid>
+
                     <Grid item xs={3} sm={6} md={6} textAlign={{ sm: "right" }}>
                       <Box pr={2} pb={2}>
                         Estado actual:
                       </Box>
                     </Grid>
+
                     <Grid item xs={9} sm={6} md={6}>
                       {machine ? (
-                        getStatusLabel(
-                          machine?.status?.id,
-                          machine.lastRent,
-                          machine.currentVehicle,
-                          machine.currentWarehouse
+                        !isEditing.info ? (
+                          getStatusLabel(
+                            machine?.status?.id,
+                            machine?.lastRent,
+                            machine?.currentVehicle,
+                            machine?.currentWarehouse
+                          )
+                        ) : statusList ? (
+                          <FormControl>
+                            <Select
+                              size="small"
+                              labelId="level-id"
+                              id="level"
+                              name="level"
+                              required
+                              autoComplete="off"
+                              value={machineToEdit?.status._id || ""}
+                              onChange={(event) =>
+                                handleStatusSelection(event.target.value)
+                              }
+                            >
+                              {statusList
+                                ? statusList.map((status) => (
+                                    <MenuItem
+                                      key={status._id}
+                                      value={status._id}
+                                    >
+                                      {status.description}
+                                    </MenuItem>
+                                  ))
+                                : null}
+                            </Select>
+                          </FormControl>
+                        ) : (
+                          getErrorMessage("Error al obtener los estados")
                         )
                       ) : (
                         <Skeleton
@@ -280,6 +369,115 @@ function MachineInfoTab({ role, machine }) {
                         />
                       )}
                     </Grid>
+
+{machine?.status?.id !== MACHINE_STATUS_LIST.RENTADO &&
+<>
+                    <Grid item xs={3} sm={6} md={6} textAlign={{ sm: "right" }}>
+                      <Box pr={2} pb={2}>
+                        Ubicación:
+                      </Box>
+                    </Grid>
+
+                    <Grid item xs={9} sm={6} md={6}>
+                      {!isEditing.info ? (
+                        <Typography
+                          variant="body2"
+                          color="text.secondary"
+                          noWrap
+                        >
+                          {getStatusDescription(
+                            machine?.status?.id,
+                            machine?.lastRent,
+                            machine?.currentVehicle,
+                            machine?.currentWarehouse
+                          )}
+                        </Typography>
+                      ) : (
+                        <>
+                          {isWarehouseStatus && (
+                            <>
+                              {warehousesError && (
+                                <Grid item lg={12}>
+                                  <Alert severity="error">
+                                    {warehousesError?.message}
+                                  </Alert>
+                                </Grid>
+                              )}
+                              <Grid item lg={12}>
+                                <FormControl fullWidth>
+                                  <Select
+                                  size="small"
+                                    id="warehouse"
+                                    name="warehouse"
+                                    required
+                                    autoComplete="off"
+                                    value={selectedLocation || ""}
+                                    onChange={(event) =>
+                                      handleLocationSelection(
+                                        event.target.value
+                                      )
+                                    }
+                                  >
+                                    {warehousesList
+                                      ? warehousesList.map((warehouse) => (
+                                          <MenuItem
+                                            key={warehouse._id}
+                                            value={warehouse._id}
+                                          >
+                                            {warehouse.name}
+                                          </MenuItem>
+                                        ))
+                                      : null}
+                                  </Select>
+                                </FormControl>
+                              </Grid>
+                            </>
+                          )}
+
+                          {isVehicleStatus && (
+                            <>
+                              {vehiclesError && (
+                                <Grid item lg={12}>
+                                  <Alert severity="error">
+                                    {vehiclesError?.message}
+                                  </Alert>
+                                </Grid>
+                              )}
+                              <Grid item lg={12}>
+                                <FormControl fullWidth>
+                                  <Select
+                                    id="vehicle"
+                                    name="vehicle"
+                                    required
+                                    size="small"
+                                    autoComplete="off"
+                                    value={selectedLocation || ""}
+                                    onChange={(event) =>
+                                      handleLocationSelection(
+                                        event.target.value
+                                      )
+                                    }
+                                  >
+                                    {vehiclesList
+                                      ? vehiclesList.map((vehicle) => (
+                                          <MenuItem
+                                            key={vehicle._id}
+                                            value={vehicle._id}
+                                          >
+                                            {`${vehicle.brand} ${vehicle.model} ${vehicle.color} ${vehicle.year}`}
+                                          </MenuItem>
+                                        ))
+                                      : null}
+                                  </Select>
+                                </FormControl>
+                              </Grid>
+                            </>
+                          )}
+                        </>
+                      )}
+                    </Grid>
+                    </>
+}
                     <Grid item xs={3} sm={6} md={6} textAlign={{ sm: "right" }}>
                       <Box pr={2} pb={2}>
                         Cambios:

@@ -13,7 +13,7 @@ import DoneTwoToneIcon from '@mui/icons-material/DoneTwoTone';
 import Text from '@/components/Text';
 import Label from '@/components/Label';*/
 
-function EditProfileTab() {
+function HistoryTab() {
   return (
     null/*
     <Grid container spacing={3}>
@@ -195,4 +195,4 @@ function EditProfileTab() {
   );
 }
 
-export default EditProfileTab;
+export default HistoryTab;

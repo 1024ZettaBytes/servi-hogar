@@ -5,8 +5,6 @@ import PageTitleWrapper from "@/components/PageTitleWrapper";
 import { Container, Tabs, Tab, Grid, Alert } from "@mui/material";
 import Footer from "@/components/Footer";
 import { styled } from "@mui/material/styles";
-import EditProfileTab from "@/content/Management/Users/settings/EditProfileTab";
-//import SecurityTab from "@/content/Management/Users/settings/SecurityTab";
 import SidebarLayout from "@/layouts/SidebarLayout";
 import { validateServerSideSession } from "lib/auth";
 import { useRouter } from "next/router";
@@ -20,6 +18,7 @@ import {
   useGetCities,
 } from "pages/api/useRequest";
 import CustomerInfoTab from "@/content/customers/InfoTab";
+import HistoryTab from "@/content/customers/HistoryTab";
 
 const TabsWrapper = styled(Tabs)(
   () => `
@@ -100,7 +99,7 @@ function CustomerDetail({ session }) {
                     citiesList={citiesList}
                   />
                 )}
-                {currentTab === "history" && <EditProfileTab />}
+                {currentTab === "history" && <HistoryTab movementsList={customer?.movements} />}
                 {
                   //currentTab === "security" && <SecurityTab />
                 }
