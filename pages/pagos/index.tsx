@@ -22,7 +22,7 @@ import { useSnackbar } from "notistack";
 import NextBreadcrumbs from "@/components/Shared/BreadCrums";
 import AddPaymentModal from "@/components/AddPaymentModal";
 
-function Equipos({ session }) {
+function Pagos({ }) {
   const paths = ["Inicio", "Pagos"];
   const { enqueueSnackbar } = useSnackbar();
   const { paymentsList, paymentsError } = useGetPayments(getFetcher);
@@ -30,7 +30,6 @@ function Equipos({ session }) {
   const [addModalIsOpen, setAddModalIsOpen] = useState(false);
   const generalError = paymentsError;
   const completeData = paymentsList;
-  const { user } = session;
 
   const handleClickOpen = () => {
     setAddModalIsOpen(true);
@@ -104,10 +103,10 @@ function Equipos({ session }) {
   );
 }
 
-Equipos.getLayout = (page) => <SidebarLayout>{page}</SidebarLayout>;
+Pagos.getLayout = (page) => <SidebarLayout>{page}</SidebarLayout>;
 
 export async function getServerSideProps({ req, resolvedUrl }) {
   let props = await validateServerSideSession(getSession, req, resolvedUrl);
   return props;
 }
-export default Equipos;
+export default Pagos;
