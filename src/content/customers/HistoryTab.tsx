@@ -1,13 +1,9 @@
 import { FC, ChangeEvent, useState } from "react";
-import numeral from "numeral";
-import * as str from "string";
 import PropTypes from "prop-types";
 import {
-  Tooltip,
   Divider,
   Box,
   Card,
-  IconButton,
   Table,
   TableBody,
   TableCell,
@@ -16,16 +12,10 @@ import {
   TableRow,
   TableContainer,
   Typography,
-  useTheme,
   CardHeader,
-  TextField,
-  InputAdornment,
 } from "@mui/material";
 
-import ImageSearchIcon from '@mui/icons-material/ImageSearch';
-import SearchIcon from "@mui/icons-material/Search";
 import { capitalizeFirstLetter } from "lib/client/utils";
-import {PAYMENT_METHODS,} from "../../../lib/consts/OBJ_CONTS"
 import { format } from "date-fns";
 import es from "date-fns/locale/es";
 interface HistoryTabProps {

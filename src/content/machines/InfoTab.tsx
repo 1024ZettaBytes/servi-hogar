@@ -14,7 +14,6 @@ import {
   FormControl,
   Select,
   MenuItem,
-  InputLabel,
 } from "@mui/material";
 import { MACHINE_STATUS_LIST } from "../../../lib/consts/OBJ_CONTS";
 import { useSnackbar } from "notistack";
