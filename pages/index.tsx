@@ -4,11 +4,11 @@ import SidebarLayout from '@/layouts/SidebarLayout';
 import {validateServerSideSession} from "../lib/auth"
 import PageHeader from '@/components/PageHeader';
 import PageTitleWrapper from '@/components/PageTitleWrapper';
-import { Container, Grid } from '@mui/material';
+import { Container } from '@mui/material';
 import Footer from '@/components/Footer';
-import AccountBalance from '@/content/Dashboards/Crypto/AccountBalance';
-import Wallets from '@/content/Dashboards/Crypto/Wallets';
-import WatchList from '@/content/Dashboards/Crypto/WatchList';
+//import AccountBalance from '@/content/Dashboards/Crypto/AccountBalance';
+//import Wallets from '@/content/Dashboards/Crypto/Wallets';
+//import WatchList from '@/content/Dashboards/Crypto/WatchList';
 
 function Home({session}) {
   const {user} = session;
