@@ -30,8 +30,8 @@ const ResidenceSchema = new Schema<IResidence>({
   residenceRef: { type: 'string', required: true},
   nameRef: { type: 'string', required: true},
   telRef: { type: 'string', required: true},
-  maps: { type: 'string', required: true},
-  coordinates: {type: Object, required: true},
+  maps: { type: 'string', default: ""},
+  coordinates: {type: Object, default: null},
   createdAt: { type: Date, required: true },
   updatedAt: { type: Date, required: true }
 });

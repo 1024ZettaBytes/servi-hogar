@@ -154,3 +154,9 @@ export const useGetChangeById = (fetcher, id) => {
   );
   return { change: data?.data, changeByIdError: error };
 };
+
+// Payments
+export const useGetPayments = (fetcher) => {
+  const { data, error } = useSWR(ROUTES.ALL_PAYMENTS_API, fetcher);
+  return { paymentsList: data?.data, paymentsError: error };
+};

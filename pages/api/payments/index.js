@@ -1,11 +1,27 @@
 import { validateUserPermissions, getUserId } from "../auth/authUtils";
-import { savePaymentData } from "../../../lib/data/Payments";
+import { savePaymentData, getPaymentsData } from "../../../lib/data/Payments";
 import formidable from "formidable";
 export const config = {
   api: {
     bodyParser: false,
   },
 };
+
+async function getPaymentsAPI(req, res){
+  try {
+    const payments = await getPaymentsData();
+    res.status(200).json({ data: payments });
+  } catch (e) {
+    console.error(e);
+    res
+      .status(500)
+      .json({
+        errorMsg:
+          "Hubo un problema al consultar los pagos. Por favor intente de nuevo.",
+      });
+  }
+  
+}
 async function savePaymentAPI(req, res, userId) {
   try {
     const form = new formidable.IncomingForm();
@@ -43,6 +59,7 @@ async function handler(req, res) {
   if (validRole)
     switch (req.method) {
       case "GET":
+        await getPaymentsAPI(req, res);
         break;
       case "POST":
         await savePaymentAPI(req, res, userId);

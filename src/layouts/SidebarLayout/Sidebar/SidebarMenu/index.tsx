@@ -383,7 +383,7 @@ function SidebarMenu({userRole}) {
             </List>
           </SubMenuWrapper>
         </List>
-        <List
+        {/*<List
           component="div"
           subheader={
             <ListSubheader component="div" disableSticky>
@@ -463,7 +463,7 @@ function SidebarMenu({userRole}) {
               </ListItem>
             </List>
           </SubMenuWrapper>
-        </List>
+                  </List>*/}
         {["ADMIN", "AUX"].includes(userRole) ?
         <List
           component="div"
@@ -476,10 +476,10 @@ function SidebarMenu({userRole}) {
           <SubMenuWrapper>
             <List component="div">
               <ListItem component="div">
-                <NextLink href="/" passHref>
+                <NextLink href="/pagos" passHref>
                   <Button
                     className={
-                      currentRoute === '/management/profile' ? 'active' : ''
+                      currentRoute === '/pagos' ? 'active' : ''
                     }
                     disableRipple
                     component="a"

@@ -1,6 +1,8 @@
 import mongoose, { Model, model, Schema } from 'mongoose';
 
 export interface IPayment extends Document {
+  number: number;
+  amount: number;
   customer: Schema.Types.ObjectId;
   reason: string;
   description: string;
@@ -12,6 +14,8 @@ export interface IPayment extends Document {
 }
 
 const PaymentSchema = new Schema<IPayment>({
+  number: { type: 'number', required:true},
+  amount: { type: 'number', required:true},
   customer: {
     type: Schema.Types.ObjectId,
     ref: 'customers',

@@ -63,7 +63,7 @@ function ResumenEquipos({
           <Card
             sx={{
               px: 1,
-              height: "150px",
+              height: "auto",
               overflowY: "auto",
             }}
           >

@@ -294,7 +294,6 @@ function AddCustomerModal(props) {
               <Grid item lg={12}>
                 <TextField
                   autoComplete="off"
-                  required
                   id="maps"
                   name="maps"
                   label="Maps"

@@ -48,7 +48,7 @@ const getStatusDescription = (
   const notAvailable = "Información no disponible";
   switch (status) {
     case MACHINE_STATUS_LIST.RENTADO:
-      return rent ? `Renta ${rent?.rentNum}` : notAvailable;
+      return rent ? `Renta #${rent?.num}` : notAvailable;
     case MACHINE_STATUS_LIST.VEHI:
       return vehicle
         ? `${vehicle?.brand} ${vehicle?.model} ${vehicle?.color} ${vehicle?.year}`
@@ -392,8 +392,13 @@ const TablaEquipos: FC<TablaEquiposProps> = ({ userRole, machinesList }) => {
                         color="text.primary"
                         gutterBottom
                         noWrap
-                      >
-                        {machine?.lastRent?.updatedAt}
+                      >{
+                        machine?.lastRent?.startDate ?
+                        capitalizeFirstLetter(
+                        format(new Date(machine?.lastRent?.startDate), "LLL dd yyyy", {
+                          locale: es,
+                        })
+                      ):""}
                       </Typography>
                     </TableCell>
                     <TableCell align="center">

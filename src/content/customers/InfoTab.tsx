@@ -800,6 +800,7 @@ function CustomerInfoTab({
                         textAlign="center"
                       >
                         {customer ? (
+                          customer.currentResidence?.maps &&
                           <Button
                             variant="outlined"
                             href={`${customer?.currentResidence?.maps}`}
@@ -809,6 +810,7 @@ function CustomerInfoTab({
                           >
                             Ver Ubicación
                           </Button>
+
                         ) : (
                           <Skeleton
                             variant="text"
@@ -832,7 +834,6 @@ function CustomerInfoTab({
                         <Grid item xs={9} sm={6} md={6}>
                           <TextField
                             autoComplete="off"
-                            required
                             id="maps"
                             name="maps"
                             multiline
@@ -952,7 +953,9 @@ function CustomerInfoTab({
                       <Grid item xs={6} sm={6} md={6}>
                         {customer ? (
                           <Text color="black">
-                            {customer?.currentRent || "1 semana"}
+                            {customer?.currentRent?.totalWeeks ? 
+                            `${customer?.currentRent?.totalWeeks} semana(s)`
+                             : "N/A"}
                           </Text>
                         ) : (
                           <Skeleton
@@ -975,7 +978,7 @@ function CustomerInfoTab({
                       <Grid item xs={6} sm={6} md={6}>
                         {customer ? (
                           <Text color="black">
-                            {customer?.maxRentTime || "3 semanas"}
+                            {customer?.longestWeeks + " semana(s)"}
                           </Text>
                         ) : (
                           <Skeleton
@@ -998,7 +1001,7 @@ function CustomerInfoTab({
                       <Grid item xs={6} sm={6} md={6}>
                         {customer ? (
                           <Text color="black">
-                            {customer?.totalRent || "4 semanas"}
+                            {customer?.totalRentWeeks + " semanas(s)"}
                           </Text>
                         ) : (
                           <Skeleton

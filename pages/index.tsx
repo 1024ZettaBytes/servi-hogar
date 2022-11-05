@@ -21,7 +21,7 @@ function Home({session}) {
       <PageHeader title={"¡Bienvenido(a) "+user?.name+"!"} sutitle={"Esta es la página de inicio"} showAvatar={true}/>
       </PageTitleWrapper>
       <Container maxWidth="lg">
-        <Grid
+        {/*<Grid
           container
           direction="row"
           justifyContent="left"
@@ -38,7 +38,7 @@ function Home({session}) {
           <Grid item xs={12}>
             <WatchList />
           </Grid>
-        </Grid>
+        </Grid>*/}
       </Container>
       <Footer />
     </>

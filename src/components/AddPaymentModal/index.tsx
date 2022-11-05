@@ -34,6 +34,7 @@ import {
   PAYMENT_METHODS,
 } from "../../../lib/consts/OBJ_CONTS";
 import { MuiFileInput } from "mui-file-input";
+import numeral from "numeral";
 function AddPaymentModal(props) {
   const { customerId, handleOnClose, open, reason, amount } = props;
   const { customerList, customerError } = useGetAllCustomers(getFetcher);
@@ -130,278 +131,297 @@ function AddPaymentModal(props) {
         <CardContent>
           <Box>
             <Container maxWidth="lg">
-            {customerError ? 
-            <Grid item m={1}>
-            <Alert severity="error">{customerError.message}</Alert>
-            </Grid>:
-              <Stepper
-                activeStep={activeStep}
-                orientation="vertical"
-                sx={{ backgroundColor: "transparent" }}
-              >
-                {steps.map((step, index) => (
-                  <Step key={step.label}>
-                    <StepLabel>
-                      {index === 0 && selectedCustomer
-                        ? `${step.label} (${selectedCustomer.name} - ${PAYMENT_REASONS[selectedReason]})`
-                        : index === 1 && selectedMethod
-                        ? `${step.label} (${PAYMENT_METHODS[selectedMethod]})`
-                        : step.label}
-                    </StepLabel>
-                    <StepContent>
-                      <Box
-                        component="form"
-                        onSubmit={
-                          activeStep < steps.length - 1
-                            ? handleNext
-                            : handleOnSubmit
-                        }
-                      >
-                        
-                        {activeStep === 0 && (
-                          <Grid container>
-                            <Grid item lg={6} m={1}>
-                              {(
-                                customerId ? selectedCustomer : customerList
-                              ) ? (
-                                <Autocomplete
-                                  disablePortal
-                                  id="combo-box-demo"
-                                  options={customerList.map((customer) => {
-                                    return {
-                                      label: `${customer.name} (${customer.cell})`,
-                                      id: customer._id,
-                                    };
-                                  })}
-                                  onChange={(
-                                    event: any,
-                                    newValue: string | null
-                                  ) => {
-                                    event.target;
-                                    handleCustomerSelect(newValue);
-                                  }}
-                                  value={
-                                    selectedCustomer
-                                      ? {
-                                          label: `${selectedCustomer.name} (${selectedCustomer.cell})`,
-                                          id: selectedCustomer._id,
-                                        }
-                                      : null
-                                  }
-                                  fullWidth
-                                  isOptionEqualToValue={(
-                                    option: any,
-                                    value: any
-                                  ) => option.id === value.id}
-                                  renderInput={(params) => (
-                                    <TextField
-                                      required
-                                      {...params}
-                                      label="Cliente"
-                                    />
-                                  )}
-                                />
-                              ) : (
-                                <Skeleton
-                                  variant="text"
-                                  sx={{ fontSize: "1rem", width: "100px" }}
-                                />
-                              )}
-                            </Grid>
-                            <Grid item xs={12} sm={12} lg={12} />
-                            <Grid item lg={4} m={1}>
-                              <FormControl sx={{ width: "100%" }}>
-                                <InputLabel id="reason-id">
-                                  Concepto*
-                                </InputLabel>
-                                <Select
-                                  labelId="reason-id"
-                                  label="Concepto*"
-                                  id="reason"
-                                  name="reason"
-                                  required
-                                  autoComplete="off"
-                                  size="medium"
-                                  value={selectedReason || ""}
-                                  onChange={(event) =>
-                                    setSelectedReason(event.target.value)
-                                  }
-                                >
-                                  {Object.keys(PAYMENT_REASONS).map(
-                                    (reasonKey) => (
-                                      <MenuItem
-                                        key={reasonKey}
-                                        value={reasonKey}
-                                      >
-                                        {PAYMENT_REASONS[reasonKey]}
-                                      </MenuItem>
-                                    )
-                                  )}
-                                </Select>
-                              </FormControl>
-                            </Grid>
-                          </Grid>
-                        )}
-                        {activeStep === 1 && (
-                          <Grid item lg={4} m={1}>
-                            <FormControl sx={{ width: "100%" }}>
-                              <InputLabel id="method-id">Método*</InputLabel>
-                              <Select
-                                labelId="method-id"
-                                label="Concepto*"
-                                id="method"
-                                name="method"
-                                required
-                                autoComplete="off"
-                                size="medium"
-                                value={selectedMethod || ""}
-                                onChange={(event) =>
-                                  setSelectedMethod(event.target.value)
-                                }
-                              >
-                                {Object.keys(PAYMENT_METHODS).map(
-                                  (methodKey) => (
-                                    <MenuItem key={methodKey} value={methodKey}>
-                                      {PAYMENT_METHODS[methodKey]}
-                                    </MenuItem>
-                                  )
+              {customerError ? (
+                <Grid item m={1}>
+                  <Alert severity="error">{customerError.message}</Alert>
+                </Grid>
+              ) : (
+                <Stepper
+                  activeStep={activeStep}
+                  orientation="vertical"
+                  sx={{ backgroundColor: "transparent" }}
+                >
+                  {steps.map((step, index) => (
+                    <Step key={step.label}>
+                      <StepLabel>
+                        {index === 0 && selectedCustomer && selectedReason
+                          ? `${step.label} (${selectedCustomer.name} - ${PAYMENT_REASONS[selectedReason]})`
+                          : index === 1 && selectedMethod
+                          ? `${step.label} (${PAYMENT_METHODS[selectedMethod]})`
+                          : step.label}
+                      </StepLabel>
+                      <StepContent>
+                        <Box
+                          component="form"
+                          onSubmit={
+                            activeStep < steps.length - 1
+                              ? handleNext
+                              : handleOnSubmit
+                          }
+                        >
+                          {activeStep === 0 && (
+                            <Grid container>
+                              <Grid item lg={6} m={1}>
+                                {(
+                                  customerId ? selectedCustomer : customerList
+                                ) ? (
+                                  <Autocomplete
+                                    disablePortal
+                                    id="combo-box-demo"
+                                    options={customerList.map((customer) => {
+                                      return {
+                                        label: `${customer.name} (${customer.cell})`,
+                                        id: customer._id,
+                                      };
+                                    })}
+                                    onChange={(
+                                      event: any,
+                                      newValue: string | null
+                                    ) => {
+                                      event.target;
+                                      handleCustomerSelect(newValue);
+                                    }}
+                                    value={
+                                      selectedCustomer
+                                        ? {
+                                            label: `${selectedCustomer.name} (${selectedCustomer.cell})`,
+                                            id: selectedCustomer._id,
+                                          }
+                                        : null
+                                    }
+                                    fullWidth
+                                    isOptionEqualToValue={(
+                                      option: any,
+                                      value: any
+                                    ) => option.id === value.id}
+                                    renderInput={(params) => (
+                                      <TextField
+                                        required
+                                        {...params}
+                                        label="Cliente"
+                                      />
+                                    )}
+                                  />
+                                ) : (
+                                  <Skeleton
+                                    variant="text"
+                                    sx={{ fontSize: "1rem", width: "100px" }}
+                                  />
                                 )}
-                              </Select>
-                            </FormControl>
-                          </Grid>
-                        )}
-                        {activeStep === 2 && (
-                          <Grid container>
-                            <Grid item lg={2} m={1}>
-                              <TextField
-                                label="Cantidad*"
-                                type="number"
-                                required
-                                value={selectedAmount}
-                                variant="outlined"
-                                size="small"
-                                InputProps={{
-                                  startAdornment: (
-                                    <InputAdornment position="start">
-                                      $
-                                    </InputAdornment>
-                                  ),
-                                  inputProps: {
-                                    min: 0,
-                                    style: { textAlign: "center" },
-                                  },
-                                }}
-                                onChange={(event) => {
-                                  setSelectedAmount(event.target.value);
-                                }}
-                              />
+                              </Grid>
+                              {selectedCustomer && (
+                                <Grid item m={1}>
+                                  <Typography variant="h5">Saldo</Typography>
+                                  <Typography variant="subtitle2">
+                                    {numeral(selectedCustomer.balance).format(
+                                      `$${selectedCustomer.balance}0,0.00`
+                                    )}
+                                  </Typography>
+                                </Grid>
+                              )}
+                              <Grid item xs={12} sm={12} lg={12} />
+
+                              <Grid item lg={3} m={1}>
+                                <FormControl sx={{ width: "100%" }}>
+                                  <InputLabel id="reason-id">
+                                    Concepto*
+                                  </InputLabel>
+                                  <Select
+                                    labelId="reason-id"
+                                    label="Concepto*"
+                                    id="reason"
+                                    name="reason"
+                                    required
+                                    autoComplete="off"
+                                    size="medium"
+                                    value={selectedReason || ""}
+                                    onChange={(event) =>
+                                      setSelectedReason(event.target.value)
+                                    }
+                                  >
+                                    {Object.keys(PAYMENT_REASONS).map(
+                                      (reasonKey) => (
+                                        <MenuItem
+                                          key={reasonKey}
+                                          value={reasonKey}
+                                        >
+                                          {PAYMENT_REASONS[reasonKey]}
+                                        </MenuItem>
+                                      )
+                                    )}
+                                  </Select>
+                                </FormControl>
+                              </Grid>
                             </Grid>
-                            <Grid item xs={12} sm={12} lg={12} />
-                            <Grid item lg={4} m={1}>
-                              <TextField
-                                fullWidth
-                                label="Folio comprobante"
-                                required={selectedMethod !== "CASH"}
-                                value={selectedFolio || ""}
-                                variant="outlined"
-                                size="small"
-                                onChange={(event) => {
-                                  setSelectedFolio(event.target.value);
-                                }}
-                              />
+                          )}
+                          {activeStep === 1 && (
+                            <Grid container>
+                              <Grid item lg={2} m={1}>
+                                <FormControl sx={{ width: "100%" }}>
+                                  <InputLabel id="method-id">
+                                    Método*
+                                  </InputLabel>
+                                  <Select
+                                    labelId="method-id"
+                                    label="Concepto*"
+                                    id="method"
+                                    name="method"
+                                    required
+                                    autoComplete="off"
+                                    size="medium"
+                                    value={selectedMethod || ""}
+                                    onChange={(event) =>
+                                      setSelectedMethod(event.target.value)
+                                    }
+                                  >
+                                    {Object.keys(PAYMENT_METHODS).map(
+                                      (methodKey) => (
+                                        <MenuItem
+                                          key={methodKey}
+                                          value={methodKey}
+                                        >
+                                          {PAYMENT_METHODS[methodKey]}
+                                        </MenuItem>
+                                      )
+                                    )}
+                                  </Select>
+                                </FormControl>
+                              </Grid>
                             </Grid>
-                            <Grid item xs={12} sm={12} lg={12} />
-                            {attached.voucher?.url && (
-                              <Grid item lg={12} m={1}>
-                                <Image
-                                  src={attached.voucher.url}
-                                  alt="Comprobante de pago"
-                                  width={200}
-                                  height={300}
+                          )}
+                          {activeStep === 2 && (
+                            <Grid container>
+                              <Grid item lg={2} m={1}>
+                                <TextField
+                                  label="Cantidad*"
+                                  type="number"
+                                  required
+                                  value={selectedAmount}
+                                  variant="outlined"
+                                  size="small"
+                                  InputProps={{
+                                    startAdornment: (
+                                      <InputAdornment position="start">
+                                        $
+                                      </InputAdornment>
+                                    ),
+                                    inputProps: {
+                                      min: 0,
+                                      style: { textAlign: "center" },
+                                    },
+                                  }}
+                                  onChange={(event) => {
+                                    setSelectedAmount(event.target.value);
+                                  }}
                                 />
                               </Grid>
-                            )}
-                            <Grid item lg={4} m={1}>
-                              <MuiFileInput
-                                required={
-                                  selectedMethod !== "CASH" &&
-                                  !attached.voucher.file
-                                }
-                                placeholder={"No seleccionada"}
-                                label={"Foto de comprobante"}
-                                value={attached.voucher?.file}
-                                onChange={(file) => {
-                                  if (file && !file.type.includes("image/")) {
-                                    setBadFormat({
-                                      ...badFormat,
-                                      voucher: true,
-                                    });
+                              <Grid item xs={12} sm={12} lg={12} />
+                              <Grid item lg={4} m={1}>
+                                <TextField
+                                  fullWidth
+                                  label="Folio comprobante"
+                                  required={selectedMethod !== "CASH"}
+                                  value={selectedFolio || ""}
+                                  variant="outlined"
+                                  size="small"
+                                  onChange={(event) => {
+                                    setSelectedFolio(event.target.value);
+                                  }}
+                                />
+                              </Grid>
+                              <Grid item xs={12} sm={12} lg={12} />
+                              {attached.voucher?.url && (
+                                <Grid item lg={12} m={1}>
+                                  <Image
+                                    src={attached.voucher.url}
+                                    alt="Comprobante de pago"
+                                    width={200}
+                                    height={300}
+                                  />
+                                </Grid>
+                              )}
+                              <Grid item lg={4} m={1}>
+                                <MuiFileInput
+                                  required={
+                                    selectedMethod !== "CASH" &&
+                                    !attached.voucher.file
+                                  }
+                                  placeholder={"No seleccionada"}
+                                  label={"Foto de comprobante"}
+                                  value={attached.voucher?.file}
+                                  onChange={(file) => {
+                                    if (file && !file.type.includes("image/")) {
+                                      setBadFormat({
+                                        ...badFormat,
+                                        voucher: true,
+                                      });
+                                      setAttached({
+                                        ...attached,
+                                        voucher: {
+                                          ...attached.voucher,
+                                          error: true,
+                                        },
+                                      });
+                                      return;
+                                    }
+                                    const url = file
+                                      ? URL.createObjectURL(file)
+                                      : null;
                                     setAttached({
                                       ...attached,
-                                      voucher: {
-                                        ...attached.voucher,
-                                        error: true,
-                                      },
+                                      voucher: { file, url, error: false },
                                     });
-                                    return;
-                                  }
-                                  const url = file
-                                    ? URL.createObjectURL(file)
-                                    : null;
-                                  setAttached({
-                                    ...attached,
-                                    voucher: { file, url, error: false },
-                                  });
-                                }}
-                              />
-                            </Grid>
-                            <Grid item lg={12} />
-                            {attached.voucher?.error && (
-                              <Grid item lg={4} m={1}>
-                                <Typography color="error">
-                                  Seleccione un archivo válido(*.jpg, *.jpeg,
-                                  *.png).
-                                </Typography>
+                                  }}
+                                />
                               </Grid>
-                            )}
-                          </Grid>
-                        )}
-                        {hasErrorSubmitting.error && (
-                          <Grid item lg={12} m={1}>
-                            <Alert severity="error">
-                              {hasErrorSubmitting.msg}
-                            </Alert>
-                          </Grid>
-                        )}
-                        <Box sx={{ mb: 2 }}>
-                          <div>
-                            {index > 0 && (
-                              <Button
-                                disabled={isSubmitting}
-                                onClick={handleBack}
+                              <Grid item lg={12} />
+                              {attached.voucher?.error && (
+                                <Grid item lg={4} m={1}>
+                                  <Typography color="error">
+                                    Seleccione un archivo válido(*.jpg, *.jpeg,
+                                    *.png).
+                                  </Typography>
+                                </Grid>
+                              )}
+                            </Grid>
+                          )}
+                          {hasErrorSubmitting.error && (
+                            <Grid item lg={12} m={1}>
+                              <Alert severity="error">
+                                {hasErrorSubmitting.msg}
+                              </Alert>
+                            </Grid>
+                          )}
+                          <Box sx={{ mb: 2 }}>
+                            <div>
+                              {index > 0 && (
+                                <Button
+                                  disabled={isSubmitting}
+                                  onClick={handleBack}
+                                  sx={{ mt: 1, mr: 1 }}
+                                >
+                                  Atrás
+                                </Button>
+                              )}
+                              <LoadingButton
+                                loading={isSubmitting}
+                                variant="contained"
+                                disabled={customerError}
+                                type="submit"
                                 sx={{ mt: 1, mr: 1 }}
                               >
-                                Atrás
-                              </Button>
-                            )}
-                            <LoadingButton
-                              loading={isSubmitting}
-                              variant="contained"
-                              disabled={customerError}
-                              type="submit"
-                              sx={{ mt: 1, mr: 1 }}
-                            >
-                              {index === steps.length - 1
-                                ? "Guardar"
-                                : "Siguiente"}
-                            </LoadingButton>
-                          </div>
+                                {index === steps.length - 1
+                                  ? "Guardar"
+                                  : "Siguiente"}
+                              </LoadingButton>
+                            </div>
+                          </Box>
                         </Box>
-                      </Box>
-                    </StepContent>
-                  </Step>
-                ))}
-              </Stepper>}
+                      </StepContent>
+                    </Step>
+                  ))}
+                </Stepper>
+              )}
             </Container>
           </Box>
           <Grid item lg={12}>

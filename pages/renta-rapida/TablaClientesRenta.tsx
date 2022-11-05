@@ -544,6 +544,7 @@ const TablaClientesRenta: FC<TablaClientesRentaProps> = ({
                 </Grid>
                 <Grid item xs={12} sm={12} lg={12} margin={1}>
                   {!isEditing ? (
+                    selectedCustomer?.currentResidence?.maps &&
                    <Button
                    fullWidth
                    variant="text"
@@ -558,7 +559,6 @@ const TablaClientesRenta: FC<TablaClientesRentaProps> = ({
                     <Typography variant="h5">Ubicación</Typography>
                     <TextField
                             autoComplete="off"
-                            required
                             id="maps"
                             name="maps"
                             multiline

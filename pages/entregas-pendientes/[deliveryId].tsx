@@ -3,6 +3,7 @@ import { getSession } from "next-auth/react";
 import { useState } from "react";
 import SidebarLayout from "@/layouts/SidebarLayout";
 import { validateServerSideSession } from "../../lib/auth";
+import { validateMapsUrl } from "../../lib/client/utils";
 import PageHeader from "@/components/PageHeader";
 import PageTitleWrapper from "@/components/PageTitleWrapper";
 import Image from "next/image";
@@ -173,7 +174,7 @@ function RentaRapida() {
     />
   );
   const checkEnabledButton = () => {
-    if (activeStep === 0) return true;
+    if (activeStep === 0) return customerToEdit?.currentResidence?.maps && validateMapsUrl(customerToEdit?.currentResidence?.maps);
     if (activeStep === 1) return deliveredMachine;
     return true;
   };
@@ -573,6 +574,12 @@ function RentaRapida() {
                                   }}
                                 />
                               </Grid>
+                              {!nextButtonEnabled &&
+                                <Grid item lg={6} m={1}>
+                                  <Alert severity="warning">
+                                    {"Ingrese la url de maps"}
+                                  </Alert>
+                                  </Grid>}
                             </Grid>
                           )}
                           {activeStep === 1 && (
