@@ -43,6 +43,7 @@
     "clsx": "1.2.1",
     "context-api": "0.0.2",
     "date-fns": "^2.29.3",
+    "dayjs": "^1.11.6",
     "formidable": "^2.0.1",
     "mongodb": "^4.10.0",
     "mongoose": "^6.6.5",

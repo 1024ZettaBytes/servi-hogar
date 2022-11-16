@@ -64,7 +64,7 @@ function SchedulePickupModal(props) {
     const result = await savePickup({ rentId, pickupTime });
     setIsSubmitting(false);
     if (!result.error) {
-      handleSavedPickup(result.msg);
+      handleSavedPickup(result.msg, result.pickup);
     } else {
       setHasErrorSubmitting({ error: true, msg: result.msg });
     }
@@ -75,8 +75,8 @@ function SchedulePickupModal(props) {
     setIsSubmitting(false);
     handleOnClose(false);
   };
-  const handleSavedPickup = (successMessage) => {
-    handleOnClose(true, {rent, pickupTime},successMessage);
+  const handleSavedPickup = (successMessage, pickup) => {
+    handleOnClose(true, {rent, pickupTime, pickup},successMessage);
   };
   if (rent && !selectedDay) {
     const dayName = format(new Date(rent?.endDate), "eeee").toLowerCase();

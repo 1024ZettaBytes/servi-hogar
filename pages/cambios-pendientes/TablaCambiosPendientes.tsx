@@ -222,7 +222,9 @@ const TablaCambiosPendientes: FC<TablaCambiosPendientesProps> = ({
           <Table>
             <TableHead>
               <TableRow>
-                <TableCell align="center"># de renta</TableCell>
+                <TableCell align="center">Renta</TableCell>
+                <TableCell align="center">#</TableCell>
+                <TableCell align="center"># del día</TableCell>
 
                 <TableCell align="center">Cliente</TableCell>
 
@@ -245,6 +247,28 @@ const TablaCambiosPendientes: FC<TablaCambiosPendientesProps> = ({
                         noWrap
                       >
                         {change?.rent?.num}
+                      </Typography>
+                    </TableCell>
+                    <TableCell align="center">
+                      <Typography
+                        variant="body1"
+                        fontWeight="bold"
+                        color="text.primary"
+                        gutterBottom
+                        noWrap
+                      >
+                        {change?.totalNumber}
+                      </Typography>
+                    </TableCell>
+                    <TableCell align="center">
+                      <Typography
+                        variant="body1"
+                        fontWeight="bold"
+                        color="text.secondary"
+                        gutterBottom
+                        noWrap
+                      >
+                        {change?.dayNumber}
                       </Typography>
                     </TableCell>
                     <TableCell align="center">
@@ -352,7 +376,7 @@ const TablaCambiosPendientes: FC<TablaCambiosPendientesProps> = ({
                       <Tooltip title="Ver formato" arrow>
                         <IconButton
                           onClick={() => {
-                            setFormatText(getFormatForChange(change.rent, change));
+                            setFormatText(getFormatForChange(change.rent, change, change));
                             setFormatIsOpen(true);
                           }}
                           sx={{

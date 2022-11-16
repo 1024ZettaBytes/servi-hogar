@@ -22,7 +22,7 @@ export interface IRent extends Document {
 }
 
 const RentSchema = new Schema<IRent>({
-  num: { type: Number },
+  num: { type: Number, default: -1 },
   status: {
     type: Schema.Types.ObjectId,
     ref: 'rent_statuses',

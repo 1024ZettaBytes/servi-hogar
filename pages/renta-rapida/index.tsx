@@ -159,7 +159,8 @@ function RentaRapida() {
       rentPeriod,
       deliveryTime,
     });
-    const rent = { ...result.rent, customer: selectedCustomer };
+    const rent = { ...result.rent, customer: selectedCustomer, delivery: result.delivery };
+    
     setCustomerRent(rent);
     setIsSubmitting(false);
     if (!result.error) {
@@ -359,7 +360,7 @@ function RentaRapida() {
           open={formatIsOpen}
           title="Formato de entrega"
           text=""
-          formatText={getFormatForDelivery(customerRent, deliveryTime)}
+          formatText={getFormatForDelivery(customerRent, customerRent.delivery, deliveryTime)}
           onAccept={() => {
             setFormatIsOpen(false);
           }}

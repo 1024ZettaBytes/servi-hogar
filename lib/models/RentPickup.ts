@@ -1,6 +1,8 @@
 import mongoose, { Model, model, Schema } from 'mongoose';
 
 export interface IRentPickup extends Document {
+  totalNumber: number;
+  dayNumber: number;
   rent: Schema.Types.ObjectId;
   status: string;
   takenAt: Date;
@@ -17,6 +19,8 @@ export interface IRentPickup extends Document {
 }
 
 const RentPickupSchema = new Schema<IRentPickup>({
+  totalNumber: { type: Schema.Types.Number, required: true },
+  dayNumber: { type: Schema.Types.Number, required: true },
   rent: {
     type: Schema.Types.ObjectId,
     ref: 'rents',

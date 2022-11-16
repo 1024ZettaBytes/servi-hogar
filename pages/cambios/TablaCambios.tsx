@@ -172,7 +172,9 @@ const TablaCambios: FC<TablaCambiosProps> = ({
           <Table>
             <TableHead>
               <TableRow>
-                <TableCell align="center"># de renta</TableCell>
+                <TableCell align="center">Renta</TableCell>
+                <TableCell align="center">#</TableCell>
+                <TableCell align="center"># del día</TableCell>
                 <TableCell align="center">Cliente</TableCell>
                 <TableCell align="center">Solicitado</TableCell>
                 <TableCell align="center">Realizado</TableCell>
@@ -194,6 +196,28 @@ const TablaCambios: FC<TablaCambiosProps> = ({
                         noWrap
                       >
                         {change?.rent?.num}
+                      </Typography>
+                    </TableCell>
+                    <TableCell align="center">
+                      <Typography
+                        variant="body1"
+                        fontWeight="bold"
+                        color="text.primary"
+                        gutterBottom
+                        noWrap
+                      >
+                        {change?.totalNumber}
+                      </Typography>
+                    </TableCell>
+                    <TableCell align="center">
+                      <Typography
+                        variant="body1"
+                        fontWeight="bold"
+                        color="text.secondary"
+                        gutterBottom
+                        noWrap
+                      >
+                        {change?.dayNumber}
                       </Typography>
                     </TableCell>
                     <TableCell align="center">

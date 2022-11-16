@@ -50,7 +50,7 @@ function CambioPendiente() {
   const { change, changeByIdError } = useGetChangeById(getFetcher, changeId);
   const { machinesData, machinesError } = useGetMachinesForRent(getFetcher);
   const [changedAccesories, setChangedAccesories] = useState<any>({});
-  const paths = ["Inicio", "Cambios pendientes", `${change?.rent?.num}`];
+  const paths = ["Inicio", "Cambios pendientes", `${change?.totalNumber}`];
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
   const [wasFixed, setWasFixed] = useState<boolean>(false);
   const [hasErrorSubmitting, setHasErrorSubmitting] = useState<any>({

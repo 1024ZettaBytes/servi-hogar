@@ -64,7 +64,7 @@ function ScheduleChangeModal(props) {
     const result = await saveChange({ rentId, changeTime });
     setIsSubmitting(false);
     if (!result.error) {
-      handleSavedChange(result.msg);
+      handleSavedChange(result.msg, result.change);
     } else {
       setHasErrorSubmitting({ error: true, msg: result.msg });
     }
@@ -75,8 +75,8 @@ function ScheduleChangeModal(props) {
     setIsSubmitting(false);
     handleOnClose(false);
   };
-  const handleSavedChange = (successMessage) => {
-    handleOnClose(true, {rent, changeTime},successMessage);
+  const handleSavedChange = (successMessage, change) => {
+    handleOnClose(true, {rent, changeTime, change},successMessage);
   };
   if (rent && !selectedDay) {
     const dayName = format(new Date(rent?.endDate), "eeee").toLowerCase();

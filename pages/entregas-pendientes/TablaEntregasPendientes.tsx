@@ -222,10 +222,9 @@ const TablaEntregasPendientes: FC<TablaEntregasPendientesProps> = ({
           <Table>
             <TableHead>
               <TableRow>
-                <TableCell align="center"># de renta</TableCell>
-
+                <TableCell align="center">#</TableCell>
+                <TableCell align="center"># del día</TableCell>
                 <TableCell align="center">Cliente</TableCell>
-
                 <TableCell align="center">Estado</TableCell>
                 <TableCell align="center">Fecha de entrega</TableCell>
                 <TableCell align="center">Horario Especial</TableCell>
@@ -244,7 +243,17 @@ const TablaEntregasPendientes: FC<TablaEntregasPendientesProps> = ({
                         gutterBottom
                         noWrap
                       >
-                        {delivery?.rent?.num}
+                        {delivery?.totalNumber}
+                      </Typography>
+                    </TableCell>
+                    <TableCell align="center">
+                      <Typography
+                        variant="body1"
+                        color="text.secondary"
+                        gutterBottom
+                        noWrap
+                      >
+                        {delivery?.dayNumber}
                       </Typography>
                     </TableCell>
                     <TableCell align="center">
@@ -352,7 +361,7 @@ const TablaEntregasPendientes: FC<TablaEntregasPendientesProps> = ({
                       <Tooltip title="Ver formato" arrow>
                         <IconButton
                           onClick={() => {
-                            setFormatText(getFormatForDelivery(delivery.rent, delivery));
+                            setFormatText(getFormatForDelivery(delivery.rent, delivery, delivery));
                             setFormatIsOpen(true);
                           }}
                           sx={{

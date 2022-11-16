@@ -462,6 +462,7 @@ const TablaRentasActuales: FC<TablaRentasActualesProps> = ({ rentList }) => {
           text=""
           formatText={getFormatForPickup(
             createdPickup.rent,
+            createdPickup.pickup,
             createdPickup.pickupTime
           )}
           onAccept={() => {
@@ -477,6 +478,7 @@ const TablaRentasActuales: FC<TablaRentasActualesProps> = ({ rentList }) => {
           text=""
           formatText={getFormatForChange(
             createdChange.rent,
+            createdChange.change,
             createdChange.changeTime
           )}
           onAccept={() => {

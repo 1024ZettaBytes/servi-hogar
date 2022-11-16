@@ -18,8 +18,8 @@ async function getPickupsAPI(req, res) {
 
 async function savePickupAPI(req, res, userId) {
   try {
-    await savePickupData({ ...req.body, lastUpdatedBy: userId });
-    res.status(200).json({ msg: "¡Recolección creada!" });
+    const newPickup = await savePickupData({ ...req.body, lastUpdatedBy: userId });
+    res.status(200).json({ msg: "¡Recolección creada!", pickup: newPickup });
   } catch (e) {
     console.error(e);
     res.status(500).json({ errorMsg: e.message });

@@ -57,7 +57,7 @@ function RentaRapida() {
     deliveryId
   );
   const customer = delivery?.rent?.customer;
-  const paths = ["Inicio", "Entregas pendientes", `${delivery?.rent?.num}`];
+  const paths = ["Inicio", "Entregas pendientes", `${delivery?.totalNumber}`];
   const [customerToEdit, setCustomerToEdit] = useState<any>({ isSet: false });
   const [deliveredMachine, setDeliveredMachine] = useState<string>(null);
 

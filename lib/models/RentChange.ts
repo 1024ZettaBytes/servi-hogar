@@ -1,6 +1,8 @@
 import mongoose, { Model, model, Schema } from 'mongoose';
 
 export interface IRentChange extends Document {
+  totalNumber: number;
+  dayNumber: number;
   rent: Schema.Types.ObjectId;
   status: string;
   takenAt: Date;
@@ -22,6 +24,8 @@ export interface IRentChange extends Document {
 }
 
 const RentChangeSchema = new Schema<IRentChange>({
+  totalNumber: { type: Schema.Types.Number, required: true },
+  dayNumber: { type: Schema.Types.Number, required: true },
   rent: {
     type: Schema.Types.ObjectId,
     ref: 'rents',

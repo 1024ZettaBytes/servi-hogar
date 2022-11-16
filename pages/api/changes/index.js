@@ -18,8 +18,8 @@ async function getChangesAPI(req, res) {
 
 async function saveChangeAPI(req, res, userId) {
   try {
-    await saveChangeData({ ...req.body, lastUpdatedBy: userId });
-    res.status(200).json({ msg: "¡Cambio creado!" });
+     const newChange = await saveChangeData({ ...req.body, lastUpdatedBy: userId });
+    res.status(200).json({ msg: "¡Cambio creado!", change: newChange });
   } catch (e) {
     console.error(e);
     res.status(500).json({ errorMsg: e.message });

@@ -222,10 +222,10 @@ const TablaRecoleccionesPendientes: FC<TablaRecoleccionesPendientesProps> = ({
           <Table>
             <TableHead>
               <TableRow>
-                <TableCell align="center"># de renta</TableCell>
-                
+                <TableCell align="center">Renta</TableCell>
+                <TableCell align="center">#</TableCell>
+                <TableCell align="center"># del día</TableCell>
                 <TableCell align="center">Cliente</TableCell>
-                
                 <TableCell align="center">Estado</TableCell>
                 <TableCell align="center">Fecha solicitada</TableCell>
                 <TableCell align="center">Horario Especial</TableCell>
@@ -245,6 +245,28 @@ const TablaRecoleccionesPendientes: FC<TablaRecoleccionesPendientesProps> = ({
                         noWrap
                       >
                         {pickup?.rent?.num}
+                      </Typography>
+                    </TableCell>
+                    <TableCell align="center">
+                      <Typography
+                        variant="body1"
+                        fontWeight="bold"
+                        color="text.primary"
+                        gutterBottom
+                        noWrap
+                      >
+                        {pickup?.totalNumber}
+                      </Typography>
+                    </TableCell>
+                    <TableCell align="center">
+                      <Typography
+                        variant="body1"
+                        fontWeight="bold"
+                        color="text.secondary"
+                        gutterBottom
+                        noWrap
+                      >
+                        {pickup?.dayNumber}
                       </Typography>
                     </TableCell>
                     <TableCell align="center">
@@ -353,7 +375,7 @@ const TablaRecoleccionesPendientes: FC<TablaRecoleccionesPendientesProps> = ({
                       <Tooltip title="Ver formato" arrow>
                         <IconButton
                           onClick={() => {
-                            setFormatText(getFormatForPickup(pickup.rent, pickup));
+                            setFormatText(getFormatForPickup(pickup.rent, pickup, pickup));
                             setFormatIsOpen(true);
                           }}
                           sx={{
