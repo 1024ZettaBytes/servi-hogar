@@ -432,6 +432,7 @@ const TablaCambiosPendientes: FC<TablaCambiosPendientesProps> = ({
       <GenericModal
         open={cancelModalIsOpen}
         title="Atención"
+        requiredReason= {false}
         text={"¿Está seguro de cancelar el cambio seleccionado?"}
         isLoading={isDeleting}
         onAccept={handleOnConfirmDelete}

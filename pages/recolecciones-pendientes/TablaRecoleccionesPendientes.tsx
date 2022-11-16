@@ -432,6 +432,7 @@ const TablaRecoleccionesPendientes: FC<TablaRecoleccionesPendientesProps> = ({
         open={cancelModalIsOpen}
         title="Atención"
         text={"¿Está seguro de cancelar la recolección seleccionada?"}
+        requiredReason= {false}
         isLoading={isDeleting}
         onAccept={handleOnConfirmDelete}
         onCancel={() => {

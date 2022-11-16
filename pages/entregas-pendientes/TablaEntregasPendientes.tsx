@@ -167,9 +167,9 @@ const TablaEntregasPendientes: FC<TablaEntregasPendientesProps> = ({
     setIdToCancel(deliveryId);
     setCancelModalIsOpen(true);
   };
-  const handleOnConfirmDelete = async () => {
+  const handleOnConfirmDelete = async (reason) => {
     setIsDeleting(true);
-    const result = await cancelDelivery(idToCancel);
+    const result = await cancelDelivery(idToCancel, reason);
     setCancelModalIsOpen(false);
     setIsDeleting(false);
     enqueueSnackbar(result.msg, {
@@ -414,17 +414,19 @@ const TablaEntregasPendientes: FC<TablaEntregasPendientesProps> = ({
           }}
         />
       )}
+      {cancelModalIsOpen && 
       <GenericModal
         open={cancelModalIsOpen}
         title="Atención"
         text={"¿Está seguro de cancelar la entrega seleccionada?"}
         isLoading={isDeleting}
+        requiredReason
         onAccept={handleOnConfirmDelete}
         onCancel={() => {
           setCancelModalIsOpen(false);
           setIsDeleting(false);
         }}
-      />
+      />}
     </>
   );
 };

@@ -16,7 +16,9 @@ import {
   CardHeader,
   TextField,
   InputAdornment,
+  Tooltip,
 } from "@mui/material";
+import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
 import { capitalizeFirstLetter } from "lib/client/utils";
 import { format } from "date-fns";
 import es from "date-fns/locale/es";
@@ -63,7 +65,10 @@ const applyFilters = (deliveriesList: any[], filter: string): any[] => {
         }
         switch (key) {
           case "rent": {
-            const matchCustomerName = value["customer"] && value["customer"].name && compareStringsForFilter(filter, value["customer"].name);
+            const matchCustomerName =
+              value["customer"] &&
+              value["customer"].name &&
+              compareStringsForFilter(filter, value["customer"].name);
             const matchNumber =
               value["num"] && compareStringsForFilter(filter, value["num"]);
             return matchNumber || matchCustomerName;
@@ -112,13 +117,11 @@ const applyPagination = (
   return deliveriesList.slice(page * limit, page * limit + limit);
 };
 
-const TablaEntregas: FC<TablaEntregasProps> = ({
-  deliveriesList,
-}) => {
+const TablaEntregas: FC<TablaEntregasProps> = ({ deliveriesList }) => {
   const [page, setPage] = useState<number>(0);
   const [limit, setLimit] = useState<number>(10);
   const [filter, setFilter] = useState<string>("");
- 
+
   const handleSearchChange = (e: ChangeEvent<HTMLInputElement>): void => {
     const value = e.target.value;
     setFilter(value);
@@ -131,7 +134,6 @@ const TablaEntregas: FC<TablaEntregasProps> = ({
   const handleLimitChange = (event: ChangeEvent<HTMLInputElement>): void => {
     setLimit(parseInt(event.target.value));
   };
-  
 
   const filteredDeliveries = applyFilters(deliveriesList, filter);
   const paginatedDeliveries = applyPagination(filteredDeliveries, page, limit);
@@ -240,15 +242,26 @@ const TablaEntregas: FC<TablaEntregasProps> = ({
                         gutterBottom
                         noWrap
                       >
-                        {delivery?.finishedAt ? capitalizeFirstLetter(
-                          format(new Date(delivery?.finishedAt), "LLL dd yyyy", {
-                            locale: es,
-                          })
-                        ) : "N/A"}
+                        {delivery?.finishedAt
+                          ? capitalizeFirstLetter(
+                              format(
+                                new Date(delivery?.finishedAt),
+                                "LLL dd yyyy",
+                                {
+                                  locale: es,
+                                }
+                              )
+                            )
+                          : "N/A"}
                       </Typography>
                     </TableCell>
-                    <TableCell align="center">
-                      {getStatusLabel(delivery?.status)}
+                    <TableCell align="center" sx={{display:"flex", alignItems: "center", justifyContent: "center"}}>
+                    {getStatusLabel(delivery?.status)}
+                      {delivery?.status === "CANCELADA" && 
+                        <Tooltip title={delivery?.cancellationReason || "SIN RAZÓN"} arrow>
+                          <InfoOutlinedIcon fontSize="small" />
+                        </Tooltip>
+                      }
                     </TableCell>
                   </TableRow>
                 );

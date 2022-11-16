@@ -387,6 +387,7 @@ const TablaClientes: FC<TablaClientesProps> = ({ userRole, customerList }) => {
     <GenericModal
     open={deleteModalIsOpen}
     title="Atención"
+    requiredReason= {false}
     text={
       "¿Esta seguro de eliminar a" +
       (customersToDelete.length === 1

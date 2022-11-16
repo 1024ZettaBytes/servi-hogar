@@ -487,6 +487,7 @@ const TablaEquipos: FC<TablaEquiposProps> = ({ userRole, machinesList }) => {
       <GenericModal
         open={deleteModalIsOpen}
         title="Atención"
+        requiredReason= {false}
         text={
           "¿Esta seguro de eliminar a" +
           (machinesToDelete.length === 1
