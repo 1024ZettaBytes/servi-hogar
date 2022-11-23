@@ -18,7 +18,7 @@ import {
   InputAdornment,
   Tooltip,
 } from "@mui/material";
-import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
+import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
 import { capitalizeFirstLetter } from "lib/client/utils";
 import { format } from "date-fns";
 import es from "date-fns/locale/es";
@@ -255,13 +255,23 @@ const TablaEntregas: FC<TablaEntregasProps> = ({ deliveriesList }) => {
                           : "N/A"}
                       </Typography>
                     </TableCell>
-                    <TableCell align="center" sx={{display:"flex", alignItems: "center", justifyContent: "center"}}>
-                    {getStatusLabel(delivery?.status)}
-                      {delivery?.status === "CANCELADA" && 
-                        <Tooltip title={delivery?.cancellationReason || "SIN RAZÓN"} arrow>
+                    <TableCell
+                      align="center"
+                      sx={{
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                      }}
+                    >
+                      {getStatusLabel(delivery?.status)}
+                      {delivery?.status === "CANCELADA" && (
+                        <Tooltip
+                          title={delivery?.cancellationReason || "SIN RAZÓN"}
+                          arrow
+                        >
                           <InfoOutlinedIcon fontSize="small" />
                         </Tooltip>
-                      }
+                      )}
                     </TableCell>
                   </TableRow>
                 );
