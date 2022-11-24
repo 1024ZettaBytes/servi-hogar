@@ -12,6 +12,7 @@ export interface IRentPickup extends Document {
   timeOption: string,
   fromTime: Date,
   endTime:Date,
+  cancellationReason: string;
   finishedAt: Date;
   createdAt: Date;
   updatedAt: Date;
@@ -38,6 +39,7 @@ const RentPickupSchema = new Schema<IRentPickup>({
   timeOption: { type: String, required:true },
   fromTime: { type: Date, required: true },
   endTime:{ type: Date, required: true },
+  cancellationReason: { type: String, default: '' },
   finishedAt: { type: Date, default: null },
   createdAt: { type: Date, required: true },
   updatedAt: { type: Date, required: true },

@@ -16,13 +16,15 @@ import {
   CardHeader,
   TextField,
   InputAdornment,
+  Tooltip
 } from "@mui/material";
+
 import { capitalizeFirstLetter } from "lib/client/utils";
 import { format } from "date-fns";
 import es from "date-fns/locale/es";
 import Label from "@/components/Label";
 import SearchIcon from "@mui/icons-material/Search";
-
+import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
 interface TablaCambiosProps {
   userRole: string;
   className?: string;
@@ -268,8 +270,13 @@ const TablaCambios: FC<TablaCambiosProps> = ({
                     <TableCell align="center">
                       {change.leftMachine ? change.leftMachine.machineNum : "N/A"}
                     </TableCell>
-                    <TableCell align="center">
-                      {getStatusLabel(change?.status)}
+                    <TableCell align="center" sx={{display:"flex", alignItems: "center", justifyContent: "center"}}>
+                    {getStatusLabel(change?.status)}
+                      {change?.status === "CANCELADO" && 
+                        <Tooltip title={change?.cancellationReason || "SIN RAZÓN"} arrow>
+                          <InfoOutlinedIcon fontSize="small" />
+                        </Tooltip>
+                      }
                     </TableCell>
                   </TableRow>
                 );

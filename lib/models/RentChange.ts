@@ -15,6 +15,7 @@ export interface IRentChange extends Document {
   leftMachine: Schema.Types.ObjectId;
   date: Date,
   timeOption: string,
+  cancellationReason: string;
   fromTime: Date,
   endTime:Date,
   finishedAt: Date;
@@ -48,6 +49,7 @@ const RentChangeSchema = new Schema<IRentChange>({
   timeOption: { type: String, required:true },
   fromTime: { type: Date, required: true },
   endTime:{ type: Date, required: true },
+  cancellationReason: { type: String, default: '' },
   finishedAt: { type: Date, default: null },
   createdAt: { type: Date, required: true },
   updatedAt: { type: Date, required: true },

@@ -27,7 +27,7 @@ import es from "date-fns/locale/es";
 import { cancelPickup } from "../../lib/client/pickupsFetch";
 import { useSnackbar } from "notistack";
 import Label from "@/components/Label";
-import WhatsAppIcon from '@mui/icons-material/WhatsApp';
+import WhatsAppIcon from "@mui/icons-material/WhatsApp";
 import CheckIcon from "@mui/icons-material/Check";
 import EditIcon from "@mui/icons-material/Edit";
 import CancelIcon from "@mui/icons-material/Cancel";
@@ -35,7 +35,7 @@ import SearchIcon from "@mui/icons-material/Search";
 import GenericModal from "@/components/GenericModal";
 import ModifyPickupModal from "../../src/components/ModifyPickupModal";
 import FormatModal from "@/components/FormatModal";
-import { getFormatForPickup} from "../../lib/consts/OBJ_CONTS";
+import { getFormatForPickup } from "../../lib/consts/OBJ_CONTS";
 
 interface TablaRecoleccionesPendientesProps {
   userRole: string;
@@ -81,7 +81,10 @@ const applyFilters = (pickupsList: any[], filter: string): any[] => {
         }
         switch (key) {
           case "rent": {
-            const matchCustomerName  = value["customer"] && value["customer"].name && compareStringsForFilter(filter, value["customer"].name);
+            const matchCustomerName =
+              value["customer"] &&
+              value["customer"].name &&
+              compareStringsForFilter(filter, value["customer"].name);
             const matchNumber =
               value["num"] && compareStringsForFilter(filter, value["num"]);
             return matchNumber || matchCustomerName;
@@ -167,9 +170,9 @@ const TablaRecoleccionesPendientes: FC<TablaRecoleccionesPendientesProps> = ({
     setIdToCancel(pickupId);
     setCancelModalIsOpen(true);
   };
-  const handleOnConfirmDelete = async () => {
+  const handleOnConfirmDelete = async (reason) => {
     setIsDeleting(true);
-    const result = await cancelPickup(idToCancel);
+    const result = await cancelPickup(idToCancel, reason);
     setCancelModalIsOpen(false);
     setIsDeleting(false);
     enqueueSnackbar(result.msg, {
@@ -270,16 +273,16 @@ const TablaRecoleccionesPendientes: FC<TablaRecoleccionesPendientesProps> = ({
                       </Typography>
                     </TableCell>
                     <TableCell align="center">
-                    <Typography
-                      variant="body1"
-                      fontWeight="bold"
-                      color="text.primary"
-                      gutterBottom
-                      noWrap
-                    >
-                      {pickup?.rent?.customer?.name}
-                    </Typography>
-              </TableCell>
+                      <Typography
+                        variant="body1"
+                        fontWeight="bold"
+                        color="text.primary"
+                        gutterBottom
+                        noWrap
+                      >
+                        {pickup?.rent?.customer?.name}
+                      </Typography>
+                    </TableCell>
                     <TableCell align="center">
                       {getStatusLabel(pickup?.status)}
                     </TableCell>
@@ -291,8 +294,7 @@ const TablaRecoleccionesPendientes: FC<TablaRecoleccionesPendientesProps> = ({
                         gutterBottom
                         noWrap
                       >
-                        {
-                        capitalizeFirstLetter(
+                        {capitalizeFirstLetter(
                           format(new Date(pickup?.fromTime), "LLL dd yyyy", {
                             locale: es,
                           })
@@ -323,7 +325,9 @@ const TablaRecoleccionesPendientes: FC<TablaRecoleccionesPendientesProps> = ({
                     </TableCell>
 
                     <TableCell align="center">
-                      <NextLink href={`/recolecciones-pendientes/${pickup?._id}`}>
+                      <NextLink
+                        href={`/recolecciones-pendientes/${pickup?._id}`}
+                      >
                         <Tooltip title="Marcar recolectada" arrow>
                           <IconButton
                             sx={{
@@ -375,7 +379,9 @@ const TablaRecoleccionesPendientes: FC<TablaRecoleccionesPendientesProps> = ({
                       <Tooltip title="Ver formato" arrow>
                         <IconButton
                           onClick={() => {
-                            setFormatText(getFormatForPickup(pickup.rent, pickup, pickup));
+                            setFormatText(
+                              getFormatForPickup(pickup.rent, pickup, pickup)
+                            );
                             setFormatIsOpen(true);
                           }}
                           sx={{
@@ -428,18 +434,20 @@ const TablaRecoleccionesPendientes: FC<TablaRecoleccionesPendientesProps> = ({
           }}
         />
       )}
-      <GenericModal
-        open={cancelModalIsOpen}
-        title="Atención"
-        text={"¿Está seguro de cancelar la recolección seleccionada?"}
-        requiredReason= {false}
-        isLoading={isDeleting}
-        onAccept={handleOnConfirmDelete}
-        onCancel={() => {
-          setCancelModalIsOpen(false);
-          setIsDeleting(false);
-        }}
-      />
+      {cancelModalIsOpen && (
+        <GenericModal
+          open={cancelModalIsOpen}
+          title="Atención"
+          text={"¿Está seguro de cancelar la recolección seleccionada?"}
+          requiredReason
+          isLoading={isDeleting}
+          onAccept={handleOnConfirmDelete}
+          onCancel={() => {
+            setCancelModalIsOpen(false);
+            setIsDeleting(false);
+          }}
+        />
+      )}
     </>
   );
 };

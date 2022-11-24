@@ -22,6 +22,8 @@ async function getPendingDeliveriesAPI(req, res) {
 async function completeDeliveryAPI(req, res, userId) {
   try{
     const form = new formidable.IncomingForm();
+    form.multiples = true;
+  
     const {fields, files} = await new Promise(function (resolve, reject) {
       form.parse(req, function (err, fields, files) {
           if (err) {
@@ -34,6 +36,7 @@ async function completeDeliveryAPI(req, res, userId) {
   });
 
   const body = JSON.parse(fields?.body);
+  
   await markCompleteDeliveryData({...body, files, lastUpdatedBy: userId});
   res.status(200).json({ msg: "La entrega ha sido completada." });
 }catch(e){

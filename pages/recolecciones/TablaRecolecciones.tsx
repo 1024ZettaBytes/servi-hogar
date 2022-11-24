@@ -16,12 +16,14 @@ import {
   CardHeader,
   TextField,
   InputAdornment,
+  Tooltip
 } from "@mui/material";
 import { capitalizeFirstLetter } from "lib/client/utils";
 import { format } from "date-fns";
 import es from "date-fns/locale/es";
 import Label from "@/components/Label";
 import SearchIcon from "@mui/icons-material/Search";
+import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
 
 interface TablaRecoleccionesProps {
   userRole: string;
@@ -260,8 +262,13 @@ const TablaRecolecciones: FC<TablaRecoleccionesProps> = ({
                         ) : "N/A"}
                       </Typography>
                     </TableCell>
-                    <TableCell align="center">
-                      {getStatusLabel(pickup?.status)}
+                    <TableCell align="center" sx={{display:"flex", alignItems: "center", justifyContent: "center"}}>
+                    {getStatusLabel(pickup?.status)}
+                      {pickup?.status === "CANCELADA" && 
+                        <Tooltip title={pickup?.cancellationReason || "SIN RAZÓN"} arrow>
+                          <InfoOutlinedIcon fontSize="small" />
+                        </Tooltip>
+                      }
                     </TableCell>
                   </TableRow>
                 );

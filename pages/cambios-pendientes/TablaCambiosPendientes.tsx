@@ -34,7 +34,7 @@ import CancelIcon from "@mui/icons-material/Cancel";
 import SearchIcon from "@mui/icons-material/Search";
 import GenericModal from "@/components/GenericModal";
 import ModifyChangeModal from "../../src/components/ModifyChangeModal";
-import {getFormatForChange} from "../../lib/consts/OBJ_CONTS";
+import { getFormatForChange } from "../../lib/consts/OBJ_CONTS";
 import FormatModal from "@/components/FormatModal";
 
 interface TablaCambiosPendientesProps {
@@ -81,7 +81,10 @@ const applyFilters = (changesList: any[], filter: string): any[] => {
         }
         switch (key) {
           case "rent": {
-            const matchCustomerName  = value["customer"] && value["customer"].name && compareStringsForFilter(filter, value["customer"].name);
+            const matchCustomerName =
+              value["customer"] &&
+              value["customer"].name &&
+              compareStringsForFilter(filter, value["customer"].name);
             const matchNumber =
               value["num"] && compareStringsForFilter(filter, value["num"]);
             return matchNumber || matchCustomerName;
@@ -167,9 +170,9 @@ const TablaCambiosPendientes: FC<TablaCambiosPendientesProps> = ({
     setIdToCancel(changeId);
     setCancelModalIsOpen(true);
   };
-  const handleOnConfirmDelete = async () => {
+  const handleOnConfirmDelete = async (reason) => {
     setIsDeleting(true);
-    const result = await cancelChange(idToCancel);
+    const result = await cancelChange(idToCancel, reason);
     setCancelModalIsOpen(false);
     setIsDeleting(false);
     enqueueSnackbar(result.msg, {
@@ -376,7 +379,9 @@ const TablaCambiosPendientes: FC<TablaCambiosPendientesProps> = ({
                       <Tooltip title="Ver formato" arrow>
                         <IconButton
                           onClick={() => {
-                            setFormatText(getFormatForChange(change.rent, change, change));
+                            setFormatText(
+                              getFormatForChange(change.rent, change, change)
+                            );
                             setFormatIsOpen(true);
                           }}
                           sx={{
@@ -429,18 +434,20 @@ const TablaCambiosPendientes: FC<TablaCambiosPendientesProps> = ({
           }}
         />
       )}
-      <GenericModal
-        open={cancelModalIsOpen}
-        title="Atención"
-        requiredReason= {false}
-        text={"¿Está seguro de cancelar el cambio seleccionado?"}
-        isLoading={isDeleting}
-        onAccept={handleOnConfirmDelete}
-        onCancel={() => {
-          setCancelModalIsOpen(false);
-          setIsDeleting(false);
-        }}
-      />
+      {cancelModalIsOpen && (
+        <GenericModal
+          open={cancelModalIsOpen}
+          title="Atención"
+          requiredReason
+          text={"¿Está seguro de cancelar el cambio seleccionado?"}
+          isLoading={isDeleting}
+          onAccept={handleOnConfirmDelete}
+          onCancel={() => {
+            setCancelModalIsOpen(false);
+            setIsDeleting(false);
+          }}
+        />
+      )}
     </>
   );
 };
