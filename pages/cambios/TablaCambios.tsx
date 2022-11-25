@@ -16,15 +16,20 @@ import {
   CardHeader,
   TextField,
   InputAdornment,
-  Tooltip
+  Tooltip,
+  IconButton,
+  useTheme,
 } from "@mui/material";
+import ImageSearchIcon from "@mui/icons-material/ImageSearch";
 
 import { capitalizeFirstLetter } from "lib/client/utils";
 import { format } from "date-fns";
 import es from "date-fns/locale/es";
 import Label from "@/components/Label";
 import SearchIcon from "@mui/icons-material/Search";
-import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
+import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
+
+import ImagesModal from "@/components/ImagesModal";
 interface TablaCambiosProps {
   userRole: string;
   className?: string;
@@ -65,7 +70,10 @@ const applyFilters = (changesList: any[], filter: string): any[] => {
         }
         switch (key) {
           case "rent": {
-            const matchCustomerName = value["customer"] && value["customer"].name && compareStringsForFilter(filter, value["customer"].name);
+            const matchCustomerName =
+              value["customer"] &&
+              value["customer"].name &&
+              compareStringsForFilter(filter, value["customer"].name);
             const matchNumber =
               value["num"] && compareStringsForFilter(filter, value["num"]);
             return matchNumber || matchCustomerName;
@@ -114,13 +122,17 @@ const applyPagination = (
   return changesList.slice(page * limit, page * limit + limit);
 };
 
-const TablaCambios: FC<TablaCambiosProps> = ({
-  changesList,
-}) => {
+const TablaCambios: FC<TablaCambiosProps> = ({ changesList }) => {
   const [page, setPage] = useState<number>(0);
   const [limit, setLimit] = useState<number>(10);
   const [filter, setFilter] = useState<string>("");
- 
+  const [openImages, setOpenImages] = useState<boolean>(false);
+  const [selectedImages, setSelectedImages] = useState<null>();
+
+  const handleOnCloseImages = () => {
+    setOpenImages(false);
+    setSelectedImages(null);
+  };
   const handleSearchChange = (e: ChangeEvent<HTMLInputElement>): void => {
     const value = e.target.value;
     setFilter(value);
@@ -133,10 +145,10 @@ const TablaCambios: FC<TablaCambiosProps> = ({
   const handleLimitChange = (event: ChangeEvent<HTMLInputElement>): void => {
     setLimit(parseInt(event.target.value));
   };
-  
 
   const filteredChanges = applyFilters(changesList, filter);
   const paginatedChanges = applyPagination(filteredChanges, page, limit);
+  const theme = useTheme();
 
   return (
     <>
@@ -182,6 +194,7 @@ const TablaCambios: FC<TablaCambiosProps> = ({
                 <TableCell align="center">Realizado</TableCell>
                 <TableCell align="center">Equipo recogido</TableCell>
                 <TableCell align="center">Equipo dejado</TableCell>
+                <TableCell align="center">Fotos</TableCell>
                 <TableCell align="center">Resultado</TableCell>
               </TableRow>
             </TableHead>
@@ -257,26 +270,70 @@ const TablaCambios: FC<TablaCambiosProps> = ({
                         gutterBottom
                         noWrap
                       >
-                        {change?.finishedAt ? capitalizeFirstLetter(
-                          format(new Date(change?.finishedAt), "LLL dd yyyy", {
-                            locale: es,
-                          })
-                        ) : "N/A"}
+                        {change?.finishedAt
+                          ? capitalizeFirstLetter(
+                              format(
+                                new Date(change?.finishedAt),
+                                "LLL dd yyyy",
+                                {
+                                  locale: es,
+                                }
+                              )
+                            )
+                          : "N/A"}
                       </Typography>
                     </TableCell>
                     <TableCell align="center">
-                      {change.pickedMachine ? change.pickedMachine.machineNum : "N/A"}
+                      {change.pickedMachine
+                        ? change.pickedMachine.machineNum
+                        : "N/A"}
                     </TableCell>
                     <TableCell align="center">
-                      {change.leftMachine ? change.leftMachine.machineNum : "N/A"}
+                      {change.leftMachine
+                        ? change.leftMachine.machineNum
+                        : "N/A"}
                     </TableCell>
-                    <TableCell align="center" sx={{display:"flex", alignItems: "center", justifyContent: "center"}}>
-                    {getStatusLabel(change?.status)}
-                      {change?.status === "CANCELADO" && 
-                        <Tooltip title={change?.cancellationReason || "SIN RAZÓN"} arrow>
+                    <TableCell align="center">
+                      {change.imagesUrl ? (
+                        <Tooltip title="Ver fotos" arrow>
+                          <IconButton
+                            onClick={() => {
+                              setSelectedImages(change.imagesUrl);
+                              setOpenImages(true);
+                            }}
+                            sx={{
+                              "&:hover": {
+                                background: theme.colors.primary.lighter,
+                              },
+                              color: theme.palette.primary.main,
+                            }}
+                            color="inherit"
+                            size="small"
+                          >
+                            <ImageSearchIcon fontSize="small" />
+                          </IconButton>
+                        </Tooltip>
+                      ) : (
+                        "N/A"
+                      )}
+                    </TableCell>
+                    <TableCell
+                      align="center"
+                      sx={{
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                      }}
+                    >
+                      {getStatusLabel(change?.status)}
+                      {change?.status === "CANCELADO" && (
+                        <Tooltip
+                          title={change?.cancellationReason || "SIN RAZÓN"}
+                          arrow
+                        >
                           <InfoOutlinedIcon fontSize="small" />
                         </Tooltip>
-                      }
+                      )}
                     </TableCell>
                   </TableRow>
                 );
@@ -296,6 +353,15 @@ const TablaCambios: FC<TablaCambiosProps> = ({
           />
         </Box>
       </Card>
+      {openImages && selectedImages && (
+        <ImagesModal
+          open={openImages}
+          imagesObj={selectedImages}
+          title={"Fotos del cambio"}
+          text=""
+          onClose={handleOnCloseImages}
+        />
+      )}
     </>
   );
 };

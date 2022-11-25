@@ -28,7 +28,7 @@ async function handler(req, res) {
   }
   const givenRole = await Role.findOne({ id: role });
   if (!givenRole) {
-    res.status(422).json({ ok: false, message: `El rol ${rol} no existe` });
+    res.status(422).json({ ok: false, message: `El rol ${role} no existe` });
     return;
   }
   const newUser = new User({ id, name, role: givenRole._id });

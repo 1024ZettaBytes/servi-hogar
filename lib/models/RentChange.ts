@@ -13,6 +13,7 @@ export interface IRentChange extends Document {
   changedAccesories: object;
   pickedMachine: Schema.Types.ObjectId;
   leftMachine: Schema.Types.ObjectId;
+  imagesUrl: object;
   date: Date,
   timeOption: string,
   cancellationReason: string;
@@ -45,6 +46,10 @@ const RentChangeSchema = new Schema<IRentChange>({
   problemDesc: { type: String, default: null },
   solutionDesc: { type: String, default: null },
   changedAccesories: {type: Object, default: {}},
+  imagesUrl:{ 
+    type: Object,
+    default:{}
+  },
   date: { type: Date, required: true },
   timeOption: { type: String, required:true },
   fromTime: { type: Date, required: true },

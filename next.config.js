@@ -12,4 +12,14 @@ const withTM = require("next-transpile-modules")([
 
 module.exports = withTM({
   // your custom config goes here
+  images: {
+    remotePatterns: [
+      {
+        protocol: 'https',
+        hostname: 'storage.googleapis.com',
+        port: '',
+        pathname: '/servi-bucket/*',
+      },
+    ],
+  },
 });
