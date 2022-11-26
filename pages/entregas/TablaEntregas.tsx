@@ -17,6 +17,8 @@ import {
   TextField,
   InputAdornment,
   Tooltip,
+  IconButton,
+  useTheme,
 } from "@mui/material";
 import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
 import { capitalizeFirstLetter } from "lib/client/utils";
@@ -24,6 +26,8 @@ import { format } from "date-fns";
 import es from "date-fns/locale/es";
 import Label from "@/components/Label";
 import SearchIcon from "@mui/icons-material/Search";
+import ImageSearchIcon from "@mui/icons-material/ImageSearch";
+import ImagesModal from "@/components/ImagesModal";
 
 interface TablaEntregasProps {
   userRole: string;
@@ -121,6 +125,13 @@ const TablaEntregas: FC<TablaEntregasProps> = ({ deliveriesList }) => {
   const [page, setPage] = useState<number>(0);
   const [limit, setLimit] = useState<number>(10);
   const [filter, setFilter] = useState<string>("");
+  const [openImages, setOpenImages] = useState<boolean>(false);
+  const [selectedImages, setSelectedImages] = useState<null>();
+
+  const handleOnCloseImages = () => {
+    setOpenImages(false);
+    setSelectedImages(null);
+  };
 
   const handleSearchChange = (e: ChangeEvent<HTMLInputElement>): void => {
     const value = e.target.value;
@@ -137,6 +148,7 @@ const TablaEntregas: FC<TablaEntregasProps> = ({ deliveriesList }) => {
 
   const filteredDeliveries = applyFilters(deliveriesList, filter);
   const paginatedDeliveries = applyPagination(filteredDeliveries, page, limit);
+  const theme = useTheme();
 
   return (
     <>
@@ -179,6 +191,7 @@ const TablaEntregas: FC<TablaEntregasProps> = ({ deliveriesList }) => {
                 <TableCell align="center">Cliente</TableCell>
                 <TableCell align="center">Solicitada</TableCell>
                 <TableCell align="center">Entregada</TableCell>
+                <TableCell align="center">Fotos</TableCell>
                 <TableCell align="center">Resultado</TableCell>
               </TableRow>
             </TableHead>
@@ -255,6 +268,30 @@ const TablaEntregas: FC<TablaEntregasProps> = ({ deliveriesList }) => {
                           : "N/A"}
                       </Typography>
                     </TableCell>
+                    <TableCell align="center">
+                      {delivery?.rent?.imagesUrl ? (
+                        <Tooltip title="Ver fotos" arrow>
+                          <IconButton
+                            onClick={() => {
+                              setSelectedImages(delivery?.rent?.imagesUrl);
+                              setOpenImages(true);
+                            }}
+                            sx={{
+                              "&:hover": {
+                                background: theme.colors.primary.lighter,
+                              },
+                              color: theme.palette.primary.main,
+                            }}
+                            color="inherit"
+                            size="small"
+                          >
+                            <ImageSearchIcon fontSize="small" />
+                          </IconButton>
+                        </Tooltip>
+                      ) : (
+                        "N/A"
+                      )}
+                    </TableCell>
                     <TableCell
                       align="center"
                       sx={{
@@ -291,6 +328,15 @@ const TablaEntregas: FC<TablaEntregasProps> = ({ deliveriesList }) => {
           />
         </Box>
       </Card>
+      {openImages && selectedImages && (
+        <ImagesModal
+          open={openImages}
+          imagesObj={selectedImages}
+          title={"Fotos de la recolección"}
+          text=""
+          onClose={handleOnCloseImages}
+        />
+      )}
     </>
   );
 };

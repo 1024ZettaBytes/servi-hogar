@@ -186,6 +186,7 @@ function RentaRapida() {
     setDeliveryTime(defaultData().deliveryTime);
     setCustomerRent(null);
   };
+  console.log("Selected customer:", selectedCustomer);
   return (
     <>
       <Head>
@@ -263,7 +264,7 @@ function RentaRapida() {
                               selectedWeeks={rentPeriod.selectedWeeks}
                               useFreeWeeks={rentPeriod.useFreeWeeks}
                               freeWeeks={selectedCustomer.freeWeeks}
-                              weekPrice={139.0}
+                              weekPrice={selectedCustomer.level?.weekPrice}
                               onChangePeriod={onChangePeriod}
                             />
                           ) : (

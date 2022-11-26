@@ -49,7 +49,7 @@ function ExtendRentModal(props) {
       ? rent.customer?.balance >=
           (rentPeriod.selectedWeeks -
             (rentPeriod.useFreeWeeks ? rent.customer.freeWeeks : 0)) *
-            139.0
+            rent.customer?.level?.weekPrice
       : 0;
   };
 
@@ -59,7 +59,7 @@ function ExtendRentModal(props) {
     return (
       (rentPeriod.selectedWeeks -
         (rentPeriod.useFreeWeeks ? rent.customer.freeWeeks : 0)) *
-        139.0 -
+        rent.customer?.level?.weekPrice -
       rent.customer?.balance
     );
   };
@@ -258,7 +258,7 @@ function ExtendRentModal(props) {
                             selectedWeeks={rentPeriod.selectedWeeks}
                             useFreeWeeks={rentPeriod.useFreeWeeks}
                             freeWeeks={rent.customer?.freeWeeks}
-                            weekPrice={139.0}
+                            weekPrice={rent.customer?.level?.weekPrice}
                             onChangePeriod={onChangePeriod}
                           />
                         </Grid>

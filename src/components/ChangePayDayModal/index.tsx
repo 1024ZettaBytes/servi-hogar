@@ -24,7 +24,7 @@ import { changePayday } from "../../../lib/client/rentsFetch";
 import { capitalizeFirstLetter, addDaysToDate } from "lib/client/utils";
 import { format } from "date-fns";
 import es from "date-fns/locale/es";
-import { WEEK_DAYS, PRICES } from "lib/consts/OBJ_CONTS";
+import { WEEK_DAYS } from "lib/consts/OBJ_CONTS";
 import numeral from "numeral";
 function ChangePayDayModal(props) {
   const { rentId, handleOnClose, open } = props;
@@ -83,7 +83,7 @@ function ChangePayDayModal(props) {
   };
 
   const addedDays = plusDays();
-  const daysCost = addedDays * PRICES.day;
+  const daysCost = addedDays * (rent?.customer?.level?.dayPrice || 0);
   const getTotalDebt = () => {
     let usedFree = false;
     let newBalance = 0;
@@ -95,10 +95,16 @@ function ChangePayDayModal(props) {
       newBalance = debt;
       debt = daysCost;
       //if will use free week
-      if (toPay >= 4 * PRICES.day && rent.customer.freeWeeks > 0) {
+      if (
+        toPay >= 4 * (rent?.customer?.level?.dayPrice || 0) &&
+        rent.customer.freeWeeks > 0
+      ) {
         usedFree = true;
-        debt = debt - PRICES.week > 0 ? debt - PRICES.week : 0;
-        newBalance = newBalance + PRICES.week;
+        debt =
+          debt - (rent?.customer?.level?.weekPrice || 0) > 0
+            ? debt - (rent?.customer?.level?.weekPrice || 0)
+            : 0;
+        newBalance = newBalance + (rent?.customer?.level?.weekPrice || 0);
       }
     } else {
       debt = daysCost;
