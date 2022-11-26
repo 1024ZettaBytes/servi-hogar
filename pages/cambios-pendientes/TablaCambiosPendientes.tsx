@@ -380,7 +380,7 @@ const TablaCambiosPendientes: FC<TablaCambiosPendientesProps> = ({
                         <IconButton
                           onClick={() => {
                             setFormatText(
-                              getFormatForChange(change.rent, change, change)
+                              getFormatForChange(change.rent, change,change.reason, change)
                             );
                             setFormatIsOpen(true);
                           }}
@@ -425,7 +425,7 @@ const TablaCambiosPendientes: FC<TablaCambiosPendientesProps> = ({
       {formatIsOpen && (
         <FormatModal
           open={formatIsOpen}
-          title="Formato de cambio"
+          title="Formato de Cambio"
           text=""
           formatText={formatText}
           onAccept={() => {

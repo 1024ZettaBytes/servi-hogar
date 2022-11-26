@@ -16,14 +16,18 @@ import {
   CardHeader,
   TextField,
   InputAdornment,
-  Tooltip
+  Tooltip,
+  IconButton,
+  useTheme,
 } from "@mui/material";
 import { capitalizeFirstLetter } from "lib/client/utils";
 import { format } from "date-fns";
 import es from "date-fns/locale/es";
 import Label from "@/components/Label";
 import SearchIcon from "@mui/icons-material/Search";
-import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
+import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
+import ImageSearchIcon from "@mui/icons-material/ImageSearch";
+import ImagesModal from "@/components/ImagesModal";
 
 interface TablaRecoleccionesProps {
   userRole: string;
@@ -65,7 +69,10 @@ const applyFilters = (pickupsList: any[], filter: string): any[] => {
         }
         switch (key) {
           case "rent": {
-            const matchCustomerName = value["customer"] && value["customer"].name && compareStringsForFilter(filter, value["customer"].name);
+            const matchCustomerName =
+              value["customer"] &&
+              value["customer"].name &&
+              compareStringsForFilter(filter, value["customer"].name);
             const matchNumber =
               value["num"] && compareStringsForFilter(filter, value["num"]);
             return matchNumber || matchCustomerName;
@@ -114,13 +121,18 @@ const applyPagination = (
   return pickupsList.slice(page * limit, page * limit + limit);
 };
 
-const TablaRecolecciones: FC<TablaRecoleccionesProps> = ({
-  pickupsList,
-}) => {
+const TablaRecolecciones: FC<TablaRecoleccionesProps> = ({ pickupsList }) => {
   const [page, setPage] = useState<number>(0);
   const [limit, setLimit] = useState<number>(10);
   const [filter, setFilter] = useState<string>("");
- 
+  const [openImages, setOpenImages] = useState<boolean>(false);
+  const [selectedImages, setSelectedImages] = useState<null>();
+
+  const handleOnCloseImages = () => {
+    setOpenImages(false);
+    setSelectedImages(null);
+  };
+
   const handleSearchChange = (e: ChangeEvent<HTMLInputElement>): void => {
     const value = e.target.value;
     setFilter(value);
@@ -133,10 +145,10 @@ const TablaRecolecciones: FC<TablaRecoleccionesProps> = ({
   const handleLimitChange = (event: ChangeEvent<HTMLInputElement>): void => {
     setLimit(parseInt(event.target.value));
   };
-  
 
   const filteredPickups = applyFilters(pickupsList, filter);
   const paginatedPickups = applyPagination(filteredPickups, page, limit);
+  const theme = useTheme();
 
   return (
     <>
@@ -181,6 +193,8 @@ const TablaRecolecciones: FC<TablaRecoleccionesProps> = ({
                 <TableCell align="center">Solicitada</TableCell>
                 <TableCell align="center">Recolectada</TableCell>
                 <TableCell align="center">Resultado</TableCell>
+                <TableCell align="center"># Equipo</TableCell>
+                <TableCell align="center">Fotos</TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
@@ -255,20 +269,71 @@ const TablaRecolecciones: FC<TablaRecoleccionesProps> = ({
                         gutterBottom
                         noWrap
                       >
-                        {pickup?.finishedAt ? capitalizeFirstLetter(
-                          format(new Date(pickup?.finishedAt), "LLL dd yyyy", {
-                            locale: es,
-                          })
-                        ) : "N/A"}
+                        {pickup?.finishedAt
+                          ? capitalizeFirstLetter(
+                              format(
+                                new Date(pickup?.finishedAt),
+                                "LLL dd yyyy",
+                                {
+                                  locale: es,
+                                }
+                              )
+                            )
+                          : "N/A"}
                       </Typography>
                     </TableCell>
-                    <TableCell align="center" sx={{display:"flex", alignItems: "center", justifyContent: "center"}}>
-                    {getStatusLabel(pickup?.status)}
-                      {pickup?.status === "CANCELADA" && 
-                        <Tooltip title={pickup?.cancellationReason || "SIN RAZÓN"} arrow>
+                    <TableCell
+                      align="center"
+                      sx={{
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                      }}
+                    >
+                      {getStatusLabel(pickup?.status)}
+                      {pickup?.status === "CANCELADA" && (
+                        <Tooltip
+                          title={pickup?.cancellationReason || "SIN RAZÓN"}
+                          arrow
+                        >
                           <InfoOutlinedIcon fontSize="small" />
                         </Tooltip>
-                      }
+                      )}
+                    </TableCell>
+                    <TableCell align="center">
+                      <Typography
+                        variant="body1"
+                        fontWeight="bold"
+                        color="text.primary"
+                        gutterBottom
+                        noWrap
+                      >
+                        {pickup?.rent?.machine?.machineNum}
+                      </Typography>
+                    </TableCell>
+                    <TableCell align="center">
+                      {pickup.imagesUrl ? (
+                        <Tooltip title="Ver fotos" arrow>
+                          <IconButton
+                            onClick={() => {
+                              setSelectedImages(pickup.imagesUrl);
+                              setOpenImages(true);
+                            }}
+                            sx={{
+                              "&:hover": {
+                                background: theme.colors.primary.lighter,
+                              },
+                              color: theme.palette.primary.main,
+                            }}
+                            color="inherit"
+                            size="small"
+                          >
+                            <ImageSearchIcon fontSize="small" />
+                          </IconButton>
+                        </Tooltip>
+                      ) : (
+                        "N/A"
+                      )}
                     </TableCell>
                   </TableRow>
                 );
@@ -288,6 +353,15 @@ const TablaRecolecciones: FC<TablaRecoleccionesProps> = ({
           />
         </Box>
       </Card>
+      {openImages && selectedImages && (
+        <ImagesModal
+          open={openImages}
+          imagesObj={selectedImages}
+          title={"Fotos de la recolección"}
+          text=""
+          onClose={handleOnCloseImages}
+        />
+      )}
     </>
   );
 };

@@ -479,6 +479,7 @@ const TablaRentasActuales: FC<TablaRentasActualesProps> = ({ rentList }) => {
           formatText={getFormatForChange(
             createdChange.rent,
             createdChange.change,
+            createdChange.reason,
             createdChange.changeTime
           )}
           onAccept={() => {

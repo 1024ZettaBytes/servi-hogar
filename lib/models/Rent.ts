@@ -12,6 +12,8 @@ export interface IRent extends Document {
   usedFreeWeeks: Number;
   startDate: Date;
   endDate: Date;
+  consecutiveChanges: Number;
+  totalChanges: Number;
   acumulatedDays: number;
   extendedTimes: number;
   totalWeeks: number;
@@ -51,6 +53,8 @@ const RentSchema = new Schema<IRent>({
   usedFreeWeeks: { type: 'number', required: true },
   startDate: { type: Date, default: null },
   endDate: { type: Date, default: null },
+  consecutiveChanges: { type: Number, default:0},
+  totalChanges: { type: Number, default:0},
   acumulatedDays: { type: 'number', default: 0 },
   extendedTimes: { type: 'number', default: 0 },
   totalWeeks: { type: 'number', default: 0 },

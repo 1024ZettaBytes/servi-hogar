@@ -9,6 +9,7 @@ export interface IRentPickup extends Document {
   takenBy: Schema.Types.ObjectId;
   pickedAccesories: object;
   date: Date,
+  imagesUrl: object;
   timeOption: string,
   fromTime: Date,
   endTime:Date,
@@ -36,6 +37,10 @@ const RentPickupSchema = new Schema<IRentPickup>({
   },
   pickedAccesories: {type: Object, default: {}},
   date: { type: Date, required: true },
+  imagesUrl:{ 
+    type: Object,
+    default:null
+  },
   timeOption: { type: String, required:true },
   fromTime: { type: Date, required: true },
   endTime:{ type: Date, required: true },

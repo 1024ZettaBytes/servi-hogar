@@ -13,11 +13,16 @@ import {
   Container,
   Skeleton,
   Typography,
+  TextField,
 } from "@mui/material";
 import { LoadingButton } from "@mui/lab";
 import { useGetRentById, getFetcher } from "../../../pages/api/useRequest";
 import { saveChange } from "../../../lib/client/changesFetch";
-import { capitalizeFirstLetter, addDaysToDate, dateDiffInDays } from "lib/client/utils";
+import {
+  capitalizeFirstLetter,
+  addDaysToDate,
+  dateDiffInDays,
+} from "lib/client/utils";
 import { format } from "date-fns";
 import es from "date-fns/locale/es";
 import numeral from "numeral";
@@ -40,6 +45,7 @@ function ScheduleChangeModal(props) {
     fromTime: defaultInitialDate(addDaysToDate(new Date(), 1)),
     endTime: defaultEndDate(addDaysToDate(new Date(), 1)),
   });
+  const [reason, setReason] = useState<string>("");
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
 
   const [hasErrorSubmitting, setHasErrorSubmitting] = useState<any>({
@@ -51,17 +57,17 @@ function ScheduleChangeModal(props) {
   const submitButtonEnabled =
     rent &&
     changeTime.date &&
+    reason.trim()!=="" &&
     dateDiffInDays(new Date(), new Date(changeTime.date)) >= 0 &&
     (changeTime.timeOption === "any" ||
       (changeTime.fromTime &&
         changeTime.endTime &&
         changeTime.fromTime.getTime() <= changeTime.endTime.getTime()));
 
-
   const handleOnSubmit = async () => {
     setHasErrorSubmitting({ error: false, msg: "" });
     setIsSubmitting(true);
-    const result = await saveChange({ rentId, changeTime });
+    const result = await saveChange({ rentId, changeTime, reason });
     setIsSubmitting(false);
     if (!result.error) {
       handleSavedChange(result.msg, result.change);
@@ -76,7 +82,7 @@ function ScheduleChangeModal(props) {
     handleOnClose(false);
   };
   const handleSavedChange = (successMessage, change) => {
-    handleOnClose(true, {rent, changeTime, change},successMessage);
+    handleOnClose(true, { rent, changeTime, reason, change }, successMessage);
   };
   if (rent && !selectedDay) {
     const dayName = format(new Date(rent?.endDate), "eeee").toLowerCase();
@@ -107,7 +113,6 @@ function ScheduleChangeModal(props) {
     }
     return `VENCIDA (${Math.abs(rent.remaining)} día(s))`;
   };
-
 
   return (
     <Dialog open={open} fullWidth={true} maxWidth={"md"} scroll={"body"}>
@@ -254,6 +259,22 @@ function ScheduleChangeModal(props) {
                           endTime={changeTime.endTime}
                           onChangeTime={onChangeTime}
                         />
+                        <Grid item lg={6}>
+                          <TextField
+                            sx={{ marginTop: 2 }}
+                            autoComplete="off"
+                            required
+                            label={"Razón del cambio"}
+                            multiline
+                            rows={3}
+                            value={reason}
+                            onChange={(event) => {
+                              setReason(event.target.value);
+                            }}
+                            autoFocus
+                            fullWidth={true}
+                          />
+                        </Grid>
                       </Grid>
                     </>
                   )}

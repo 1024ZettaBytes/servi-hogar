@@ -133,6 +133,7 @@ const TablaCambios: FC<TablaCambiosProps> = ({ changesList }) => {
     setOpenImages(false);
     setSelectedImages(null);
   };
+  
   const handleSearchChange = (e: ChangeEvent<HTMLInputElement>): void => {
     const value = e.target.value;
     setFilter(value);

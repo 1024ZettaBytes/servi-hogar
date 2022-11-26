@@ -61,6 +61,11 @@ export const getFileExtension = (fileName: string): string =>{
   return splited[splited.length-1];
 }
 
+export const getFileFromUrl = (url: string): string =>{
+  const splited = url.split("/");
+  return splited[splited.length-1];
+}
+
 export const dateDiffInDays = (initial: Date, end: Date):number =>{
   const _MS_PER_DAY = 1000 * 60 * 60 * 24;
   // Discard the time and time-zone information.

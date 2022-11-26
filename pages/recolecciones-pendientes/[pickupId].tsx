@@ -6,6 +6,7 @@ import { validateServerSideSession } from "../../lib/auth";
 import PageHeader from "@/components/PageHeader";
 import PageTitleWrapper from "@/components/PageTitleWrapper";
 import NextLink from "next/link";
+import Image from "next/image";
 import {
   Card,
   Container,
@@ -38,6 +39,7 @@ import { LoadingButton } from "@mui/lab";
 import { completePickup } from "lib/client/pickupsFetch";
 import { useRouter } from "next/router";
 import React from "react";
+import { MuiFileInput } from "mui-file-input";
 
 function RecoleccionPendiente() {
   const router = useRouter();
@@ -47,6 +49,13 @@ function RecoleccionPendiente() {
     pickupId
   );
   const [pickedAccesories, setPickedAccesories] = useState<any>({});
+  const [attached, setAttached] = useState<any>({
+    tag: { file: null, url: null },
+  });
+
+  const [badFormat, setBadFormat] = useState<any>({
+    tag: false,
+  });
   const paths = ["Inicio", "Recolecciones pendientes", `${pickup?.rent?.num}`];
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
 
@@ -67,7 +76,7 @@ function RecoleccionPendiente() {
 
 
   const checkEnabledButton = () => {
-    if (activeStep === 0) return true;
+    if (activeStep === 0) return attached.tag.file;
     return true;
   };
 
@@ -76,7 +85,7 @@ function RecoleccionPendiente() {
   const handleOnSubmit = async (event) => {
     setHasErrorSubmitting({ error: false, msg: "" });
     setIsSubmitting(true);
-    const result = await completePickup({
+    const result = await completePickup(attached, {
       pickupId,
       pickedAccesories
     });
@@ -198,6 +207,56 @@ function RecoleccionPendiente() {
                                   </FormGroup>
                                 </FormControl>
                               </Grid>
+                                {attached.tag?.url && (
+                                  <Grid item lg={12} m={1}>
+                                    <Image
+                                      src={attached.tag.url}
+                                      alt="Picture of the author"
+                                      width={300}
+                                      height={400}
+                                    />
+                                  </Grid>
+                                )}
+                                <Grid item lg={4} m={1}>
+                                  <MuiFileInput
+                                  required={!attached.tag.file}
+                                    placeholder={"No seleccionada"}
+                                    label={"Foto de frente"}
+                                    value={attached.tag?.file}
+                                    onChange={(file) => {
+                                      if (file && !file.type.includes("image/")) {
+                                        setBadFormat({
+                                          ...badFormat,
+                                          tag: true,
+                                        });
+                                        setAttached({
+                                          ...attached,
+                                          tag: {
+                                            ...attached.tag,
+                                            error: true,
+                                          },
+                                        });
+                                        return;
+                                      }
+                                      const url = file
+                                        ? URL.createObjectURL(file)
+                                        : null;
+                                      setAttached({
+                                        ...attached,
+                                        tag: { file, url, error: false },
+                                      });
+                                    }}
+                                  />
+                                </Grid>
+                                <Grid item lg={12} />
+                                {attached.tag?.error && (
+                                  <Grid item lg={4} m={1}>
+                                    <Typography color="error">
+                                      Seleccione un archivo válido(*.jpg, *.jpeg,
+                                      *.png).
+                                    </Typography>
+                                  </Grid>
+                                )}
                               {hasErrorSubmitting.error && (
                                 <Grid item lg={6} m={1}>
                                   <Alert severity="error">
