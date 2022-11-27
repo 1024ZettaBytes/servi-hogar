@@ -17,7 +17,6 @@ module.exports = withTM({
       {
         protocol: 'https',
         hostname: 'storage.googleapis.com',
-        port: '',
         pathname: '/servi-bucket/*',
       },
     ],
