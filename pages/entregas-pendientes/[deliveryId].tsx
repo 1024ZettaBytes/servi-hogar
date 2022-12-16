@@ -48,7 +48,7 @@ import { LoadingButton } from "@mui/lab";
 import { completeDelivery } from "lib/client/deliveriesFetch";
 import { useRouter } from "next/router";
 import React from "react";
-
+import { DesktopDatePicker } from "@mui/x-date-pickers";
 function RentaRapida() {
   const router = useRouter();
   const { deliveryId } = router.query;
@@ -60,6 +60,7 @@ function RentaRapida() {
   const paths = ["Inicio", "Entregas pendientes", `${delivery?.totalNumber}`];
   const [customerToEdit, setCustomerToEdit] = useState<any>({ isSet: false });
   const [deliveredMachine, setDeliveredMachine] = useState<string>(null);
+  const [deliveryDate, setDeliveryDate] = useState<any>(new Date());
 
   const [isOk, setIsOk] = useState<any>({
     info: true,
@@ -180,9 +181,14 @@ function RentaRapida() {
     />
   );
   const checkEnabledButton = () => {
-    if (activeStep === 0) return customerToEdit?.currentResidence?.maps && validateMapsUrl(customerToEdit?.currentResidence?.maps);
+    if (activeStep === 0)
+      return (
+        customerToEdit?.currentResidence?.maps &&
+        validateMapsUrl(customerToEdit?.currentResidence?.maps)
+      );
     if (activeStep === 1) return deliveredMachine;
-    return true;
+    if (activeStep === 2) return deliveryDate.toString() !== "Invalid Date";
+
   };
 
   const nextButtonEnabled = checkEnabledButton();
@@ -196,6 +202,7 @@ function RentaRapida() {
       customerData: customerToEdit,
       deliveredMachine,
       leftAccesories,
+      deliveryDate,
       isOk,
     });
     setIsSubmitting(false);
@@ -580,12 +587,13 @@ function RentaRapida() {
                                   }}
                                 />
                               </Grid>
-                              {!nextButtonEnabled &&
+                              {!nextButtonEnabled && (
                                 <Grid item lg={6} m={1}>
                                   <Alert severity="warning">
                                     {"Ingrese la url de maps"}
                                   </Alert>
-                                  </Grid>}
+                                </Grid>
+                              )}
                             </Grid>
                           )}
                           {activeStep === 1 && (
@@ -657,6 +665,20 @@ function RentaRapida() {
                           )}
                           {activeStep === 2 && (
                             <Grid container>
+                              <Grid item lg={12} m={1}>
+                                <DesktopDatePicker
+                                  label="Fecha de entrega"
+                                  inputFormat="dd/MM/yyyy"
+                                  value={deliveryDate}
+                                  maxDate={new Date()}
+                                  onChange={(newValue) => {
+                                    setDeliveryDate(newValue);
+                                  }}
+                                  renderInput={(params) => (
+                                    <TextField {...params} />
+                                  )}
+                                />
+                              </Grid>
                               {attached.contract?.url && (
                                 <Grid item lg={12} m={1}>
                                   <Image
@@ -669,7 +691,7 @@ function RentaRapida() {
                               )}
                               <Grid item lg={4} m={1}>
                                 <MuiFileInput
-                                required={!attached.contract.file}
+                                  required={!attached.contract.file}
                                   placeholder={"No seleccionada"}
                                   label={"Foto de contrato"}
                                   value={attached.contract?.file}
@@ -719,7 +741,7 @@ function RentaRapida() {
                               )}
                               <Grid item lg={4} m={1}>
                                 <MuiFileInput
-                                required={!attached.front.file}
+                                  required={!attached.front.file}
                                   placeholder={"No seleccionada"}
                                   label={"Foto de frente"}
                                   value={attached.front?.file}
@@ -769,7 +791,7 @@ function RentaRapida() {
                               )}
                               <Grid item lg={4} m={1}>
                                 <MuiFileInput
-                                required={!attached.board.file}
+                                  required={!attached.board.file}
                                   placeholder={"No seleccionada"}
                                   label={"Foto de tablero"}
                                   value={attached.board?.file}
@@ -819,7 +841,7 @@ function RentaRapida() {
                               )}
                               <Grid item lg={4} m={1}>
                                 <MuiFileInput
-                                required={!attached.tag.file}
+                                  required={!attached.tag.file}
                                   placeholder={"No seleccionada"}
                                   label={"Foto de etiqueta"}
                                   value={attached.tag?.file}
@@ -898,13 +920,11 @@ function RentaRapida() {
 
                 {activeStep === steps.length && (
                   <Paper square elevation={0} sx={{ p: 3 }}>
-                    <Alert severity="success">
-                      La entrega fue completada
-                    </Alert>
+                    <Alert severity="success">La entrega fue completada</Alert>
                     <NextLink href="/entregas-pendientes">
-                    <Button  sx={{ mt: 1, mr: 1 }}>
-                      Lista de entregas pendientes
-                    </Button>
+                      <Button sx={{ mt: 1, mr: 1 }}>
+                        Lista de entregas pendientes
+                      </Button>
                     </NextLink>
                   </Paper>
                 )}
