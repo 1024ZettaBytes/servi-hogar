@@ -14,8 +14,8 @@ export interface IPayment extends Document {
 }
 
 const PaymentSchema = new Schema<IPayment>({
-  number: { type: 'number', required:true},
-  amount: { type: 'number', required:true},
+  number: { type: Number, required:true},
+  amount: { type: Number, required:true},
   customer: {
     type: Schema.Types.ObjectId,
     ref: 'customers',

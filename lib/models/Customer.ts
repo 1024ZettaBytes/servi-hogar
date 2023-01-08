@@ -52,7 +52,7 @@ const CustomerSchema = new Schema<ICustomer>({
     ref: 'customers'
   },
   referrals: { type: [Schema.Types.ObjectId], default: [], ref: 'customers' },
-  freeWeeks: { type: 'number', default: 0 },
+  freeWeeks: { type: Number, default: 0 },
   hasRent: { type: 'boolean', default: false },
   currentRent: { type: Schema.Types.ObjectId, default: null, ref: 'rents' },
   movements: {
@@ -60,10 +60,10 @@ const CustomerSchema = new Schema<ICustomer>({
     default: [],
     ref: 'customer_movements'
   },
-  balance: { type: 'number', default: 0 },
+  balance: { type: Number, default: 0 },
   payDayChanged: { type: 'boolean', default: false },
-  acumulatedDays: { type: 'number', default: 0 },
-  totalRentWeeks: { type: 'number', default: 0 },
+  acumulatedDays: { type: Number, default: 0 },
+  totalRentWeeks: { type: Number, default: 0 },
   createdAt: { type: Date, required: true },
   updatedAt: { type: Date, required: true },
   lastUpdatedBy: { type: Schema.Types.ObjectId, required: true, ref: 'users' },

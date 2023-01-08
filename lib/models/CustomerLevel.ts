@@ -10,8 +10,8 @@ export interface ICustomerLevel extends Document {
 const CustomerLevelSchema = new Schema<ICustomerLevel>({
   id: { type: 'string' },
   name: { type: 'string' },
-  weekPrice: { type: 'number', required: true},
-  dayPrice: { type: 'number', required: true}
+  weekPrice: { type: Number, required: true},
+  dayPrice: { type: Number, required: true}
 });
 export const CustomerLevel: Model<ICustomerLevel> =
   mongoose.models.customer_levels || model('customer_levels', CustomerLevelSchema);
