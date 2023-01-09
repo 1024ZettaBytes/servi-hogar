@@ -175,7 +175,7 @@ function RecoleccionPendiente() {
 
                               </Grid>
                               <Grid item xs={12} sm={12} lg={12} />
-                              <Grid item xs={9} sm={6} lg={12} m={2}>
+                              {pickup.rent.accesories && <Grid item xs={9} sm={6} lg={12} m={2}>
                                 <FormControl
                                   component="fieldset"
                                   variant="standard"
@@ -206,7 +206,7 @@ function RecoleccionPendiente() {
                                     ))}
                                   </FormGroup>
                                 </FormControl>
-                              </Grid>
+                              </Grid>}
                                 {attached.tag?.url && (
                                   <Grid item lg={12} m={1}>
                                     <Image

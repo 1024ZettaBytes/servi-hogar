@@ -491,7 +491,7 @@ function CambioPendiente() {
 
                 {activeStep === steps.length && (
                   <Paper square elevation={0} sx={{ p: 3 }}>
-                    <Alert severity="success">El cambio fue completada</Alert>
+                    <Alert severity="success">El cambio fue completado</Alert>
                     <NextLink href="/cambios-pendientes">
                       <Button sx={{ mt: 1, mr: 1 }}>
                         Lista de cambios pendientes
