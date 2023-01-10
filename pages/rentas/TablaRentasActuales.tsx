@@ -269,7 +269,7 @@ const TablaRentasActuales: FC<TablaRentasActualesProps> = ({ rentList }) => {
                 <TableCell align="center"># de renta</TableCell>
                 <TableCell align="center">Equipo</TableCell>
                 <TableCell align="center">Cliente</TableCell>
-                <TableCell align="center">Vencimiento</TableCell>
+                <TableCell align="center">Pago</TableCell>
                 <TableCell align="center">Estado</TableCell>
                 <TableCell align="center">Días Restantes</TableCell>
                 <TableCell align="center"></TableCell>

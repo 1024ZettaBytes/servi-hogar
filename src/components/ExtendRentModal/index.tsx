@@ -17,7 +17,11 @@ import {
 import AddPaymentModal from "../AddPaymentModal";
 import RentPeriod from "../../../pages/renta-rapida/RentPeriod";
 import { LoadingButton } from "@mui/lab";
-import { useGetRentById, getFetcher, refreshData } from "../../../pages/api/useRequest";
+import {
+  useGetRentById,
+  getFetcher,
+  refreshData,
+} from "../../../pages/api/useRequest";
 import { extendRent } from "../../../lib/client/rentsFetch";
 import { capitalizeFirstLetter, addDaysToDate } from "lib/client/utils";
 import { format } from "date-fns";
@@ -54,7 +58,7 @@ function ExtendRentModal(props) {
   };
 
   const customerHasBalance = checkCustomerBalance();
-  
+
   const getToPay = (): number => {
     return (
       (rentPeriod.selectedWeeks -
@@ -68,7 +72,7 @@ function ExtendRentModal(props) {
       rent &&
       rentPeriod.selectedWeeks &&
       rentPeriod.selectedWeeks > 0 &&
-      (customerHasBalance ||rent.customer.balance + getToPay() === 0)
+      (customerHasBalance || rent.customer.balance + getToPay() === 0)
     );
   };
   const submitButtonEnabled = checkEnabledButton();
@@ -99,7 +103,7 @@ function ExtendRentModal(props) {
         autoHideDuration: 1500,
       });
     }
-    refreshData(ROUTES.RENT_BY_ID_API.replace(":id", rentId))
+    refreshData(ROUTES.RENT_BY_ID_API.replace(":id", rentId));
   };
   const handleClose = () => {
     setHasErrorSubmitting({ error: false, msg: "" });
@@ -262,26 +266,28 @@ function ExtendRentModal(props) {
                             onChangePeriod={onChangePeriod}
                           />
                         </Grid>
-                        {!customerHasBalance && (Math.abs(rent.customer?.balance) !== getToPay() || rent.customer.balance > 0) && (
-                          <Grid item lg={12}>
-                            <Alert
-                              severity="warning"
-                              action={
-                                <Button
-                                  fullWidth
-                                  size="medium"
-                                  variant="outlined"
-                                  onClick={() => setPaymentModalIsOpen(true)}
-                                >
-                                  NUEVO PAGO
-                                </Button>
-                              }
-                            >
-                              El cliente no tiene el saldo suficiente, por favor
-                              agregue un pago nuevo de ${getToPay()}
-                            </Alert>
-                          </Grid>
-                        )}
+                        {!customerHasBalance &&
+                          (Math.abs(rent.customer?.balance) !== getToPay() ||
+                            rent.customer.balance > 0) && (
+                            <Grid item lg={12}>
+                              <Alert
+                                severity="warning"
+                                action={
+                                  <Button
+                                    fullWidth
+                                    size="medium"
+                                    variant="outlined"
+                                    onClick={() => setPaymentModalIsOpen(true)}
+                                  >
+                                    NUEVO PAGO
+                                  </Button>
+                                }
+                              >
+                                El cliente no tiene el saldo suficiente, por
+                                favor agregue un pago nuevo de ${getToPay()}
+                              </Alert>
+                            </Grid>
+                          )}
                         <Grid item lg={9}></Grid>
                         <Grid
                           item
@@ -293,7 +299,7 @@ function ExtendRentModal(props) {
                         >
                           <Box>
                             <Typography gutterBottom variant="h5">
-                              Nueva fecha de vencimiento
+                              Nueva fecha de pago
                             </Typography>
                             <Typography color="black" gutterBottom>
                               {capitalizeFirstLetter(
