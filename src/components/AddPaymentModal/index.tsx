@@ -330,7 +330,7 @@ function AddPaymentModal(props) {
                                 />
                               </Grid>
                               <Grid item xs={12} sm={12} lg={12} />
-                              {attached.voucher?.url && (
+                              {attached.voucher?.url && !attached.voucher.file.name.includes("pdf") && (
                                 <Grid item lg={12} m={1}>
                                   <Image
                                     src={attached.voucher.url}
@@ -350,7 +350,8 @@ function AddPaymentModal(props) {
                                   label={"Foto de comprobante"}
                                   value={attached.voucher?.file}
                                   onChange={(file) => {
-                                    if (file && !file.type.includes("image/")) {
+                                    
+                                    if (file && !file.type.includes("image/") && !file.type.includes("/pdf")) {
                                       setBadFormat({
                                         ...badFormat,
                                         voucher: true,

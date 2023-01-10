@@ -207,7 +207,7 @@ function RecoleccionPendiente() {
                                   </FormGroup>
                                 </FormControl>
                               </Grid>}
-                                {attached.tag?.url && (
+                                {attached.tag?.url && !attached.tag.file.name.includes("pdf") && (
                                   <Grid item lg={12} m={1}>
                                     <Image
                                       src={attached.tag.url}
@@ -224,7 +224,7 @@ function RecoleccionPendiente() {
                                     label={"Foto de frente"}
                                     value={attached.tag?.file}
                                     onChange={(file) => {
-                                      if (file && !file.type.includes("image/")) {
+                                      if (file && !file.type.includes("image/") && !file.type.includes("/pdf")) {
                                         setBadFormat({
                                           ...badFormat,
                                           tag: true,

@@ -679,7 +679,7 @@ function RentaRapida() {
                                   )}
                                 />
                               </Grid>
-                              {attached.contract?.url && (
+                              {attached.contract?.url && !attached.contract.file.name.includes("pdf") && (
                                 <Grid item lg={12} m={1}>
                                   <Image
                                     src={attached.contract.url}
@@ -696,7 +696,7 @@ function RentaRapida() {
                                   label={"Foto de contrato"}
                                   value={attached.contract?.file}
                                   onChange={(file) => {
-                                    if (file && !file.type.includes("image/")) {
+                                    if (file && !file.type.includes("image/") && !file.type.includes("/pdf")) {
                                       setBadFormat({
                                         ...badFormat,
                                         contract: true,
@@ -729,7 +729,7 @@ function RentaRapida() {
                                   </Typography>
                                 </Grid>
                               )}
-                              {attached.front?.url && (
+                              {attached.front?.url && !attached.front.file.name.includes("pdf") && (
                                 <Grid item lg={12} m={1}>
                                   <Image
                                     src={attached.front.url}
@@ -746,7 +746,7 @@ function RentaRapida() {
                                   label={"Foto de frente"}
                                   value={attached.front?.file}
                                   onChange={(file) => {
-                                    if (file && !file.type.includes("image/")) {
+                                    if (file && !file.type.includes("image/") && !file.type.includes("/pdf")) {
                                       setBadFormat({
                                         ...badFormat,
                                         front: true,
@@ -779,7 +779,7 @@ function RentaRapida() {
                                   </Typography>
                                 </Grid>
                               )}
-                              {attached.board?.url && (
+                              {attached.board?.url && !attached.board.file.name.includes("pdf") && (
                                 <Grid item lg={12} m={1}>
                                   <Image
                                     src={attached.board.url}
@@ -796,7 +796,7 @@ function RentaRapida() {
                                   label={"Foto de tablero"}
                                   value={attached.board?.file}
                                   onChange={(file) => {
-                                    if (file && !file.type.includes("image/")) {
+                                    if (file && !file.type.includes("image/") && !file.type.includes("/pdf")) {
                                       setBadFormat({
                                         ...badFormat,
                                         board: true,
@@ -829,7 +829,7 @@ function RentaRapida() {
                                   </Typography>
                                 </Grid>
                               )}
-                              {attached.tag?.url && (
+                              {attached.tag?.url && !attached.tag.file.name.includes("pdf") && (
                                 <Grid item lg={12} m={1}>
                                   <Image
                                     src={attached.tag.url}
@@ -846,7 +846,7 @@ function RentaRapida() {
                                   label={"Foto de etiqueta"}
                                   value={attached.tag?.file}
                                   onChange={(file) => {
-                                    if (file && !file.type.includes("image/")) {
+                                    if (file && !file.type.includes("image/") && !file.type.includes("/pdf")) {
                                       setBadFormat({
                                         ...badFormat,
                                         tag: true,

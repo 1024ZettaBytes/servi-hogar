@@ -186,7 +186,6 @@ function RentaRapida() {
     setDeliveryTime(defaultData().deliveryTime);
     setCustomerRent(null);
   };
-  console.log("Selected customer:", selectedCustomer);
   return (
     <>
       <Head>
