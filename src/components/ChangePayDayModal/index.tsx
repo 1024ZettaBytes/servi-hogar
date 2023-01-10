@@ -354,7 +354,7 @@ function ChangePayDayModal(props) {
                             >
                               <Box>
                                 <Typography gutterBottom variant="h5">
-                                  Nueva fecha de vencimiento
+                                  Nueva fecha de pago
                                 </Typography>
                                 <Typography color="black" gutterBottom>
                                   {capitalizeFirstLetter(
