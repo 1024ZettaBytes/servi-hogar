@@ -20,6 +20,7 @@ import {
   TextField,
   InputAdornment,
 } from "@mui/material";
+import NextLink from "next/link";
 import { capitalizeFirstLetter } from "lib/client/utils";
 import { format } from "date-fns";
 import es from "date-fns/locale/es";
@@ -36,7 +37,7 @@ import FormatModal from "@/components/FormatModal";
 import { getFormatForPickup, getFormatForChange } from "lib/consts/OBJ_CONTS";
 import ScheduleChangeModal from "@/components/ScheduleChangeModal";
 import Label from "@/components/Label";
-
+import styles from "../tables.module.css";
 interface TablaRentasActualesProps {
   className?: string;
   rentList: any[];
@@ -304,7 +305,7 @@ const TablaRentasActuales: FC<TablaRentasActualesProps> = ({ rentList }) => {
                     <TableCell align="center">
                       {rent?.machine?.machineNum}
                     </TableCell>
-                    <TableCell align="center">{rent?.customer?.name}</TableCell>
+                    <TableCell align="center"><NextLink href={`/clientes/${rent?.customer?._id}` }><a className={styles.title_text}>{rent?.customer?.name}</a></NextLink></TableCell>
                     <TableCell align="center">
                       <Typography
                         variant="body1"
@@ -373,6 +374,9 @@ const TablaRentasActuales: FC<TablaRentasActualesProps> = ({ rentList }) => {
                       </Tooltip>
                       <Tooltip title="Cambiar día de pago" arrow>
                         <IconButton
+                        disabled={["EN_CAMBIO", "EN_RECOLECCION"].includes(
+                          rent?.status?.id
+                        )}
                           onClick={() => {
                             handleOnDayChangeClick(rent?._id);
                           }}
