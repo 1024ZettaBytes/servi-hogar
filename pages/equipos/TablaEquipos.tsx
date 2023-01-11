@@ -489,7 +489,7 @@ const TablaEquipos: FC<TablaEquiposProps> = ({ userRole, machinesList }) => {
         title="Atención"
         requiredReason= {false}
         text={
-          "¿Esta seguro de eliminar a" +
+          "¿Está seguro de eliminar a" +
           (machinesToDelete.length === 1
             ? "l equipo seleccionado"
             : " los equipos seleccionados") +

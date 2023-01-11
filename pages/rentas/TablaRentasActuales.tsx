@@ -30,6 +30,7 @@ import CurrencyExchangeIcon from "@mui/icons-material/CurrencyExchange";
 import LocalShippingIcon from "@mui/icons-material/LocalShipping";
 import SearchIcon from "@mui/icons-material/Search";
 import ChangeCircleIcon from "@mui/icons-material/ChangeCircle";
+import RedeemIcon from '@mui/icons-material/Redeem';
 import ExtendRentModal from "../../src/components/ExtendRentModal";
 import ChangePayDayModal from "@/components/ChangePayDayModal";
 import SchedulePickupModal from "@/components/SchedulePickupModal";
@@ -38,6 +39,7 @@ import { getFormatForPickup, getFormatForChange } from "lib/consts/OBJ_CONTS";
 import ScheduleChangeModal from "@/components/ScheduleChangeModal";
 import Label from "@/components/Label";
 import styles from "../tables.module.css";
+import BonusModal from "@/components/BonusModal";
 interface TablaRentasActualesProps {
   className?: string;
   rentList: any[];
@@ -149,10 +151,12 @@ const TablaRentasActuales: FC<TablaRentasActualesProps> = ({ rentList }) => {
   const [payDayModalIsOpen, setPayDayModalIsOpen] = useState(false);
   const [pickupModalIsOpen, setPickupModalIsOpen] = useState(false);
   const [changeModalIsOpen, setChangeModalIsOpen] = useState(false);
+  const [bonusModalIsOpen, setBonusModalIsOpen] = useState(false);
   const [formatIsOpen, setFormatIsOpen] = useState(false);
   const [createdPickup, setCreatedPickup] = useState<any>(null);
   const [createdChange, setCreatedChange] = useState<any>(null);
   const [selectedId, setSelectedId] = useState<any>(null);
+  const [selectedRent, setSelectedRent] = useState<any>(null);
   const [page, setPage] = useState<number>(0);
   const [limit, setLimit] = useState<number>(10);
   const [filter, setFilter] = useState<string>("");
@@ -161,6 +165,7 @@ const TablaRentasActuales: FC<TablaRentasActualesProps> = ({ rentList }) => {
     setPayDayModalIsOpen(false);
     setPickupModalIsOpen(false);
     setChangeModalIsOpen(false);
+    setBonusModalIsOpen(false);
     if (wasSuccess && successMessage) {
       enqueueSnackbar(successMessage, {
         variant: "success",
@@ -183,7 +188,7 @@ const TablaRentasActuales: FC<TablaRentasActualesProps> = ({ rentList }) => {
       setFormatIsOpen(true);
     }
   };
-
+  
   const handleCloseChangeModal = (
     wasSuccess,
     changeCompleteData,
@@ -195,6 +200,17 @@ const TablaRentasActuales: FC<TablaRentasActualesProps> = ({ rentList }) => {
       setFormatIsOpen(true);
     }
   };
+
+  const handleCloseBonusModal = (
+    wasSuccess,
+    successMessage = null
+  ) => {
+    handleCloseModal(wasSuccess, successMessage);
+    if (wasSuccess) {
+// Show success message
+    }
+  };
+
   const handleSearchChange = (e: ChangeEvent<HTMLInputElement>): void => {
     const value = e.target.value;
     setFilter(value);
@@ -225,6 +241,11 @@ const TablaRentasActuales: FC<TablaRentasActualesProps> = ({ rentList }) => {
   const handleOnChangeClick = (rentId: string) => {
     setSelectedId(rentId);
     setChangeModalIsOpen(true);
+  };
+  const handleOnBonusClick = (rent: any) => {
+    setSelectedId(rent?._id);
+    setSelectedRent(rent);
+    setBonusModalIsOpen(true);
   };
 
   const filteredRents = applyFilters(rentList, filter);
@@ -412,6 +433,31 @@ const TablaRentasActuales: FC<TablaRentasActualesProps> = ({ rentList }) => {
                           </IconButton>
                         </span>
                       </Tooltip>
+                      <Tooltip title="Bonificar" arrow>
+                        <span>
+                          <IconButton
+                            disabled={
+                              ["EN_CAMBIO", "EN_RECOLECCION"].includes(
+                                rent.status.id
+                              )
+                            }
+                            onClick={() => {
+                              handleOnBonusClick(rent);
+                            }}
+                            sx={{
+                              "&:hover": {
+                                background: theme.colors.gradients.blue4
+                              ,
+                              },
+                              color: theme.colors.gradients.blue1,
+                            }}
+                            color="info"
+                            size="small"
+                          >
+                            <RedeemIcon fontSize="small" />
+                          </IconButton>
+                        </span>
+                      </Tooltip>
                     </TableCell>
                   </TableRow>
                 );
@@ -457,6 +503,13 @@ const TablaRentasActuales: FC<TablaRentasActualesProps> = ({ rentList }) => {
           open={pickupModalIsOpen}
           handleOnClose={handleClosePickupModal}
           rentId={selectedId}
+        />
+      )}
+      {bonusModalIsOpen && (
+        <BonusModal
+          open={bonusModalIsOpen}
+          handleOnClose={handleCloseBonusModal}
+          rent={selectedRent}
         />
       )}
       {formatIsOpen && createdPickup && (
