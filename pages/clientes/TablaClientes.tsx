@@ -389,7 +389,7 @@ const TablaClientes: FC<TablaClientesProps> = ({ userRole, customerList }) => {
     title="Atención"
     requiredReason= {false}
     text={
-      "¿Esta seguro de eliminar a" +
+      "¿Está seguro de eliminar a" +
       (customersToDelete.length === 1
         ? "l cliente seleccionado"
         : " los clientes seleccionados") +
