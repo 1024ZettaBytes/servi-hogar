@@ -1,0 +1,16 @@
+.logoContainer {
+    width:100%
+}
+.loginLogo{
+    width: 100%;
+    padding:10%;
+    height: auto;
+
+}
+.buttonContainer{
+    width: 100%;
+    /*padding-left: 30%;
+    padding-right: 30%;*/
+    padding-top: 5%;
+
+}

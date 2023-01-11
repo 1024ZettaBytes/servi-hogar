@@ -1,0 +1,8 @@
+.title_text, .title_text:visited, .title_text:active{
+    color: inherit !important;
+    text-decoration: none !important;
+    }
+    
+    .title_text:hover{
+        text-decoration: underline !important;
+    }
