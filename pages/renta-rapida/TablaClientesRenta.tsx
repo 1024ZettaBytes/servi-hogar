@@ -32,6 +32,7 @@ import Label from "@/components/Label";
 import { CustomerLevel } from "@/models/crypto_order";
 import SearchIcon from "@mui/icons-material/Search";
 import { LoadingButton } from "@mui/lab";
+import numeral from "numeral";
 
 interface TablaClientesRentaProps {
   className?: string;
@@ -385,6 +386,12 @@ const TablaClientesRenta: FC<TablaClientesRentaProps> = ({
           />
         </Box>
       </Card>
+      {
+        selectedCustomer && selectedCustomer.balance < 0 &&
+      <Grid item sm={12} md={12} lg={5} m={2}>
+          <Alert severity="warning">{`ATENCIÓN: Este cliente tiene saldo pendiente de $${numeral(selectedCustomer?.balance).format(`${selectedCustomer?.balance}0,0.00`)}`}</Alert>
+            </Grid>
+}
       {selectedCustomer && (
         <Grid container marginTop={1}>
           <Grid item sm={12} md={12} lg={5}>
@@ -606,6 +613,7 @@ const TablaClientesRenta: FC<TablaClientesRentaProps> = ({
               </Box>
             </Card>
           </Grid>
+          
         </Grid>
       )}
     </>
