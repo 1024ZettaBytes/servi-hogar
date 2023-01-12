@@ -21,6 +21,7 @@ import {
   InputLabel,
   FormGroup,
   Checkbox,
+  TextField,
 } from "@mui/material";
 import Footer from "@/components/Footer";
 import Stepper from "@mui/material/Stepper";
@@ -29,25 +30,23 @@ import StepLabel from "@mui/material/StepLabel";
 import StepContent from "@mui/material/StepContent";
 import Button from "@mui/material/Button";
 import Paper from "@mui/material/Paper";
-import {
-  getFetcher,
-  useGetPickupById,
-} from "../api/useRequest";
+import { getFetcher, useGetPickupById } from "../api/useRequest";
 import { ACCESORIES_LIST } from "../../lib/consts/OBJ_CONTS";
 import NextBreadcrumbs from "@/components/Shared/BreadCrums";
 import { LoadingButton } from "@mui/lab";
+import { DesktopDatePicker } from "@mui/x-date-pickers";
 import { completePickup } from "lib/client/pickupsFetch";
 import { useRouter } from "next/router";
 import React from "react";
 import { MuiFileInput } from "mui-file-input";
+import { dateDiffInDays } from "lib/client/utils";
 
 function RecoleccionPendiente() {
   const router = useRouter();
   const { pickupId } = router.query;
-  const { pickup, pickupByIdError } = useGetPickupById(
-    getFetcher,
-    pickupId
-  );
+  const { pickup, pickupByIdError } = useGetPickupById(getFetcher, pickupId);
+  const [pickupDate, setPickupDate] = useState<any>(new Date());
+  const [whitDebt, setWhitDebt] = useState<boolean>(true);
   const [pickedAccesories, setPickedAccesories] = useState<any>({});
   const [attached, setAttached] = useState<any>({
     tag: { file: null, url: null },
@@ -63,20 +62,28 @@ function RecoleccionPendiente() {
     error: false,
     msg: "",
   });
+  const debt =
+    (pickup?.rent?.customer?.level?.dayPrice || 0) *
+    Math.abs(
+      (pickup?.rent?.remaining || 0) - dateDiffInDays(new Date(), pickupDate)
+    );
+  const newbalance = (pickup?.rent?.customer?.balance || 0) - debt;
   const [activeStep, setActiveStep] = useState(0);
   const generalError = pickupByIdError;
   const completeData = pickup;
 
   const steps = [
     {
+      label: "Fecha de recolección",
+    },
+    {
       label: "Equipo y accesorios recolectados",
     },
-
   ];
 
-
   const checkEnabledButton = () => {
-    if (activeStep === 0) return attached.tag.file;
+    if (activeStep === 0) return pickupDate.toString() !== "Invalid Date";
+    if (activeStep === 1) return attached.tag.file;
     return true;
   };
 
@@ -87,7 +94,7 @@ function RecoleccionPendiente() {
     setIsSubmitting(true);
     const result = await completePickup(attached, {
       pickupId,
-      pickedAccesories
+      pickedAccesories,
     });
     setIsSubmitting(false);
     if (!result.error) {
@@ -105,7 +112,6 @@ function RecoleccionPendiente() {
   const handleBack = () => {
     setActiveStep((prevActiveStep) => prevActiveStep - 1);
   };
-
 
   return (
     <>
@@ -129,9 +135,7 @@ function RecoleccionPendiente() {
         >
           <Grid item xs={12}>
             {generalError ? (
-              <Alert severity="error">
-                {pickupByIdError?.message}
-              </Alert>
+              <Alert severity="error">{pickupByIdError?.message}</Alert>
             ) : !completeData ? (
               <Skeleton
                 variant="rectangular"
@@ -160,54 +164,113 @@ function RecoleccionPendiente() {
                         >
                           {activeStep === 0 && (
                             <Grid container>
-                              <Grid item xs={2} sm={2} lg={1} mt={1} textAlign="center">
-                                <InputLabel id="machine-id">
-                                  # Equipo
-                                </InputLabel>
-
-
+                              <Grid item lg={12} m={1}>
+                                <DesktopDatePicker
+                                  label="Fecha de recolección*"
+                                  inputFormat="dd/MM/yyyy"
+                                  value={pickupDate}
+                                  maxDate={new Date()}
+                                  onChange={(newValue) => {
+                                    setPickupDate(newValue);
+                                  }}
+                                  renderInput={(params) => (
+                                    <TextField {...params} />
+                                  )}
+                                />
                               </Grid>
-                              <Grid item xs={12} sm={12} lg={12} />
-                              <Grid item xs={2} sm={2} lg={1} textAlign="center">
-                                <Typography color="black" fontWeight="bold">
-                                  {pickup.rent.machine.machineNum}
-                                </Typography>
-
-                              </Grid>
-                              <Grid item xs={12} sm={12} lg={12} />
-                              {pickup.rent.accesories && <Grid item xs={9} sm={6} lg={12} m={2}>
+                              <Grid item xs={12} sm={12} lg={12} m={1}>
                                 <FormControl
                                   component="fieldset"
                                   variant="standard"
                                 >
                                   <FormLabel component="legend">
-                                    Accesorios
+                                    Generar deuda
                                   </FormLabel>
                                   <FormGroup>
-                                    {Object.keys(pickup.rent.accesories).map((key) => (
-                                      pickup.rent.accesories[key] ? 
-                                      <FormControlLabel
-                                        key={key}
-                                        control={
-                                          <Checkbox
-                                            checked={
-                                              pickedAccesories[key] ? true : false
-                                            }
-                                            onChange={(event) => {
-                                              setPickedAccesories({
-                                                ...pickedAccesories,
-                                                [key]: event.target.checked,
-                                              });
-                                            }}
-                                          />
-                                        }
-                                        label={ACCESORIES_LIST[key]}
-                                      /> : null
-                                    ))}
+                                    <FormControlLabel
+                                      control={
+                                        <Checkbox
+                                          checked={whitDebt}
+                                          onChange={(event) => {
+                                            setWhitDebt(event.target.checked);
+                                          }}
+                                        />
+                                      }
+                                      label={`Deuda de $${debt} (Vencida hace ${Math.abs(pickup?.rent.remaining)} día(s))`}
+                                    />
                                   </FormGroup>
                                 </FormControl>
-                              </Grid>}
-                                {attached.tag?.url && !attached.tag.file.name.includes("pdf") && (
+                              </Grid>
+                            </Grid>
+                          )}
+                          {activeStep === 1 && (
+                            <Grid container>
+                              <Grid
+                                item
+                                xs={2}
+                                sm={2}
+                                lg={1}
+                                mt={1}
+                                textAlign="center"
+                              >
+                                <InputLabel id="machine-id">
+                                  # Equipo
+                                </InputLabel>
+                              </Grid>
+                              <Grid item xs={12} sm={12} lg={12} />
+                              <Grid
+                                item
+                                xs={2}
+                                sm={2}
+                                lg={1}
+                                textAlign="center"
+                              >
+                                <Typography color="black" fontWeight="bold">
+                                  {pickup.rent.machine.machineNum}
+                                </Typography>
+                              </Grid>
+                              <Grid item xs={12} sm={12} lg={12} />
+                              {pickup.rent.accesories && (
+                                <Grid item xs={9} sm={6} lg={12} m={2}>
+                                  <FormControl
+                                    component="fieldset"
+                                    variant="standard"
+                                  >
+                                    <FormLabel component="legend">
+                                      Accesorios
+                                    </FormLabel>
+                                    <FormGroup>
+                                      {Object.keys(pickup.rent.accesories).map(
+                                        (key) =>
+                                          pickup.rent.accesories[key] ? (
+                                            <FormControlLabel
+                                              key={key}
+                                              control={
+                                                <Checkbox
+                                                  checked={
+                                                    pickedAccesories[key]
+                                                      ? true
+                                                      : false
+                                                  }
+                                                  onChange={(event) => {
+                                                    setPickedAccesories({
+                                                      ...pickedAccesories,
+                                                      [key]:
+                                                        event.target.checked,
+                                                    });
+                                                  }}
+                                                />
+                                              }
+                                              label={ACCESORIES_LIST[key]}
+                                            />
+                                          ) : null
+                                      )}
+                                    </FormGroup>
+                                  </FormControl>
+                                </Grid>
+                              )}
+                              {attached.tag?.url &&
+                                !attached.tag.file.name.includes("pdf") && (
                                   <Grid item lg={12} m={1}>
                                     <Image
                                       src={attached.tag.url}
@@ -217,46 +280,50 @@ function RecoleccionPendiente() {
                                     />
                                   </Grid>
                                 )}
-                                <Grid item lg={4} m={1}>
-                                  <MuiFileInput
+                              <Grid item lg={4} m={1}>
+                                <MuiFileInput
                                   required={!attached.tag.file}
-                                    placeholder={"No seleccionada"}
-                                    label={"Foto de frente"}
-                                    value={attached.tag?.file}
-                                    onChange={(file) => {
-                                      if (file && !file.type.includes("image/") && !file.type.includes("/pdf")) {
-                                        setBadFormat({
-                                          ...badFormat,
-                                          tag: true,
-                                        });
-                                        setAttached({
-                                          ...attached,
-                                          tag: {
-                                            ...attached.tag,
-                                            error: true,
-                                          },
-                                        });
-                                        return;
-                                      }
-                                      const url = file
-                                        ? URL.createObjectURL(file)
-                                        : null;
+                                  placeholder={"No seleccionada"}
+                                  label={"Foto de frente"}
+                                  value={attached.tag?.file}
+                                  onChange={(file) => {
+                                    if (
+                                      file &&
+                                      !file.type.includes("image/") &&
+                                      !file.type.includes("/pdf")
+                                    ) {
+                                      setBadFormat({
+                                        ...badFormat,
+                                        tag: true,
+                                      });
                                       setAttached({
                                         ...attached,
-                                        tag: { file, url, error: false },
+                                        tag: {
+                                          ...attached.tag,
+                                          error: true,
+                                        },
                                       });
-                                    }}
-                                  />
+                                      return;
+                                    }
+                                    const url = file
+                                      ? URL.createObjectURL(file)
+                                      : null;
+                                    setAttached({
+                                      ...attached,
+                                      tag: { file, url, error: false },
+                                    });
+                                  }}
+                                />
+                              </Grid>
+                              <Grid item lg={12} />
+                              {attached.tag?.error && (
+                                <Grid item lg={4} m={1}>
+                                  <Typography color="error">
+                                    Seleccione un archivo válido(*.jpg, *.jpeg,
+                                    *.png).
+                                  </Typography>
                                 </Grid>
-                                <Grid item lg={12} />
-                                {attached.tag?.error && (
-                                  <Grid item lg={4} m={1}>
-                                    <Typography color="error">
-                                      Seleccione un archivo válido(*.jpg, *.jpeg,
-                                      *.png).
-                                    </Typography>
-                                  </Grid>
-                                )}
+                              )}
                               {hasErrorSubmitting.error && (
                                 <Grid item lg={6} m={1}>
                                   <Alert severity="error">
@@ -278,7 +345,7 @@ function RecoleccionPendiente() {
                                 </Button>
                               )}
                               <LoadingButton
-                                onClick={handleOnSubmit}
+                                type="submit"
                                 loading={isSubmitting}
                                 disabled={!nextButtonEnabled}
                                 variant="contained"
@@ -318,7 +385,9 @@ function RecoleccionPendiente() {
   );
 }
 
-RecoleccionPendiente.getLayout = (page) => <SidebarLayout>{page}</SidebarLayout>;
+RecoleccionPendiente.getLayout = (page) => (
+  <SidebarLayout>{page}</SidebarLayout>
+);
 
 export async function getServerSideProps({ req, resolvedUrl }) {
   let props = await validateServerSideSession(getSession, req, resolvedUrl);

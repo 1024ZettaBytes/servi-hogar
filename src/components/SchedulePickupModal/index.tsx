@@ -17,7 +17,11 @@ import {
 import { LoadingButton } from "@mui/lab";
 import { useGetRentById, getFetcher } from "../../../pages/api/useRequest";
 import { savePickup } from "../../../lib/client/pickupsFetch";
-import { capitalizeFirstLetter, addDaysToDate, dateDiffInDays } from "lib/client/utils";
+import {
+  capitalizeFirstLetter,
+  addDaysToDate,
+  dateDiffInDays,
+} from "lib/client/utils";
 import { format } from "date-fns";
 import es from "date-fns/locale/es";
 import numeral from "numeral";
@@ -31,14 +35,15 @@ const defaultEndDate = (today: Date) => {
   today.setHours(23, 0, 0);
   return today;
 };
+
 function SchedulePickupModal(props) {
   const { rentId, handleOnClose, open } = props;
   const { rent, rentByIdError } = useGetRentById(getFetcher, rentId);
   const [pickupTime, setPickupTime] = useState<any>({
-    date: addDaysToDate(new Date(), 1),
+    date: new Date(),
     timeOption: "any",
-    fromTime: defaultInitialDate(addDaysToDate(new Date(), 1)),
-    endTime: defaultEndDate(addDaysToDate(new Date(), 1)),
+    fromTime: defaultInitialDate(new Date()),
+    endTime: defaultEndDate(new Date()),
   });
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
 
@@ -47,7 +52,12 @@ function SchedulePickupModal(props) {
     msg: "",
   });
   const [selectedDay, setSelectedDay] = useState<any>(null);
-
+  const debt =
+    (rent?.customer?.level?.dayPrice || 0) *
+    Math.abs(
+      (rent?.remaining || 0) - dateDiffInDays(new Date(), pickupTime.date)
+    );
+  const newbalance = (rent?.customer?.balance || 0) - debt;
   const submitButtonEnabled =
     rent &&
     pickupTime.date &&
@@ -56,7 +66,6 @@ function SchedulePickupModal(props) {
       (pickupTime.fromTime &&
         pickupTime.endTime &&
         pickupTime.fromTime.getTime() <= pickupTime.endTime.getTime()));
-
 
   const handleOnSubmit = async () => {
     setHasErrorSubmitting({ error: false, msg: "" });
@@ -76,7 +85,7 @@ function SchedulePickupModal(props) {
     handleOnClose(false);
   };
   const handleSavedPickup = (successMessage, pickup) => {
-    handleOnClose(true, {rent, pickupTime, pickup},successMessage);
+    handleOnClose(true, { rent, pickupTime, pickup }, successMessage);
   };
   if (rent && !selectedDay) {
     const dayName = format(new Date(rent?.endDate), "eeee").toLowerCase();
@@ -107,7 +116,6 @@ function SchedulePickupModal(props) {
     }
     return `VENCIDA (${Math.abs(rent.remaining)} día(s))`;
   };
-
 
   return (
     <Dialog open={open} fullWidth={true} maxWidth={"md"} scroll={"body"}>
@@ -255,6 +263,17 @@ function SchedulePickupModal(props) {
                           onChangeTime={onChangePickupTime}
                         />
                       </Grid>
+                      {rent?.remaining < 0 && (
+                        <Grid item lg={12}>
+                          <Alert
+                            severity="warning"
+                          >
+                            Se generará una deuda de ${debt}.
+                            <br />
+                            El nuevo saldo será de ${newbalance}.
+                          </Alert>
+                        </Grid>
+                      )}
                     </>
                   )}
                 </Grid>
