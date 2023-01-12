@@ -19,7 +19,6 @@ import { useGetRentById, getFetcher } from "../../../pages/api/useRequest";
 import { savePickup } from "../../../lib/client/pickupsFetch";
 import {
   capitalizeFirstLetter,
-  addDaysToDate,
   dateDiffInDays,
 } from "lib/client/utils";
 import { format } from "date-fns";
