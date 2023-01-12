@@ -67,7 +67,7 @@ function RecoleccionPendiente() {
     Math.abs(
       (pickup?.rent?.remaining || 0) - dateDiffInDays(new Date(), pickupDate)
     );
-  const newbalance = (pickup?.rent?.customer?.balance || 0) - debt;
+ // const newbalance = (pickup?.rent?.customer?.balance || 0) - debt;
   const [activeStep, setActiveStep] = useState(0);
   const generalError = pickupByIdError;
   const completeData = pickup;
