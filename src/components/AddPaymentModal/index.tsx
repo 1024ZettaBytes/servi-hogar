@@ -293,7 +293,7 @@ function AddPaymentModal(props) {
                             <Grid container>
                               <Grid item lg={2} m={1}>
                                 <TextField
-                                  label="Cantidad*"
+                                  label="Cantidad"
                                   type="number"
                                   required
                                   value={selectedAmount}

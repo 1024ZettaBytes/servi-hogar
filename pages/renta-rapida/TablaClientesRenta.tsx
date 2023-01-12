@@ -137,7 +137,10 @@ const TablaClientesRenta: FC<TablaClientesRentaProps> = ({
   const [customerToEdit, setCustomerToEdit] = useState<any>({ isSet: false });
   const [isEditing, setIsEditing] = useState<any>(false);
   const [isUpdating, setIsUpdating] = useState<any>(false);
-  const [hasErrorUpdating, setHasErrorUpdating] = useState<any>({ error: false, msg: "" });
+  const [hasErrorUpdating, setHasErrorUpdating] = useState<any>({
+    error: false,
+    msg: "",
+  });
   const [page, setPage] = useState<number>(0);
   const [limit, setLimit] = useState<number>(10);
   const [filter, setFilter] = useState<string>("");
@@ -249,7 +252,7 @@ const TablaClientesRenta: FC<TablaClientesRentaProps> = ({
     (!customerToEdit.isSet && selectedCustomer) ||
     customerToEdit?._id?.toString() !== selectedCustomer?._id?.toString()
   ) {
-    setHasErrorUpdating({ error: false, msg: ""});
+    setHasErrorUpdating({ error: false, msg: "" });
     setCustomerToEdit({ ...selectedCustomer, isSet: true });
   }
   return (
@@ -386,12 +389,13 @@ const TablaClientesRenta: FC<TablaClientesRentaProps> = ({
           />
         </Box>
       </Card>
-      {
-        selectedCustomer && selectedCustomer.balance < 0 &&
-      <Grid item sm={12} md={12} lg={5} m={2}>
-          <Alert severity="warning">{`ATENCIÓN: Este cliente tiene saldo pendiente de $${numeral(selectedCustomer?.balance).format(`${selectedCustomer?.balance}0,0.00`)}`}</Alert>
-            </Grid>
-}
+      {selectedCustomer && selectedCustomer.balance < 0 && (
+        <Grid item sm={12} md={12} lg={5} m={2}>
+          <Alert severity="warning">{`ATENCIÓN: Este cliente tiene saldo pendiente de $${numeral(
+            selectedCustomer?.balance
+          ).format(`${selectedCustomer?.balance}0,0.00`)}`}</Alert>
+        </Grid>
+      )}
       {selectedCustomer && (
         <Grid container marginTop={1}>
           <Grid item sm={12} md={12} lg={5}>
@@ -406,7 +410,7 @@ const TablaClientesRenta: FC<TablaClientesRentaProps> = ({
                       variant="text"
                       sx={{ marginTop: 1 }}
                       onClick={() => {
-                        setHasErrorUpdating({ error: false, msg: ""});
+                        setHasErrorUpdating({ error: false, msg: "" });
                         setCustomerToEdit({ ...selectedCustomer });
                         setIsEditing(!isEditing);
                       }}
@@ -418,202 +422,232 @@ const TablaClientesRenta: FC<TablaClientesRentaProps> = ({
               />
               <Divider />
               <Box component="form" onSubmit={handleUpdateResidence}>
-              <Grid container p={1}>
-                <Grid item xs={4} sm={3} lg={4} margin={1}>
-                  <Typography variant="h5">Celular</Typography>
-                  {!isEditing ? (
-                    <Typography variant="h5" sx={{ py: 1 }} fontWeight="normal">
-                      {selectedCustomer?.cell}
-                    </Typography>
-                  ) : (
-                    getInfoTextField("cell", 10, 10)
-                  )}
-                </Grid>
-                <Grid item xs={6} sm={4} lg={7} margin={1}>
-                  <Typography variant="h5">Calle y Número</Typography>
-                  {!isEditing ? (
-                    <Typography variant="h5" sx={{ py: 1 }} fontWeight="normal">
-                      {selectedCustomer?.currentResidence?.street}
-                    </Typography>
-                  ) : (
-                    getResidenceTextField("street", 1, 100)
-                  )}
-                </Grid>
-                <Grid item xs={4} sm={4} lg={4} margin={1}>
-                  <Typography variant="h5">Colonia</Typography>
-                  {!isEditing ? (
-                    <Typography variant="h5" sx={{ py: 1 }} fontWeight="normal">
-                      {selectedCustomer?.currentResidence?.suburb}
-                    </Typography>
-                  ) : (
-                    getResidenceTextField("suburb", 1, 100)
-                  )}
-                </Grid>
-                <Grid item xs={6} sm={3} lg={5} margin={1}>
-                  <Typography variant="h5">Sector</Typography>
-                  {!isEditing ? (
-                    <Typography variant="h5" sx={{ py: 1 }} fontWeight="normal">
-                      {selectedCustomer?.currentResidence?.sector?.name}
-                    </Typography>
-                  ) : (
-                    <FormControl sx={{ width: "100%" }}>
-                      <Select
-                        labelId="sector-id"
-                        id="sector"
-                        name="sector"
-                        required
-                        autoComplete="off"
-                        size="small"
-                        placeholder="Seleccione un valor"
-                        value={
-                          customerToEdit?.currentResidence?.sector._id || ""
-                        }
-                        onChange={(event) =>
-                          handleSectorSelection(event.target.value)
-                        }
+                <Grid container p={1}>
+                  <Grid item xs={4} sm={3} lg={4} margin={1}>
+                    <Typography variant="h5">Celular</Typography>
+                    {!isEditing ? (
+                      <Typography
+                        variant="h5"
+                        sx={{ py: 1 }}
+                        fontWeight="normal"
                       >
-                        {customerToEdit?.currentResidence?.city?.sectors
-                          ?.length > 0
-                          ? customerToEdit?.currentResidence?.city?.sectors?.map(
-                              (sector) => (
-                                <MenuItem key={sector._id} value={sector._id}>
-                                  {sector.name}
-                                </MenuItem>
+                        {selectedCustomer?.cell}
+                      </Typography>
+                    ) : (
+                      getInfoTextField("cell", 10, 10)
+                    )}
+                  </Grid>
+                  <Grid item xs={6} sm={4} lg={7} margin={1}>
+                    <Typography variant="h5">Calle y Número</Typography>
+                    {!isEditing ? (
+                      <Typography
+                        variant="h5"
+                        sx={{ py: 1 }}
+                        fontWeight="normal"
+                      >
+                        {selectedCustomer?.currentResidence?.street}
+                      </Typography>
+                    ) : (
+                      getResidenceTextField("street", 1, 100)
+                    )}
+                  </Grid>
+                  <Grid item xs={4} sm={4} lg={4} margin={1}>
+                    <Typography variant="h5">Colonia</Typography>
+                    {!isEditing ? (
+                      <Typography
+                        variant="h5"
+                        sx={{ py: 1 }}
+                        fontWeight="normal"
+                      >
+                        {selectedCustomer?.currentResidence?.suburb}
+                      </Typography>
+                    ) : (
+                      getResidenceTextField("suburb", 1, 100)
+                    )}
+                  </Grid>
+                  <Grid item xs={6} sm={3} lg={5} margin={1}>
+                    <Typography variant="h5">Sector</Typography>
+                    {!isEditing ? (
+                      <Typography
+                        variant="h5"
+                        sx={{ py: 1 }}
+                        fontWeight="normal"
+                      >
+                        {selectedCustomer?.currentResidence?.sector?.name}
+                      </Typography>
+                    ) : (
+                      <FormControl sx={{ width: "100%" }}>
+                        <Select
+                          labelId="sector-id"
+                          id="sector"
+                          name="sector"
+                          required
+                          autoComplete="off"
+                          size="small"
+                          placeholder="Seleccione un valor"
+                          value={
+                            customerToEdit?.currentResidence?.sector._id || ""
+                          }
+                          onChange={(event) =>
+                            handleSectorSelection(event.target.value)
+                          }
+                        >
+                          {customerToEdit?.currentResidence?.city?.sectors
+                            ?.length > 0
+                            ? customerToEdit?.currentResidence?.city?.sectors?.map(
+                                (sector) => (
+                                  <MenuItem key={sector._id} value={sector._id}>
+                                    {sector.name}
+                                  </MenuItem>
+                                )
                               )
-                            )
-                          : null}
-                      </Select>
-                    </FormControl>
-                  )}
-                </Grid>
-                <Grid item xs={4} sm={4} lg={4} margin={1}>
-                  <Typography variant="h5">Ciudad</Typography>
-                  {!isEditing ? (
-                    <Typography variant="h5" sx={{ py: 1 }} fontWeight="normal">
-                      {selectedCustomer?.currentResidence?.sector?.name}
-                    </Typography>
-                  ) : (
-                    <FormControl sx={{ width: "100%" }}>
-                      <Select
-                        labelId="city-id"
-                        id="city"
-                        name="city"
-                        required
-                        autoComplete="off"
-                        size="small"
-                        value={
-                          customerToEdit?.currentResidence?.city?._id || ""
-                        }
-                        onChange={(event) =>
-                          handleCitySelection(event.target.value)
-                        }
+                            : null}
+                        </Select>
+                      </FormControl>
+                    )}
+                  </Grid>
+                  <Grid item xs={4} sm={4} lg={4} margin={1}>
+                    <Typography variant="h5">Ciudad</Typography>
+                    {!isEditing ? (
+                      <Typography
+                        variant="h5"
+                        sx={{ py: 1 }}
+                        fontWeight="normal"
                       >
-                        {citiesList
-                          ? citiesList.map((city) => (
-                              <MenuItem key={city._id} value={city._id}>
-                                {city.name}
-                              </MenuItem>
-                            ))
-                          : null}
-                      </Select>
-                    </FormControl>
+                        {selectedCustomer?.currentResidence?.sector?.name}
+                      </Typography>
+                    ) : (
+                      <FormControl sx={{ width: "100%" }}>
+                        <Select
+                          labelId="city-id"
+                          id="city"
+                          name="city"
+                          required
+                          autoComplete="off"
+                          size="small"
+                          value={
+                            customerToEdit?.currentResidence?.city?._id || ""
+                          }
+                          onChange={(event) =>
+                            handleCitySelection(event.target.value)
+                          }
+                        >
+                          {citiesList
+                            ? citiesList.map((city) => (
+                                <MenuItem key={city._id} value={city._id}>
+                                  {city.name}
+                                </MenuItem>
+                              ))
+                            : null}
+                        </Select>
+                      </FormControl>
+                    )}
+                  </Grid>
+                  <Grid item xs={6} sm={4} lg={5} margin={1}>
+                    <Typography variant="h5">Referencia domicilio</Typography>
+                    {!isEditing ? (
+                      <Typography
+                        variant="h5"
+                        sx={{ py: 1 }}
+                        fontWeight="normal"
+                      >
+                        {selectedCustomer?.currentResidence?.residenceRef}
+                      </Typography>
+                    ) : (
+                      getResidenceTextField("residenceRef", 1, 100)
+                    )}
+                  </Grid>
+                  <Grid item xs={4} sm={3} lg={4} margin={1}>
+                    <Typography variant="h5">Nombre ref.</Typography>
+                    {!isEditing ? (
+                      <Typography
+                        variant="h5"
+                        sx={{ py: 1 }}
+                        fontWeight="normal"
+                      >
+                        {selectedCustomer?.currentResidence?.nameRef}
+                      </Typography>
+                    ) : (
+                      getResidenceTextField("nameRef", 1, 100)
+                    )}
+                  </Grid>
+                  <Grid item xs={6} sm={6} lg={5} margin={1}>
+                    <Typography variant="h5">Teléfono ref.</Typography>
+                    {!isEditing ? (
+                      <Typography
+                        variant="h5"
+                        sx={{ py: 1 }}
+                        fontWeight="normal"
+                      >
+                        {selectedCustomer?.currentResidence?.telRef}
+                      </Typography>
+                    ) : (
+                      getResidenceTextField("telRef", 10, 10)
+                    )}
+                  </Grid>
+                  <Grid item xs={12} sm={12} lg={12} margin={1}>
+                    {!isEditing ? (
+                      selectedCustomer?.currentResidence?.maps && (
+                        <Button
+                          fullWidth
+                          variant="text"
+                          href={`${selectedCustomer?.currentResidence?.maps}`}
+                          target="_blank"
+                          startIcon={<LocationOnIcon />}
+                        >
+                          Ver Ubicación
+                        </Button>
+                      )
+                    ) : (
+                      <>
+                        <Typography variant="h5">Ubicación</Typography>
+                        <TextField
+                          autoComplete="off"
+                          id="maps"
+                          name="maps"
+                          multiline
+                          maxRows={3}
+                          fullWidth={true}
+                          value={customerToEdit?.currentResidence?.maps}
+                          onChange={(e) => {
+                            setCustomerToEdit({
+                              ...customerToEdit,
+                              currentResidence: {
+                                ...customerToEdit.currentResidence,
+                                maps: e.target.value,
+                              },
+                            });
+                          }}
+                        />
+                      </>
+                    )}
+                  </Grid>
+                  {isEditing && hasErrorUpdating.error && (
+                    <Grid item xs={12} sm={12} md={12} p={1}>
+                      <Alert severity="error">{hasErrorUpdating.msg}</Alert>
+                    </Grid>
                   )}
-                </Grid>
-                <Grid item xs={6} sm={4} lg={5} margin={1}>
-                  <Typography variant="h5">Referencia domicilio</Typography>
-                  {!isEditing ? (
-                    <Typography variant="h5" sx={{ py: 1 }} fontWeight="normal">
-                      {selectedCustomer?.currentResidence?.residenceRef}
-                    </Typography>
-                  ) : (
-                    getResidenceTextField("residenceRef", 1, 100)
-                  )}
-                </Grid>
-                <Grid item xs={4} sm={3} lg={4} margin={1}>
-                  <Typography variant="h5">Nombre ref.</Typography>
-                  {!isEditing ? (
-                    <Typography variant="h5" sx={{ py: 1 }} fontWeight="normal">
-                      {selectedCustomer?.currentResidence?.nameRef}
-                    </Typography>
-                  ) : (
-                    getResidenceTextField("nameRef", 1, 100)
-                  )}
-                </Grid>
-                <Grid item xs={6} sm={6} lg={5} margin={1}>
-                  <Typography variant="h5">Teléfono ref.</Typography>
-                  {!isEditing ? (
-                    <Typography variant="h5" sx={{ py: 1 }} fontWeight="normal">
-                      {selectedCustomer?.currentResidence?.telRef}
-                    </Typography>
-                  ) : (
-                    getResidenceTextField("telRef", 10, 10)
-                  )}
-                </Grid>
-                <Grid item xs={12} sm={12} lg={12} margin={1}>
-                  {!isEditing ? (
-                    selectedCustomer?.currentResidence?.maps &&
-                   <Button
-                   fullWidth
-                   variant="text"
-                   href={`${selectedCustomer?.currentResidence?.maps}`}
-                   target="_blank"
-                   startIcon={<LocationOnIcon />}
-                 >
-                   Ver Ubicación
-                 </Button>
-                  ) : (
+                  {isEditing && (
                     <>
-                    <Typography variant="h5">Ubicación</Typography>
-                    <TextField
-                            autoComplete="off"
-                            id="maps"
-                            name="maps"
-                            multiline
-                            maxRows={3}
-                            fullWidth={true}
-                            value={customerToEdit?.currentResidence?.maps}
-                            onChange={(e) => {
-                              setCustomerToEdit({
-                                ...customerToEdit,
-                                currentResidence: {
-                                  ...customerToEdit.currentResidence,
-                                  maps: e.target.value,
-                                },
-                              });
-                            }}
-                          />
+                      <Grid item sm={4} lg={4}></Grid>
+                      <Grid item xs={12} sm={4} lg={4}>
+                        <LoadingButton
+                          loading={isUpdating}
+                          fullWidth
+                          variant="outlined"
+                          type="submit"
+                        >
+                          Guardar
+                        </LoadingButton>
+                      </Grid>
+                      <Grid item sm={4} lg={4}></Grid>
                     </>
                   )}
+                  <Grid></Grid>
                 </Grid>
-                {isEditing && hasErrorUpdating.error && (
-                      <Grid item xs={12} sm={12} md={12} p={1}>
-                        <Alert severity="error">
-                          {hasErrorUpdating.msg}
-                        </Alert>
-                      </Grid>
-                    )}
-                    {isEditing && <>
-                <Grid item sm={4} lg={4}></Grid>
-                <Grid item xs={12} sm={4} lg={4}>
-                  <LoadingButton
-                    loading={isUpdating}
-                    fullWidth
-                    variant="outlined"
-                    type="submit"
-                  >
-                    Guardar
-                  </LoadingButton>
-                </Grid>
-                <Grid item  sm={4} lg={4}></Grid>
-                </>}
-                <Grid>
-
-                </Grid>
-              </Grid>
               </Box>
             </Card>
           </Grid>
-          
         </Grid>
       )}
     </>
