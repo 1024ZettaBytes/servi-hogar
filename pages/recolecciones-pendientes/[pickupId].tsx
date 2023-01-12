@@ -22,6 +22,7 @@ import {
   FormGroup,
   Checkbox,
   TextField,
+  InputAdornment,
 } from "@mui/material";
 import Footer from "@/components/Footer";
 import Stepper from "@mui/material/Stepper";
@@ -46,7 +47,7 @@ function RecoleccionPendiente() {
   const { pickupId } = router.query;
   const { pickup, pickupByIdError } = useGetPickupById(getFetcher, pickupId);
   const [pickupDate, setPickupDate] = useState<any>(new Date());
-  const [whitDebt, setWhitDebt] = useState<boolean>(true);
+  const [whitDebt, setWhitDebt] = useState<number>(0);
   const [pickedAccesories, setPickedAccesories] = useState<any>({});
   const [attached, setAttached] = useState<any>({
     tag: { file: null, url: null },
@@ -62,16 +63,20 @@ function RecoleccionPendiente() {
     error: false,
     msg: "",
   });
-  const debt =
-    (pickup?.rent?.customer?.level?.dayPrice || 0) *
-    Math.abs(
-      (pickup?.rent?.remaining || 0) - dateDiffInDays(new Date(), pickupDate)
-    );
- // const newbalance = (pickup?.rent?.customer?.balance || 0) - debt;
+  const validDate = pickupDate && pickupDate.toString() !== "Invalid Date";
+  const expiredDays = 
+      (validDate ? dateDiffInDays(new Date(pickup?.rent?.endDate) || new Date(), pickupDate) : 0);
+  const debt = (pickup?.rent?.customer?.level?.dayPrice || 0) * whitDebt;
   const [activeStep, setActiveStep] = useState(0);
   const generalError = pickupByIdError;
   const completeData = pickup;
-
+  if(expiredDays > 0 && whitDebt > expiredDays){
+    setWhitDebt(expiredDays);
+  }
+  if(expiredDays <0 && whitDebt > 0){
+    setWhitDebt(0);
+  }
+console.log(whitDebt);
   const steps = [
     {
       label: "Fecha de recolección",
@@ -82,7 +87,7 @@ function RecoleccionPendiente() {
   ];
 
   const checkEnabledButton = () => {
-    if (activeStep === 0) return pickupDate.toString() !== "Invalid Date";
+    if (activeStep === 0) return validDate;
     if (activeStep === 1) return attached.tag.file;
     return true;
   };
@@ -90,10 +95,13 @@ function RecoleccionPendiente() {
   const nextButtonEnabled = checkEnabledButton();
 
   const handleOnSubmit = async (event) => {
+    event.preventDefault();
     setHasErrorSubmitting({ error: false, msg: "" });
     setIsSubmitting(true);
     const result = await completePickup(attached, {
       pickupId,
+      pickupDate,
+      whitDebt,
       pickedAccesories,
     });
     setIsSubmitting(false);
@@ -169,6 +177,7 @@ function RecoleccionPendiente() {
                                   label="Fecha de recolección*"
                                   inputFormat="dd/MM/yyyy"
                                   value={pickupDate}
+                                  minDate={new Date(pickup?.rent?.startDate)}
                                   maxDate={new Date()}
                                   onChange={(newValue) => {
                                     setPickupDate(newValue);
@@ -178,29 +187,45 @@ function RecoleccionPendiente() {
                                   )}
                                 />
                               </Grid>
-                              <Grid item xs={12} sm={12} lg={12} m={1}>
-                                <FormControl
-                                  component="fieldset"
-                                  variant="standard"
-                                >
-                                  <FormLabel component="legend">
-                                    Generar deuda
-                                  </FormLabel>
-                                  <FormGroup>
-                                    <FormControlLabel
-                                      control={
-                                        <Checkbox
-                                          checked={whitDebt}
-                                          onChange={(event) => {
-                                            setWhitDebt(event.target.checked);
-                                          }}
-                                        />
-                                      }
-                                      label={`Deuda de $${debt} (Vencida hace ${Math.abs(pickup?.rent.remaining)} día(s))`}
-                                    />
-                                  </FormGroup>
-                                </FormControl>
+                              {expiredDays>0 &&<>
+                              <Grid item lg={2} sm={6} xs={6} m={1}>
+                                <TextField
+                                  label={"Deuda:"}
+                                  type="number"
+                                  fullWidth
+                                  value={whitDebt}
+                                  variant="outlined"
+                                  size="small"
+                                  autoFocus
+                                  InputProps={{
+                                    endAdornment: (
+                                      <InputAdornment position="start">
+                                        día(s)
+                                      </InputAdornment>
+                                    ),
+                                    inputProps: {
+                                      min: 0,
+                                      max: expiredDays,
+                                      style: { textAlign: "center" },
+                                    },
+                                  }}
+                                  onChange={(event) => {
+                                    setWhitDebt(Number(event.target.value));
+                                  }}
+                                />
                               </Grid>
+                              <Grid item mt={2} xs={12}>
+                                <Typography>
+                                  {`(${expiredDays} día(s) de vencimiento)`}
+                                </Typography>
+                              </Grid>
+                              <Grid item lg={12} />
+                              {debt !== 0 && <Grid item m={1}>
+                                <Typography color="red" fontWeight={"bold"}>
+                                  {`$-${debt} de deuda`}
+                                </Typography>
+                              </Grid>}
+                             </> }
                             </Grid>
                           )}
                           {activeStep === 1 && (

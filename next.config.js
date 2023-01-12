@@ -19,6 +19,11 @@ module.exports = withTM({
         hostname: 'storage.googleapis.com',
         pathname: '/servi-bucket/*',
       },
+      {
+        protocol: 'https',
+        hostname: 'storage.googleapis.com',
+        pathname: '/servi-bucket-test/*',
+      },
     ],
   },
 });
