@@ -25,6 +25,7 @@ import {
   MenuItem,
   InputAdornment,
 } from "@mui/material";
+import AccountBalanceWalletIcon from "@mui/icons-material/AccountBalanceWallet";
 import Image from "next/image";
 import { LoadingButton } from "@mui/lab";
 import { useGetAllCustomers, getFetcher } from "../../../pages/api/useRequest";
@@ -41,6 +42,7 @@ function AddPaymentModal(props) {
   const [selectedCustomer, setSelectedCustomer] = useState<any>(null);
   const [selectedReason, setSelectedReason] = useState<any>(null);
   const [selectedMethod, setSelectedMethod] = useState<any>(null);
+  const [account, setAccount] = useState<string>(null);
   const [selectedAmount, setSelectedAmount] = useState<any>(null);
   const [selectedFolio, setSelectedFolio] = useState<any>(null);
   const [attached, setAttached] = useState<any>({
@@ -84,6 +86,7 @@ function AddPaymentModal(props) {
       customerId: selectedCustomer._id,
       reason: selectedReason,
       method: selectedMethod,
+      account,
       amount: selectedAmount,
       folio: selectedFolio,
     });
@@ -256,7 +259,7 @@ function AddPaymentModal(props) {
                           )}
                           {activeStep === 1 && (
                             <Grid container>
-                              <Grid item lg={2} m={1}>
+                              <Grid item lg={3} m={1}>
                                 <FormControl sx={{ width: "100%" }}>
                                   <InputLabel id="method-id">
                                     Método*
@@ -287,6 +290,28 @@ function AddPaymentModal(props) {
                                   </Select>
                                 </FormControl>
                               </Grid>
+                              {selectedMethod && !["CASH", "CASH_OFFICE"].includes(
+                                selectedMethod
+                              ) && (
+                                <Grid item lg={2} m={1}>
+                                  <TextField
+                                    label="Cuenta"
+                                    required
+                                    value={account}
+                                    variant="outlined"
+                                    InputProps={{
+                                      startAdornment: (
+                                        <InputAdornment position="start">
+                                          <AccountBalanceWalletIcon />
+                                        </InputAdornment>
+                                      ),
+                                    }}
+                                    onChange={(event) => {
+                                      setAccount(event.target.value);
+                                    }}
+                                  />
+                                </Grid>
+                              )}
                             </Grid>
                           )}
                           {activeStep === 2 && (
@@ -320,7 +345,10 @@ function AddPaymentModal(props) {
                                 <TextField
                                   fullWidth
                                   label="Folio comprobante"
-                                  required={selectedMethod !== "CASH"}
+                                  required={
+                                    selectedMethod !== "CASH" &&
+                                    selectedMethod !== "CASH_OFFICE"
+                                  }
                                   value={selectedFolio || ""}
                                   variant="outlined"
                                   size="small"
@@ -330,28 +358,33 @@ function AddPaymentModal(props) {
                                 />
                               </Grid>
                               <Grid item xs={12} sm={12} lg={12} />
-                              {attached.voucher?.url && !attached.voucher.file.name.includes("pdf") && (
-                                <Grid item lg={12} m={1}>
-                                  <Image
-                                    src={attached.voucher.url}
-                                    alt="Comprobante de pago"
-                                    width={200}
-                                    height={300}
-                                  />
-                                </Grid>
-                              )}
+                              {attached.voucher?.url &&
+                                !attached.voucher.file.name.includes("pdf") && (
+                                  <Grid item lg={12} m={1}>
+                                    <Image
+                                      src={attached.voucher.url}
+                                      alt="Comprobante de pago"
+                                      width={200}
+                                      height={300}
+                                    />
+                                  </Grid>
+                                )}
                               <Grid item lg={4} m={1}>
                                 <MuiFileInput
                                   required={
                                     selectedMethod !== "CASH" &&
+                                    selectedMethod !== "CASH_OFFICE" &&
                                     !attached.voucher.file
                                   }
                                   placeholder={"No seleccionada"}
                                   label={"Foto de comprobante"}
                                   value={attached.voucher?.file}
                                   onChange={(file) => {
-                                    
-                                    if (file && !file.type.includes("image/") && !file.type.includes("/pdf")) {
+                                    if (
+                                      file &&
+                                      !file.type.includes("image/") &&
+                                      !file.type.includes("/pdf")
+                                    ) {
                                       setBadFormat({
                                         ...badFormat,
                                         voucher: true,

@@ -159,6 +159,7 @@ const TablaPagos: FC<TablaPagosProps> = ({ paymentsList }) => {
                 <TableCell align="center">Cliente</TableCell>
                 <TableCell align="center">Concepto</TableCell>
                 <TableCell align="center">Método</TableCell>
+                <TableCell align="center">Cuenta</TableCell>
                 <TableCell align="center">Folio</TableCell>
                 <TableCell align="center">Comprobante</TableCell>
                 <TableCell align="center">Importe</TableCell>
@@ -227,6 +228,17 @@ const TablaPagos: FC<TablaPagosProps> = ({ paymentsList }) => {
                         noWrap
                       >
                         {PAYMENT_METHODS[payment?.method]}
+                      </Typography>
+                    </TableCell>
+                    <TableCell align="center">
+                      <Typography
+                        variant="body1"
+                        fontWeight="bold"
+                        color="text.primary"
+                        gutterBottom
+                        noWrap
+                      >
+                        {payment?.account ? payment?.account : "N/A"}
                       </Typography>
                     </TableCell>
                     <TableCell align="center">
