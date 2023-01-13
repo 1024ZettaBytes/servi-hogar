@@ -28,6 +28,7 @@ import {
   InputLabel,
   FormGroup,
   Checkbox,
+  InputAdornment,
 } from "@mui/material";
 import Footer from "@/components/Footer";
 import Stepper from "@mui/material/Stepper";
@@ -61,7 +62,7 @@ function RentaRapida() {
   const [customerToEdit, setCustomerToEdit] = useState<any>({ isSet: false });
   const [deliveredMachine, setDeliveredMachine] = useState<string>(null);
   const [deliveryDate, setDeliveryDate] = useState<any>(new Date());
-
+const [payment, setPayment] = useState<number>(-1);
   const [isOk, setIsOk] = useState<any>({
     info: true,
     residence: true,
@@ -104,7 +105,6 @@ function RentaRapida() {
       label: "Entrega",
     },
   ];
-
   function handleCitySelection(cityId) {
     const filteredCity = citiesList.filter((c) => c._id === cityId);
     const city = filteredCity[0];
@@ -183,6 +183,8 @@ function RentaRapida() {
   const checkEnabledButton = () => {
     if (activeStep === 0)
       return (
+        customerToEdit?.currentResidence?.nameRef?.trim()?.length > 0 &&
+        customerToEdit?.currentResidence?.telRef?.trim()?.length > 0 &&
         customerToEdit?.currentResidence?.maps &&
         validateMapsUrl(customerToEdit?.currentResidence?.maps)
       );
@@ -200,6 +202,7 @@ function RentaRapida() {
     const result = await completeDelivery(attached, {
       deliveryId,
       customerData: customerToEdit,
+      payment,
       deliveredMachine,
       leftAccesories,
       deliveryDate,
@@ -230,6 +233,9 @@ function RentaRapida() {
   };
   if (!customerToEdit.isSet && customer) {
     setCustomerToEdit({ ...customer, isSet: true });
+  }
+  if ( payment < 0 && delivery?.rent) {
+    setPayment(delivery?.rent?.initialPay)
   }
   return (
     <>
@@ -590,7 +596,7 @@ function RentaRapida() {
                               {!nextButtonEnabled && (
                                 <Grid item lg={6} m={1}>
                                   <Alert severity="warning">
-                                    {"Ingrese la url de maps"}
+                                    {"Ingrese los datos faltantes"}
                                   </Alert>
                                 </Grid>
                               )}
@@ -678,6 +684,32 @@ function RentaRapida() {
                                     <TextField {...params} />
                                   )}
                                 />
+                              </Grid>
+                              <Grid item lg={12} m={1}>
+                              <TextField
+                                  label="Cantidad"
+                                  type="number"
+                                  required
+                                  value={payment}
+                                  variant="outlined"
+                                  size="small"
+                                  InputProps={{
+                                    startAdornment: (
+                                      <InputAdornment position="start">
+                                        $
+                                      </InputAdornment>
+                                    ),
+                                    inputProps: {
+                                      min: 0,
+                                      style: { textAlign: "center" },
+                                    },
+                                  }}
+                                  onChange={(event) => {
+                                    setPayment(Number(event.target.value));
+                                  }}
+                                />
+    
+
                               </Grid>
                               {attached.contract?.url && !attached.contract.file.name.includes("pdf") && (
                                 <Grid item lg={12} m={1}>

@@ -28,8 +28,8 @@ const ResidenceSchema = new Schema<IResidence>({
     required: true
   },
   residenceRef: { type: 'string', required: true},
-  nameRef: { type: 'string', required: true},
-  telRef: { type: 'string', required: true},
+  nameRef: { type: 'string', default:""},
+  telRef: { type: 'string', default:""},
   maps: { type: 'string', default: ""},
   coordinates: {type: Object, default: null},
   createdAt: { type: Date, required: true },

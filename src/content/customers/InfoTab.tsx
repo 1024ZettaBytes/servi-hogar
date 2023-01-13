@@ -34,12 +34,13 @@ import { useState } from "react";
 import { updateCustomer } from "lib/client/customersFetch";
 import { LoadingButton } from "@mui/lab";
 import { HOW_FOUND_LIST } from "lib/consts/OBJ_CONTS";
+import numeral from "numeral";
 
 
 
 const getHowFoundLabel = (howFoundId: string, referrer?: string) => {
   let map = { ...HOW_FOUND_LIST };
-  if (howFoundId === "referred") map.referred = `Referido por ${referrer}`;
+  if (howFoundId === "referred") map.referred = `Recomendado por ${referrer}`;
   return map[howFoundId];
 };
 const getLevelLabel = (customerLevelId: string, customerLevelName: string) => {
@@ -400,7 +401,7 @@ function CustomerInfoTab({
                           textAlign={{ sm: "right" }}
                         >
                           <Box pr={2} pb={2}>
-                            Referido por:
+                            Recomendado por:
                           </Box>
                         </Grid>
                         <Grid item xs={9} sm={6} md={6}>
@@ -939,6 +940,27 @@ function CustomerInfoTab({
                     justifyItems="center"
                   >
                     <Grid container item spacing={0} xs={12} sm={6} md={6}>
+                    <Grid
+                        item
+                        xs={6}
+                        sm={6}
+                        md={6}
+                        textAlign={{ sm: "right" }}
+                      >
+                        <Box pr={2} pb={2}>
+                          Saldo del cliente:
+                        </Box>
+                      </Grid>
+                      <Grid item xs={6} sm={6} md={6}>
+                        {customer ? (
+                          <Text color="black">{`$${numeral(customer.balance).format(`${customer.balance}0,0.00`)}`}</Text>
+                        ) : (
+                          <Skeleton
+                            variant="text"
+                            sx={{ fontSize: "1rem", width: "100px" }}
+                          />
+                        )}
+                      </Grid>
                       <Grid
                         item
                         xs={6}
@@ -1018,7 +1040,7 @@ function CustomerInfoTab({
                         textAlign={{ sm: "right" }}
                       >
                         <Box pr={2} pb={2}>
-                          Clientes referidos:
+                          Clientes recomendados:
                         </Box>
                       </Grid>
                       <Grid item xs={6} sm={6} md={6}>
