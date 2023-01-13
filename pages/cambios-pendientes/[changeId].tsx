@@ -54,14 +54,10 @@ function CambioPendiente() {
   const { machinesData, machinesError } = useGetMachinesForRent(getFetcher);
   const [changedAccesories, setChangedAccesories] = useState<any>({});
   const [attached, setAttached] = useState<any>({
-    front: { file: null, url: null },
-    board: { file: null, url: null },
     tag: { file: null, url: null },
   });
 
   const [badFormat, setBadFormat] = useState<any>({
-    front: false,
-    board: false,
     tag: false,
   });
   const paths = ["Inicio", "Cambios pendientes", `${change?.totalNumber}`];
@@ -93,7 +89,7 @@ function CambioPendiente() {
     setHasErrorSubmitting({ error: false, msg: "" });
     setIsSubmitting(true);
     const { problemDesc, solutionDesc, newMachine } = event.target;
-    const result = await completeChange(!wasFixed ? attached: null, {
+    const result = await completeChange(!wasFixed ? attached : null, {
       changeId,
       wasFixed,
       problemDesc: problemDesc?.value,
@@ -264,188 +260,98 @@ function CambioPendiente() {
                               <Grid item xs={0} sm={12} lg={12} />
                               {!wasFixed && (
                                 <>
-                                <Grid item xs={4} sm={1} lg={2} m={1}>
-                                  <FormControl
-                                    sx={{ width: "100%", textAlign: "center" }}
-                                  >
-                                    <InputLabel id="machine-id">
-                                      Nuevo equipo*
-                                    </InputLabel>
-                                    <Select
-                                      labelId="machine-id"
-                                      label="Nuevo equipo*"
-                                      id="newMachine"
-                                      name="newMachine"
-                                      required
-                                      defaultValue=""
-                                      size="medium"
+                                  <Grid item xs={4} sm={1} lg={2} m={1}>
+                                    <FormControl
+                                      sx={{
+                                        width: "100%",
+                                        textAlign: "center",
+                                      }}
                                     >
-                                      {machinesData
-                                        ? machinesData.map((machine) => (
-                                            <MenuItem
-                                              key={machine._id}
-                                              value={machine._id}
-                                            >
-                                              {machine.machineNum}
-                                            </MenuItem>
-                                          ))
-                                        : null}
-                                    </Select>
-                                  </FormControl>
-                                </Grid>
-                                <Grid container>
-                                {attached.front?.url && !attached.front.file.name.includes("pdf") && (
-                                  <Grid item lg={12} m={1}>
-                                    <Image
-                                      src={attached.front.url}
-                                      alt="Picture of the author"
-                                      width={300}
-                                      height={400}
-                                    />
+                                      <InputLabel id="machine-id">
+                                        Nuevo equipo*
+                                      </InputLabel>
+                                      <Select
+                                        labelId="machine-id"
+                                        label="Nuevo equipo*"
+                                        id="newMachine"
+                                        name="newMachine"
+                                        required
+                                        defaultValue=""
+                                        size="medium"
+                                      >
+                                        {machinesData
+                                          ? machinesData.map((machine) => (
+                                              <MenuItem
+                                                key={machine._id}
+                                                value={machine._id}
+                                              >
+                                                {machine.machineNum}
+                                              </MenuItem>
+                                            ))
+                                          : null}
+                                      </Select>
+                                    </FormControl>
                                   </Grid>
-                                )}
-                                <Grid item lg={4} m={1}>
-                                  <MuiFileInput
-                                  required={!attached.front.file}
-                                    placeholder={"No seleccionada"}
-                                    label={"Foto de frente"}
-                                    value={attached.front?.file}
-                                    onChange={(file) => {
-                                      if (file && !file.type.includes("image/") && !file.type.includes("/pdf")) {
-                                        setBadFormat({
-                                          ...badFormat,
-                                          front: true,
-                                        });
-                                        setAttached({
-                                          ...attached,
-                                          front: {
-                                            ...attached.front,
-                                            error: true,
-                                          },
-                                        });
-                                        return;
-                                      }
-                                      const url = file
-                                        ? URL.createObjectURL(file)
-                                        : null;
-                                      setAttached({
-                                        ...attached,
-                                        front: { file, url, error: false },
-                                      });
-                                    }}
-                                  />
-                                </Grid>
-                                <Grid item lg={12} />
-                                {attached.front?.error && (
-                                  <Grid item lg={4} m={1}>
-                                    <Typography color="error">
-                                      Seleccione un archivo válido(*.jpg, *.jpeg,
-                                      *.png).
-                                    </Typography>
+                                  <Grid container>
+                                    {attached.tag?.url &&
+                                      !attached.tag.file.name.includes(
+                                        "pdf"
+                                      ) && (
+                                        <Grid item lg={12} m={1}>
+                                          <Image
+                                            src={attached.tag.url}
+                                            alt="Picture of the author"
+                                            width={300}
+                                            height={400}
+                                          />
+                                        </Grid>
+                                      )}
+                                    <Grid item lg={4} m={1}>
+                                      <MuiFileInput
+                                        required={!attached.tag.file}
+                                        placeholder={"No seleccionada"}
+                                        label={"Foto de etiqueta"}
+                                        value={attached.tag?.file}
+                                        onChange={(file) => {
+                                          if (
+                                            file &&
+                                            !file.type.includes("image/") &&
+                                            !file.type.includes("/pdf")
+                                          ) {
+                                            setBadFormat({
+                                              ...badFormat,
+                                              tag: true,
+                                            });
+                                            setAttached({
+                                              ...attached,
+                                              tag: {
+                                                ...attached.tag,
+                                                error: true,
+                                              },
+                                            });
+                                            return;
+                                          }
+                                          const url = file
+                                            ? URL.createObjectURL(file)
+                                            : null;
+                                          setAttached({
+                                            ...attached,
+                                            tag: { file, url, error: false },
+                                          });
+                                        }}
+                                      />
+                                    </Grid>
+                                    <Grid item lg={12} />
+                                    {attached.tag?.error && (
+                                      <Grid item lg={4} m={1}>
+                                        <Typography color="error">
+                                          Seleccione un archivo válido(*.jpg,
+                                          *.jpeg, *.png).
+                                        </Typography>
+                                      </Grid>
+                                    )}
                                   </Grid>
-                                )}
-                                {attached.board?.url && !attached.board.file.name.includes("pdf") && (
-                                  <Grid item lg={12} m={1}>
-                                    <Image
-                                      src={attached.board.url}
-                                      alt="Picture of the author"
-                                      width={300}
-                                      height={400}
-                                    />
-                                  </Grid>
-                                )}
-                                <Grid item lg={4} m={1}>
-                                  <MuiFileInput
-                                  required={!attached.board.file}
-                                    placeholder={"No seleccionada"}
-                                    label={"Foto de tablero"}
-                                    value={attached.board?.file}
-                                    onChange={(file) => {
-                                      if (file && !file.type.includes("image/") && !file.type.includes("/pdf")) {
-                                        setBadFormat({
-                                          ...badFormat,
-                                          board: true,
-                                        });
-                                        setAttached({
-                                          ...attached,
-                                          board: {
-                                            ...attached.board,
-                                            error: true,
-                                          },
-                                        });
-                                        return;
-                                      }
-                                      const url = file
-                                        ? URL.createObjectURL(file)
-                                        : null;
-                                      setAttached({
-                                        ...attached,
-                                        board: { file, url, error: false },
-                                      });
-                                    }}
-                                  />
-                                </Grid>
-                                <Grid item lg={12} />
-                                {attached.board?.error && (
-                                  <Grid item lg={4} m={1}>
-                                    <Typography color="error">
-                                      Seleccione un archivo válido(*.jpg, *.jpeg,
-                                      *.png).
-                                    </Typography>
-                                  </Grid>
-                                )}
-                                {attached.tag?.url && !attached.tag.file.name.includes("pdf") && (
-                                  <Grid item lg={12} m={1}>
-                                    <Image
-                                      src={attached.tag.url}
-                                      alt="Picture of the author"
-                                      width={300}
-                                      height={400}
-                                    />
-                                  </Grid>
-                                )}
-                                <Grid item lg={4} m={1}>
-                                  <MuiFileInput
-                                  required={!attached.tag.file}
-                                    placeholder={"No seleccionada"}
-                                    label={"Foto de etiqueta"}
-                                    value={attached.tag?.file}
-                                    onChange={(file) => {
-                                      if (file && !file.type.includes("image/") && !file.type.includes("/pdf")) {
-                                        setBadFormat({
-                                          ...badFormat,
-                                          tag: true,
-                                        });
-                                        setAttached({
-                                          ...attached,
-                                          tag: {
-                                            ...attached.tag,
-                                            error: true,
-                                          },
-                                        });
-                                        return;
-                                      }
-                                      const url = file
-                                        ? URL.createObjectURL(file)
-                                        : null;
-                                      setAttached({
-                                        ...attached,
-                                        tag: { file, url, error: false },
-                                      });
-                                    }}
-                                  />
-                                </Grid>
-                                <Grid item lg={12} />
-                                {attached.tag?.error && (
-                                  <Grid item lg={4} m={1}>
-                                    <Typography color="error">
-                                      Seleccione un archivo válido(*.jpg, *.jpeg,
-                                      *.png).
-                                    </Typography>
-                                  </Grid>
-                                )}
-                              </Grid>
-                              </>
+                                </>
                               )}
                               {hasErrorSubmitting.error && (
                                 <>
