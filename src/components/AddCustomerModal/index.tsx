@@ -174,7 +174,7 @@ function AddCustomerModal(props) {
                       option.id === value.id
                     }
                     renderInput={(params) => (
-                      <TextField required {...params} label="Referido por" />
+                      <TextField required {...params} label="Recomendado por" />
                     )}
                   />
                 </Grid>
@@ -274,7 +274,6 @@ function AddCustomerModal(props) {
               <Grid item lg={12}>
                 <TextField
                   autoComplete="off"
-                  required
                   id="nameRef"
                   name="nameRef"
                   label="Nombre Referencia"
@@ -284,7 +283,6 @@ function AddCustomerModal(props) {
               <Grid item lg={12}>
                 <TextField
                   autoComplete="off"
-                  required
                   id="telRef"
                   name="telRef"
                   label="Teléfono Referencia"

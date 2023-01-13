@@ -105,7 +105,6 @@ const [payment, setPayment] = useState<number>(-1);
       label: "Entrega",
     },
   ];
-console.log("Payment: ", payment);
   function handleCitySelection(cityId) {
     const filteredCity = citiesList.filter((c) => c._id === cityId);
     const city = filteredCity[0];
@@ -184,6 +183,8 @@ console.log("Payment: ", payment);
   const checkEnabledButton = () => {
     if (activeStep === 0)
       return (
+        customerToEdit?.currentResidence?.nameRef?.trim()?.length > 0 &&
+        customerToEdit?.currentResidence?.telRef?.trim()?.length > 0 &&
         customerToEdit?.currentResidence?.maps &&
         validateMapsUrl(customerToEdit?.currentResidence?.maps)
       );
@@ -595,7 +596,7 @@ console.log("Payment: ", payment);
                               {!nextButtonEnabled && (
                                 <Grid item lg={6} m={1}>
                                   <Alert severity="warning">
-                                    {"Ingrese la url de maps"}
+                                    {"Ingrese los datos faltantes"}
                                   </Alert>
                                 </Grid>
                               )}

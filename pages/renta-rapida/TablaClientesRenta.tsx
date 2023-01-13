@@ -188,13 +188,14 @@ const TablaClientesRenta: FC<TablaClientesRentaProps> = ({
   const getResidenceTextField = (
     field: string,
     minLength: number,
-    maxLength: number
+    maxLength: number,
+    required
   ) => (
     <TextField
       fullWidth
       inputProps={{ minLength, maxLength }}
       autoComplete="off"
-      required
+      required={required}
       id={field}
       name={field}
       variant="outlined"
@@ -448,7 +449,7 @@ const TablaClientesRenta: FC<TablaClientesRentaProps> = ({
                         {selectedCustomer?.currentResidence?.street}
                       </Typography>
                     ) : (
-                      getResidenceTextField("street", 1, 100)
+                      getResidenceTextField("street", 1, 100, true)
                     )}
                   </Grid>
                   <Grid item xs={4} sm={4} lg={4} margin={1}>
@@ -462,7 +463,7 @@ const TablaClientesRenta: FC<TablaClientesRentaProps> = ({
                         {selectedCustomer?.currentResidence?.suburb}
                       </Typography>
                     ) : (
-                      getResidenceTextField("suburb", 1, 100)
+                      getResidenceTextField("suburb", 1, 100, true)
                     )}
                   </Grid>
                   <Grid item xs={6} sm={3} lg={5} margin={1}>
@@ -554,7 +555,7 @@ const TablaClientesRenta: FC<TablaClientesRentaProps> = ({
                         {selectedCustomer?.currentResidence?.residenceRef}
                       </Typography>
                     ) : (
-                      getResidenceTextField("residenceRef", 1, 100)
+                      getResidenceTextField("residenceRef", 1, 100, true)
                     )}
                   </Grid>
                   <Grid item xs={4} sm={3} lg={4} margin={1}>
@@ -568,7 +569,7 @@ const TablaClientesRenta: FC<TablaClientesRentaProps> = ({
                         {selectedCustomer?.currentResidence?.nameRef}
                       </Typography>
                     ) : (
-                      getResidenceTextField("nameRef", 1, 100)
+                      getResidenceTextField("nameRef", 1, 100, false)
                     )}
                   </Grid>
                   <Grid item xs={6} sm={6} lg={5} margin={1}>
@@ -582,7 +583,7 @@ const TablaClientesRenta: FC<TablaClientesRentaProps> = ({
                         {selectedCustomer?.currentResidence?.telRef}
                       </Typography>
                     ) : (
-                      getResidenceTextField("telRef", 10, 10)
+                      getResidenceTextField("telRef", 10, 10, false)
                     )}
                   </Grid>
                   <Grid item xs={12} sm={12} lg={12} margin={1}>
