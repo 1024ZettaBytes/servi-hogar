@@ -33,7 +33,7 @@ export const useGetAllCustomers = (fetcher) => {
 
 export const useGetAllCustomersForRent = (fetcher) => {
   const { data, error } = useSWR(ROUTES.ALL_CUSTOMERS_FOR_RENT_API, fetcher);
-  return { customerList: data?.data, customerError: error };
+  return { customersForRentList: data?.data, customersForRentError: error };
 };
 export const useGetCustomerLevels = (fetcher) => {
   const { data, error } = useSWR(ROUTES.ALL_CUSTOMERS_LEVELS_API, fetcher);

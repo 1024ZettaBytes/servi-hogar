@@ -27,6 +27,7 @@ import {
   useGetAllCustomersForRent,
   getFetcher,
   useGetCities,
+  useGetAllCustomers,
 } from "../api/useRequest";
 import { useSnackbar } from "notistack";
 import { addDaysToDate, dateDiffInDays } from "../../lib/client/utils";
@@ -66,7 +67,8 @@ const defaultData = () => {
 function RentaRapida() {
   const paths = ["Inicio", "Renta Rápida"];
   const { enqueueSnackbar } = useSnackbar();
-  const { customerList, customerError } = useGetAllCustomersForRent(getFetcher);
+  const { customersForRentList, customersForRentError } = useGetAllCustomersForRent(getFetcher);
+  const { customerList, customerError } = useGetAllCustomers(getFetcher);
   const { citiesList, citiesError } = useGetCities(getFetcher);
   const [modalIsOpen, setModalIsOpen] = useState(false);
   const [formatIsOpen, setFormatIsOpen] = useState(false);
@@ -247,7 +249,7 @@ function RentaRapida() {
                               <Grid item xs={12} md={4} lg={4}></Grid>
                               <Grid item xs={12} md={12} lg={12}>
                                 <TablaClientesRenta
-                                  customerList={customerList}
+                                  customerList={customersForRentList}
                                   citiesList={citiesList}
                                   selectedCustomer={selectedCustomer}
                                   onSelectCustomer={setSelectedCustomer}
