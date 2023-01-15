@@ -254,6 +254,7 @@ const TablaClientesRenta: FC<TablaClientesRentaProps> = ({
     customerToEdit?._id?.toString() !== selectedCustomer?._id?.toString()
   ) {
     setHasErrorUpdating({ error: false, msg: "" });
+<<<<<<< HEAD
     let currentResidence;
     if (selectedCustomer?.currentResidence?.city?.sectors) {
       currentResidence = selectedCustomer.currentResidence;
@@ -262,6 +263,12 @@ const TablaClientesRenta: FC<TablaClientesRentaProps> = ({
       ).sectors;
     }
     setCustomerToEdit({ ...selectedCustomer, currentResidence, isSet: true });
+=======
+    let currentResidence = selectedCustomer.currentResidence;
+    currentResidence.city.sectors = citiesList.find(city => city.id === currentResidence.city.id).sectors;
+    setCustomerToEdit({ ...selectedCustomer, currentResidence, isSet: true });
+
+>>>>>>> TEST
   }
   return (
     <>
