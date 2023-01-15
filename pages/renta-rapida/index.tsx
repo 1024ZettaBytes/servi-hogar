@@ -84,8 +84,8 @@ function RentaRapida() {
     msg: "",
   });
   const [activeStep, setActiveStep] = useState(0);
-  const generalError = customerError || citiesError;
-  const completeData = customerList && citiesList;
+  const generalError = customerError || citiesError || customersForRentError;
+  const completeData = customerList && citiesList && customersForRentList;
   const steps = [
     {
       label: "Seleccione un cliente",

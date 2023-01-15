@@ -254,7 +254,10 @@ const TablaClientesRenta: FC<TablaClientesRentaProps> = ({
     customerToEdit?._id?.toString() !== selectedCustomer?._id?.toString()
   ) {
     setHasErrorUpdating({ error: false, msg: "" });
-    setCustomerToEdit({ ...selectedCustomer, isSet: true });
+    let currentResidence = selectedCustomer.currentResidence;
+    currentResidence.city.sectors = citiesList.find(city => city.id === currentResidence.city.id).sectors;
+    setCustomerToEdit({ ...selectedCustomer, currentResidence, isSet: true });
+
   }
   return (
     <>
@@ -515,7 +518,7 @@ const TablaClientesRenta: FC<TablaClientesRentaProps> = ({
                         sx={{ py: 1 }}
                         fontWeight="normal"
                       >
-                        {selectedCustomer?.currentResidence?.sector?.name}
+                        {selectedCustomer?.currentResidence?.city?.name}
                       </Typography>
                     ) : (
                       <FormControl sx={{ width: "100%" }}>
