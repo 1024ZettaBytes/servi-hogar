@@ -254,7 +254,14 @@ const TablaClientesRenta: FC<TablaClientesRentaProps> = ({
     customerToEdit?._id?.toString() !== selectedCustomer?._id?.toString()
   ) {
     setHasErrorUpdating({ error: false, msg: "" });
-    setCustomerToEdit({ ...selectedCustomer, isSet: true });
+    let currentResidence;
+    if (selectedCustomer?.currentResidence?.city?.sectors) {
+      currentResidence = selectedCustomer.currentResidence;
+      currentResidence.city.sectors = citiesList.find(
+        (city) => city.id === currentResidence?.city?.id
+      ).sectors;
+    }
+    setCustomerToEdit({ ...selectedCustomer, currentResidence, isSet: true });
   }
   return (
     <>
@@ -487,7 +494,7 @@ const TablaClientesRenta: FC<TablaClientesRentaProps> = ({
                           size="small"
                           placeholder="Seleccione un valor"
                           value={
-                            customerToEdit?.currentResidence?.sector._id || ""
+                            customerToEdit?.currentResidence?.sector?._id || ""
                           }
                           onChange={(event) =>
                             handleSectorSelection(event.target.value)
@@ -515,7 +522,7 @@ const TablaClientesRenta: FC<TablaClientesRentaProps> = ({
                         sx={{ py: 1 }}
                         fontWeight="normal"
                       >
-                        {selectedCustomer?.currentResidence?.sector?.name}
+                        {selectedCustomer?.currentResidence?.city?.name}
                       </Typography>
                     ) : (
                       <FormControl sx={{ width: "100%" }}>
