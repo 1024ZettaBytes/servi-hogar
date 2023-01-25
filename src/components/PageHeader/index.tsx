@@ -1,7 +1,5 @@
 import { Typography, Avatar, Grid, Button } from '@mui/material';
 import { useTheme } from '@mui/material/styles';
-import AddTwoToneIcon from '@mui/icons-material/AddTwoTone';
-
 function PageHeader(props) {
   const user = {
     avatar: '/static/images/avatars/1.png'
@@ -37,8 +35,9 @@ function PageHeader(props) {
         { button ? 
         <Button
           sx={{ mt: { xs: 2, md: 0 } }}
-          variant="contained"
-          startIcon={<AddTwoToneIcon fontSize="small" />}
+          variant={button.variant}
+          startIcon={button.startIcon}
+          color={button.color || 'primary'}
           onClick={() =>button.onClick()}
           disabled={button.disabled}
         >

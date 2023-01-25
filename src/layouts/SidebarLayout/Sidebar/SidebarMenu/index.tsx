@@ -543,10 +543,10 @@ function SidebarMenu({userRole}) {
                 </NextLink>
               </ListItem>
               <ListItem component="div">
-                <NextLink href="/" passHref>
+                <NextLink href="/reportes" passHref>
                   <Button
                     className={
-                      currentRoute === '/management/profile/settings'
+                      currentRoute === '/reportes'
                         ? 'active'
                         : ''
                     }

@@ -21,6 +21,7 @@ import {
 import { useSnackbar } from "notistack";
 import NextBreadcrumbs from "@/components/Shared/BreadCrums";
 import AddPaymentModal from "@/components/AddPaymentModal";
+import AddTwoTone from "@mui/icons-material/AddTwoTone";
 
 function Pagos({ }) {
   const paths = ["Inicio", "Pagos"];
@@ -48,7 +49,7 @@ function Pagos({ }) {
       });
     }
   };
-  const button = { text: "Nuevo pago", onClick: handleClickOpen };
+  const button = { text: "Nuevo pago", onClick: handleClickOpen, startIcon: <AddTwoTone/>, variant:"contained" };
   return (
     <>
       <Head>

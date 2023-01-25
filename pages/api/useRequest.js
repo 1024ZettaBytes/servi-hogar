@@ -160,3 +160,17 @@ export const useGetPayments = (fetcher) => {
   const { data, error } = useSWR(ROUTES.ALL_PAYMENTS_API, fetcher);
   return { paymentsList: data?.data, paymentsError: error };
 };
+
+// Reports
+export const useGetReport = (
+  fetcher,
+  filter,
+  startDate = null,
+  endDate = null
+) => {
+  let url = `${ROUTES.REPORT_API}?filter=${filter}`;
+  url = url + (startDate ? `&start=${startDate.toISOString()}` : "");
+  url = url + (endDate ? `&end=${endDate.toISOString}` : "");
+  const { data, error } = useSWR(url, fetcher);
+  return { reportData: data?.data, reportError: error };
+};
