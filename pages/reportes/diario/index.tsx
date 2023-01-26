@@ -55,7 +55,7 @@ function DayReport() {
   const completeData = reportData;
 
   const handleClickOpen = () => {
-    const fileName = `Reporte_DIARIO_${format(selectedDate, "dd-MM-yyyy")}.pdf`;
+    const fileName = `DIARIO_${format(selectedDate, "dd-MM-yyyy")}.pdf`;
 
     printElement(document, fileName);
   };

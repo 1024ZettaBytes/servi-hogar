@@ -1,4 +1,4 @@
-import { jsPDF } from "jspdf";
+import { jsPDF } from 'jspdf';
 import * as htmlToImage from 'html-to-image';
 
 function startOfWeek(dt): Date {
@@ -99,14 +99,27 @@ export const dateDiffInWeeks = (initial: Date, end: Date): number => {
   );
 };
 
-export const printElement = (document: Document, filename:string ):void => {
-  htmlToImage.toPng(document.getElementById('reportTable'), { quality: 1 })
+export const printElement = (document: Document, filename: string): void => {
+  htmlToImage
+    .toPng(document.getElementById('reportTable'), { quality: 1 })
     .then(function (dataUrl) {
       const pdf = new jsPDF();
-      const imgProps= pdf.getImageProperties(dataUrl);
+      const imgProps = pdf.getImageProperties(dataUrl);
       const pdfWidth = pdf.internal.pageSize.getWidth();
       const pdfHeight = (imgProps.height * pdfWidth) / imgProps.width;
-      pdf.addImage(dataUrl, 'PNG', 0, 0,pdfWidth, pdfHeight);
-      pdf.save(filename); 
+      pdf.addImage(dataUrl, 'PNG', 0, 0, pdfWidth, pdfHeight);
+      pdf.save(filename);
     });
-}
+};
+
+export const getFirstWeekDay = (date: Date): Date => {
+  const day = date.getDay();
+  if (day === 6) return setDateToInitial(date);
+  else return setDateToInitial(addDaysToDate(date, -(day + 1)));
+};
+
+export const getLastWeekDay = (date: Date): Date => {
+  const day = date.getDay();
+  if (day === 6) return setDateToEnd(addDaysToDate(date, 6));
+  else return setDateToEnd(addDaysToDate(date, 5 - day));
+};
