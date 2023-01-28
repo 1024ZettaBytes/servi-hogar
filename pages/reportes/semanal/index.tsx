@@ -30,6 +30,7 @@ import {
 } from "lib/client/utils";
 import WeekPicker from "@/components/WeekPicker";
 import ActivityReportTable from "./ActivityReportTable";
+import RegistersReportTable from "./RegistersReportTable";
 
 const cellStyle = { border: "2px solid #374246" };
 const headerStyle = {
@@ -41,73 +42,83 @@ const headerStyle = {
 const deliveryStyle = { ...headerStyle, backgroundColor: "#DAF7A6" };
 const pickupStyle = { ...headerStyle, backgroundColor: "#EE5656" };
 const changeStyle = { ...headerStyle, backgroundColor: "#FFC300" };
-//const customerStyle = { ...headerStyle, backgroundColor: "#E570EE" };
-///const paymentStyle = { ...headerStyle, backgroundColor: "#A580EE" };
+const customerStyle = { ...headerStyle, backgroundColor: "#F4F189" };
+const paymentStyle = { ...headerStyle, backgroundColor: "#89C3F4" };
 const DUMMY = {
-  deliveries:{
-    totalData:{
-      sent:80,
-      done:55
+  deliveries: {
+    totalData: {
+      sent: 80,
+      done: 55,
     },
-    days:[
+    days: [
       {
-        weekDay:"Sábado",
-        sent:10,
-        done:10
+        date: new Date("01/07/2023"),
+        weekDay: "Sábado",
+        sent: 10,
+        done: 10,
       },
       {
-        weekDay:"Domingo",
-        sent:15,
-        done:14
+        date: new Date("07/01/2023"),
+        weekDay: "Domingo",
+        sent: 15,
+        done: 14,
       },
       {
-        weekDay:"Lunes",
-        sent:12,
-        done:11
+        date: new Date("07/01/2023"),
+        weekDay: "Lunes",
+        sent: 12,
+        done: 11,
       },
       {
-        weekDay:"Martes",
-        sent:10,
-        done:5
+        date: new Date("07/01/2023"),
+        weekDay: "Martes",
+        sent: 10,
+        done: 5,
       },
       {
-        weekDay:"Miércoles",
-        sent:11,
-        done:2
+        date: new Date("07/01/2023"),
+        weekDay: "Miércoles",
+        sent: 11,
+        done: 2,
       },
       {
-        weekDay:"Jueves",
-        sent:12,
-        done:8
+        date: new Date("07/01/2023"),
+        weekDay: "Jueves",
+        sent: 12,
+        done: 8,
       },
       {
-        weekDay:"Viernes",
-        sent:10,
-        done:5
+        date: new Date("07/01/2023"),
+        weekDay: "Viernes",
+        sent: 10,
+        done: 5,
       },
-    ]
-  }
-}
+    ],
+  },
+};
 function DayReport() {
   const [selectedDate, setSelectedDate] = useState<Date>(new Date());
   const [start, setStart] = useState<Date>(getFirstWeekDay(new Date()));
   const [end, setEnd] = useState<Date>(getLastWeekDay(new Date()));
+  const [isPrinting, setIsPrinting] = useState<boolean>(false);
   const { reportData, reportError } = useGetReport(
     getFetcher,
-    "day",
-    selectedDate
+    "week",
+    start,
+    end
   );
   const generalError = reportError;
   const completeData = reportData;
 
-  const handleClickOpen = () => {
+  const handleClickOpen = async () => {
+    setIsPrinting(true);
     const fileName = `SEMANAL_${format(start, "dd-LLLL-yyyy", {
       locale: es,
     })}_al_${format(end, "dd-LLLL-yyyy", {
       locale: es,
     })}.pdf`;
-
-    printElement(document, fileName);
+    await printElement(document, fileName);
+    setIsPrinting(false);
   };
   const handleOnSelectDate = (newValue) => {
     if (newValue && newValue.toString() !== "Invalid Date") {
@@ -120,6 +131,7 @@ function DayReport() {
     text: "Descargar PDF",
     onClick: handleClickOpen,
     startIcon: <CloudDownloadIcon />,
+    isLoading: isPrinting,
     variant: "outlined",
     color: "info",
   };
@@ -184,10 +196,7 @@ function DayReport() {
             </Grid>
           </CardContent>
         </Card>
-        <Grid
-          container
-          
-        >
+        <Grid container>
           <Grid item lg={12}>
             <Card id="reportTable">
               {generalError ? (
@@ -213,35 +222,47 @@ function DayReport() {
                     subheader={getHeader()}
                   />
                   <Divider />
-                  <Grid container
-                  spacing={2}
-                  p={2}
-                  
-                  >
-                  <Grid item lg={6}>
-                  <ActivityReportTable
-                    header="ENTREGAS"
-                    colorStyle={deliveryStyle}
-                    totalData={DUMMY.deliveries.totalData}
-                    list={DUMMY.deliveries.days}
-                  />
-                  </Grid>
-                  <Grid item lg={6}>
-                  <ActivityReportTable
-                    header="CAMBIOS"
-                    colorStyle={changeStyle}
-                    totalData={DUMMY.deliveries.totalData}
-                    list={DUMMY.deliveries.days}
-                  />
-                  </Grid>
-                  <Grid item lg={6}>
-                  <ActivityReportTable
-                    header="RECOLECCIONES"
-                    colorStyle={pickupStyle}
-                    totalData={DUMMY.deliveries.totalData}
-                    list={DUMMY.deliveries.days}
-                  />
-                  </Grid>
+                  <Grid container spacing={4} p={2}>
+                    <Grid item lg={6}>
+                      <ActivityReportTable
+                        header="ENTREGAS"
+                        colorStyle={deliveryStyle}
+                        totalData={reportData?.deliveries?.totalData}
+                        list={reportData?.deliveries?.days}
+                      />
+                    </Grid>
+                    <Grid item lg={6}>
+                      <ActivityReportTable
+                        header="CAMBIOS"
+                        colorStyle={changeStyle}
+                        totalData={DUMMY.deliveries.totalData}
+                        list={DUMMY.deliveries.days}
+                      />
+                    </Grid>
+                    <Grid item lg={6}>
+                      <ActivityReportTable
+                        header="RECOLECCIONES"
+                        colorStyle={pickupStyle}
+                        totalData={DUMMY.deliveries.totalData}
+                        list={DUMMY.deliveries.days}
+                      />
+                    </Grid>
+                    <Grid item lg={6}>
+                      <RegistersReportTable
+                        header="DEPOSITOS"
+                        colorStyle={paymentStyle}
+                        totalData={DUMMY.deliveries.totalData}
+                        list={DUMMY.deliveries.days}
+                      />
+                    </Grid>
+                    <Grid item lg={6}>
+                      <RegistersReportTable
+                        header="CLIENTES NUEVOS"
+                        colorStyle={customerStyle}
+                        totalData={DUMMY.deliveries.totalData}
+                        list={DUMMY.deliveries.days}
+                      />
+                    </Grid>
                   </Grid>
                   <Box p={2}></Box>
                 </div>

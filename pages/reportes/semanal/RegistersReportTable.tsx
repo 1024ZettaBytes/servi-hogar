@@ -14,20 +14,19 @@ import {
 import { format } from "date-fns";
 import es from "date-fns/locale/es";
 
-interface ActivityReportTableProps {
+interface RegistersReportTableProps {
   header: string;
   colorStyle: object;
   list: any[];
   totalData: any;
 }
 const cellStyle = { border: "2px solid #374246" };
-const ActivityReportTable: React.FC<ActivityReportTableProps> = ({
+const RegistersReportTable: React.FC<RegistersReportTableProps> = ({
   header,
   colorStyle,
   list,
   totalData,
 }) => {
-  console.log("Days:", list)
   return (
     <div>
       <Divider />
@@ -35,7 +34,7 @@ const ActivityReportTable: React.FC<ActivityReportTableProps> = ({
         <Table size="small">
           <TableHead>
             <TableRow>
-              <TableCell align="center" style={colorStyle} colSpan={4}>
+              <TableCell align="center" style={colorStyle} colSpan={3}>
                 {header}
               </TableCell>
             </TableRow>
@@ -49,10 +48,7 @@ const ActivityReportTable: React.FC<ActivityReportTableProps> = ({
                 Día
               </TableCell>
               <TableCell align="center" style={colorStyle}>
-                Enviadas
-              </TableCell>
-              <TableCell align="center" style={colorStyle}>
-                Realizadas
+                Registro
               </TableCell>
             </TableRow>
             {list?.map((day) => (
@@ -65,7 +61,7 @@ const ActivityReportTable: React.FC<ActivityReportTableProps> = ({
                     gutterBottom
                     noWrap
                   >
-                    {format(new Date(day?.date),"dd/MM/yyyy", { locale: es})}
+                    {format(day?.date,"dd/MM/yyyy", { locale: es})}
                   </Typography>
                 </TableCell>
                 <TableCell align="center" style={cellStyle}>
@@ -76,16 +72,6 @@ const ActivityReportTable: React.FC<ActivityReportTableProps> = ({
                     noWrap
                   >
                     {day?.weekDay}
-                  </Typography>
-                </TableCell>
-                <TableCell align="center" style={cellStyle}>
-                  <Typography
-                    variant="body1"
-                    color="text.primary"
-                    gutterBottom
-                    noWrap
-                  >
-                    {day?.sent}
                   </Typography>
                 </TableCell>
                 <TableCell align="center" style={cellStyle}>
@@ -110,11 +96,6 @@ const ActivityReportTable: React.FC<ActivityReportTableProps> = ({
               </TableCell>
               <TableCell align="center" style={colorStyle}>
                 <Typography variant="h5" gutterBottom noWrap>
-                  {totalData?.sent}
-                </Typography>
-              </TableCell>
-              <TableCell align="center" style={colorStyle}>
-                <Typography variant="h5" gutterBottom noWrap>
                   {totalData?.done}
                 </Typography>
               </TableCell>
@@ -126,10 +107,10 @@ const ActivityReportTable: React.FC<ActivityReportTableProps> = ({
     </div>
   );
 };
-ActivityReportTable.propTypes = {
+RegistersReportTable.propTypes = {
   header: PropTypes.string.isRequired,
   colorStyle: PropTypes.object.isRequired,
   list: PropTypes.array.isRequired,
   totalData: PropTypes.any.isRequired,
 };
-export default ActivityReportTable;
+export default RegistersReportTable;

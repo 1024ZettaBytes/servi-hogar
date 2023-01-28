@@ -101,7 +101,7 @@ const applyFilters = (changesList: any[], filter: string): any[] => {
               value &&
               compareStringsForFilter(
                 filter,
-                format(new Date(change?.fromTime), "LLL dd yyyy", {
+                format(new Date(change?.date), "LLL dd yyyy", {
                   locale: es,
                 })
               );
@@ -228,9 +228,7 @@ const TablaCambiosPendientes: FC<TablaCambiosPendientesProps> = ({
                 <TableCell align="center">Renta</TableCell>
                 <TableCell align="center">#</TableCell>
                 <TableCell align="center"># del día</TableCell>
-
                 <TableCell align="center">Cliente</TableCell>
-
                 <TableCell align="center">Estado</TableCell>
                 <TableCell align="center">Fecha solicitada</TableCell>
                 <TableCell align="center">Horario Especial</TableCell>
@@ -297,7 +295,7 @@ const TablaCambiosPendientes: FC<TablaCambiosPendientesProps> = ({
                         noWrap
                       >
                         {capitalizeFirstLetter(
-                          format(new Date(change?.fromTime), "LLL dd yyyy", {
+                          format(new Date(change?.date), "LLL dd yyyy", {
                             locale: es,
                           })
                         )}

@@ -170,7 +170,7 @@ export const useGetReport = (
 ) => {
   let url = `${ROUTES.REPORT_API}?filter=${filter}`;
   url = url + (startDate ? `&start=${startDate.toISOString()}` : "");
-  url = url + (endDate ? `&end=${endDate.toISOString}` : "");
+  url = url + (endDate ? `&end=${endDate.toISOString()}` : "");
   const { data, error } = useSWR(url, fetcher);
   return { reportData: data?.data, reportError: error };
 };

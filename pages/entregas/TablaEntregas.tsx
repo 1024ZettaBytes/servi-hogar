@@ -84,12 +84,12 @@ const applyFilters = (deliveriesList: any[], filter: string): any[] => {
               compareStringsForFilter(filter, statusMap["" + value].text);
             return matchText;
           }
-          case "createdAt": {
+          case "date": {
             const matchFormatedDate =
               value &&
               compareStringsForFilter(
                 filter,
-                format(new Date(delivery?.createdAt), "LLL dd yyyy", {
+                format(new Date(delivery?.date), "LLL dd yyyy", {
                   locale: es,
                 })
               );
@@ -189,7 +189,7 @@ const TablaEntregas: FC<TablaEntregasProps> = ({ deliveriesList }) => {
                 <TableCell align="center">#</TableCell>
                 <TableCell align="center"># del día</TableCell>
                 <TableCell align="center">Cliente</TableCell>
-                <TableCell align="center">Solicitada</TableCell>
+                <TableCell align="center">Fecha solicitada</TableCell>
                 <TableCell align="center">Entregada</TableCell>
                 <TableCell align="center">Fotos</TableCell>
                 <TableCell align="center">Resultado</TableCell>
@@ -241,7 +241,7 @@ const TablaEntregas: FC<TablaEntregasProps> = ({ deliveriesList }) => {
                         noWrap
                       >
                         {capitalizeFirstLetter(
-                          format(new Date(delivery?.createdAt), "LLL dd yyyy", {
+                          format(new Date(delivery?.date), "LLL dd yyyy", {
                             locale: es,
                           })
                         )}

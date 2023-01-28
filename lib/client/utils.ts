@@ -99,14 +99,15 @@ export const dateDiffInWeeks = (initial: Date, end: Date): number => {
   );
 };
 
-export const printElement = (document: Document, filename: string): void => {
-  htmlToImage
+export const printElement = async (document: Document, filename: string): Promise<void> => {
+  return await htmlToImage
     .toPng(document.getElementById('reportTable'), { quality: 1 })
     .then(function (dataUrl) {
       const pdf = new jsPDF();
       const imgProps = pdf.getImageProperties(dataUrl);
       const pdfWidth = pdf.internal.pageSize.getWidth();
       const pdfHeight = (imgProps.height * pdfWidth) / imgProps.width;
+      
       pdf.addImage(dataUrl, 'PNG', 0, 0, pdfWidth, pdfHeight);
       pdf.save(filename);
     });

@@ -98,7 +98,7 @@ const applyFilters = (deliveriesList: any[], filter: string): any[] => {
               value &&
               compareStringsForFilter(
                 filter,
-                format(new Date(delivery?.fromTime), "LLL dd yyyy", {
+                format(new Date(delivery?.date), "LLL dd yyyy", {
                   locale: es,
                 })
               );
@@ -279,7 +279,7 @@ const TablaEntregasPendientes: FC<TablaEntregasPendientesProps> = ({
                         noWrap
                       >
                         {capitalizeFirstLetter(
-                          format(new Date(delivery?.fromTime), "LLL dd yyyy", {
+                          format(new Date(delivery?.date), "LLL dd yyyy", {
                             locale: es,
                           })
                         )}

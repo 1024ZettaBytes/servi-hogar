@@ -46,6 +46,7 @@ const customerStyle = { ...headerStyle, backgroundColor: "#E570EE" };
 const paymentStyle = { ...headerStyle, backgroundColor: "#A580EE" };
 function DayReport() {
   const [selectedDate, setSelectedDate] = useState<Date>(new Date());
+  const [isPrinting, setIsPrinting] = useState<boolean>(false);
   const { reportData, reportError } = useGetReport(
     getFetcher,
     "day",
@@ -54,10 +55,11 @@ function DayReport() {
   const generalError = reportError;
   const completeData = reportData;
 
-  const handleClickOpen = () => {
+  const handleClickOpen = async () => {
+    setIsPrinting(true);
     const fileName = `DIARIO_${format(selectedDate, "dd-MM-yyyy")}.pdf`;
-
-    printElement(document, fileName);
+    await printElement(document, fileName);
+    setIsPrinting(false);
   };
   const handleOnSelectDate = (newValue) => {
     if (newValue && newValue.toString() !== "Invalid Date") {
@@ -68,6 +70,7 @@ function DayReport() {
     text: "Descargar PDF",
     onClick: handleClickOpen,
     startIcon: <CloudDownloadIcon />,
+    isLoading: isPrinting,
     variant: "outlined",
     color: "info",
   };

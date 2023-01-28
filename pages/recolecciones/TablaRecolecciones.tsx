@@ -84,12 +84,12 @@ const applyFilters = (pickupsList: any[], filter: string): any[] => {
               compareStringsForFilter(filter, statusMap["" + value].text);
             return matchText;
           }
-          case "createdAt": {
+          case "date": {
             const matchFormatedDate =
               value &&
               compareStringsForFilter(
                 filter,
-                format(new Date(pickup?.createdAt), "LLL dd yyyy", {
+                format(new Date(pickup?.date), "LLL dd yyyy", {
                   locale: es,
                 })
               );
@@ -255,7 +255,7 @@ const TablaRecolecciones: FC<TablaRecoleccionesProps> = ({ pickupsList }) => {
                         noWrap
                       >
                         {capitalizeFirstLetter(
-                          format(new Date(pickup?.createdAt), "LLL dd yyyy", {
+                          format(new Date(pickup?.date), "LLL dd yyyy", {
                             locale: es,
                           })
                         )}

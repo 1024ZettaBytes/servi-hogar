@@ -101,7 +101,7 @@ const applyFilters = (pickupsList: any[], filter: string): any[] => {
               value &&
               compareStringsForFilter(
                 filter,
-                format(new Date(pickup?.fromTime), "LLL dd yyyy", {
+                format(new Date(pickup?.date), "LLL dd yyyy", {
                   locale: es,
                 })
               );
@@ -295,7 +295,7 @@ const TablaRecoleccionesPendientes: FC<TablaRecoleccionesPendientesProps> = ({
                         noWrap
                       >
                         {capitalizeFirstLetter(
-                          format(new Date(pickup?.fromTime), "LLL dd yyyy", {
+                          format(new Date(pickup?.date), "LLL dd yyyy", {
                             locale: es,
                           })
                         )}
