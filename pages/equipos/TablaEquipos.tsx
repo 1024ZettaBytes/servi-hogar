@@ -136,7 +136,7 @@ const TablaEquipos: FC<TablaEquiposProps> = ({ userRole, machinesList }) => {
   const [page, setPage] = useState<number>(0);
   const [limit, setLimit] = useState<number>(10);
   const [filter, setFilter] = useState<string>("");
-  const userCanDelete = userRole === "ADMIN";
+  const userCanDelete = ["ADMIN", "AUX"].includes(userRole);
   const machineCanBeDeleted = (machineIsActive, machineStatus) => {
     return (
       userCanDelete &&

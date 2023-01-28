@@ -127,7 +127,7 @@ const TablaClientes: FC<TablaClientesProps> = ({ userRole, customerList }) => {
   const [page, setPage] = useState<number>(0);
   const [limit, setLimit] = useState<number>(10);
   const [filter, setFilter] = useState<string>("");
-  const userCanDelete = userRole === "ADMIN";
+  const userCanDelete = ["ADMIN"].includes(userRole);
   const handleSearchChange = (e: ChangeEvent<HTMLInputElement>): void => {
     const value = e.target.value;
     setFilter(value);
