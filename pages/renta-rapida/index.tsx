@@ -28,6 +28,7 @@ import {
   getFetcher,
   useGetCities,
   useGetAllCustomers,
+  useGetPrices,
 } from "../api/useRequest";
 import { useSnackbar } from "notistack";
 import { addDaysToDate, dateDiffInDays } from "../../lib/client/utils";
@@ -69,6 +70,7 @@ function RentaRapida() {
   const { enqueueSnackbar } = useSnackbar();
   const { customersForRentList, customersForRentError } = useGetAllCustomersForRent(getFetcher);
   const { customerList, customerError } = useGetAllCustomers(getFetcher);
+  const {prices, pricesError } = useGetPrices(getFetcher);
   const { citiesList, citiesError } = useGetCities(getFetcher);
   const [modalIsOpen, setModalIsOpen] = useState(false);
   const [formatIsOpen, setFormatIsOpen] = useState(false);
@@ -84,8 +86,8 @@ function RentaRapida() {
     msg: "",
   });
   const [activeStep, setActiveStep] = useState(0);
-  const generalError = customerError || citiesError || customersForRentError;
-  const completeData = customerList && citiesList && customersForRentList;
+  const generalError = customerError || citiesError || customersForRentError || pricesError;
+  const completeData = customerList && citiesList && customersForRentList && prices;
   const steps = [
     {
       label: "Seleccione un cliente",
@@ -208,7 +210,7 @@ function RentaRapida() {
           <Grid item xs={12}>
             {generalError ? (
               <Alert severity="error">
-                {customerError?.message || citiesError?.message}
+                {customerError?.message || citiesError?.message || pricesError?.message}
               </Alert>
             ) : !completeData ? (
               <Skeleton
@@ -265,7 +267,7 @@ function RentaRapida() {
                               selectedWeeks={rentPeriod.selectedWeeks}
                               useFreeWeeks={rentPeriod.useFreeWeeks}
                               freeWeeks={selectedCustomer.freeWeeks}
-                              weekPrice={selectedCustomer.level?.weekPrice}
+                              weekPrice={prices.newWeekPrice}
                               onChangePeriod={onChangePeriod}
                             />
                           ) : (

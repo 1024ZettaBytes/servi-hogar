@@ -133,7 +133,7 @@ const TablaEntregasPendientes: FC<TablaEntregasPendientesProps> = ({
   const [page, setPage] = useState<number>(0);
   const [limit, setLimit] = useState<number>(10);
   const [filter, setFilter] = useState<string>("");
-  const userCanDelete = userRole === "ADMIN";
+  const userCanDelete = ["ADMIN", "AUX"].includes(userRole);
   const handleModifyClose = (modifiedDelivery, successMessage = null) => {
     setModifyModalIsOpen(false);
     if (modifiedDelivery && successMessage) {
