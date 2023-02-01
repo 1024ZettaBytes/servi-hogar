@@ -1,7 +1,7 @@
 import { validateUserPermissions, getUserId } from "../../auth/authUtils";
 import {
   getPendingDeliveriesData,
-  markCompleteDeliveryData
+  markCompleteDeliveryData,
 } from "../../../../lib/data/Deliveries";
 import formidable from "formidable";
 export const config = {
@@ -20,29 +20,33 @@ async function getPendingDeliveriesAPI(req, res) {
 }
 
 async function completeDeliveryAPI(req, res, userId) {
-  try{
+  try {
     const form = new formidable.IncomingForm();
     form.multiples = true;
-  
-    const {fields, files} = await new Promise(function (resolve, reject) {
-      form.parse(req, function (err, fields, files) {
-          if (err) {
-              console.error(err);
-              reject(new Error("Ocurrió un error interno, por favor contacte al administrador."));
-              return;
-          }
-          resolve({fields, files});
-      });
-  });
 
-  const body = JSON.parse(fields?.body);
-  
-  await markCompleteDeliveryData({...body, files, lastUpdatedBy: userId});
-  res.status(200).json({ msg: "La entrega ha sido completada." });
-}catch(e){
-  console.error(e);
-  res.status(500).json({ errorMsg: e.message });
-}
+    const { fields, files } = await new Promise(function (resolve, reject) {
+      form.parse(req, function (err, fields, files) {
+        if (err) {
+          console.error(err);
+          reject(
+            new Error(
+              "Ocurrió un error interno, por favor contacte al administrador."
+            )
+          );
+          return;
+        }
+        resolve({ fields, files });
+      });
+    });
+
+    const body = JSON.parse(fields?.body);
+
+    await markCompleteDeliveryData({ ...body, files, lastUpdatedBy: userId });
+    res.status(200).json({ msg: "La entrega ha sido completada." });
+  } catch (e) {
+    console.error(e);
+    res.status(500).json({ errorMsg: e.message });
+  }
 }
 
 async function handler(req, res) {

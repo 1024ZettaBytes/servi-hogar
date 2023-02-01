@@ -189,7 +189,7 @@ const TablaEntregas: FC<TablaEntregasProps> = ({ deliveriesList }) => {
                 <TableCell align="center">#</TableCell>
                 <TableCell align="center"># del día</TableCell>
                 <TableCell align="center">Cliente</TableCell>
-                <TableCell align="center">Fecha solicitada</TableCell>
+                <TableCell align="center">Fecha Programada</TableCell>
                 <TableCell align="center">Entregada</TableCell>
                 <TableCell align="center">Fotos</TableCell>
                 <TableCell align="center">Resultado</TableCell>

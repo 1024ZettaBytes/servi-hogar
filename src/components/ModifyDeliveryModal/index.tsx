@@ -84,7 +84,7 @@ function ModifyDeliveryModal(props) {
             <OperationTime
               fullWidth
               date={deliveryTime.date}
-              minDate={new Date()}
+              minDate={deliveryToEdit.createdAt}
               timeOption={deliveryTime.timeOption}
               fromTime={deliveryTime.fromTime}
               endTime={deliveryTime.endTime}

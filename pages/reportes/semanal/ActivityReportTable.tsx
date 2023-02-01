@@ -27,7 +27,6 @@ const ActivityReportTable: React.FC<ActivityReportTableProps> = ({
   list,
   totalData,
 }) => {
-  console.log("Days:", list)
   return (
     <div>
       <Divider />

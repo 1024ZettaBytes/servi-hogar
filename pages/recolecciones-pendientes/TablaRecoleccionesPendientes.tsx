@@ -24,7 +24,7 @@ import NextLink from "next/link";
 import { capitalizeFirstLetter } from "lib/client/utils";
 import { format } from "date-fns";
 import es from "date-fns/locale/es";
-import { cancelPickup } from "../../lib/client/pickupsFetch";
+import { cancelPickup, markWasSentPickup } from "../../lib/client/pickupsFetch";
 import { useSnackbar } from "notistack";
 import Label from "@/components/Label";
 import WhatsAppIcon from "@mui/icons-material/WhatsApp";
@@ -89,6 +89,11 @@ const applyFilters = (pickupsList: any[], filter: string): any[] => {
               value["num"] && compareStringsForFilter(filter, value["num"]);
             return matchNumber || matchCustomerName;
           }
+          case "totalNumber": {
+            const matchTNumber =
+              value && compareStringsForFilter(filter, value + "");
+            return matchTNumber;
+          }
           case "status": {
             const matchText =
               statusMap["" + value] &&
@@ -131,15 +136,15 @@ const TablaRecoleccionesPendientes: FC<TablaRecoleccionesPendientesProps> = ({
   const [formatIsOpen, setFormatIsOpen] = useState(false);
   const [formatText, setFormatText] = useState<string>("");
   const [isDeleting, setIsDeleting] = useState(false);
-  const [pickupToEdit, setDeliveryToEdit] = useState<any>(null);
+  const [pickupToEdit, setPickupToEdit] = useState<any>(null);
   const [idToCancel, setIdToCancel] = useState<string>(null);
   const [page, setPage] = useState<number>(0);
   const [limit, setLimit] = useState<number>(10);
   const [filter, setFilter] = useState<string>("");
   const userCanDelete = ["ADMIN", "AUX"].includes(userRole);
-  const handleModifyClose = (modifiedDelivery, successMessage = null) => {
+  const handleModifyClose = (modifiedPickup, successMessage = null) => {
     setModifyModalIsOpen(false);
-    if (modifiedDelivery && successMessage) {
+    if (modifiedPickup && successMessage) {
       enqueueSnackbar(successMessage, {
         variant: "success",
         anchorOrigin: {
@@ -163,7 +168,7 @@ const TablaRecoleccionesPendientes: FC<TablaRecoleccionesPendientesProps> = ({
     setLimit(parseInt(event.target.value));
   };
   const handleOnModifyClick = (pickup: any) => {
-    setDeliveryToEdit(pickup);
+    setPickupToEdit(pickup);
     setModifyModalIsOpen(true);
   };
   const handleOnDeleteClick = (pickupId: string) => {
@@ -230,8 +235,9 @@ const TablaRecoleccionesPendientes: FC<TablaRecoleccionesPendientesProps> = ({
                 <TableCell align="center"># del día</TableCell>
                 <TableCell align="center">Cliente</TableCell>
                 <TableCell align="center">Estado</TableCell>
-                <TableCell align="center">Fecha solicitada</TableCell>
+                <TableCell align="center">Fecha Programada</TableCell>
                 <TableCell align="center">Horario Especial</TableCell>
+                <TableCell align="center">¿Enviada?</TableCell>
                 <TableCell align="center"></TableCell>
               </TableRow>
             </TableHead>
@@ -323,7 +329,17 @@ const TablaRecoleccionesPendientes: FC<TablaRecoleccionesPendientesProps> = ({
                           : "-"}
                       </Typography>
                     </TableCell>
-
+                    <TableCell align="center">
+                      <Typography
+                        variant="body1"
+                        fontWeight="bold"
+                        color="text.primary"
+                        gutterBottom
+                        noWrap
+                      >
+                        {pickup?.wasSent ? "Sí" : "-"}
+                      </Typography>
+                    </TableCell>
                     <TableCell align="center">
                       <NextLink
                         href={`/recolecciones-pendientes/${pickup?._id}`}
@@ -379,6 +395,7 @@ const TablaRecoleccionesPendientes: FC<TablaRecoleccionesPendientesProps> = ({
                       <Tooltip title="Ver formato" arrow>
                         <IconButton
                           onClick={() => {
+                            setPickupToEdit(pickup)
                             setFormatText(
                               getFormatForPickup(pickup.rent, pickup, pickup)
                             );
@@ -425,13 +442,16 @@ const TablaRecoleccionesPendientes: FC<TablaRecoleccionesPendientesProps> = ({
       {formatIsOpen && (
         <FormatModal
           open={formatIsOpen}
+          selectedId={pickupToEdit?._id}
           title="Formato de recolección"
-          text=""
+          text={pickupToEdit?.wasSent ? "ENVIADO" : null}
+          textColor="green"
           formatText={formatText}
           onAccept={() => {
             setFormatIsOpen(false);
             setFormatText("");
           }}
+          onSubmitAction={markWasSentPickup}
         />
       )}
       {cancelModalIsOpen && (

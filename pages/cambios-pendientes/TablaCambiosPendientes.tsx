@@ -24,7 +24,7 @@ import NextLink from "next/link";
 import { capitalizeFirstLetter } from "lib/client/utils";
 import { format } from "date-fns";
 import es from "date-fns/locale/es";
-import { cancelChange } from "../../lib/client/changesFetch";
+import { cancelChange, markWasSentChange } from "../../lib/client/changesFetch";
 import { useSnackbar } from "notistack";
 import Label from "@/components/Label";
 import WhatsAppIcon from "@mui/icons-material/WhatsApp";
@@ -230,8 +230,9 @@ const TablaCambiosPendientes: FC<TablaCambiosPendientesProps> = ({
                 <TableCell align="center"># del día</TableCell>
                 <TableCell align="center">Cliente</TableCell>
                 <TableCell align="center">Estado</TableCell>
-                <TableCell align="center">Fecha solicitada</TableCell>
+                <TableCell align="center">Fecha Programada</TableCell>
                 <TableCell align="center">Horario Especial</TableCell>
+                <TableCell align="center">¿Enviada?</TableCell>
                 <TableCell align="center"></TableCell>
               </TableRow>
             </TableHead>
@@ -323,7 +324,17 @@ const TablaCambiosPendientes: FC<TablaCambiosPendientesProps> = ({
                           : "-"}
                       </Typography>
                     </TableCell>
-
+                    <TableCell align="center">
+                      <Typography
+                        variant="body1"
+                        fontWeight="bold"
+                        color="text.primary"
+                        gutterBottom
+                        noWrap
+                      >
+                        {change?.wasSent ? "Sí" : "-"}
+                      </Typography>
+                    </TableCell>
                     <TableCell align="center">
                       <NextLink href={`/cambios-pendientes/${change?._id}`}>
                         <Tooltip title="Marcar completado" arrow>
@@ -377,8 +388,14 @@ const TablaCambiosPendientes: FC<TablaCambiosPendientesProps> = ({
                       <Tooltip title="Ver formato" arrow>
                         <IconButton
                           onClick={() => {
+                            setChangeToEdit(change);
                             setFormatText(
-                              getFormatForChange(change.rent, change,change.reason, change)
+                              getFormatForChange(
+                                change.rent,
+                                change,
+                                change.reason,
+                                change
+                              )
                             );
                             setFormatIsOpen(true);
                           }}
@@ -423,13 +440,16 @@ const TablaCambiosPendientes: FC<TablaCambiosPendientesProps> = ({
       {formatIsOpen && (
         <FormatModal
           open={formatIsOpen}
+          selectedId={changeToEdit?._id}
           title="Formato de Cambio"
-          text=""
+          text={changeToEdit?.wasSent ? "ENVIADO" : null}
           formatText={formatText}
+          textColor={"green"}
           onAccept={() => {
             setFormatIsOpen(false);
             setFormatText("");
           }}
+          onSubmitAction={markWasSentChange}
         />
       )}
       {cancelModalIsOpen && (

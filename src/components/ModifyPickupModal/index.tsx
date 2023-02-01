@@ -84,7 +84,7 @@ function ModifyPickupModal(props) {
             <OperationTime
               fullWidth
               date={pickupTime.date}
-              minDate={new Date()}
+              minDate={pickupToEdit.createdAt}
               timeOption={pickupTime.timeOption}
               fromTime={pickupTime.fromTime}
               endTime={pickupTime.endTime}

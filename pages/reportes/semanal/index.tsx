@@ -235,16 +235,16 @@ function DayReport() {
                       <ActivityReportTable
                         header="CAMBIOS"
                         colorStyle={changeStyle}
-                        totalData={DUMMY.deliveries.totalData}
-                        list={DUMMY.deliveries.days}
+                        totalData={reportData?.changes?.totalData}
+                        list={reportData?.changes?.days}
                       />
                     </Grid>
                     <Grid item lg={6}>
                       <ActivityReportTable
                         header="RECOLECCIONES"
                         colorStyle={pickupStyle}
-                        totalData={DUMMY.deliveries.totalData}
-                        list={DUMMY.deliveries.days}
+                        totalData={reportData?.pickups.totalData}
+                        list={reportData?.pickups.days}
                       />
                     </Grid>
                     <Grid item lg={6}>
