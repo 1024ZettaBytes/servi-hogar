@@ -40,6 +40,8 @@ import ScheduleChangeModal from "@/components/ScheduleChangeModal";
 import Label from "@/components/Label";
 import styles from "../tables.module.css";
 import BonusModal from "@/components/BonusModal";
+import { markWasSentPickup } from "lib/client/pickupsFetch";
+import { markWasSentChange } from "lib/client/changesFetch";
 interface TablaRentasActualesProps {
   className?: string;
   rentList: any[];
@@ -515,8 +517,10 @@ const TablaRentasActuales: FC<TablaRentasActualesProps> = ({ rentList }) => {
       {formatIsOpen && createdPickup && (
         <FormatModal
           open={formatIsOpen}
+          selectedId={createdPickup.pickup._id}
           title="Formato de Recolección"
-          text=""
+          text={createdPickup?.wasSent ? "ENVIADO" : null}
+          textColor="green"
           formatText={getFormatForPickup(
             createdPickup.rent,
             createdPickup.pickup,
@@ -526,13 +530,16 @@ const TablaRentasActuales: FC<TablaRentasActualesProps> = ({ rentList }) => {
             setFormatIsOpen(false);
             setCreatedPickup(null);
           }}
+          onSubmitAction={markWasSentPickup}
         />
       )}
       {formatIsOpen && createdChange && (
         <FormatModal
           open={formatIsOpen}
+          selectedId={createdChange.change._id}
           title="Formato de Cambio"
-          text=""
+          text={createdChange?.change.wasSent ? "ENVIADO" : null}
+          textColor="green"
           formatText={getFormatForChange(
             createdChange.rent,
             createdChange.change,
@@ -543,6 +550,7 @@ const TablaRentasActuales: FC<TablaRentasActualesProps> = ({ rentList }) => {
             setFormatIsOpen(false);
             setCreatedChange(null);
           }}
+          onSubmitAction={markWasSentChange}
         />
       )}
     </>

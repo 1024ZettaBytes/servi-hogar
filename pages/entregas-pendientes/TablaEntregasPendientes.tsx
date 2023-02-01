@@ -24,7 +24,10 @@ import NextLink from "next/link";
 import { capitalizeFirstLetter } from "lib/client/utils";
 import { format } from "date-fns";
 import es from "date-fns/locale/es";
-import { cancelDelivery } from "../../lib/client/deliveriesFetch";
+import {
+  cancelDelivery,
+  markWasSentDelivery,
+} from "../../lib/client/deliveriesFetch";
 import { useSnackbar } from "notistack";
 import Label from "@/components/Label";
 import CheckIcon from "@mui/icons-material/Check";
@@ -35,7 +38,7 @@ import SearchIcon from "@mui/icons-material/Search";
 import GenericModal from "@/components/GenericModal";
 import ModifyDeliveryModal from "../../src/components/ModifyDeliveryModal";
 import FormatModal from "@/components/FormatModal";
-import { getFormatForDelivery } from "../../lib/consts/OBJ_CONTS"
+import { getFormatForDelivery } from "../../lib/consts/OBJ_CONTS";
 
 interface TablaEntregasPendientesProps {
   userRole: string;
@@ -56,6 +59,7 @@ const statusMap = {
     color: "success",
   },
 };
+
 const getStatusLabel = (deliverStatus: string): JSX.Element => {
   const { text, color }: any = statusMap[deliverStatus];
 
@@ -81,7 +85,10 @@ const applyFilters = (deliveriesList: any[], filter: string): any[] => {
         }
         switch (key) {
           case "rent": {
-            const matchCustomerName = value["customer"] && value["customer"].name && compareStringsForFilter(filter, value["customer"].name);
+            const matchCustomerName =
+              value["customer"] &&
+              value["customer"].name &&
+              compareStringsForFilter(filter, value["customer"].name);
             const matchNumber =
               value["num"] && compareStringsForFilter(filter, value["num"]);
             return matchNumber || matchCustomerName;
@@ -98,7 +105,7 @@ const applyFilters = (deliveriesList: any[], filter: string): any[] => {
               value &&
               compareStringsForFilter(
                 filter,
-                format(new Date(delivery?.fromTime), "LLL dd yyyy", {
+                format(new Date(delivery?.date), "LLL dd yyyy", {
                   locale: es,
                 })
               );
@@ -228,6 +235,7 @@ const TablaEntregasPendientes: FC<TablaEntregasPendientesProps> = ({
                 <TableCell align="center">Estado</TableCell>
                 <TableCell align="center">Fecha de entrega</TableCell>
                 <TableCell align="center">Horario Especial</TableCell>
+                <TableCell align="center">¿Enviada?</TableCell>
                 <TableCell align="center"></TableCell>
               </TableRow>
             </TableHead>
@@ -279,7 +287,7 @@ const TablaEntregasPendientes: FC<TablaEntregasPendientesProps> = ({
                         noWrap
                       >
                         {capitalizeFirstLetter(
-                          format(new Date(delivery?.fromTime), "LLL dd yyyy", {
+                          format(new Date(delivery?.date), "LLL dd yyyy", {
                             locale: es,
                           })
                         )}
@@ -296,18 +304,28 @@ const TablaEntregasPendientes: FC<TablaEntregasPendientesProps> = ({
                       >
                         {delivery?.timeOption === "specific"
                           ? `${format(new Date(delivery?.fromTime), "h:mm a", {
-                            locale: es,
-                          })} - ${format(
-                            new Date(delivery?.endTime),
-                            "h:mm a",
-                            {
                               locale: es,
-                            }
-                          )}`
+                            })} - ${format(
+                              new Date(delivery?.endTime),
+                              "h:mm a",
+                              {
+                                locale: es,
+                              }
+                            )}`
                           : "-"}
                       </Typography>
                     </TableCell>
-
+                    <TableCell align="center">
+                      <Typography
+                        variant="body1"
+                        fontWeight="bold"
+                        color="text.primary"
+                        gutterBottom
+                        noWrap
+                      >
+                        {delivery?.wasSent ? "Sí" : "-"}
+                      </Typography>
+                    </TableCell>
                     <TableCell align="center">
                       <NextLink href={`/entregas-pendientes/${delivery?._id}`}>
                         <Tooltip title="Marcar entregada" arrow>
@@ -361,7 +379,14 @@ const TablaEntregasPendientes: FC<TablaEntregasPendientesProps> = ({
                       <Tooltip title="Ver formato" arrow>
                         <IconButton
                           onClick={() => {
-                            setFormatText(getFormatForDelivery(delivery.rent, delivery, delivery));
+                            setDeliveryToEdit(delivery);
+                            setFormatText(
+                              getFormatForDelivery(
+                                delivery.rent,
+                                delivery,
+                                delivery
+                              )
+                            );
                             setFormatIsOpen(true);
                           }}
                           sx={{
@@ -404,29 +429,33 @@ const TablaEntregasPendientes: FC<TablaEntregasPendientesProps> = ({
       )}
       {formatIsOpen && (
         <FormatModal
+          selectedId={deliveryToEdit?._id}
           open={formatIsOpen}
           title="Formato de entrega"
-          text=""
+          text={deliveryToEdit?.wasSent ? "ENVIADO" : null}
+          textColor={"green"}
           formatText={formatText}
           onAccept={() => {
             setFormatIsOpen(false);
             setFormatText("");
           }}
+          onSubmitAction={markWasSentDelivery}
         />
       )}
-      {cancelModalIsOpen && 
-      <GenericModal
-        open={cancelModalIsOpen}
-        title="Atención"
-        text={"¿Está seguro de cancelar la entrega seleccionada?"}
-        isLoading={isDeleting}
-        requiredReason
-        onAccept={handleOnConfirmDelete}
-        onCancel={() => {
-          setCancelModalIsOpen(false);
-          setIsDeleting(false);
-        }}
-      />}
+      {cancelModalIsOpen && (
+        <GenericModal
+          open={cancelModalIsOpen}
+          title="Atención"
+          text={"¿Está seguro de cancelar la entrega seleccionada?"}
+          isLoading={isDeleting}
+          requiredReason
+          onAccept={handleOnConfirmDelete}
+          onCancel={() => {
+            setCancelModalIsOpen(false);
+            setIsDeleting(false);
+          }}
+        />
+      )}
     </>
   );
 };

@@ -85,12 +85,12 @@ const applyFilters = (changesList: any[], filter: string): any[] => {
               compareStringsForFilter(filter, statusMap["" + value].text);
             return matchText;
           }
-          case "createdAt": {
+          case "date": {
             const matchFormatedDate =
               value &&
               compareStringsForFilter(
                 filter,
-                format(new Date(change?.createdAt), "LLL dd yyyy", {
+                format(new Date(change?.date), "LLL dd yyyy", {
                   locale: es,
                 })
               );
@@ -257,7 +257,7 @@ const TablaCambios: FC<TablaCambiosProps> = ({ changesList }) => {
                         noWrap
                       >
                         {capitalizeFirstLetter(
-                          format(new Date(change?.createdAt), "LLL dd yyyy", {
+                          format(new Date(change?.date), "LLL dd yyyy", {
                             locale: es,
                           })
                         )}

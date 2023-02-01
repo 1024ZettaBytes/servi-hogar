@@ -53,12 +53,12 @@ function CambioPendiente() {
   const { changeId } = router.query;
   const { change, changeByIdError } = useGetChangeById(getFetcher, changeId);
   const { machinesData, machinesError } = useGetMachinesForRent(getFetcher);
-  const [changeDate, setChangeDate] = useState<any>(new Date());
+  const [changeDate, setChangeDate] = useState<any>(null);
   const [changedAccesories, setChangedAccesories] = useState<any>({});
   const [attached, setAttached] = useState<any>({
     tag: { file: null, url: null },
   });
-
+  
   const [badFormat, setBadFormat] = useState<any>({
     tag: false,
   });
@@ -80,7 +80,7 @@ function CambioPendiente() {
   ];
 
   const checkEnabledButton = () => {
-    return changeDate && changeDate.toString() !== "Invalid Date";
+    return changeDate ? changeDate.toString() !== "Invalid Date" : change?.date;
   };
 
   const nextButtonEnabled = checkEnabledButton();
@@ -93,7 +93,7 @@ function CambioPendiente() {
     const result = await completeChange(!wasFixed ? attached : null, {
       changeId,
       wasFixed,
-      changeDate,
+      changeDate: changeDate ? changeDate : change?.date,
       problemDesc: problemDesc?.value,
       solutionDesc: solutionDesc?.value,
       newMachine: newMachine?.value,
@@ -173,7 +173,7 @@ function CambioPendiente() {
                                 <DesktopDatePicker
                                   label="Fecha de cambio"
                                   inputFormat="dd/MM/yyyy"
-                                  value={changeDate}
+                                  value={changeDate || change.date}
                                   maxDate={new Date()}
                                   onChange={(newValue) => {
                                     setChangeDate(newValue);

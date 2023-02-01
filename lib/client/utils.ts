@@ -1,4 +1,7 @@
-function startOfWeek(dt):Date {
+import { jsPDF } from 'jspdf';
+import * as htmlToImage from 'html-to-image';
+
+function startOfWeek(dt): Date {
   const day = 24 * 60 * 60 * 1000;
   const weekday = dt.getDay();
   return new Date(dt.getTime() - Math.abs(0 - weekday) * day);
@@ -44,38 +47,80 @@ export const getTimeFromDate = (
   };
 };
 
-export const addDaysToDate = (date: Date, days: number):Date => {
+export const addDaysToDate = (date: Date, days: number): Date => {
   var result = new Date(date);
   result.setDate(result.getDate() + days);
   return result;
-}
+};
 
-export const setDateToInitial = (date: Date):Date => {
+export const setDateToInitial = (date: Date): Date => {
   var result = new Date(date);
   result.setHours(0, 0, 0, 0);
   return result;
-}
+};
 
-export const getFileExtension = (fileName: string): string =>{
-  const splited = fileName.split(".");
-  return splited[splited.length-1];
-}
+export const setDateToEnd = (date: Date): Date => {
+  var result = new Date(date);
+  result.setHours(23, 59, 59, 999);
+  return result;
+};
 
-export const getFileFromUrl = (url: string): string =>{
-  const splited = url.split("/");
-  return splited[splited.length-1];
-}
+export const isDateInRange = (date: Date, start: Date, end: Date): boolean => {
+  return date.getTime() >= start.getTime() && date.getTime() <= end.getTime();
+};
 
-export const dateDiffInDays = (initial: Date, end: Date):number =>{
+export const getFileExtension = (fileName: string): string => {
+  const splited = fileName.split('.');
+  return splited[splited.length - 1];
+};
+
+export const getFileFromUrl = (url: string): string => {
+  const splited = url.split('/');
+  return splited[splited.length - 1];
+};
+
+export const dateDiffInDays = (initial: Date, end: Date): number => {
   const _MS_PER_DAY = 1000 * 60 * 60 * 24;
   // Discard the time and time-zone information.
-  const utc1 = Date.UTC(initial.getFullYear(), initial.getMonth(), initial.getDate());
+  const utc1 = Date.UTC(
+    initial.getFullYear(),
+    initial.getMonth(),
+    initial.getDate()
+  );
   const utc2 = Date.UTC(end.getFullYear(), end.getMonth(), end.getDate());
 
   return Math.floor((utc2 - utc1) / _MS_PER_DAY);
-}
+};
 
-export const dateDiffInWeeks = (initial: Date, end: Date):number =>{
+export const dateDiffInWeeks = (initial: Date, end: Date): number => {
   const week = 7 * 24 * 60 * 60 * 1000;
-return Math.ceil((startOfWeek(initial).getTime() - startOfWeek(end).getTime()) / week);
-}
+  return Math.ceil(
+    (startOfWeek(initial).getTime() - startOfWeek(end).getTime()) / week
+  );
+};
+
+export const printElement = async (document: Document, filename: string): Promise<void> => {
+  return await htmlToImage
+    .toPng(document.getElementById('reportTable'), { quality: 1 })
+    .then(function (dataUrl) {
+      const pdf = new jsPDF();
+      const imgProps = pdf.getImageProperties(dataUrl);
+      const pdfWidth = pdf.internal.pageSize.getWidth();
+      const pdfHeight = (imgProps.height * pdfWidth) / imgProps.width;
+      
+      pdf.addImage(dataUrl, 'PNG', 0, 0, pdfWidth, pdfHeight);
+      pdf.save(filename);
+    });
+};
+
+export const getFirstWeekDay = (date: Date): Date => {
+  const day = date.getDay();
+  if (day === 6) return setDateToInitial(date);
+  else return setDateToInitial(addDaysToDate(date, -(day + 1)));
+};
+
+export const getLastWeekDay = (date: Date): Date => {
+  const day = date.getDay();
+  if (day === 6) return setDateToEnd(addDaysToDate(date, 6));
+  else return setDateToEnd(addDaysToDate(date, 5 - day));
+};

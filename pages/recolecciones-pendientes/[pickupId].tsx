@@ -46,7 +46,7 @@ function RecoleccionPendiente() {
   const router = useRouter();
   const { pickupId } = router.query;
   const { pickup, pickupByIdError } = useGetPickupById(getFetcher, pickupId);
-  const [pickupDate, setPickupDate] = useState<any>(new Date());
+  const [pickupDate, setPickupDate] = useState<any>(null);
   const [whitDebt, setWhitDebt] = useState<number>(0);
   const [pickedAccesories, setPickedAccesories] = useState<any>({});
   const [attached, setAttached] = useState<any>({
@@ -63,20 +63,26 @@ function RecoleccionPendiente() {
     error: false,
     msg: "",
   });
-  const validDate = pickupDate && pickupDate.toString() !== "Invalid Date";
-  const expiredDays = 
-      (validDate ? dateDiffInDays(new Date(pickup?.rent?.endDate) || new Date(), pickupDate) : 0);
+  const validDate = pickupDate
+    ? pickupDate.toString() !== "Invalid Date"
+    : pickup?.date;
+  const expiredDays =
+    validDate && pickup
+      ? dateDiffInDays(
+          new Date(pickup?.rent?.endDate),
+          new Date(pickupDate ? pickupDate : pickup.date)
+        )
+      : 0;
   const debt = (pickup?.rent?.customer?.level?.dayPrice || 0) * whitDebt;
   const [activeStep, setActiveStep] = useState(0);
   const generalError = pickupByIdError;
   const completeData = pickup;
-  if(expiredDays > 0 && whitDebt > expiredDays){
+  if (expiredDays > 0 && whitDebt > expiredDays) {
     setWhitDebt(expiredDays);
   }
-  if(expiredDays <0 && whitDebt > 0){
+  if (expiredDays < 0 && whitDebt > 0) {
     setWhitDebt(0);
   }
-console.log(whitDebt);
   const steps = [
     {
       label: "Fecha de recolección",
@@ -100,7 +106,7 @@ console.log(whitDebt);
     setIsSubmitting(true);
     const result = await completePickup(attached, {
       pickupId,
-      pickupDate,
+      pickupDate: pickupDate ? pickupDate : pickup.date,
       whitDebt,
       pickedAccesories,
     });
@@ -176,9 +182,9 @@ console.log(whitDebt);
                                 <DesktopDatePicker
                                   label="Fecha de recolección*"
                                   inputFormat="dd/MM/yyyy"
-                                  value={pickupDate}
-                                  minDate={new Date(pickup?.rent?.startDate)}
+                                  value={pickupDate || pickup.date}
                                   maxDate={new Date()}
+                                  minDate={new Date(pickup?.rent?.startDate)}
                                   onChange={(newValue) => {
                                     setPickupDate(newValue);
                                   }}
@@ -187,45 +193,52 @@ console.log(whitDebt);
                                   )}
                                 />
                               </Grid>
-                              {expiredDays>0 &&<>
-                              <Grid item lg={2} sm={6} xs={6} m={1}>
-                                <TextField
-                                  label={"Deuda:"}
-                                  type="number"
-                                  fullWidth
-                                  value={whitDebt}
-                                  variant="outlined"
-                                  size="small"
-                                  autoFocus
-                                  InputProps={{
-                                    endAdornment: (
-                                      <InputAdornment position="start">
-                                        día(s)
-                                      </InputAdornment>
-                                    ),
-                                    inputProps: {
-                                      min: 0,
-                                      max: expiredDays,
-                                      style: { textAlign: "center" },
-                                    },
-                                  }}
-                                  onChange={(event) => {
-                                    setWhitDebt(Number(event.target.value));
-                                  }}
-                                />
-                              </Grid>
-                              <Grid item mt={2} xs={12}>
-                                <Typography>
-                                  {`(${expiredDays} día(s) de vencimiento)`}
-                                </Typography>
-                              </Grid>
-                              <Grid item lg={12} />
-                              {debt !== 0 && <Grid item m={1}>
-                                <Typography color="red" fontWeight={"bold"}>
-                                  {`$-${debt} de deuda`}
-                                </Typography>
-                              </Grid>}
-                             </> }
+                              {expiredDays > 0 && (
+                                <>
+                                  <Grid item lg={2} sm={6} xs={6} m={1}>
+                                    <TextField
+                                      label={"Deuda:"}
+                                      type="number"
+                                      fullWidth
+                                      value={whitDebt}
+                                      variant="outlined"
+                                      size="small"
+                                      autoFocus
+                                      InputProps={{
+                                        endAdornment: (
+                                          <InputAdornment position="start">
+                                            día(s)
+                                          </InputAdornment>
+                                        ),
+                                        inputProps: {
+                                          min: 0,
+                                          max: expiredDays,
+                                          style: { textAlign: "center" },
+                                        },
+                                      }}
+                                      onChange={(event) => {
+                                        setWhitDebt(Number(event.target.value));
+                                      }}
+                                    />
+                                  </Grid>
+                                  <Grid item mt={2} xs={12}>
+                                    <Typography>
+                                      {`(${expiredDays} día(s) de vencimiento)`}
+                                    </Typography>
+                                  </Grid>
+                                  <Grid item lg={12} />
+                                  {debt !== 0 && (
+                                    <Grid item m={1}>
+                                      <Typography
+                                        color="red"
+                                        fontWeight={"bold"}
+                                      >
+                                        {`$-${debt} de deuda`}
+                                      </Typography>
+                                    </Grid>
+                                  )}
+                                </>
+                              )}
                             </Grid>
                           )}
                           {activeStep === 1 && (

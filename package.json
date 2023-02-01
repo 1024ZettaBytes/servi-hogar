@@ -5,7 +5,7 @@
   "description": "Sistema desarrollado utilizando NextJs y MongoDB",
   "author": {
     "name": "Eduardo Ramírez",
-    "url": ""
+    "url": "https://github.com/1024ZettaBytes/servi-hogar.git"
   },
   "engines": {
     "node": "18.12.1"
@@ -45,6 +45,8 @@
     "date-fns": "^2.29.3",
     "dayjs": "^1.11.6",
     "formidable": "^2.0.1",
+    "html-to-image": "^1.11.4",
+    "jspdf": "^2.5.1",
     "mongodb": "^4.10.0",
     "mongoose": "^6.6.5",
     "mui-file-input": "^1.1.3",

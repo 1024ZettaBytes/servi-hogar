@@ -61,7 +61,7 @@ function RentaRapida() {
   const paths = ["Inicio", "Entregas pendientes", `${delivery?.totalNumber}`];
   const [customerToEdit, setCustomerToEdit] = useState<any>({ isSet: false });
   const [deliveredMachine, setDeliveredMachine] = useState<string>(null);
-  const [deliveryDate, setDeliveryDate] = useState<any>(new Date());
+  const [deliveryDate, setDeliveryDate] = useState<any>(null);
   const [payment, setPayment] = useState<number>(-1);
   const [isOk, setIsOk] = useState<any>({
     info: true,
@@ -189,7 +189,7 @@ function RentaRapida() {
         validateMapsUrl(customerToEdit?.currentResidence?.maps)
       );
     if (activeStep === 1) return deliveredMachine;
-    if (activeStep === 2) return deliveryDate.toString() !== "Invalid Date";
+    if (activeStep === 2) return deliveryDate ? deliveryDate.toString() !== "Invalid Date" : delivery?.date
   };
 
   const nextButtonEnabled = checkEnabledButton();
@@ -204,7 +204,7 @@ function RentaRapida() {
       payment,
       deliveredMachine,
       leftAccesories,
-      deliveryDate,
+      deliveryDate: deliveryDate ? deliveryDate : delivery.date,
       isOk,
     });
     setIsSubmitting(false);
@@ -674,7 +674,7 @@ function RentaRapida() {
                                 <DesktopDatePicker
                                   label="Fecha de entrega"
                                   inputFormat="dd/MM/yyyy"
-                                  value={deliveryDate}
+                                  value={deliveryDate || delivery.date}
                                   maxDate={new Date()}
                                   onChange={(newValue) => {
                                     setDeliveryDate(newValue);

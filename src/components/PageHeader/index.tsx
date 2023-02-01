@@ -1,7 +1,6 @@
-import { Typography, Avatar, Grid, Button } from '@mui/material';
+import { LoadingButton } from '@mui/lab';
+import { Typography, Avatar, Grid } from '@mui/material';
 import { useTheme } from '@mui/material/styles';
-import AddTwoToneIcon from '@mui/icons-material/AddTwoTone';
-
 function PageHeader(props) {
   const user = {
     avatar: '/static/images/avatars/1.png'
@@ -35,15 +34,17 @@ function PageHeader(props) {
       </Grid>
       <Grid item>
         { button ? 
-        <Button
+        <LoadingButton
           sx={{ mt: { xs: 2, md: 0 } }}
-          variant="contained"
-          startIcon={<AddTwoToneIcon fontSize="small" />}
+          variant={button.variant}
+          startIcon={button.startIcon}
+          color={button.color || 'primary'}
           onClick={() =>button.onClick()}
           disabled={button.disabled}
+          loading={button.isLoading}
         >
           {button.text}
-        </Button>:null
+        </LoadingButton>:null
 }
       </Grid>
     </Grid>

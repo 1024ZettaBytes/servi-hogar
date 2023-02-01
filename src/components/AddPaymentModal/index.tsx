@@ -36,6 +36,7 @@ import {
 } from "../../../lib/consts/OBJ_CONTS";
 import { MuiFileInput } from "mui-file-input";
 import numeral from "numeral";
+import { DesktopDatePicker } from "@mui/x-date-pickers";
 function AddPaymentModal(props) {
   const { customerId, handleOnClose, open, reason, amount } = props;
   const { customerList, customerError } = useGetAllCustomers(getFetcher);
@@ -43,6 +44,7 @@ function AddPaymentModal(props) {
   const [selectedReason, setSelectedReason] = useState<any>(null);
   const [selectedMethod, setSelectedMethod] = useState<any>(null);
   const [account, setAccount] = useState<string>(null);
+  const [paymentDate, setPaymentDate] = useState<Date>(new Date());
   const [selectedAmount, setSelectedAmount] = useState<any>(null);
   const [selectedFolio, setSelectedFolio] = useState<any>(null);
   const [attached, setAttached] = useState<any>({
@@ -87,6 +89,7 @@ function AddPaymentModal(props) {
       reason: selectedReason,
       method: selectedMethod,
       account,
+      paymentDate,
       amount: selectedAmount,
       folio: selectedFolio,
     });
@@ -316,6 +319,20 @@ function AddPaymentModal(props) {
                           )}
                           {activeStep === 2 && (
                             <Grid container>
+                               <Grid item lg={12} m={1}>
+                                <DesktopDatePicker
+                                  label="Fecha de pago"
+                                  inputFormat="dd/MM/yyyy"
+                                  value={paymentDate}
+                                  maxDate={new Date()}
+                                  onChange={(newValue) => {
+                                    setPaymentDate(newValue)
+                                  }}
+                                  renderInput={(params) => (
+                                    <TextField {...params} />
+                                  )}
+                                />
+                              </Grid>
                               <Grid item lg={2} m={1}>
                                 <TextField
                                   label="Cantidad"
@@ -440,7 +457,7 @@ function AddPaymentModal(props) {
                               <LoadingButton
                                 loading={isSubmitting}
                                 variant="contained"
-                                disabled={customerError}
+                                disabled={customerError || !paymentDate || (paymentDate.toString()==="Invalid Date")}
                                 type="submit"
                                 sx={{ mt: 1, mr: 1 }}
                               >

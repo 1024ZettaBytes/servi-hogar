@@ -18,7 +18,7 @@ function Footer() {
       >
         <Box>
           <Typography variant="subtitle1">
-            &copy; 2022 - Servi Hogar: Soluciones a tu medida.
+            &copy; {new Date().getFullYear()} - Servi Hogar: Soluciones a tu medida.
           </Typography>
         </Box>
       </Box>
