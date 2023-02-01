@@ -40,6 +40,7 @@ import { LoadingButton } from "@mui/lab";
 import { saveRent } from "lib/client/rentsFetch";
 import FormatModal from "@/components/FormatModal";
 import { getFormatForDelivery } from "../../lib/consts/OBJ_CONTS";
+import { markWasSentDelivery } from "lib/client/deliveriesFetch";
 
 const defaultInitialDate = (today: Date) => {
   today.setHours(8, 0, 0);
@@ -362,12 +363,15 @@ function RentaRapida() {
       {formatIsOpen && (
         <FormatModal
           open={formatIsOpen}
+          selectedId={customerRent?.delivery?._id}
           title="Formato de entrega"
-          text=""
+          text={customerRent.delivery?.wasSent ? "ENVIADO":null}
+          textColor="green"
           formatText={getFormatForDelivery(customerRent, customerRent.delivery, deliveryTime)}
           onAccept={() => {
             setFormatIsOpen(false);
           }}
+          onSubmitAction={markWasSentDelivery}
         />
       )}
       <Footer />
