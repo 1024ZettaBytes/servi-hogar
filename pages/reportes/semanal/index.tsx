@@ -44,58 +44,6 @@ const pickupStyle = { ...headerStyle, backgroundColor: "#EE5656" };
 const changeStyle = { ...headerStyle, backgroundColor: "#FFC300" };
 const customerStyle = { ...headerStyle, backgroundColor: "#F4F189" };
 const paymentStyle = { ...headerStyle, backgroundColor: "#89C3F4" };
-const DUMMY = {
-  deliveries: {
-    totalData: {
-      sent: 80,
-      done: 55,
-    },
-    days: [
-      {
-        date: new Date("01/07/2023"),
-        weekDay: "Sábado",
-        sent: 10,
-        done: 10,
-      },
-      {
-        date: new Date("07/01/2023"),
-        weekDay: "Domingo",
-        sent: 15,
-        done: 14,
-      },
-      {
-        date: new Date("07/01/2023"),
-        weekDay: "Lunes",
-        sent: 12,
-        done: 11,
-      },
-      {
-        date: new Date("07/01/2023"),
-        weekDay: "Martes",
-        sent: 10,
-        done: 5,
-      },
-      {
-        date: new Date("07/01/2023"),
-        weekDay: "Miércoles",
-        sent: 11,
-        done: 2,
-      },
-      {
-        date: new Date("07/01/2023"),
-        weekDay: "Jueves",
-        sent: 12,
-        done: 8,
-      },
-      {
-        date: new Date("07/01/2023"),
-        weekDay: "Viernes",
-        sent: 10,
-        done: 5,
-      },
-    ],
-  },
-};
 function DayReport() {
   const [selectedDate, setSelectedDate] = useState<Date>(new Date());
   const [start, setStart] = useState<Date>(getFirstWeekDay(new Date()));
@@ -251,16 +199,16 @@ function DayReport() {
                       <RegistersReportTable
                         header="DEPOSITOS"
                         colorStyle={paymentStyle}
-                        totalData={DUMMY.deliveries.totalData}
-                        list={DUMMY.deliveries.days}
+                        totalData={reportData.payments.totalData}
+                        list={reportData.payments.days}
                       />
                     </Grid>
                     <Grid item lg={6}>
                       <RegistersReportTable
                         header="CLIENTES NUEVOS"
                         colorStyle={customerStyle}
-                        totalData={DUMMY.deliveries.totalData}
-                        list={DUMMY.deliveries.days}
+                        totalData={reportData.customers.totalData}
+                        list={reportData.customers.days}
                       />
                     </Grid>
                   </Grid>

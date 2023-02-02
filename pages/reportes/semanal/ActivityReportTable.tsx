@@ -13,6 +13,7 @@ import {
 } from "@mui/material";
 import { format } from "date-fns";
 import es from "date-fns/locale/es";
+import { capitalizeFirstLetter } from "lib/client/utils";
 
 interface ActivityReportTableProps {
   header: string;
@@ -74,7 +75,7 @@ const ActivityReportTable: React.FC<ActivityReportTableProps> = ({
                     gutterBottom
                     noWrap
                   >
-                    {day?.weekDay}
+                    {capitalizeFirstLetter(day?.weekDay)}
                   </Typography>
                 </TableCell>
                 <TableCell align="center" style={cellStyle}>

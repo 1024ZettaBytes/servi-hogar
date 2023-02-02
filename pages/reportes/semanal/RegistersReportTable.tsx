@@ -13,6 +13,7 @@ import {
 } from "@mui/material";
 import { format } from "date-fns";
 import es from "date-fns/locale/es";
+import { capitalizeFirstLetter } from "lib/client/utils";
 
 interface RegistersReportTableProps {
   header: string;
@@ -27,6 +28,7 @@ const RegistersReportTable: React.FC<RegistersReportTableProps> = ({
   list,
   totalData,
 }) => {
+  console.log("List: ", list);
   return (
     <div>
       <Divider />
@@ -61,7 +63,7 @@ const RegistersReportTable: React.FC<RegistersReportTableProps> = ({
                     gutterBottom
                     noWrap
                   >
-                    {format(day?.date,"dd/MM/yyyy", { locale: es})}
+                    {format(new Date(day?.date),"dd/MM/yyyy", { locale: es})}
                   </Typography>
                 </TableCell>
                 <TableCell align="center" style={cellStyle}>
@@ -71,7 +73,7 @@ const RegistersReportTable: React.FC<RegistersReportTableProps> = ({
                     gutterBottom
                     noWrap
                   >
-                    {day?.weekDay}
+                    {capitalizeFirstLetter(day?.weekDay)}
                   </Typography>
                 </TableCell>
                 <TableCell align="center" style={cellStyle}>

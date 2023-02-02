@@ -191,7 +191,7 @@ const TablaPagos: FC<TablaPagosProps> = ({ paymentsList }) => {
                         {capitalizeFirstLetter(
                           format(
                             new Date(payment?.date),
-                            "MMM dd yyyy HH:mm:mm",
+                            "MMMM dd yyyy",
                             { locale: es }
                           )
                         )}
