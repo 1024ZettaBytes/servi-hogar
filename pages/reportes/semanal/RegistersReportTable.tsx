@@ -28,7 +28,6 @@ const RegistersReportTable: React.FC<RegistersReportTableProps> = ({
   list,
   totalData,
 }) => {
-  console.log("List: ", list);
   return (
     <div>
       <Divider />

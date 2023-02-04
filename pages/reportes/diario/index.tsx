@@ -30,7 +30,7 @@ import { getFetcher, useGetReport } from "../../api/useRequest";
 import CloudDownloadIcon from "@mui/icons-material/CloudDownload";
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
-import { capitalizeFirstLetter, printElement } from "lib/client/utils";
+import { capitalizeFirstLetter, printElement, sleep } from "lib/client/utils";
 
 const cellStyle = { border: "2px solid #374246" };
 const headerStyle = {
@@ -57,6 +57,7 @@ function DayReport() {
 
   const handleClickOpen = async () => {
     setIsPrinting(true);
+    await sleep(1000);
     const fileName = `DIARIO_${format(selectedDate, "dd-MM-yyyy")}.pdf`;
     await printElement(document, fileName);
     setIsPrinting(false);

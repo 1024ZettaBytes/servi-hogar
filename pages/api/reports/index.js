@@ -1,4 +1,4 @@
-import { getSummaryByDay, getSummaryByWeek } from "../../../lib/data/Reports";
+import { getSummaryByDay, getSummaryByRange } from "../../../lib/data/Reports";
 async function getSummaryAPI(req, res) {
   try {
     const { filter, start, end } = req.query;
@@ -9,7 +9,7 @@ async function getSummaryAPI(req, res) {
       case "day":
         data = await getSummaryByDay(startDate);
         break;
-      case "week": data = await getSummaryByWeek(startDate, endDate); 
+      case "range": data = await getSummaryByRange(startDate, endDate); 
       break;
     }
     res.status(200).json({ data });

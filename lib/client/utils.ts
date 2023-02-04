@@ -124,3 +124,20 @@ export const getLastWeekDay = (date: Date): Date => {
   if (day === 6) return setDateToEnd(addDaysToDate(date, 6));
   else return setDateToEnd(addDaysToDate(date, 5 - day));
 };
+
+export const getFirstDayMonth = (date: Date): Date => {
+  const firstDayDate = new Date(date.getFullYear(), date.getMonth(), 1);
+  return setDateToInitial(firstDayDate);
+};
+
+
+export const getLastDayMonth = (date: Date): Date => {
+  const lastDayDate = new Date(date.getFullYear(), date.getMonth() + 1, 0);
+  return setDateToEnd(lastDayDate);
+};
+
+export const sleep = async  (duration: number): Promise<void> => {
+  return new Promise((resolve) => {
+    setTimeout(resolve, duration)
+  })
+}
