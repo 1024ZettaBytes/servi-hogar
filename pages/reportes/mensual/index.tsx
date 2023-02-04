@@ -24,15 +24,13 @@ import { format } from "date-fns";
 import { es } from "date-fns/locale";
 import {
   capitalizeFirstLetter,
-  getLastWeekDay,
-  getFirstWeekDay,
   printElement,
+  getLastDayMonth,
+  getFirstDayMonth,
   sleep,
 } from "lib/client/utils";
-import WeekPicker from "@/components/WeekPicker";
 import ActivityReportTable from "./ActivityReportTable";
-import RegistersReportTable from "./RegistersReportTable";
-
+import MonthPicker from "@/components/MonthPicker";
 const cellStyle = { border: "2px solid #374246" };
 const headerStyle = {
   ...cellStyle,
@@ -43,12 +41,19 @@ const headerStyle = {
 const deliveryStyle = { ...headerStyle, backgroundColor: "#DAF7A6" };
 const pickupStyle = { ...headerStyle, backgroundColor: "#EE5656" };
 const changeStyle = { ...headerStyle, backgroundColor: "#FFC300" };
-const customerStyle = { ...headerStyle, backgroundColor: "#F4F189" };
+const customerStyle = {
+  header: { ...headerStyle, backgroundColor: "#F4F189" },
+  howFound: {
+    facebook: { ...headerStyle, backgroundColor: "#2269C4" },
+    ads: { ...headerStyle, backgroundColor: "#EC0000" },
+    referred: { ...headerStyle, backgroundColor: "#8E8E8E" },
+  },
+};
 const paymentStyle = { ...headerStyle, backgroundColor: "#89C3F4" };
 function DayReport() {
   const [selectedDate, setSelectedDate] = useState<Date>(new Date());
-  const [start, setStart] = useState<Date>(getFirstWeekDay(new Date()));
-  const [end, setEnd] = useState<Date>(getLastWeekDay(new Date()));
+  const [start, setStart] = useState<Date>(getFirstDayMonth(new Date()));
+  const [end, setEnd] = useState<Date>(getLastDayMonth(new Date()));
   const [isPrinting, setIsPrinting] = useState<boolean>(false);
   const { reportData, reportError } = useGetReport(
     getFetcher,
@@ -62,9 +67,7 @@ function DayReport() {
   const handleClickOpen = async () => {
     setIsPrinting(true);
     await sleep(1000);
-    const fileName = `SEMANAL_${format(start, "dd-LLLL-yyyy", {
-      locale: es,
-    })}_al_${format(end, "dd-LLLL-yyyy", {
+    const fileName = `Mensual_${format(start, "LLLL-yyyy", {
       locale: es,
     })}.pdf`;
     await printElement(document, fileName);
@@ -73,8 +76,8 @@ function DayReport() {
   const handleOnSelectDate = (newValue) => {
     if (newValue && newValue.toString() !== "Invalid Date") {
       setSelectedDate(newValue);
-      setStart(getFirstWeekDay(newValue));
-      setEnd(getLastWeekDay(newValue));
+      setStart(getFirstDayMonth(newValue));
+      setEnd(getLastDayMonth(newValue));
     }
   };
   const button = {
@@ -86,30 +89,20 @@ function DayReport() {
     color: "info",
   };
   const getHeader = () => {
-    const startMonthDay = start.getDate();
-    const endMonthDay = end.getDate();
-    const startMonth = capitalizeFirstLetter(
-      format(start, "LLLL", {
+    return capitalizeFirstLetter(
+      format(selectedDate, "LLLL yyyy", {
         locale: es,
       })
     );
-    const endMonth = capitalizeFirstLetter(
-      format(end, "LLLL", {
-        locale: es,
-      })
-    );
-    const startYear = start.getFullYear();
-    const endYear = end.getFullYear();
-    return `${startMonthDay}/${startMonth}/${startYear} - ${endMonthDay}/${endMonth}/${endYear}`;
   };
   return (
     <>
       <Head>
-        <title>Reportes | Semanal</title>
+        <title>Reportes | Mensual</title>
       </Head>
       <PageTitleWrapper>
         <PageHeader
-          title={"Reporte Semanal"}
+          title={"Reporte Mensual"}
           subtitle={""}
           button={!generalError && completeData ? button : null}
         />
@@ -127,19 +120,16 @@ function DayReport() {
                 item
                 alignItems="center"
                 justifyContent="center"
-                textAlign="center"
-                lg={12}
+                display={"flex"}
                 mr={1}
               >
                 <Typography fontWeight={"bold"} fontSize={16}>
-                  Seleccione la semana:{" "}
+                  Seleccione el mes:{" "}
                 </Typography>
               </Grid>
-              <Grid item lg={12}>
-                <WeekPicker
+              <Grid item lg={9}>
+                <MonthPicker
                   selectedValue={selectedDate}
-                  start={start}
-                  end={end}
                   handleOnChange={handleOnSelectDate}
                 />
               </Grid>
@@ -168,49 +158,21 @@ function DayReport() {
                       justifyContent: "space-between",
                       flexWrap: "wrap",
                     }}
-                    title={"REPORTE SEMANAL"}
+                    title={"REPORTE MENSUAL"}
                     subheader={getHeader()}
                   />
                   <Divider />
-                  <Grid container spacing={4} p={2}>
-                    <Grid item lg={6}>
+                  <Grid container p={2}>
+                    <Grid item lg={12}>
                       <ActivityReportTable
-                        header="ENTREGAS"
-                        colorStyle={deliveryStyle}
-                        totalData={reportData?.deliveries?.totalData}
-                        list={reportData?.deliveries?.days}
-                      />
-                    </Grid>
-                    <Grid item lg={6}>
-                      <ActivityReportTable
-                        header="CAMBIOS"
-                        colorStyle={changeStyle}
-                        totalData={reportData?.changes?.totalData}
-                        list={reportData?.changes?.days}
-                      />
-                    </Grid>
-                    <Grid item lg={6}>
-                      <ActivityReportTable
-                        header="RECOLECCIONES"
-                        colorStyle={pickupStyle}
-                        totalData={reportData?.pickups.totalData}
-                        list={reportData?.pickups.days}
-                      />
-                    </Grid>
-                    <Grid item lg={6}>
-                      <RegistersReportTable
-                        header="DEPOSITOS"
-                        colorStyle={paymentStyle}
-                        totalData={reportData.payments.totalData}
-                        list={reportData.payments.days}
-                      />
-                    </Grid>
-                    <Grid item lg={6}>
-                      <RegistersReportTable
-                        header="CLIENTES NUEVOS"
-                        colorStyle={customerStyle}
-                        totalData={reportData.customers.totalData}
-                        list={reportData.customers.days}
+                        colorStyle={{
+                          deliveryStyle,
+                          changeStyle,
+                          pickupStyle,
+                          customerStyle,
+                          paymentStyle,
+                        }}
+                        data={reportData}
                       />
                     </Grid>
                   </Grid>
