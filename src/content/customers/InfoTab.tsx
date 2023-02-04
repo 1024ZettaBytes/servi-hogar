@@ -736,7 +736,7 @@ function CustomerInfoTab({
                             {customer?.currentResidence?.residenceRef}
                           </Text>
                         ) : (
-                          getResidenceTextField("residenceRef", 1, 100)
+                          getResidenceTextField("residenceRef", 1, 250)
                         )
                       ) : (
                         <Skeleton
