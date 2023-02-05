@@ -31,7 +31,7 @@ import {
   useGetPrices,
 } from "../api/useRequest";
 import { useSnackbar } from "notistack";
-import { addDaysToDate, dateDiffInDays } from "../../lib/client/utils";
+import { addDaysToDate } from "../../lib/client/utils";
 import NextBreadcrumbs from "@/components/Shared/BreadCrums";
 import TablaClientesRenta from "./TablaClientesRenta";
 import RentPeriod from "./RentPeriod";
@@ -108,7 +108,7 @@ function RentaRapida() {
       return (
         selectedCustomer &&
         deliveryTime.date &&
-        dateDiffInDays(new Date(), new Date(deliveryTime.date)) >= 0 &&
+        //dateDiffInDays(new Date(), new Date(deliveryTime.date)) >= 0 &&
         (deliveryTime.timeOption === "any" ||
           (deliveryTime.fromTime &&
             deliveryTime.endTime &&
@@ -283,7 +283,7 @@ function RentaRapida() {
                             <>
                               <OperationTime
                                 date={deliveryTime.date}
-                                minDate={new Date()}
+                                minDate={null}
                                 timeOption={deliveryTime.timeOption}
                                 fromTime={deliveryTime.fromTime}
                                 endTime={deliveryTime.endTime}
@@ -372,7 +372,7 @@ function RentaRapida() {
             setFormatIsOpen(false);
           }}
           onSubmitAction={markWasSentDelivery}
-        />
+     />
       )}
       <Footer />
     </>
