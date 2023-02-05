@@ -31,7 +31,7 @@ import {
   useGetPrices,
 } from "../api/useRequest";
 import { useSnackbar } from "notistack";
-import { addDaysToDate, dateDiffInDays } from "../../lib/client/utils";
+import { addDaysToDate } from "../../lib/client/utils";
 import NextBreadcrumbs from "@/components/Shared/BreadCrums";
 import TablaClientesRenta from "./TablaClientesRenta";
 import RentPeriod from "./RentPeriod";
