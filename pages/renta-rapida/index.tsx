@@ -280,7 +280,7 @@ function RentaRapida() {
                             <>
                               <OperationTime
                                 date={deliveryTime.date}
-                                minDate={new Date()}
+                                minDate={null}
                                 timeOption={deliveryTime.timeOption}
                                 fromTime={deliveryTime.fromTime}
                                 endTime={deliveryTime.endTime}
