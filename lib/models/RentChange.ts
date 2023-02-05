@@ -20,6 +20,7 @@ export interface IRentChange extends Document {
   cancellationReason: string;
   fromTime: Date,
   endTime:Date,
+  wasSent: boolean;
   finishedAt: Date;
   createdAt: Date;
   updatedAt: Date;
@@ -55,6 +56,7 @@ const RentChangeSchema = new Schema<IRentChange>({
   timeOption: { type: String, required:true },
   fromTime: { type: Date, required: true },
   endTime:{ type: Date, required: true },
+  wasSent:{ type: Boolean, default: false },
   reason: { type: String, required: true },
   cancellationReason: { type: String, default: '' },
   finishedAt: { type: Date, default: null },

@@ -61,8 +61,8 @@ function RentaRapida() {
   const paths = ["Inicio", "Entregas pendientes", `${delivery?.totalNumber}`];
   const [customerToEdit, setCustomerToEdit] = useState<any>({ isSet: false });
   const [deliveredMachine, setDeliveredMachine] = useState<string>(null);
-  const [deliveryDate, setDeliveryDate] = useState<any>(new Date());
-const [payment, setPayment] = useState<number>(-1);
+  const [deliveryDate, setDeliveryDate] = useState<any>(null);
+  const [payment, setPayment] = useState<number>(-1);
   const [isOk, setIsOk] = useState<any>({
     info: true,
     residence: true,
@@ -189,8 +189,7 @@ const [payment, setPayment] = useState<number>(-1);
         validateMapsUrl(customerToEdit?.currentResidence?.maps)
       );
     if (activeStep === 1) return deliveredMachine;
-    if (activeStep === 2) return deliveryDate.toString() !== "Invalid Date";
-
+    if (activeStep === 2) return deliveryDate ? deliveryDate.toString() !== "Invalid Date" : delivery?.date
   };
 
   const nextButtonEnabled = checkEnabledButton();
@@ -205,7 +204,7 @@ const [payment, setPayment] = useState<number>(-1);
       payment,
       deliveredMachine,
       leftAccesories,
-      deliveryDate,
+      deliveryDate: deliveryDate ? deliveryDate : delivery.date,
       isOk,
     });
     setIsSubmitting(false);
@@ -234,8 +233,8 @@ const [payment, setPayment] = useState<number>(-1);
   if (!customerToEdit.isSet && customer) {
     setCustomerToEdit({ ...customer, isSet: true });
   }
-  if ( payment < 0 && delivery?.rent) {
-    setPayment(delivery?.rent?.initialPay)
+  if (payment < 0 && delivery?.rent) {
+    setPayment(delivery?.rent?.initialPay);
   }
   return (
     <>
@@ -528,7 +527,7 @@ const [payment, setPayment] = useState<number>(-1);
                                     "Domicilio referencia",
                                     "residenceRef",
                                     1,
-                                    100,
+                                    250,
                                     isOk.residence
                                   )
                                 ) : (
@@ -675,7 +674,7 @@ const [payment, setPayment] = useState<number>(-1);
                                 <DesktopDatePicker
                                   label="Fecha de entrega"
                                   inputFormat="dd/MM/yyyy"
-                                  value={deliveryDate}
+                                  value={deliveryDate || delivery.date}
                                   maxDate={new Date()}
                                   onChange={(newValue) => {
                                     setDeliveryDate(newValue);
@@ -686,7 +685,7 @@ const [payment, setPayment] = useState<number>(-1);
                                 />
                               </Grid>
                               <Grid item lg={12} m={1}>
-                              <TextField
+                                <TextField
                                   label="Cantidad"
                                   type="number"
                                   required
@@ -708,19 +707,20 @@ const [payment, setPayment] = useState<number>(-1);
                                     setPayment(Number(event.target.value));
                                   }}
                                 />
-    
-
                               </Grid>
-                              {attached.contract?.url && !attached.contract.file.name.includes("pdf") && (
-                                <Grid item lg={12} m={1}>
-                                  <Image
-                                    src={attached.contract.url}
-                                    alt="Picture of the author"
-                                    width={300}
-                                    height={400}
-                                  />
-                                </Grid>
-                              )}
+                              {attached.contract?.url &&
+                                !attached.contract.file.name.includes(
+                                  "pdf"
+                                ) && (
+                                  <Grid item lg={12} m={1}>
+                                    <Image
+                                      src={attached.contract.url}
+                                      alt="Picture of the author"
+                                      width={300}
+                                      height={400}
+                                    />
+                                  </Grid>
+                                )}
                               <Grid item lg={4} m={1}>
                                 <MuiFileInput
                                   required={!attached.contract.file}
@@ -728,7 +728,11 @@ const [payment, setPayment] = useState<number>(-1);
                                   label={"Foto de contrato"}
                                   value={attached.contract?.file}
                                   onChange={(file) => {
-                                    if (file && !file.type.includes("image/") && !file.type.includes("/pdf")) {
+                                    if (
+                                      file &&
+                                      !file.type.includes("image/") &&
+                                      !file.type.includes("/pdf")
+                                    ) {
                                       setBadFormat({
                                         ...badFormat,
                                         contract: true,
@@ -761,16 +765,17 @@ const [payment, setPayment] = useState<number>(-1);
                                   </Typography>
                                 </Grid>
                               )}
-                              {attached.front?.url && !attached.front.file.name.includes("pdf") && (
-                                <Grid item lg={12} m={1}>
-                                  <Image
-                                    src={attached.front.url}
-                                    alt="Picture of the author"
-                                    width={300}
-                                    height={400}
-                                  />
-                                </Grid>
-                              )}
+                              {attached.front?.url &&
+                                !attached.front.file.name.includes("pdf") && (
+                                  <Grid item lg={12} m={1}>
+                                    <Image
+                                      src={attached.front.url}
+                                      alt="Picture of the author"
+                                      width={300}
+                                      height={400}
+                                    />
+                                  </Grid>
+                                )}
                               <Grid item lg={4} m={1}>
                                 <MuiFileInput
                                   required={!attached.front.file}
@@ -778,7 +783,11 @@ const [payment, setPayment] = useState<number>(-1);
                                   label={"Foto de frente"}
                                   value={attached.front?.file}
                                   onChange={(file) => {
-                                    if (file && !file.type.includes("image/") && !file.type.includes("/pdf")) {
+                                    if (
+                                      file &&
+                                      !file.type.includes("image/") &&
+                                      !file.type.includes("/pdf")
+                                    ) {
                                       setBadFormat({
                                         ...badFormat,
                                         front: true,
@@ -811,16 +820,17 @@ const [payment, setPayment] = useState<number>(-1);
                                   </Typography>
                                 </Grid>
                               )}
-                              {attached.board?.url && !attached.board.file.name.includes("pdf") && (
-                                <Grid item lg={12} m={1}>
-                                  <Image
-                                    src={attached.board.url}
-                                    alt="Picture of the author"
-                                    width={300}
-                                    height={400}
-                                  />
-                                </Grid>
-                              )}
+                              {attached.board?.url &&
+                                !attached.board.file.name.includes("pdf") && (
+                                  <Grid item lg={12} m={1}>
+                                    <Image
+                                      src={attached.board.url}
+                                      alt="Picture of the author"
+                                      width={300}
+                                      height={400}
+                                    />
+                                  </Grid>
+                                )}
                               <Grid item lg={4} m={1}>
                                 <MuiFileInput
                                   required={!attached.board.file}
@@ -828,7 +838,11 @@ const [payment, setPayment] = useState<number>(-1);
                                   label={"Foto de tablero"}
                                   value={attached.board?.file}
                                   onChange={(file) => {
-                                    if (file && !file.type.includes("image/") && !file.type.includes("/pdf")) {
+                                    if (
+                                      file &&
+                                      !file.type.includes("image/") &&
+                                      !file.type.includes("/pdf")
+                                    ) {
                                       setBadFormat({
                                         ...badFormat,
                                         board: true,
@@ -861,16 +875,17 @@ const [payment, setPayment] = useState<number>(-1);
                                   </Typography>
                                 </Grid>
                               )}
-                              {attached.tag?.url && !attached.tag.file.name.includes("pdf") && (
-                                <Grid item lg={12} m={1}>
-                                  <Image
-                                    src={attached.tag.url}
-                                    alt="Picture of the author"
-                                    width={300}
-                                    height={400}
-                                  />
-                                </Grid>
-                              )}
+                              {attached.tag?.url &&
+                                !attached.tag.file.name.includes("pdf") && (
+                                  <Grid item lg={12} m={1}>
+                                    <Image
+                                      src={attached.tag.url}
+                                      alt="Picture of the author"
+                                      width={300}
+                                      height={400}
+                                    />
+                                  </Grid>
+                                )}
                               <Grid item lg={4} m={1}>
                                 <MuiFileInput
                                   required={!attached.tag.file}
@@ -878,7 +893,11 @@ const [payment, setPayment] = useState<number>(-1);
                                   label={"Foto de etiqueta"}
                                   value={attached.tag?.file}
                                   onChange={(file) => {
-                                    if (file && !file.type.includes("image/") && !file.type.includes("/pdf")) {
+                                    if (
+                                      file &&
+                                      !file.type.includes("image/") &&
+                                      !file.type.includes("/pdf")
+                                    ) {
                                       setBadFormat({
                                         ...badFormat,
                                         tag: true,

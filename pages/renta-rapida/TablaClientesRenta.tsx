@@ -562,7 +562,7 @@ const TablaClientesRenta: FC<TablaClientesRentaProps> = ({
                         {selectedCustomer?.currentResidence?.residenceRef}
                       </Typography>
                     ) : (
-                      getResidenceTextField("residenceRef", 1, 100, true)
+                      getResidenceTextField("residenceRef", 1, 250, true)
                     )}
                   </Grid>
                   <Grid item xs={4} sm={3} lg={4} margin={1}>

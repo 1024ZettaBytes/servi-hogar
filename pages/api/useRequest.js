@@ -104,6 +104,11 @@ export const useGetRentById = (fetcher, id) => {
   );
   return { rent: data?.data, rentByIdError: error };
 };
+// Prices
+export const useGetPrices = (fetcher) => {
+  const { data, error } = useSWR(ROUTES.ALL_PRICES_API, fetcher);
+  return { prices: data?.data, pricesError: error };
+};
 // Deliveries
 export const useGetPendingDeliveries = (fetcher) => {
   const { data, error } = useSWR(ROUTES.ALL_PENDING_DELIVERIES_API, fetcher);
@@ -159,4 +164,18 @@ export const useGetChangeById = (fetcher, id) => {
 export const useGetPayments = (fetcher) => {
   const { data, error } = useSWR(ROUTES.ALL_PAYMENTS_API, fetcher);
   return { paymentsList: data?.data, paymentsError: error };
+};
+
+// Reports
+export const useGetReport = (
+  fetcher,
+  filter,
+  startDate = null,
+  endDate = null
+) => {
+  let url = `${ROUTES.REPORT_API}?filter=${filter}`;
+  url = url + (startDate ? `&start=${startDate.toISOString()}` : "");
+  url = url + (endDate ? `&end=${endDate.toISOString()}` : "");
+  const { data, error } = useSWR(url, fetcher);
+  return { reportData: data?.data, reportError: error };
 };

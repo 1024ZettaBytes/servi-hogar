@@ -5,7 +5,7 @@
   "description": "Sistema desarrollado utilizando NextJs y MongoDB",
   "author": {
     "name": "Eduardo Ramírez",
-    "url": ""
+    "url": "https://github.com/1024ZettaBytes/servi-hogar.git"
   },
   "engines": {
     "node": "18.12.1"
@@ -26,10 +26,10 @@
     "@material-ui/core": "^4.12.4",
     "@material-ui/icons": "^4.11.3",
     "@mui/base": "^5.0.0-alpha.100",
-    "@mui/icons-material": "5.10.6",
+    "@mui/icons-material": "^5.10.6",
     "@mui/lab": "5.0.0-alpha.102",
-    "@mui/material": "5.10.8",
-    "@mui/styles": "5.10.8",
+    "@mui/material": "^5.10.8",
+    "@mui/styles": "^5.10.8",
     "@mui/x-date-pickers": "^5.0.4",
     "@react-google-maps/api": "^2.16.0",
     "@types/node": "18.8.4",
@@ -45,6 +45,8 @@
     "date-fns": "^2.29.3",
     "dayjs": "^1.11.6",
     "formidable": "^2.0.1",
+    "html-to-image": "^1.11.4",
+    "jspdf": "^2.5.1",
     "mongodb": "^4.10.0",
     "mongoose": "^6.6.5",
     "mui-file-input": "^1.1.3",

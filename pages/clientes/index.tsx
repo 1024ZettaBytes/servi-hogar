@@ -17,6 +17,7 @@ import {
 import { useSnackbar } from "notistack";
 
 import NextBreadcrumbs from "@/components/Shared/BreadCrums";
+import AddTwoTone from "@mui/icons-material/AddTwoTone";
 
 function Clientes({ session }) {
   const paths = ["Inicio", "Clientes"];
@@ -45,7 +46,7 @@ function Clientes({ session }) {
       });
     }
   };
-  const button = { text: "Agregar cliente", onClick: handleClickOpen };
+  const button = { text: "Agregar cliente", onClick: handleClickOpen, startIcon: <AddTwoTone/>, variant:"contained" };
   return (
     <>
       <Head>

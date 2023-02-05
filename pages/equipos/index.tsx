@@ -23,6 +23,7 @@ import {
 import { useSnackbar } from "notistack";
 import NextBreadcrumbs from "@/components/Shared/BreadCrums";
 import ResumenEquipos from "./ResumenEquipos";
+import AddTwoTone from "@mui/icons-material/AddTwoTone";
 
 function Equipos({ session }) {
   const paths = ["Inicio", "Equipos"];
@@ -55,7 +56,7 @@ function Equipos({ session }) {
       });
     }
   };
-  const button = { text: "Agregar equipo", onClick: handleClickOpen };
+  const button = { text: "Agregar equipo", onClick: handleClickOpen, startIcon: <AddTwoTone/>, variant:"contained" };
   return (
     <>
       <Head>

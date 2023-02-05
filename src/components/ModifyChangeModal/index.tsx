@@ -77,14 +77,14 @@ function ModifyChangeModal(props) {
   return (
     <Dialog open={open} fullWidth={true} scroll={"body"}>
       <Card>
-        <CardHeader title="Modificar horario de recolección" />
+        <CardHeader title="Modificar horario de cambio" />
         <Divider />
         <CardContent>
           <Box component="form" onSubmit={submitHandler}>
             <OperationTime
               fullWidth
               date={changeTime.date}
-              minDate={new Date()}
+              minDate={changeToEdit.createdAt}
               timeOption={changeTime.timeOption}
               fromTime={changeTime.fromTime}
               endTime={changeTime.endTime}
