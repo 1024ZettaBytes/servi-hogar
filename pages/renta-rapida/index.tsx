@@ -108,7 +108,7 @@ function RentaRapida() {
       return (
         selectedCustomer &&
         deliveryTime.date &&
-        dateDiffInDays(new Date(), new Date(deliveryTime.date)) >= 0 &&
+        //dateDiffInDays(new Date(), new Date(deliveryTime.date)) >= 0 &&
         (deliveryTime.timeOption === "any" ||
           (deliveryTime.fromTime &&
             deliveryTime.endTime &&
@@ -372,7 +372,7 @@ function RentaRapida() {
             setFormatIsOpen(false);
           }}
           onSubmitAction={markWasSentDelivery}
-        />
+     />
       )}
       <Footer />
     </>
