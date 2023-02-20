@@ -9,6 +9,11 @@ import PageTitleWrapper from "@/components/PageTitleWrapper";
 import Image from "next/image";
 import { MuiFileInput } from "mui-file-input";
 import NextLink from "next/link";
+import dayjs from 'dayjs'
+import LocalizedFormat from "dayjs/plugin/localizedFormat";
+import 'dayjs/locale/es-mx'
+dayjs.locale('es-mx')
+dayjs.extend(LocalizedFormat);
 import {
   Card,
   Container,
@@ -677,6 +682,8 @@ function RentaRapida() {
                                   value={deliveryDate || delivery.date}
                                   maxDate={new Date()}
                                   onChange={(newValue) => {
+                                    console.log("Fecha:", newValue.toString());
+                                    console.log(dayjs(newValue).format("LLL dd yyyy"));
                                     setDeliveryDate(newValue);
                                   }}
                                   renderInput={(params) => (
