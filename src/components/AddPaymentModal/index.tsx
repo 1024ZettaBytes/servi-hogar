@@ -25,6 +25,11 @@ import {
   MenuItem,
   InputAdornment,
 } from "@mui/material";
+import dayjs from 'dayjs'
+import LocalizedFormat from "dayjs/plugin/localizedFormat";
+import 'dayjs/locale/es-mx'
+dayjs.locale('es-mx')
+dayjs.extend(LocalizedFormat);
 import AccountBalanceWalletIcon from "@mui/icons-material/AccountBalanceWallet";
 import Image from "next/image";
 import { LoadingButton } from "@mui/lab";
@@ -326,6 +331,8 @@ function AddPaymentModal(props) {
                                   value={paymentDate}
                                   maxDate={new Date()}
                                   onChange={(newValue) => {
+                                    console.log("Fecha pago:", newValue.toString());
+                                    console.log(dayjs(newValue).format("LLL dd yyyy"));
                                     setPaymentDate(newValue)
                                   }}
                                   renderInput={(params) => (
