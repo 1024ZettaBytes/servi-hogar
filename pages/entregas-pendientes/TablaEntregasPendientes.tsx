@@ -21,7 +21,7 @@ import {
   InputAdornment,
 } from "@mui/material";
 import NextLink from "next/link";
-import { capitalizeFirstLetter } from "lib/client/utils";
+import { capitalizeFirstLetter, formatTZDate } from "lib/client/utils";
 import { format } from "date-fns";
 import es from "date-fns/locale/es";
 import {
@@ -287,9 +287,7 @@ const TablaEntregasPendientes: FC<TablaEntregasPendientesProps> = ({
                         noWrap
                       >
                         {capitalizeFirstLetter(
-                          format(new Date(delivery?.date), "LLL dd yyyy", {
-                            locale: es,
-                          })
+                          formatTZDate(new Date(delivery?.date), "MMM DD YYYY")
                         )}
                       </Typography>
                     </TableCell>
@@ -303,14 +301,9 @@ const TablaEntregasPendientes: FC<TablaEntregasPendientesProps> = ({
                         noWrap
                       >
                         {delivery?.timeOption === "specific"
-                          ? `${format(new Date(delivery?.fromTime), "h:mm a", {
-                              locale: es,
-                            })} - ${format(
+                          ? `${formatTZDate(new Date(delivery?.fromTime), "h:mm A")} - ${formatTZDate(
                               new Date(delivery?.endTime),
-                              "h:mm a",
-                              {
-                                locale: es,
-                              }
+                              "h:mm A"
                             )}`
                           : "-"}
                       </Typography>

@@ -1,6 +1,7 @@
 import PropTypes from "prop-types";
 import { useState } from "react";
 import Dialog from "@mui/material/Dialog";
+import * as str from "string";
 import {
   Box,
   Button,
@@ -21,9 +22,7 @@ import {
 import { LoadingButton } from "@mui/lab";
 import { useGetRentById, getFetcher } from "../../../pages/api/useRequest";
 import { changePayday } from "../../../lib/client/rentsFetch";
-import { capitalizeFirstLetter, addDaysToDate } from "lib/client/utils";
-import { format } from "date-fns";
-import es from "date-fns/locale/es";
+import { capitalizeFirstLetter, addDaysToDate, formatTZDate } from "lib/client/utils";
 import { WEEK_DAYS } from "lib/consts/OBJ_CONTS";
 import numeral from "numeral";
 function ChangePayDayModal(props) {
@@ -39,7 +38,7 @@ function ChangePayDayModal(props) {
   const [selectedDay, setSelectedDay] = useState<any>(null);
 
   const submitButtonEnabled = rent?.endDate
-    ? selectedDay !== format(new Date(rent?.endDate), "eeee").toLowerCase()
+    ? selectedDay+"" !== formatTZDate(new Date(rent?.endDate), "dddd").toLowerCase()
     : false;
 
   const handleOnSubmit = async () => {
@@ -63,13 +62,13 @@ function ChangePayDayModal(props) {
     handleOnClose(true, successMessage);
   };
   if (rent && !selectedDay) {
-    const dayName = format(new Date(rent?.endDate), "eeee").toLowerCase();
-    setSelectedDay(dayName);
+    const dayName = formatTZDate(new Date(rent?.endDate), "dddd").toLowerCase();
+    setSelectedDay(str(dayName).latinise().toString());
   }
   const plusDays = () => {
     if (rent) {
-      const day = format(new Date(rent?.endDate), "eeee").toLowerCase();
-      if (selectedDay !== day) {
+      const day = str(formatTZDate(new Date(rent?.endDate), "dddd").toLowerCase()).latinise().toString();
+      if (selectedDay+"" !== day+"") {
         const list = Object.keys(WEEK_DAYS);
         const currentIndex = list.indexOf(day);
         const newIndex = list.indexOf(selectedDay);
@@ -117,9 +116,7 @@ function ChangePayDayModal(props) {
     if (!rent) return "";
     if (rent.remaining > 0) {
       return capitalizeFirstLetter(
-        format(new Date(rent?.endDate), "LLLL dd yyyy", {
-          locale: es,
-        })
+        formatTZDate(new Date(rent?.endDate), "dddd DD MMMM YYYY")
       );
     }
     if (rent.remaining === 0) {
@@ -358,15 +355,11 @@ function ChangePayDayModal(props) {
                                 </Typography>
                                 <Typography color="black" gutterBottom>
                                   {capitalizeFirstLetter(
-                                    format(
-                                      addDaysToDate(
-                                        new Date(rent?.endDate),
+                                    formatTZDate(
+                                      addDaysToDate(new Date(rent?.endDate),
                                         addedDays
                                       ),
-                                      "LLLL dd yyyy",
-                                      {
-                                        locale: es,
-                                      }
+                                      "MMMM DD YYYY"
                                     )
                                   )}
                                 </Typography>

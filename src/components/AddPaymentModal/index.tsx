@@ -25,6 +25,11 @@ import {
   MenuItem,
   InputAdornment,
 } from "@mui/material";
+import dayjs from 'dayjs'
+import LocalizedFormat from "dayjs/plugin/localizedFormat";
+import 'dayjs/locale/es-mx'
+dayjs.locale('es-mx')
+dayjs.extend(LocalizedFormat);
 import AccountBalanceWalletIcon from "@mui/icons-material/AccountBalanceWallet";
 import Image from "next/image";
 import { LoadingButton } from "@mui/lab";
@@ -37,6 +42,7 @@ import {
 import { MuiFileInput } from "mui-file-input";
 import numeral from "numeral";
 import { DesktopDatePicker } from "@mui/x-date-pickers";
+import { convertDateToLocal, convertDateToTZ } from "lib/client/utils";
 function AddPaymentModal(props) {
   const { customerId, handleOnClose, open, reason, amount } = props;
   const { customerList, customerError } = useGetAllCustomers(getFetcher);
@@ -44,7 +50,7 @@ function AddPaymentModal(props) {
   const [selectedReason, setSelectedReason] = useState<any>(null);
   const [selectedMethod, setSelectedMethod] = useState<any>(null);
   const [account, setAccount] = useState<string>(null);
-  const [paymentDate, setPaymentDate] = useState<Date>(new Date());
+  const [paymentDate, setPaymentDate] = useState<Date>(convertDateToLocal(new Date()));
   const [selectedAmount, setSelectedAmount] = useState<any>(null);
   const [selectedFolio, setSelectedFolio] = useState<any>(null);
   const [attached, setAttached] = useState<any>({
@@ -89,7 +95,7 @@ function AddPaymentModal(props) {
       reason: selectedReason,
       method: selectedMethod,
       account,
-      paymentDate,
+      paymentDate: convertDateToTZ(paymentDate),
       amount: selectedAmount,
       folio: selectedFolio,
     });

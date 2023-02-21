@@ -21,7 +21,7 @@ import {
   InputAdornment,
 } from "@mui/material";
 import NextLink from "next/link";
-import { capitalizeFirstLetter } from "lib/client/utils";
+import { capitalizeFirstLetter, formatTZDate } from "lib/client/utils";
 import { format } from "date-fns";
 import es from "date-fns/locale/es";
 import { useSnackbar } from "notistack";
@@ -338,9 +338,7 @@ const TablaRentasActuales: FC<TablaRentasActualesProps> = ({ rentList }) => {
                         noWrap
                       >
                         {capitalizeFirstLetter(
-                          format(new Date(rent?.endDate), "LLL dd yyyy", {
-                            locale: es,
-                          })
+                          formatTZDate(new Date(rent?.endDate), "MMM DD YYYY")
                         )}
                       </Typography>
                     </TableCell>

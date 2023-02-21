@@ -22,9 +22,10 @@ import {
   capitalizeFirstLetter,
   addDaysToDate,
   dateDiffInDays,
+  formatTZDate,
+  convertDateToLocal,
+  convertDateToTZ,
 } from "lib/client/utils";
-import { format } from "date-fns";
-import es from "date-fns/locale/es";
 import numeral from "numeral";
 import OperationTime from "pages/renta-rapida/OperationTime";
 const defaultInitialDate = (today: Date) => {
@@ -33,17 +34,19 @@ const defaultInitialDate = (today: Date) => {
 };
 
 const defaultEndDate = (today: Date) => {
-  today.setHours(23, 0, 0);
+  today.setHours(22, 0, 0);
   return today;
 };
 function ScheduleChangeModal(props) {
   const { rentId, handleOnClose, open } = props;
   const { rent, rentByIdError } = useGetRentById(getFetcher, rentId);
   const [changeTime, setChangeTime] = useState<any>({
-    date: new Date(),
+    date: addDaysToDate(new Date(), 1),
     timeOption: "any",
-    fromTime: defaultInitialDate(addDaysToDate(new Date(), 1)),
-    endTime: defaultEndDate(addDaysToDate(new Date(), 1)),
+    fromTime: defaultInitialDate(
+      convertDateToLocal(addDaysToDate(new Date(), 1))
+    ),
+    endTime: defaultEndDate(convertDateToLocal(addDaysToDate(new Date(), 1))),
   });
   const [reason, setReason] = useState<string>("");
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
@@ -52,12 +55,11 @@ function ScheduleChangeModal(props) {
     error: false,
     msg: "",
   });
-  const [selectedDay, setSelectedDay] = useState<any>(null);
 
   const submitButtonEnabled =
     rent &&
     changeTime.date &&
-    reason.trim()!=="" &&
+    reason.trim() !== "" &&
     dateDiffInDays(new Date(), new Date(changeTime.date)) >= 0 &&
     (changeTime.timeOption === "any" ||
       (changeTime.fromTime &&
@@ -67,7 +69,16 @@ function ScheduleChangeModal(props) {
   const handleOnSubmit = async () => {
     setHasErrorSubmitting({ error: false, msg: "" });
     setIsSubmitting(true);
-    const result = await saveChange({ rentId, changeTime, reason });
+    const result = await saveChange({
+      rentId,
+      changeTime: {
+        ...changeTime,
+        date: convertDateToTZ(changeTime.date),
+        fromTime: convertDateToTZ(changeTime.fromTime),
+        endTime: convertDateToTZ(changeTime.endTime),
+      },
+      reason,
+    });
     setIsSubmitting(false);
     if (!result.error) {
       handleSavedChange(result.msg, result.change);
@@ -82,12 +93,14 @@ function ScheduleChangeModal(props) {
     handleOnClose(false);
   };
   const handleSavedChange = (successMessage, change) => {
-    handleOnClose(true, { rent, changeTime, reason, change }, successMessage);
+    handleOnClose(true, { rent, changeTime: {
+      ...changeTime,
+      date: convertDateToTZ(changeTime.date),
+      fromTime: convertDateToTZ(changeTime.fromTime),
+      endTime: convertDateToTZ(changeTime.endTime),
+    }, reason, change }, successMessage);
   };
-  if (rent && !selectedDay) {
-    const dayName = format(new Date(rent?.endDate), "eeee").toLowerCase();
-    setSelectedDay(dayName);
-  }
+
 
   const onChangeTime = (id, value) => {
     if (
@@ -103,9 +116,7 @@ function ScheduleChangeModal(props) {
     if (!rent) return "";
     if (rent.remaining > 0) {
       return capitalizeFirstLetter(
-        format(new Date(rent?.endDate), "LLLL dd yyyy", {
-          locale: es,
-        })
+        formatTZDate(new Date(rent?.endDate), "MMMM DD YYYY")
       );
     }
     if (rent.remaining === 0) {
