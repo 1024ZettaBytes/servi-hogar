@@ -15,9 +15,7 @@ import {
   CardHeader,
 } from "@mui/material";
 
-import { capitalizeFirstLetter } from "lib/client/utils";
-import { format } from "date-fns";
-import es from "date-fns/locale/es";
+import { capitalizeFirstLetter, formatTZDate } from "lib/client/utils";
 interface HistoryTabProps {
   className?: string;
   movementsList: any[];
@@ -81,10 +79,9 @@ const HistoryTab: FC<HistoryTabProps> = ({ movementsList }) => {
                         noWrap
                       >
                         {capitalizeFirstLetter(
-                          format(
+                          formatTZDate(
                             new Date(movement?.date),
-                            "MMM dd yyyy HH:mm:mm",
-                            { locale: es }
+                            "MMM DD YYYY HH:mm:mm"
                           )
                         )}
                       </Typography>

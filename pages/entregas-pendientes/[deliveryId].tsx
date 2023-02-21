@@ -3,12 +3,13 @@ import { getSession } from "next-auth/react";
 import { useState } from "react";
 import SidebarLayout from "@/layouts/SidebarLayout";
 import { validateServerSideSession } from "../../lib/auth";
-import { validateMapsUrl } from "../../lib/client/utils";
+import { convertDateToLocal, convertDateToTZ, validateMapsUrl } from "../../lib/client/utils";
 import PageHeader from "@/components/PageHeader";
 import PageTitleWrapper from "@/components/PageTitleWrapper";
 import Image from "next/image";
 import { MuiFileInput } from "mui-file-input";
 import NextLink from "next/link";
+
 import {
   Card,
   Container,
@@ -204,7 +205,7 @@ function RentaRapida() {
       payment,
       deliveredMachine,
       leftAccesories,
-      deliveryDate: deliveryDate ? deliveryDate : delivery.date,
+      deliveryDate: deliveryDate ? convertDateToTZ(deliveryDate): new Date(delivery.date),
       isOk,
     });
     setIsSubmitting(false);
@@ -674,9 +675,9 @@ function RentaRapida() {
                                 <DesktopDatePicker
                                   label="Fecha de entrega"
                                   inputFormat="dd/MM/yyyy"
-                                  value={deliveryDate || delivery.date}
+                                  value={deliveryDate || convertDateToLocal(new Date(delivery.date))}
                                   maxDate={new Date()}
-                                  onChange={(newValue) => {
+                                  onChange={(newValue) => { 
                                     setDeliveryDate(newValue);
                                   }}
                                   renderInput={(params) => (

@@ -20,8 +20,7 @@ import {
 import Label from "@/components/Label";
 import SearchIcon from "@mui/icons-material/Search";
 import numeral from "numeral";
-import { format } from "date-fns";
-import es from "date-fns/locale/es";
+import { formatTZDate } from "lib/client/utils";
 
 interface TablaHistorialEquiposProps {
   className?: string;
@@ -170,9 +169,7 @@ const TablaHistorialEquipos: FC<TablaHistorialEquiposProps> = ({
                         gutterBottom
                         noWrap
                       >
-                        {format(new Date(movement?.date), "dd/LLLL/yyyy", {
-                          locale: es,
-                        })}
+                        {formatTZDate(new Date(movement?.date), "DD/MMMM/YYYY")}
                       </Typography>
                     </TableCell>
                   </TableRow>

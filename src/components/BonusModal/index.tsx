@@ -16,9 +16,7 @@ import {
 } from "@mui/material";
 import { LoadingButton } from "@mui/lab";
 import { addBonusAPI } from "../../../lib/client/rentsFetch";
-import { addDaysToDate, capitalizeFirstLetter } from "lib/client/utils";
-import { format } from "date-fns";
-import { es } from "date-fns/locale";
+import { addDaysToDate, capitalizeFirstLetter, formatTZDate } from "lib/client/utils";
 
 function BonusModal(props) {
   const { handleOnClose, open, rent } = props;
@@ -121,15 +119,12 @@ function BonusModal(props) {
                       </Typography>
                       <Typography color="black" gutterBottom>
                         {capitalizeFirstLetter(
-                          format(
+                          formatTZDate(
                             addDaysToDate(
                               new Date(rent?.endDate),
                               selectedDays
                             ),
-                            "LLLL dd yyyy",
-                            {
-                              locale: es,
-                            }
+                            "MMM DD YYYY"
                           )
                         )}
                       </Typography>

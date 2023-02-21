@@ -21,7 +21,7 @@ import {
   InputAdornment,
 } from "@mui/material";
 import NextLink from "next/link";
-import { capitalizeFirstLetter } from "lib/client/utils";
+import { capitalizeFirstLetter, formatTZDate } from "lib/client/utils";
 import { format } from "date-fns";
 import es from "date-fns/locale/es";
 import { cancelPickup, markWasSentPickup } from "../../lib/client/pickupsFetch";
@@ -301,9 +301,7 @@ const TablaRecoleccionesPendientes: FC<TablaRecoleccionesPendientesProps> = ({
                         noWrap
                       >
                         {capitalizeFirstLetter(
-                          format(new Date(pickup?.date), "LLL dd yyyy", {
-                            locale: es,
-                          })
+                          formatTZDate(new Date(pickup?.date), "MMM DD YYYY")
                         )}
                       </Typography>
                     </TableCell>
@@ -317,14 +315,12 @@ const TablaRecoleccionesPendientes: FC<TablaRecoleccionesPendientesProps> = ({
                         noWrap
                       >
                         {pickup?.timeOption === "specific"
-                          ? `${format(new Date(pickup?.fromTime), "h:mm a", {
-                              locale: es,
-                            })} - ${format(
+                          ? `${formatTZDate(
+                              new Date(pickup?.fromTime),
+                              "h:mm A"
+                            )} - ${formatTZDate(
                               new Date(pickup?.endTime),
-                              "h:mm a",
-                              {
-                                locale: es,
-                              }
+                              "h:mm A"
                             )}`
                           : "-"}
                       </Typography>
@@ -395,7 +391,7 @@ const TablaRecoleccionesPendientes: FC<TablaRecoleccionesPendientesProps> = ({
                       <Tooltip title="Ver formato" arrow>
                         <IconButton
                           onClick={() => {
-                            setPickupToEdit(pickup)
+                            setPickupToEdit(pickup);
                             setFormatText(
                               getFormatForPickup(pickup.rent, pickup, pickup)
                             );

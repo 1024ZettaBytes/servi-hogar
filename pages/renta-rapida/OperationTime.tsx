@@ -74,7 +74,8 @@ const OperationTime: FC<OperationTimeProps> = ({
           onChange={(newValue) => {
             onChangeTime("fromTime", newValue);
           }}
-          renderInput={(params) => <TextField {...params} />}
+          renderInput={(params) => {
+          return <TextField {...params} />}}
         />
         
         </Grid>

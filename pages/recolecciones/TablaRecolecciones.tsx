@@ -20,7 +20,7 @@ import {
   IconButton,
   useTheme,
 } from "@mui/material";
-import { capitalizeFirstLetter } from "lib/client/utils";
+import { capitalizeFirstLetter, formatTZDate } from "lib/client/utils";
 import { format } from "date-fns";
 import es from "date-fns/locale/es";
 import Label from "@/components/Label";
@@ -255,9 +255,7 @@ const TablaRecolecciones: FC<TablaRecoleccionesProps> = ({ pickupsList }) => {
                         noWrap
                       >
                         {capitalizeFirstLetter(
-                          format(new Date(pickup?.date), "LLL dd yyyy", {
-                            locale: es,
-                          })
+                          formatTZDate(new Date(pickup?.date), "MMM DD YYYY")
                         )}
                       </Typography>
                     </TableCell>
@@ -271,13 +269,7 @@ const TablaRecolecciones: FC<TablaRecoleccionesProps> = ({ pickupsList }) => {
                       >
                         {pickup?.finishedAt
                           ? capitalizeFirstLetter(
-                              format(
-                                new Date(pickup?.finishedAt),
-                                "LLL dd yyyy",
-                                {
-                                  locale: es,
-                                }
-                              )
+                            formatTZDate(new Date(pickup?.finishedAt), "MMM DD YYYY")
                             )
                           : "N/A"}
                       </Typography>

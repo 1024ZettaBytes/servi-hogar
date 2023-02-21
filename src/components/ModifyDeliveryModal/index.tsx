@@ -14,23 +14,22 @@ import {
 import { LoadingButton } from "@mui/lab";
 import OperationTime from "../../../pages/renta-rapida/OperationTime";
 import { updateDeliveryTime } from "../../../lib/client/deliveriesFetch";
-import { dateDiffInDays } from "lib/client/utils";
+import { convertDateToLocal, convertDateToTZ } from "lib/client/utils";
 
 function ModifyDeliveryModal(props) {
   const { handleOnClose, open, deliveryToEdit } = props;
   const [isLoading, setIsLoading] = useState(false);
   const [deliveryTime, setDeliveryTime] = useState({
-    date: new Date(deliveryToEdit.date),
+    date: convertDateToLocal(new Date(deliveryToEdit.date)),
     timeOption: deliveryToEdit.timeOption,
-    fromTime: new Date(deliveryToEdit.fromTime),
-    endTime: new Date(deliveryToEdit.endTime),
+    fromTime: convertDateToLocal(new Date(deliveryToEdit.fromTime)),
+    endTime: convertDateToLocal(new Date(deliveryToEdit.endTime)),
   });
   const [hasError, setHasError] = useState({ error: false, msg: "" });
 
   const saveButtonEnabled =
     deliveryTime.timeOption === "any" ||
     (deliveryTime.date &&
-      dateDiffInDays(new Date(), new Date(deliveryTime.date)) >= 0 &&
       deliveryTime.fromTime &&
       deliveryTime.endTime &&
       new Date(deliveryTime.fromTime).getTime() <=
@@ -52,7 +51,12 @@ function ModifyDeliveryModal(props) {
     setHasError({ error: false, msg: "" });
     const result = await updateDeliveryTime({
       deliveryId: deliveryToEdit._id,
-      deliveryTime,
+      deliveryTime: {
+        ...deliveryTime,
+        date: convertDateToTZ(deliveryTime.date),
+        fromTime: convertDateToTZ(deliveryTime.fromTime),
+        endTime: convertDateToTZ(deliveryTime.endTime)
+      },
     });
     setIsLoading(false);
     if (!result.error) {

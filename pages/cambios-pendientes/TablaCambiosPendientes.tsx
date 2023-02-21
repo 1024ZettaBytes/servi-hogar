@@ -21,7 +21,7 @@ import {
   InputAdornment,
 } from "@mui/material";
 import NextLink from "next/link";
-import { capitalizeFirstLetter } from "lib/client/utils";
+import { capitalizeFirstLetter, formatTZDate } from "lib/client/utils";
 import { format } from "date-fns";
 import es from "date-fns/locale/es";
 import { cancelChange, markWasSentChange } from "../../lib/client/changesFetch";
@@ -296,9 +296,7 @@ const TablaCambiosPendientes: FC<TablaCambiosPendientesProps> = ({
                         noWrap
                       >
                         {capitalizeFirstLetter(
-                          format(new Date(change?.date), "LLL dd yyyy", {
-                            locale: es,
-                          })
+                          formatTZDate(new Date(change?.date), "MMM DD YYYY")
                         )}
                       </Typography>
                     </TableCell>
@@ -312,14 +310,9 @@ const TablaCambiosPendientes: FC<TablaCambiosPendientesProps> = ({
                         noWrap
                       >
                         {change?.timeOption === "specific"
-                          ? `${format(new Date(change?.fromTime), "h:mm a", {
-                              locale: es,
-                            })} - ${format(
+                          ? `${formatTZDate(new Date(change?.fromTime), "h:mm A")} - ${formatTZDate(
                               new Date(change?.endTime),
-                              "h:mm a",
-                              {
-                                locale: es,
-                              }
+                              "h:mm A"
                             )}`
                           : "-"}
                       </Typography>

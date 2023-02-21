@@ -14,23 +14,22 @@ import {
 import { LoadingButton } from "@mui/lab";
 import OperationTime from "../../../pages/renta-rapida/OperationTime";
 import { updateChangeTime } from "../../../lib/client/changesFetch";
-import { dateDiffInDays } from "lib/client/utils";
+import { convertDateToLocal, convertDateToTZ } from "lib/client/utils";
 
 function ModifyChangeModal(props) {
   const { handleOnClose, open, changeToEdit } = props;
   const [isLoading, setIsLoading] = useState(false);
   const [changeTime, setChangeTime] = useState({
-    date: new Date(changeToEdit.date),
+    date: convertDateToLocal(new Date(changeToEdit.date)),
     timeOption: changeToEdit.timeOption,
-    fromTime: new Date(changeToEdit.fromTime),
-    endTime: new Date(changeToEdit.endTime),
+    fromTime: convertDateToLocal(new Date(changeToEdit.fromTime)),
+    endTime: convertDateToLocal(new Date(changeToEdit.endTime)),
   });
   const [hasError, setHasError] = useState({ error: false, msg: "" });
 
   const saveButtonEnabled =
     changeTime.timeOption === "any" ||
     (changeTime.date &&
-      dateDiffInDays(new Date(), new Date(changeTime.date)) >= 0 &&
       changeTime.fromTime &&
       changeTime.endTime &&
       new Date(changeTime.fromTime).getTime() <=
@@ -52,7 +51,12 @@ function ModifyChangeModal(props) {
     setHasError({ error: false, msg: "" });
     const result = await updateChangeTime({
       changeId: changeToEdit._id,
-      changeTime,
+      changeTime: {
+        ...changeTime,
+        date: convertDateToTZ(changeTime.date),
+        fromTime: convertDateToTZ(changeTime.fromTime),
+        endTime: convertDateToTZ(changeTime.endTime)
+      },
     });
     setIsLoading(false);
     if (!result.error) {

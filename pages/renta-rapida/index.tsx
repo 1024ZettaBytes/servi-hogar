@@ -31,7 +31,7 @@ import {
   useGetPrices,
 } from "../api/useRequest";
 import { useSnackbar } from "notistack";
-import { addDaysToDate } from "../../lib/client/utils";
+import { addDaysToDate, convertDateToLocal, convertDateToTZ } from "../../lib/client/utils";
 import NextBreadcrumbs from "@/components/Shared/BreadCrums";
 import TablaClientesRenta from "./TablaClientesRenta";
 import RentPeriod from "./RentPeriod";
@@ -58,10 +58,10 @@ const defaultData = () => {
       useFreeWeeks: true,
     },
     deliveryTime: {
-      date: addDaysToDate(new Date(), 1),
+      date: convertDateToLocal(addDaysToDate(new Date(), 1)),
       timeOption: "any",
-      fromTime: defaultInitialDate(addDaysToDate(new Date(), 1)),
-      endTime: defaultEndDate(addDaysToDate(new Date(), 1)),
+      fromTime: defaultInitialDate(convertDateToLocal(addDaysToDate(new Date(), 1))),
+      endTime: defaultEndDate(convertDateToLocal(addDaysToDate(new Date(), 1))),
     },
     selectedCustomer: null,
   };
@@ -159,10 +159,16 @@ function RentaRapida() {
     setHasErrorSubmitting({ error: false, msg: "" });
     setIsSubmitting(true);
     setCustomerRent(selectedCustomer);
+    
     const result = await saveRent({
       customerId: selectedId,
       rentPeriod,
-      deliveryTime,
+      deliveryTime:{
+        ...deliveryTime,
+        date: convertDateToTZ(deliveryTime.date),
+        fromTime: convertDateToTZ(deliveryTime.fromTime),
+        endTime: convertDateToTZ(deliveryTime.endTime)
+      },
     });
     const rent = { ...result.rent, customer: selectedCustomer, delivery: result.delivery };
     
@@ -367,7 +373,12 @@ function RentaRapida() {
           title="Formato de entrega"
           text={customerRent.delivery?.wasSent ? "ENVIADO":null}
           textColor="green"
-          formatText={getFormatForDelivery(customerRent, customerRent.delivery, deliveryTime)}
+          formatText={getFormatForDelivery(customerRent, customerRent.delivery, {
+            ...deliveryTime,
+            date: convertDateToTZ(deliveryTime.date),
+            fromTime: convertDateToTZ(deliveryTime.fromTime),
+            endTime: convertDateToTZ(deliveryTime.endTime)
+          })}
           onAccept={() => {
             setFormatIsOpen(false);
           }}

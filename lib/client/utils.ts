@@ -1,6 +1,17 @@
 import { jsPDF } from 'jspdf';
 import * as htmlToImage from 'html-to-image';
+import dayjs from 'dayjs';
 
+import LocalizedFormat from 'dayjs/plugin/localizedFormat';
+import 'dayjs/locale/es-mx';
+import utc from 'dayjs/plugin/utc';
+import tz from 'dayjs/plugin/timezone';
+import objectSupport from 'dayjs/plugin/objectSupport';
+dayjs.extend(utc);
+dayjs.extend(tz);
+dayjs.extend(objectSupport);
+dayjs.locale('es-mx');
+dayjs.extend(LocalizedFormat);
 function startOfWeek(dt): Date {
   const day = 24 * 60 * 60 * 1000;
   const weekday = dt.getDay();
@@ -99,7 +110,10 @@ export const dateDiffInWeeks = (initial: Date, end: Date): number => {
   );
 };
 
-export const printElement = async (document: Document, filename: string): Promise<void> => {
+export const printElement = async (
+  document: Document,
+  filename: string
+): Promise<void> => {
   return await htmlToImage
     .toPng(document.getElementById('reportTable'), { quality: 1 })
     .then(function (dataUrl) {
@@ -107,7 +121,7 @@ export const printElement = async (document: Document, filename: string): Promis
       const imgProps = pdf.getImageProperties(dataUrl);
       const pdfWidth = pdf.internal.pageSize.getWidth();
       const pdfHeight = (imgProps.height * pdfWidth) / imgProps.width;
-      
+
       pdf.addImage(dataUrl, 'PNG', 0, 0, pdfWidth, pdfHeight);
       pdf.save(filename);
     });
@@ -130,14 +144,44 @@ export const getFirstDayMonth = (date: Date): Date => {
   return setDateToInitial(firstDayDate);
 };
 
-
 export const getLastDayMonth = (date: Date): Date => {
   const lastDayDate = new Date(date.getFullYear(), date.getMonth() + 1, 0);
   return setDateToEnd(lastDayDate);
 };
 
-export const sleep = async  (duration: number): Promise<void> => {
+export const sleep = async (duration: number): Promise<void> => {
   return new Promise((resolve) => {
-    setTimeout(resolve, duration)
-  })
-}
+    setTimeout(resolve, duration);
+  });
+};
+
+export const formatTZDate = (date: Date, format: string): string => {
+  return dayjs.utc(date).tz('US/Mountain').format(format);
+};
+
+export const convertDateToTZ = (date: Date): Date => {
+  if (dayjs().utcOffset() / 60 === -7) return date;
+  return dayjs
+    .utc({
+      y: date.getFullYear(),
+      M: date.getMonth(),
+      d: date.getDate(),
+      h: date.getHours(),
+      m: date.getMinutes(),
+      s: date.getSeconds(),
+      ms: date.getMilliseconds()
+    })
+    .add(7, 'hour')
+    .toDate();
+};
+
+export const convertDateToLocal = (date: Date): Date => {
+  let hourDiff = 0;
+  let localOffSet = dayjs().utcOffset() / 60;
+  if (localOffSet >= 0) hourDiff = -(7 + localOffSet);
+  else {
+    localOffSet = -localOffSet;
+    hourDiff = localOffSet - 7;
+  }
+  return dayjs.utc(date).add(hourDiff, 'hour').toDate();
+};
