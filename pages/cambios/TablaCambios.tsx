@@ -22,7 +22,7 @@ import {
 } from "@mui/material";
 import ImageSearchIcon from "@mui/icons-material/ImageSearch";
 
-import { capitalizeFirstLetter } from "lib/client/utils";
+import { capitalizeFirstLetter, formatTZDate } from "lib/client/utils";
 import { format } from "date-fns";
 import es from "date-fns/locale/es";
 import Label from "@/components/Label";
@@ -257,9 +257,7 @@ const TablaCambios: FC<TablaCambiosProps> = ({ changesList }) => {
                         noWrap
                       >
                         {capitalizeFirstLetter(
-                          format(new Date(change?.date), "LLL dd yyyy", {
-                            locale: es,
-                          })
+                          formatTZDate(new Date(change?.date), "MMM DD YYYY")
                         )}
                       </Typography>
                     </TableCell>
@@ -273,13 +271,7 @@ const TablaCambios: FC<TablaCambiosProps> = ({ changesList }) => {
                       >
                         {change?.finishedAt
                           ? capitalizeFirstLetter(
-                              format(
-                                new Date(change?.finishedAt),
-                                "LLL dd yyyy",
-                                {
-                                  locale: es,
-                                }
-                              )
+                            formatTZDate(new Date(change?.finishedAt), "MMM DD YYYY")
                             )
                           : "N/A"}
                       </Typography>

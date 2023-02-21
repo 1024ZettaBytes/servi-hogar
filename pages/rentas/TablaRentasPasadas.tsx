@@ -17,7 +17,7 @@ import {
   TextField,
   InputAdornment,
 } from "@mui/material";
-import { capitalizeFirstLetter } from "lib/client/utils";
+import { capitalizeFirstLetter, formatTZDate } from "lib/client/utils";
 import { format } from "date-fns";
 import es from "date-fns/locale/es";
 import SearchIcon from "@mui/icons-material/Search";
@@ -254,9 +254,7 @@ const TablaRentasPasadas: FC<TablaRentasPasadasProps> = ({
                         noWrap
                       >
                         {rent?.startDate ? capitalizeFirstLetter(
-                          format(new Date(rent?.startDate), "LLL dd yyyy", {
-                            locale: es,
-                          })
+                          formatTZDate(new Date(rent?.startDate), "MMM DD YYYY")
                         ) : "N/A"}
                       </Typography>
                     </TableCell>
@@ -269,9 +267,7 @@ const TablaRentasPasadas: FC<TablaRentasPasadasProps> = ({
                         noWrap
                       >
                         {rent?.endDate ? capitalizeFirstLetter(
-                          format(new Date(rent?.endDate), "LLL dd yyyy", {
-                            locale: es,
-                          })
+                          formatTZDate(new Date(rent?.endDate), "MMM DD YYYY")
                         ) : "N/A"}
                       </Typography>
                     </TableCell>

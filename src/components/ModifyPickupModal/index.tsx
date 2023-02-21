@@ -14,23 +14,22 @@ import {
 import { LoadingButton } from "@mui/lab";
 import OperationTime from "../../../pages/renta-rapida/OperationTime";
 import { updatePickupTime } from "../../../lib/client/pickupsFetch";
-import { dateDiffInDays } from "lib/client/utils";
+import { convertDateToLocal, convertDateToTZ } from "lib/client/utils";
 
 function ModifyPickupModal(props) {
   const { handleOnClose, open, pickupToEdit } = props;
   const [isLoading, setIsLoading] = useState(false);
   const [pickupTime, setPickupTime] = useState({
-    date: new Date(pickupToEdit.date),
+    date: convertDateToLocal(new Date(pickupToEdit.date)),
     timeOption: pickupToEdit.timeOption,
-    fromTime: new Date(pickupToEdit.fromTime),
-    endTime: new Date(pickupToEdit.endTime),
+    fromTime: convertDateToLocal(new Date(pickupToEdit.fromTime)),
+    endTime: convertDateToLocal(new Date(pickupToEdit.endTime)),
   });
   const [hasError, setHasError] = useState({ error: false, msg: "" });
 
   const saveButtonEnabled =
     pickupTime.timeOption === "any" ||
     (pickupTime.date &&
-      dateDiffInDays(new Date(), new Date(pickupTime.date)) >= 0 &&
       pickupTime.fromTime &&
       pickupTime.endTime &&
       new Date(pickupTime.fromTime).getTime() <=
@@ -52,7 +51,12 @@ function ModifyPickupModal(props) {
     setHasError({ error: false, msg: "" });
     const result = await updatePickupTime({
       pickupId: pickupToEdit._id,
-      pickupTime,
+      pickupTime: {
+        ...pickupTime,
+        date: convertDateToTZ(pickupTime.date),
+        fromTime: convertDateToTZ(pickupTime.fromTime),
+        endTime: convertDateToTZ(pickupTime.endTime),
+      },
     });
     setIsLoading(false);
     if (!result.error) {

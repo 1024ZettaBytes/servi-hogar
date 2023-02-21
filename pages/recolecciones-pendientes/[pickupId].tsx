@@ -40,7 +40,7 @@ import { completePickup } from "lib/client/pickupsFetch";
 import { useRouter } from "next/router";
 import React from "react";
 import { MuiFileInput } from "mui-file-input";
-import { dateDiffInDays } from "lib/client/utils";
+import { convertDateToLocal, convertDateToTZ, dateDiffInDays } from "lib/client/utils";
 
 function RecoleccionPendiente() {
   const router = useRouter();
@@ -106,7 +106,7 @@ function RecoleccionPendiente() {
     setIsSubmitting(true);
     const result = await completePickup(attached, {
       pickupId,
-      pickupDate: pickupDate ? pickupDate : pickup.date,
+      pickupDate: pickupDate ? convertDateToTZ(pickupDate) : pickup.date,
       whitDebt,
       pickedAccesories,
     });
@@ -182,7 +182,7 @@ function RecoleccionPendiente() {
                                 <DesktopDatePicker
                                   label="Fecha de recolección*"
                                   inputFormat="dd/MM/yyyy"
-                                  value={pickupDate || pickup.date}
+                                  value={pickupDate || convertDateToLocal(new Date(pickup.date))}
                                   maxDate={new Date()}
                                   minDate={new Date(pickup?.rent?.startDate)}
                                   onChange={(newValue) => {

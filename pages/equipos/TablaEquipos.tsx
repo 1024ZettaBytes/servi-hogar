@@ -30,9 +30,7 @@ import BulkTableActions from "../../src/components/BulkTableActions";
 import SearchIcon from "@mui/icons-material/Search";
 import NextLink from "next/link";
 import GenericModal from "@/components/GenericModal";
-import { capitalizeFirstLetter } from "lib/client/utils";
-import { format } from "date-fns";
-import es from "date-fns/locale/es";
+import { capitalizeFirstLetter, formatTZDate } from "lib/client/utils";
 import { MACHINE_STATUS_LIST } from "../../lib/consts/OBJ_CONTS";
 interface TablaEquiposProps {
   userRole: string;
@@ -297,7 +295,11 @@ const TablaEquipos: FC<TablaEquiposProps> = ({ userRole, machinesList }) => {
                     hover={machine?.active}
                     key={machine?._id}
                     selected={isMachineSelected}
-                    sx={!machine?.active?{backgroundColor: theme.palette.grey[400]}:{}}
+                    sx={
+                      !machine?.active
+                        ? { backgroundColor: theme.palette.grey[400] }
+                        : {}
+                    }
                   >
                     <TableCell padding="checkbox">
                       {machineCanBeDeleted(
@@ -392,13 +394,15 @@ const TablaEquipos: FC<TablaEquiposProps> = ({ userRole, machinesList }) => {
                         color="text.primary"
                         gutterBottom
                         noWrap
-                      >{
-                        machine?.lastRent?.startDate ?
-                        capitalizeFirstLetter(
-                        format(new Date(machine?.lastRent?.startDate), "LLL dd yyyy", {
-                          locale: es,
-                        })
-                      ):""}
+                      >
+                        {machine?.lastRent?.startDate
+                          ? capitalizeFirstLetter(
+                              formatTZDate(
+                                new Date(machine?.lastRent?.startDate),
+                                "MMM DD YYYY"
+                              )
+                            )
+                          : ""}
                       </Typography>
                     </TableCell>
                     <TableCell align="center">
@@ -421,9 +425,10 @@ const TablaEquipos: FC<TablaEquiposProps> = ({ userRole, machinesList }) => {
                         noWrap
                       >
                         {capitalizeFirstLetter(
-                          format(new Date(machine?.createdAt), "LLL dd yyyy", {
-                            locale: es,
-                          })
+                          formatTZDate(
+                            new Date(machine?.createdAt),
+                            "MMM DD YYYY"
+                          )
                         )}
                       </Typography>
                     </TableCell>
@@ -487,7 +492,7 @@ const TablaEquipos: FC<TablaEquiposProps> = ({ userRole, machinesList }) => {
       <GenericModal
         open={deleteModalIsOpen}
         title="Atención"
-        requiredReason= {false}
+        requiredReason={false}
         text={
           "¿Está seguro de eliminar a" +
           (machinesToDelete.length === 1

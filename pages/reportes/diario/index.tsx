@@ -28,9 +28,7 @@ import Footer from "@/components/Footer";
 import { DesktopDatePicker } from "@mui/x-date-pickers";
 import { getFetcher, useGetReport } from "../../api/useRequest";
 import CloudDownloadIcon from "@mui/icons-material/CloudDownload";
-import { format } from "date-fns";
-import { es } from "date-fns/locale";
-import { capitalizeFirstLetter, printElement, sleep } from "lib/client/utils";
+import { capitalizeFirstLetter, convertDateToLocal, convertDateToTZ, formatTZDate, printElement, sleep } from "lib/client/utils";
 
 const cellStyle = { border: "2px solid #374246" };
 const headerStyle = {
@@ -45,12 +43,12 @@ const changeStyle = { ...headerStyle, backgroundColor: "#FFC300" };
 const customerStyle = { ...headerStyle, backgroundColor: "#E570EE" };
 const paymentStyle = { ...headerStyle, backgroundColor: "#A580EE" };
 function DayReport() {
-  const [selectedDate, setSelectedDate] = useState<Date>(new Date());
+  const [selectedDate, setSelectedDate] = useState<Date>(convertDateToLocal(new Date()));
   const [isPrinting, setIsPrinting] = useState<boolean>(false);
   const { reportData, reportError } = useGetReport(
     getFetcher,
     "day",
-    selectedDate
+    convertDateToTZ(selectedDate)
   );
   const generalError = reportError;
   const completeData = reportData;
@@ -58,7 +56,7 @@ function DayReport() {
   const handleClickOpen = async () => {
     setIsPrinting(true);
     await sleep(1000);
-    const fileName = `DIARIO_${format(selectedDate, "dd-MM-yyyy")}.pdf`;
+    const fileName = `DIARIO_${formatTZDate(selectedDate, "DD-MM-YYYY")}.pdf`;
     await printElement(document, fileName);
     setIsPrinting(false);
   };
@@ -77,15 +75,11 @@ function DayReport() {
   };
   const getHeader = () => {
     const weekDay = capitalizeFirstLetter(
-      format(selectedDate, "eeee", {
-        locale: es,
-      })
+      formatTZDate(selectedDate, "dddd")
     );
     const monthDay = selectedDate.getDate();
     const month = capitalizeFirstLetter(
-      format(selectedDate, "LLLL", {
-        locale: es,
-      })
+      formatTZDate(selectedDate, "MMMM")
     );
     const year = selectedDate.getFullYear();
     return `${weekDay} ${monthDay} de ${month}, ${year}`;
@@ -183,9 +177,7 @@ function DayReport() {
                           <TableCell
                             align="center"
                             style={headerStyle}
-                          >{`Total ${format(selectedDate, "LLLL", {
-                            locale: es,
-                          })}`}</TableCell>
+                          >{`Total ${formatTZDate(selectedDate, "MMMM")}`}</TableCell>
                         </TableRow>
                       </TableHead>
                       <TableBody>

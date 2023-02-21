@@ -19,10 +19,12 @@ import { useGetRentById, getFetcher } from "../../../pages/api/useRequest";
 import { savePickup } from "../../../lib/client/pickupsFetch";
 import {
   capitalizeFirstLetter,
+  convertDateToLocal,
+  convertDateToTZ,
   dateDiffInDays,
+  formatTZDate,
 } from "lib/client/utils";
 import { format } from "date-fns";
-import es from "date-fns/locale/es";
 import numeral from "numeral";
 import OperationTime from "pages/renta-rapida/OperationTime";
 const defaultInitialDate = (today: Date) => {
@@ -31,7 +33,7 @@ const defaultInitialDate = (today: Date) => {
 };
 
 const defaultEndDate = (today: Date) => {
-  today.setHours(23, 0, 0);
+  today.setHours(22, 0, 0);
   return today;
 };
 
@@ -41,8 +43,8 @@ function SchedulePickupModal(props) {
   const [pickupTime, setPickupTime] = useState<any>({
     date: new Date(),
     timeOption: "any",
-    fromTime: defaultInitialDate(new Date()),
-    endTime: defaultEndDate(new Date()),
+    fromTime: defaultInitialDate(convertDateToLocal(new Date())),
+    endTime: defaultEndDate(convertDateToLocal(new Date())),
   });
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
 
@@ -69,7 +71,15 @@ function SchedulePickupModal(props) {
   const handleOnSubmit = async () => {
     setHasErrorSubmitting({ error: false, msg: "" });
     setIsSubmitting(true);
-    const result = await savePickup({ rentId, pickupTime });
+    const result = await savePickup({
+      rentId,
+      pickupTime: {
+        ...pickupTime,
+        date: convertDateToTZ(pickupTime.date),
+        fromTime: convertDateToTZ(pickupTime.fromTime),
+        endTime: convertDateToTZ(pickupTime.endTime),
+      },
+    });
     setIsSubmitting(false);
     if (!result.error) {
       handleSavedPickup(result.msg, result.pickup);
@@ -84,7 +94,20 @@ function SchedulePickupModal(props) {
     handleOnClose(false);
   };
   const handleSavedPickup = (successMessage, pickup) => {
-    handleOnClose(true, { rent, pickupTime, pickup }, successMessage);
+    handleOnClose(
+      true,
+      {
+        rent,
+        pickupTime: {
+          ...pickupTime,
+          date: convertDateToTZ(pickupTime.date),
+          fromTime: convertDateToTZ(pickupTime.fromTime),
+          endTime: convertDateToTZ(pickupTime.endTime),
+        },
+        pickup,
+      },
+      successMessage
+    );
   };
   if (rent && !selectedDay) {
     const dayName = format(new Date(rent?.endDate), "eeee").toLowerCase();
@@ -105,9 +128,7 @@ function SchedulePickupModal(props) {
     if (!rent) return "";
     if (rent.remaining > 0) {
       return capitalizeFirstLetter(
-        format(new Date(rent?.endDate), "LLLL dd yyyy", {
-          locale: es,
-        })
+        formatTZDate(new Date(rent?.endDate), "dddd DD MMMM YYYY")
       );
     }
     if (rent.remaining === 0) {
@@ -264,9 +285,7 @@ function SchedulePickupModal(props) {
                       </Grid>
                       {rent?.remaining < 0 && (
                         <Grid item lg={12}>
-                          <Alert
-                            severity="warning"
-                          >
+                          <Alert severity="warning">
                             Se generará una deuda de ${debt}.
                             <br />
                             El nuevo saldo será de ${newbalance}.

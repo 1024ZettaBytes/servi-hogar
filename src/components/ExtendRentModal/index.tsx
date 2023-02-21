@@ -23,9 +23,7 @@ import {
   refreshData,
 } from "../../../pages/api/useRequest";
 import { extendRent } from "../../../lib/client/rentsFetch";
-import { capitalizeFirstLetter, addDaysToDate } from "lib/client/utils";
-import { format } from "date-fns";
-import es from "date-fns/locale/es";
+import { capitalizeFirstLetter, addDaysToDate, formatTZDate } from "lib/client/utils";
 import numeral from "numeral";
 import { useSnackbar } from "notistack";
 import { ROUTES } from "lib/consts/API_URL_CONST";
@@ -190,12 +188,9 @@ function ExtendRentModal(props) {
                             </Typography>
                             <Typography color="black" gutterBottom>
                               {capitalizeFirstLetter(
-                                format(
+                                formatTZDate(
                                   new Date(rent?.endDate),
-                                  "LLLL dd yyyy",
-                                  {
-                                    locale: es,
-                                  }
+                                  "MMMM DD YYYY"
                                 )
                               )}
                             </Typography>
@@ -303,15 +298,12 @@ function ExtendRentModal(props) {
                             </Typography>
                             <Typography color="black" gutterBottom>
                               {capitalizeFirstLetter(
-                                format(
+                                formatTZDate(
                                   addDaysToDate(
                                     new Date(rent?.endDate),
                                     rentPeriod.selectedWeeks * 7
                                   ),
-                                  "LLLL dd yyyy",
-                                  {
-                                    locale: es,
-                                  }
+                                  "MMMM DD YYYY"
                                 )
                               )}
                             </Typography>

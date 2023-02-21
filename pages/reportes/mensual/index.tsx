@@ -20,14 +20,15 @@ import {
 import Footer from "@/components/Footer";
 import { getFetcher, useGetReport } from "../../api/useRequest";
 import CloudDownloadIcon from "@mui/icons-material/CloudDownload";
-import { format } from "date-fns";
-import { es } from "date-fns/locale";
 import {
   capitalizeFirstLetter,
   printElement,
   getLastDayMonth,
   getFirstDayMonth,
   sleep,
+  convertDateToLocal,
+  convertDateToTZ,
+  formatTZDate,
 } from "lib/client/utils";
 import ActivityReportTable from "./ActivityReportTable";
 import MonthPicker from "@/components/MonthPicker";
@@ -51,15 +52,15 @@ const customerStyle = {
 };
 const paymentStyle = { ...headerStyle, backgroundColor: "#89C3F4" };
 function DayReport() {
-  const [selectedDate, setSelectedDate] = useState<Date>(new Date());
-  const [start, setStart] = useState<Date>(getFirstDayMonth(new Date()));
-  const [end, setEnd] = useState<Date>(getLastDayMonth(new Date()));
+  const [selectedDate, setSelectedDate] = useState<Date>(convertDateToLocal(new Date()));
+  const [start, setStart] = useState<Date>(getFirstDayMonth(convertDateToLocal(new Date())));
+  const [end, setEnd] = useState<Date>(getLastDayMonth(convertDateToLocal(new Date())));
   const [isPrinting, setIsPrinting] = useState<boolean>(false);
   const { reportData, reportError } = useGetReport(
     getFetcher,
     "range",
-    start,
-    end
+    convertDateToTZ(start),
+    convertDateToTZ(end)
   );
   const generalError = reportError;
   const completeData = reportData;
@@ -67,9 +68,7 @@ function DayReport() {
   const handleClickOpen = async () => {
     setIsPrinting(true);
     await sleep(1000);
-    const fileName = `Mensual_${format(start, "LLLL-yyyy", {
-      locale: es,
-    })}.pdf`;
+    const fileName = `Mensual_${formatTZDate(start, "MMMM-YYYY")}.pdf`;
     await printElement(document, fileName);
     setIsPrinting(false);
   };
@@ -90,9 +89,7 @@ function DayReport() {
   };
   const getHeader = () => {
     return capitalizeFirstLetter(
-      format(selectedDate, "LLLL yyyy", {
-        locale: es,
-      })
+      formatTZDate(selectedDate, "MMMM YYYY")
     );
   };
   return (

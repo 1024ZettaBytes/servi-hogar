@@ -21,14 +21,13 @@ import {
   TextField,
   InputAdornment,
 } from "@mui/material";
-import dayjs from 'dayjs'
-import LocalizedFormat from "dayjs/plugin/localizedFormat";
-import 'dayjs/locale/es-mx'
-dayjs.locale('es-mx')
-dayjs.extend(LocalizedFormat);
+
+
+
+
 import ImageSearchIcon from "@mui/icons-material/ImageSearch";
 import SearchIcon from "@mui/icons-material/Search";
-import { capitalizeFirstLetter } from "lib/client/utils";
+import { capitalizeFirstLetter, formatTZDate } from "lib/client/utils";
 import { PAYMENT_METHODS } from "../../lib/consts/OBJ_CONTS";
 interface TablaPagosProps {
   className?: string;
@@ -64,7 +63,7 @@ const applyFilters = (paymentsList: any[], filter: string): any[] => {
               value &&
               compareStringsForFilter(
                 filter,
-                dayjs(payment?.date).format("MMMM DD YYYY")
+                formatTZDate(payment?.date, "MMMM DD YYYY")
               );
             return matchFormatedDate;
           }
@@ -189,7 +188,7 @@ const TablaPagos: FC<TablaPagosProps> = ({ paymentsList }) => {
                         noWrap
                       >
                         {
-                        capitalizeFirstLetter(dayjs(payment?.date).format("MMMM DD YYYY"))
+                        capitalizeFirstLetter(formatTZDate(payment?.date, "MMMM DD YYYY"))
                         }
                       </Typography>
                     </TableCell>

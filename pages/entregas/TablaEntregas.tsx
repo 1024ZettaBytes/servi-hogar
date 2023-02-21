@@ -21,7 +21,7 @@ import {
   useTheme,
 } from "@mui/material";
 import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
-import { capitalizeFirstLetter } from "lib/client/utils";
+import { capitalizeFirstLetter, formatTZDate } from "lib/client/utils";
 import { format } from "date-fns";
 import es from "date-fns/locale/es";
 import Label from "@/components/Label";
@@ -241,9 +241,7 @@ const TablaEntregas: FC<TablaEntregasProps> = ({ deliveriesList }) => {
                         noWrap
                       >
                         {capitalizeFirstLetter(
-                          format(new Date(delivery?.date), "LLL dd yyyy", {
-                            locale: es,
-                          })
+                          formatTZDate(new Date(delivery?.date), "MMM DD YYYY")
                         )}
                       </Typography>
                     </TableCell>
@@ -257,13 +255,7 @@ const TablaEntregas: FC<TablaEntregasProps> = ({ deliveriesList }) => {
                       >
                         {delivery?.finishedAt
                           ? capitalizeFirstLetter(
-                              format(
-                                new Date(delivery?.finishedAt),
-                                "LLL dd yyyy",
-                                {
-                                  locale: es,
-                                }
-                              )
+                            formatTZDate(new Date(delivery?.finishedAt), "MMM DD YYYY")
                             )
                           : "N/A"}
                       </Typography>
