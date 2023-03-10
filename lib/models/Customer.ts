@@ -6,6 +6,7 @@ export interface ICustomer extends Document {
   residences: [Schema.Types.ObjectId];
   currentResidence: Schema.Types.ObjectId;
   level: Schema.Types.ObjectId;
+  comments: string;
   howFound: string;
   wasReferred: boolean;
   referrals: [Schema.Types.ObjectId];
@@ -45,6 +46,7 @@ const CustomerSchema = new Schema<ICustomer>({
     ref: 'customer_levels',
     required: true
   },
+  comments: { type: 'string', default:"" },
   howFound: { type: 'string', required: true },
   wasReferred: { type: 'boolean', default: false, required: true },
   referredBy: {

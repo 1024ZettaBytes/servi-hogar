@@ -31,7 +31,11 @@ import {
   useGetPrices,
 } from "../api/useRequest";
 import { useSnackbar } from "notistack";
-import { addDaysToDate, convertDateToLocal, convertDateToTZ } from "../../lib/client/utils";
+import {
+  addDaysToDate,
+  convertDateToLocal,
+  convertDateToTZ,
+} from "../../lib/client/utils";
 import NextBreadcrumbs from "@/components/Shared/BreadCrums";
 import TablaClientesRenta from "./TablaClientesRenta";
 import RentPeriod from "./RentPeriod";
@@ -60,18 +64,24 @@ const defaultData = () => {
     deliveryTime: {
       date: convertDateToLocal(addDaysToDate(new Date(), 1)),
       timeOption: "any",
-      fromTime: defaultInitialDate(convertDateToLocal(addDaysToDate(new Date(), 1))),
+      fromTime: defaultInitialDate(
+        convertDateToLocal(addDaysToDate(new Date(), 1))
+      ),
       endTime: defaultEndDate(convertDateToLocal(addDaysToDate(new Date(), 1))),
     },
     selectedCustomer: null,
   };
 };
-function RentaRapida() {
+function RentaRapida({ session }) {
+  const userRole = session.user.role;
   const paths = ["Inicio", "Renta Rápida"];
   const { enqueueSnackbar } = useSnackbar();
-  const { customersForRentList, customersForRentError } = useGetAllCustomersForRent(getFetcher);
+  const {
+    customersForRentList,
+    customersForRentError,
+  } = useGetAllCustomersForRent(getFetcher);
   const { customerList, customerError } = useGetAllCustomers(getFetcher);
-  const {prices, pricesError } = useGetPrices(getFetcher);
+  const { prices, pricesError } = useGetPrices(getFetcher);
   const { citiesList, citiesError } = useGetCities(getFetcher);
   const [modalIsOpen, setModalIsOpen] = useState(false);
   const [formatIsOpen, setFormatIsOpen] = useState(false);
@@ -87,8 +97,10 @@ function RentaRapida() {
     msg: "",
   });
   const [activeStep, setActiveStep] = useState(0);
-  const generalError = customerError || citiesError || customersForRentError || pricesError;
-  const completeData = customerList && citiesList && customersForRentList && prices;
+  const generalError =
+    customerError || citiesError || customersForRentError || pricesError;
+  const completeData =
+    customerList && citiesList && customersForRentList && prices;
   const steps = [
     {
       label: "Seleccione un cliente",
@@ -159,19 +171,23 @@ function RentaRapida() {
     setHasErrorSubmitting({ error: false, msg: "" });
     setIsSubmitting(true);
     setCustomerRent(selectedCustomer);
-    
+
     const result = await saveRent({
       customerId: selectedId,
       rentPeriod,
-      deliveryTime:{
+      deliveryTime: {
         ...deliveryTime,
         date: convertDateToTZ(deliveryTime.date),
         fromTime: convertDateToTZ(deliveryTime.fromTime),
-        endTime: convertDateToTZ(deliveryTime.endTime)
+        endTime: convertDateToTZ(deliveryTime.endTime),
       },
     });
-    const rent = { ...result.rent, customer: selectedCustomer, delivery: result.delivery };
-    
+    const rent = {
+      ...result.rent,
+      customer: selectedCustomer,
+      delivery: result.delivery,
+    };
+
     setCustomerRent(rent);
     setIsSubmitting(false);
     if (!result.error) {
@@ -217,7 +233,9 @@ function RentaRapida() {
           <Grid item xs={12}>
             {generalError ? (
               <Alert severity="error">
-                {customerError?.message || citiesError?.message || pricesError?.message}
+                {customerError?.message ||
+                  citiesError?.message ||
+                  pricesError?.message}
               </Alert>
             ) : !completeData ? (
               <Skeleton
@@ -258,6 +276,7 @@ function RentaRapida() {
                               <Grid item xs={12} md={4} lg={4}></Grid>
                               <Grid item xs={12} md={12} lg={12}>
                                 <TablaClientesRenta
+                                  role={userRole}
                                   customerList={customersForRentList}
                                   citiesList={citiesList}
                                   selectedCustomer={selectedCustomer}
@@ -371,19 +390,23 @@ function RentaRapida() {
           open={formatIsOpen}
           selectedId={customerRent?.delivery?._id}
           title="Formato de entrega"
-          text={customerRent.delivery?.wasSent ? "ENVIADO":null}
+          text={customerRent.delivery?.wasSent ? "ENVIADO" : null}
           textColor="green"
-          formatText={getFormatForDelivery(customerRent, customerRent.delivery, {
-            ...deliveryTime,
-            date: convertDateToTZ(deliveryTime.date),
-            fromTime: convertDateToTZ(deliveryTime.fromTime),
-            endTime: convertDateToTZ(deliveryTime.endTime)
-          })}
+          formatText={getFormatForDelivery(
+            customerRent,
+            customerRent.delivery,
+            {
+              ...deliveryTime,
+              date: convertDateToTZ(deliveryTime.date),
+              fromTime: convertDateToTZ(deliveryTime.fromTime),
+              endTime: convertDateToTZ(deliveryTime.endTime),
+            }
+          )}
           onAccept={() => {
             setFormatIsOpen(false);
           }}
           onSubmitAction={markWasSentDelivery}
-     />
+        />
       )}
       <Footer />
     </>
