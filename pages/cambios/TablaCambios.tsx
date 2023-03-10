@@ -28,7 +28,6 @@ import es from "date-fns/locale/es";
 import Label from "@/components/Label";
 import SearchIcon from "@mui/icons-material/Search";
 import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
-
 import ImagesModal from "@/components/ImagesModal";
 interface TablaCambiosProps {
   userRole: string;
@@ -133,7 +132,7 @@ const TablaCambios: FC<TablaCambiosProps> = ({ changesList }) => {
     setOpenImages(false);
     setSelectedImages(null);
   };
-  
+
   const handleSearchChange = (e: ChangeEvent<HTMLInputElement>): void => {
     const value = e.target.value;
     setFilter(value);
@@ -271,7 +270,10 @@ const TablaCambios: FC<TablaCambiosProps> = ({ changesList }) => {
                       >
                         {change?.finishedAt
                           ? capitalizeFirstLetter(
-                            formatTZDate(new Date(change?.finishedAt), "MMM DD YYYY")
+                              formatTZDate(
+                                new Date(change?.finishedAt),
+                                "MMM DD YYYY"
+                              )
                             )
                           : "N/A"}
                       </Typography>

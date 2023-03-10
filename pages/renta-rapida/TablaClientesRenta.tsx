@@ -23,9 +23,11 @@ import {
   Select,
   MenuItem,
   Alert,
+  Tooltip,
 } from "@mui/material";
 import EditTwoToneIcon from "@mui/icons-material/EditTwoTone";
 import LocationOnIcon from "@mui/icons-material/LocationOn";
+import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
 import { updateCustomerResidence } from "../../lib/client/customersFetch";
 import { useSnackbar } from "notistack";
 import Label from "@/components/Label";
@@ -36,6 +38,7 @@ import numeral from "numeral";
 
 interface TablaClientesRentaProps {
   className?: string;
+  role: string;
   customerList: any[];
   selectedCustomer?: any;
   citiesList: any[];
@@ -128,6 +131,7 @@ const applyPagination = (
 };
 
 const TablaClientesRenta: FC<TablaClientesRentaProps> = ({
+  role,
   customerList,
   citiesList,
   selectedCustomer,
@@ -144,7 +148,7 @@ const TablaClientesRenta: FC<TablaClientesRentaProps> = ({
   const [page, setPage] = useState<number>(0);
   const [limit, setLimit] = useState<number>(10);
   const [filter, setFilter] = useState<string>("");
-
+  const userIsAdmin = role === "ADMIN";
   const getInfoTextField = (
     field: string,
     minLength: number,
@@ -301,15 +305,16 @@ const TablaClientesRenta: FC<TablaClientesRentaProps> = ({
             <TableHead>
               <TableRow>
                 <TableCell align="center">Cliente</TableCell>
+                <TableCell align="center">Nivel</TableCell>
                 <TableCell align="center">Celular</TableCell>
                 <TableCell align="center">Domicilio</TableCell>
                 <TableCell align="center">Ciudad</TableCell>
-                <TableCell align="center">Nivel</TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
               {paginatedCustomers.map((customer) => {
                 const isSelected = selectedCustomer?._id === customer?._id;
+                const isBadCustomer = customer.level.id === "conflictivo";
                 return (
                   <TableRow
                     key={customer?._id}
@@ -320,10 +325,15 @@ const TablaClientesRenta: FC<TablaClientesRentaProps> = ({
                           ? theme.colors.primary
                           : "transparent",
                       },
-                      cursor: "pointer",
+                      cursor:
+                        !isBadCustomer || userIsAdmin
+                          ? "pointer"
+                          : "not-allowed",
                     }}
                     onClick={() => {
-                      !isUpdating && onSelectCustomer(customer._id);
+                      (!isBadCustomer || userIsAdmin) &&
+                        !isUpdating &&
+                        onSelectCustomer(customer._id);
                     }}
                   >
                     <TableCell align="center">
@@ -336,6 +346,14 @@ const TablaClientesRenta: FC<TablaClientesRentaProps> = ({
                       >
                         {customer?.name}
                       </Typography>
+                    </TableCell>
+                    <TableCell align="center">
+                      {getStatusLabel(customer?.level?.id)}
+                      {(isBadCustomer || customer?.comments !== "") && (
+                        <Tooltip title={customer.comments} arrow>
+                          <InfoOutlinedIcon fontSize="small" />
+                        </Tooltip>
+                      )}
                     </TableCell>
                     <TableCell align="center">
                       <Typography
@@ -375,9 +393,6 @@ const TablaClientesRenta: FC<TablaClientesRentaProps> = ({
                       <Typography variant="body2" color="text.secondary" noWrap>
                         {customer?.currentResidence?.sector?.name}
                       </Typography>
-                    </TableCell>
-                    <TableCell align="center">
-                      {getStatusLabel(customer?.level?.id)}
                     </TableCell>
                   </TableRow>
                 );
@@ -663,6 +678,7 @@ const TablaClientesRenta: FC<TablaClientesRentaProps> = ({
 };
 
 TablaClientesRenta.propTypes = {
+  role: PropTypes.string.isRequired,
   customerList: PropTypes.array.isRequired,
   citiesList: PropTypes.array.isRequired,
   selectedCustomer: PropTypes.object,

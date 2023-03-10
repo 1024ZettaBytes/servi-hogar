@@ -34,8 +34,6 @@ import { LoadingButton } from "@mui/lab";
 import { HOW_FOUND_LIST } from "lib/consts/OBJ_CONTS";
 import numeral from "numeral";
 
-
-
 const getHowFoundLabel = (howFoundId: string, referrer?: string) => {
   let map = { ...HOW_FOUND_LIST };
   if (howFoundId === "referred") map.referred = `Recomendado por ${referrer}`;
@@ -345,6 +343,43 @@ function CustomerInfoTab({
                           sx={{ fontSize: "1rem", width: "100px" }}
                         />
                       )}
+                    </Grid>
+                    <Grid item xs={3} sm={6} md={6} textAlign={{ sm: "right" }}>
+                      <Box pr={2} pb={2}>
+                        Comentarios:
+                      </Box>
+                    </Grid>
+                    <Grid item xs={9} sm={6} md={6}>
+                      <Box sx={{ maxWidth: { xs: "auto", sm: 300 } }}>
+                        {customer ? (
+                          !isEditing.info || role !== "ADMIN" ? (
+                            <div style={{fontStyle: 'italic'}}>
+                            <Text color="black">{customer?.comments}</Text>
+                            </div>
+                          ) : (
+                            <TextField
+                              autoComplete="off"
+                              id="comments"
+                              name="comments"
+                              multiline
+                              maxRows={3}
+                              fullWidth={true}
+                              value={customerToEdit?.comments}
+                              onChange={(e) => {
+                                setCustomerToEdit({
+                                  ...customerToEdit,
+                                  comments: e.target.value,
+                                });
+                              }}
+                            />
+                          )
+                        ) : (
+                          <Skeleton
+                            variant="text"
+                            sx={{ fontSize: "1rem", width: "100px" }}
+                          />
+                        )}
+                      </Box>
                     </Grid>
                     <Grid item xs={3} sm={6} md={6} textAlign={{ sm: "right" }}>
                       <Box pr={2} pb={2}>
@@ -798,17 +833,17 @@ function CustomerInfoTab({
                         textAlign="center"
                       >
                         {customer ? (
-                          customer.currentResidence?.maps &&
-                          <Button
-                            variant="outlined"
-                            href={`${customer?.currentResidence?.maps}`}
-                            sx={{ width: "50%" }}
-                            target="_blank"
-                            startIcon={<LocationOnIcon />}
-                          >
-                            Ver Ubicación
-                          </Button>
-
+                          customer.currentResidence?.maps && (
+                            <Button
+                              variant="outlined"
+                              href={`${customer?.currentResidence?.maps}`}
+                              sx={{ width: "50%" }}
+                              target="_blank"
+                              startIcon={<LocationOnIcon />}
+                            >
+                              Ver Ubicación
+                            </Button>
+                          )
                         ) : (
                           <Skeleton
                             variant="text"
@@ -937,7 +972,7 @@ function CustomerInfoTab({
                     justifyItems="center"
                   >
                     <Grid container item spacing={0} xs={12} sm={6} md={6}>
-                    <Grid
+                      <Grid
                         item
                         xs={6}
                         sm={6}
@@ -950,7 +985,9 @@ function CustomerInfoTab({
                       </Grid>
                       <Grid item xs={6} sm={6} md={6}>
                         {customer ? (
-                          <Text color="black">{`$${numeral(customer.balance).format(`${customer.balance}0,0.00`)}`}</Text>
+                          <Text color="black">{`$${numeral(
+                            customer.balance
+                          ).format(`${customer.balance}0,0.00`)}`}</Text>
                         ) : (
                           <Skeleton
                             variant="text"
@@ -972,9 +1009,9 @@ function CustomerInfoTab({
                       <Grid item xs={6} sm={6} md={6}>
                         {customer ? (
                           <Text color="black">
-                            {customer?.currentRent?.totalWeeks ? 
-                            `${customer?.currentRent?.totalWeeks} semana(s)`
-                             : "N/A"}
+                            {customer?.currentRent?.totalWeeks
+                              ? `${customer?.currentRent?.totalWeeks} semana(s)`
+                              : "N/A"}
                           </Text>
                         ) : (
                           <Skeleton
