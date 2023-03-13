@@ -9,22 +9,18 @@ import {
   List,
   ListItem,
   ListItemText,
-  Button,
 } from "@mui/material";
 import LocalShippingIcon from "@mui/icons-material/LocalShipping";
-import CurrencyExchangeIcon from "@mui/icons-material/CurrencyExchange";
-import EventAvailableIcon from "@mui/icons-material/EventAvailable";
 import HourglassEmptyIcon from "@mui/icons-material/HourglassEmpty";
 import BuildIcon from "@mui/icons-material/Build";
-import MapIcon from "@mui/icons-material/Map";
-import NextLink from "next/link";
+import ChangeCircleIcon from '@mui/icons-material/ChangeCircle';
 
-const AvatarWrapperSuccess = styled(Avatar)(
+/*const AvatarWrapperSuccess = styled(Avatar)(
   ({ theme }) => `
         background-color: ${theme.colors.success.lighter};
         color:  ${theme.colors.success.main};
   `
-);
+);*/
 
 const AvatarWrapperError = styled(Avatar)(
   ({ theme }) => `
@@ -38,13 +34,8 @@ const AvatarWrapperWarning = styled(Avatar)(
         color:  ${theme.colors.warning.main};
   `
 );
-function ResumenEquipos({
-  onRent,
-  inVehicles,
-  ready,
-  waiting,
-  onMaintenance,
-  total,
+function MovementsSummary({
+  
 }) {
   return (
     <>
@@ -56,70 +47,9 @@ function ResumenEquipos({
           pb: 3,
         }}
       >
-        <Typography variant="h4">Resumen</Typography>
+        <Typography variant="h4">Pendientes</Typography>
       </Box>
       <Grid container spacing={1}>
-        <Grid xs={12} sm={6} md={3} item>
-          <Card
-            sx={{
-              px: 1,
-              height: "auto",
-              overflowY: "auto",
-            }}
-          >
-            <CardContent>
-              <Grid
-                container
-                alignItems="center"
-                justifyItems="center"
-                textAlign={{ lg: "center" }}
-              >
-                <Grid item lg={2} md={2} xs={2}>
-                  <AvatarWrapperSuccess>
-                    <CurrencyExchangeIcon />
-                  </AvatarWrapperSuccess>
-                </Grid>
-                <Grid item lg={3} md={2} xs={2}>
-                  <Typography variant="h3" gutterBottom noWrap>
-                    {onRent?.total}
-                  </Typography>
-                </Grid>
-                <Grid item lg={7} md={8} xs={8}>
-                  <Typography variant="subtitle2" noWrap textAlign="left">
-                    Rentados
-                  </Typography>
-                </Grid>
-                {onRent?.byCity?.length > 0 && (
-                  <Grid item lg={12} md={12} xs={12}>
-                    <List>
-                      {onRent?.byCity.map((city) => (
-                        <ListItem disablePadding key={city?.id}>
-                          <ListItemText
-                            primary={`- ${city?.name}: ${city?.total}`}
-                          />
-                        </ListItem>
-                      ))}
-                    </List>
-                  </Grid>
-                )}
-                <Grid item lg={12} md={12} xs={12} textAlign="center">
-                  <br />
-                </Grid>
-                <Grid item lg={12} md={12} xs={12} textAlign="center">
-                  <NextLink href="/equipos/mapa">
-                    <Button
-                      fullWidth
-                      variant="outlined"
-                      startIcon={<MapIcon />}
-                    >
-                      Ver Mapa
-                    </Button>
-                  </NextLink>
-                </Grid>
-              </Grid>
-            </CardContent>
-          </Card>
-        </Grid>
         <Grid xs={12} sm={6} md={3} item>
           <Card
             sx={{
@@ -142,18 +72,18 @@ function ResumenEquipos({
                 </Grid>
                 <Grid item lg={3} md={2} xs={2}>
                   <Typography variant="h3" gutterBottom noWrap>
-                    {inVehicles?.total}
+                    {40}
                   </Typography>
                 </Grid>
                 <Grid item lg={7} md={8} xs={8}>
-                  <Typography variant="subtitle2" noWrap textAlign="left">
-                    En vehículos
+                  <Typography variant="subtitle2"  textAlign="left">
+                    Entregas pendientes
                   </Typography>
                 </Grid>
-                {inVehicles?.byVehicle?.length > 0 && (
+                {0 > 0 && (
                   <Grid item lg={12} md={12} xs={12}>
                     <List>
-                      {inVehicles?.byVehicle.map((vehicle) => (
+                      {[].map((vehicle) => (
                         <ListItem disablePadding key={vehicle?.id}>
                           <ListItemText
                             primary={`- ${vehicle?.name}: ${vehicle?.total}`}
@@ -184,23 +114,23 @@ function ResumenEquipos({
               >
                 <Grid item lg={2} md={2} xs={2}>
                   <AvatarWrapperError>
-                    <EventAvailableIcon />
+                    <ChangeCircleIcon />
                   </AvatarWrapperError>
                 </Grid>
                 <Grid item lg={3} md={2} xs={2}>
                   <Typography variant="h3" gutterBottom noWrap>
-                    {ready?.total}
+                    {30}
                   </Typography>
                 </Grid>
                 <Grid item lg={7} md={8} xs={8}>
-                  <Typography variant="subtitle2" noWrap textAlign="left">
-                    Listos para renta
+                  <Typography variant="subtitle2" textAlign="left">
+                    Cambios Pendientes
                   </Typography>
                 </Grid>
-                {ready?.byWarehouse?.length > 0 && (
+                {0 > 0 && (
                   <Grid item lg={12} md={12} xs={12}>
                     <List>
-                      {ready?.byWarehouse.map((warehouse) => (
+                      {[].map((warehouse) => (
                         <ListItem disablePadding key={warehouse?.id}>
                           <ListItemText
                             primary={`- ${warehouse?.name}: ${warehouse?.total}`}
@@ -236,7 +166,7 @@ function ResumenEquipos({
                 </Grid>
                 <Grid item lg={3} md={2} xs={2}>
                   <Typography variant="h3" gutterBottom noWrap>
-                    {waiting?.total}
+                    {10}
                   </Typography>
                 </Grid>
                 <Grid item lg={7} md={8} xs={8}>
@@ -244,10 +174,10 @@ function ResumenEquipos({
                     En espera
                   </Typography>
                 </Grid>
-                {waiting?.byWarehouse?.length > 0 && (
+                {0 > 0 && (
                   <Grid item lg={12} md={12} xs={12}>
                     <List>
-                      {waiting?.byWarehouse.map((warehouse) => (
+                      {[].map((warehouse) => (
                         <ListItem disablePadding key={warehouse?.id}>
                           <ListItemText
                             primary={`- ${warehouse?.name}: ${warehouse?.total}`}
@@ -283,7 +213,7 @@ function ResumenEquipos({
                 </Grid>
                 <Grid item lg={3} md={2} xs={2}>
                   <Typography variant="h3" gutterBottom noWrap>
-                    {onMaintenance?.total}
+                    {15}
                   </Typography>
                 </Grid>
                 <Grid item lg={7} md={8} xs={8}>
@@ -291,10 +221,10 @@ function ResumenEquipos({
                     En mantenimiento
                   </Typography>
                 </Grid>
-                {onMaintenance?.byWarehouse?.length > 0 && (
+                {0 > 0 && (
                   <Grid item lg={12} md={12} xs={12}>
                     <List>
-                      {onMaintenance?.byWarehouse.map((warehouse) => (
+                      {[].map((warehouse) => (
                         <ListItem disablePadding key={warehouse?.id}>
                           <ListItemText
                             primary={`- ${warehouse?.name}: ${warehouse?.total}`}
@@ -332,7 +262,7 @@ function ResumenEquipos({
                 </Grid>
                 <Grid item lg={7} md={8} xs={8}>
                   <Typography variant="h3" noWrap>
-                    {total}
+                    {200}
                   </Typography>
                 </Grid>
               </Grid>
@@ -345,4 +275,4 @@ function ResumenEquipos({
   );
 }
 
-export default ResumenEquipos;
+export default MovementsSummary;

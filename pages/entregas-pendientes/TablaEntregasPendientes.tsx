@@ -91,7 +91,22 @@ const applyFilters = (deliveriesList: any[], filter: string): any[] => {
               compareStringsForFilter(filter, value["customer"].name);
             const matchNumber =
               value["num"] && compareStringsForFilter(filter, value["num"]);
-            return matchNumber || matchCustomerName;
+            const matchCityOrSector =
+              value["customer"]?.currentResidence?.city?.name &&
+              value["customer"]?.currentResidence?.sector?.name &&
+              (compareStringsForFilter(
+                filter,
+                value["customer"].currentResidence.city.name
+              ) ||
+                compareStringsForFilter(
+                  filter,
+                  value["customer"].currentResidence.sector.name
+                ) ||
+                compareStringsForFilter(
+                  filter,
+                  value["customer"].currentResidence.suburb
+                ));
+            return matchNumber || matchCustomerName || matchCityOrSector;
           }
           case "status": {
             const matchText =
@@ -232,6 +247,7 @@ const TablaEntregasPendientes: FC<TablaEntregasPendientesProps> = ({
                 <TableCell align="center">#</TableCell>
                 <TableCell align="center"># del día</TableCell>
                 <TableCell align="center">Cliente</TableCell>
+                <TableCell align="center">Colonia-Sector</TableCell>
                 <TableCell align="center">Estado</TableCell>
                 <TableCell align="center">Fecha de entrega</TableCell>
                 <TableCell align="center">Horario Especial</TableCell>
@@ -276,6 +292,37 @@ const TablaEntregasPendientes: FC<TablaEntregasPendientesProps> = ({
                       </Typography>
                     </TableCell>
                     <TableCell align="center">
+                      <Typography
+                        variant="body1"
+                        fontWeight="bold"
+                        color="text.primary"
+                        gutterBottom
+                        noWrap
+                      >
+                        {delivery?.rent?.customer?.currentResidence?.suburb}
+                      </Typography>
+                      <Typography
+                        variant="body1"
+                        fontWeight="bold"
+                        color="text.primary"
+                        gutterBottom
+                        noWrap
+                      >
+                        {
+                          delivery?.rent?.customer?.currentResidence?.sector?.name
+                        }
+                      </Typography>
+                      <Typography
+                        variant="body1"
+                        fontWeight="bold"
+                        color="text.secondary"
+                        gutterBottom
+                        noWrap
+                      >
+                        {delivery?.rent?.customer?.currentResidence?.city?.name}
+                      </Typography>
+                    </TableCell>
+                    <TableCell align="center">
                       {getStatusLabel(delivery?.status)}
                     </TableCell>
                     <TableCell align="center">
@@ -301,7 +348,10 @@ const TablaEntregasPendientes: FC<TablaEntregasPendientesProps> = ({
                         noWrap
                       >
                         {delivery?.timeOption === "specific"
-                          ? `${formatTZDate(new Date(delivery?.fromTime), "h:mm A")} - ${formatTZDate(
+                          ? `${formatTZDate(
+                              new Date(delivery?.fromTime),
+                              "h:mm A"
+                            )} - ${formatTZDate(
                               new Date(delivery?.endTime),
                               "h:mm A"
                             )}`
