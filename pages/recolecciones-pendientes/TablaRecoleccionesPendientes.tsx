@@ -87,7 +87,22 @@ const applyFilters = (pickupsList: any[], filter: string): any[] => {
               compareStringsForFilter(filter, value["customer"].name);
             const matchNumber =
               value["num"] && compareStringsForFilter(filter, value["num"]);
-            return matchNumber || matchCustomerName;
+            const matchCityOrSector =
+              value["customer"]?.currentResidence?.city?.name &&
+              value["customer"]?.currentResidence?.sector?.name &&
+              (compareStringsForFilter(
+                filter,
+                value["customer"].currentResidence.city.name
+              ) ||
+                compareStringsForFilter(
+                  filter,
+                  value["customer"].currentResidence.sector.name
+                ) ||
+                compareStringsForFilter(
+                  filter,
+                  value["customer"].currentResidence.suburb
+                ));
+            return matchNumber || matchCustomerName || matchCityOrSector;
           }
           case "totalNumber": {
             const matchTNumber =
@@ -234,6 +249,7 @@ const TablaRecoleccionesPendientes: FC<TablaRecoleccionesPendientesProps> = ({
                 <TableCell align="center">#</TableCell>
                 <TableCell align="center"># del día</TableCell>
                 <TableCell align="center">Cliente</TableCell>
+                <TableCell align="center">Colonia-Sector</TableCell>
                 <TableCell align="center">Estado</TableCell>
                 <TableCell align="center">Fecha Programada</TableCell>
                 <TableCell align="center">Horario Especial</TableCell>
@@ -287,6 +303,35 @@ const TablaRecoleccionesPendientes: FC<TablaRecoleccionesPendientesProps> = ({
                         noWrap
                       >
                         {pickup?.rent?.customer?.name}
+                      </Typography>
+                    </TableCell>
+                    <TableCell align="center">
+                      <Typography
+                        variant="body1"
+                        fontWeight="bold"
+                        color="text.primary"
+                        gutterBottom
+                        noWrap
+                      >
+                        {pickup?.rent?.customer?.currentResidence?.suburb}
+                      </Typography>
+                      <Typography
+                        variant="body1"
+                        fontWeight="bold"
+                        color="text.primary"
+                        gutterBottom
+                        noWrap
+                      >
+                        {pickup?.rent?.customer?.currentResidence?.sector?.name}
+                      </Typography>
+                      <Typography
+                        variant="body1"
+                        fontWeight="bold"
+                        color="text.secondary"
+                        gutterBottom
+                        noWrap
+                      >
+                        {pickup?.rent?.customer?.currentResidence?.city?.name}
                       </Typography>
                     </TableCell>
                     <TableCell align="center">
