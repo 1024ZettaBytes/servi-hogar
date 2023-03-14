@@ -133,6 +133,7 @@ function MachineInfoTab({ role, machine, statusList }) {
   });
   const [machineToEdit, setMachineToEdit] = useState<any>({ isSet: false });
   const [selectedLocation, setSelectedLocation] = useState();
+  const isOnRentStatus =  machineToEdit.status?.id === MACHINE_STATUS_LIST.RENTADO;
   const isWarehouseStatus = machineToEdit.status?.typeWarehouse;
   const isVehicleStatus = machineToEdit.status?.id === MACHINE_STATUS_LIST.VEHI;
   const [isUpdating, setIsUpdating] = useState<any>({ info: false });
@@ -323,7 +324,7 @@ function MachineInfoTab({ role, machine, statusList }) {
 
                     <Grid item xs={9} sm={6} md={6}>
                       {machine ? (
-                        !isEditing.info ? (
+                        isOnRentStatus || !isEditing.info ? (
                           getStatusLabel(
                             machine?.status?.id,
                             machine?.lastRent,
@@ -367,7 +368,7 @@ function MachineInfoTab({ role, machine, statusList }) {
                       )}
                     </Grid>
 
-{machine?.status?.id !== MACHINE_STATUS_LIST.RENTADO &&
+{!isOnRentStatus &&
 <>
                     <Grid item xs={3} sm={6} md={6} textAlign={{ sm: "right" }}>
                       <Box pr={2} pb={2}>
