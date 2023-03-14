@@ -156,7 +156,7 @@ export const sleep = async (duration: number): Promise<void> => {
 };
 
 export const formatTZDate = (date: Date, format: string): string => {
-  return dayjs.utc(date).tz('US/Mountain').format(format);
+  return dayjs.utc(date).tz('America/Mazatlan').format(format);
 };
 
 export const convertDateToTZ = (date: Date): Date => {

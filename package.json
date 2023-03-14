@@ -67,9 +67,9 @@
     "typescript": "4.8.4"
   },
   "scripts": {
-    "dev": "TZ=US/Mountain next",
-    "build": "TZ=US/Mountain next build",
-    "start": "TZ=US/Mountain next start",
+    "dev": "TZ=America/Mazatlan next",
+    "build": "TZ=America/Mazatlan next build",
+    "start": "TZ=America/Mazatlan next start",
     "export": "next export",
     "lint": "next lint",
     "lint-fix": "next lint --fix",
