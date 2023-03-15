@@ -1010,7 +1010,7 @@ function CustomerInfoTab({
                         {customer ? (
                           <Text color="black">
                             {customer?.currentRent?.totalWeeks
-                              ? `${customer?.currentRent?.totalWeeks} semana(s)`
+                              ? `${capitalizeFirstLetter(formatTZDate(new Date(customer.currentRent.startDate), "MMM DD YYYY"))} (${customer?.currentRent?.totalWeeks} semana(s))`
                               : "N/A"}
                           </Text>
                         ) : (
