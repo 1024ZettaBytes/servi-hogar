@@ -67,10 +67,6 @@ const applyFilters = (rentList: any[], filter: string): any[] => {
           return false;
         }
         switch (key) {
-          case "num": {
-            const matchNumber = compareStringsForFilter(filter, value + "");
-            return matchNumber;
-          }
           case "status": {
             const matchText =
               value["id"] &&
@@ -290,7 +286,6 @@ const TablaRentasActuales: FC<TablaRentasActualesProps> = ({ rentList }) => {
           <Table>
             <TableHead>
               <TableRow>
-                <TableCell align="center"># de renta</TableCell>
                 <TableCell align="center">Equipo</TableCell>
                 <TableCell align="center">Cliente</TableCell>
                 <TableCell align="center">Pago</TableCell>
@@ -303,17 +298,6 @@ const TablaRentasActuales: FC<TablaRentasActualesProps> = ({ rentList }) => {
               {paginatedRents.map((rent) => {
                 return (
                   <TableRow hover key={rent?._id}>
-                    <TableCell align="center">
-                      <Typography
-                        variant="body1"
-                        fontWeight="bold"
-                        color="text.primary"
-                        gutterBottom
-                        noWrap
-                      >
-                        {rent?.num}
-                      </Typography>
-                    </TableCell>
                     {/*<TableCell align="center">
                     <Typography
                       variant="body1"
