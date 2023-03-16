@@ -150,10 +150,10 @@ function ExtendRentModal(props) {
                         >
                           <Box>
                             <Typography gutterBottom variant="subtitle2">
-                              # renta
+                              # Equipo
                             </Typography>
                             <Typography color="black" gutterBottom>
-                              {rent.num}
+                              {rent.machine?.machineNum}
                             </Typography>
                           </Box>
                         </Grid>
