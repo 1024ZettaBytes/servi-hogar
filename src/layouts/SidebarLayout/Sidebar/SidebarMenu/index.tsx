@@ -494,7 +494,7 @@ function SidebarMenu({userRole}) {
                 <NextLink href="/equipos" passHref>
                   <Button
                     className={
-                      currentRoute.includes("/equipos")
+                      currentRoute.includes("/equipos") && !currentRoute.includes("/reportes")
                         ? 'active'
                         : ''
                     }
@@ -546,7 +546,7 @@ function SidebarMenu({userRole}) {
                 <NextLink href="/reportes" passHref>
                   <Button
                     className={
-                      currentRoute === '/reportes'
+                      currentRoute.includes('/reportes')
                         ? 'active'
                         : ''
                     }

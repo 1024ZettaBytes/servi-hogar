@@ -14,6 +14,7 @@ import ViewDayIcon from '@mui/icons-material/ViewDay';
 import CalendarViewWeekIcon from '@mui/icons-material/CalendarViewWeek';
 import CalendarMonthIcon from '@mui/icons-material/CalendarMonth';
 import SidebarLayout from "@/layouts/SidebarLayout";
+import LocalLaundryServiceIcon from '@mui/icons-material/LocalLaundryService';
 import { validateServerSideSession } from "lib/auth";
 import { getSession } from "next-auth/react";
 import Footer from "@/components/Footer";
@@ -37,6 +38,13 @@ const AvatarWrapperError = styled(Avatar)(
 const AvatarWrapperWarning = styled(Avatar)(
   ({ theme }) => `
         background-color: ${theme.colors.warning.lighter};
+        color:  ${theme.colors.warning.main};
+  `
+);
+
+const AvatarWrapperNormal = styled(Avatar)(
+  ({ theme }) => `
+        background-color: ${theme.colors.info.dark};
         color:  ${theme.colors.warning.main};
   `
 );
@@ -140,6 +148,34 @@ function Reportes() {
                   >
                     <Typography variant="h3" gutterBottom noWrap>
                       Mensual
+                    </Typography>
+                  </Box>
+                </CardContent>
+              </Card>
+            </NextLink>
+          </Grid>
+          <Grid xs={12} sm={6} md={4} item>
+            <NextLink href="/reportes/equipos">
+              <Card
+                sx={{
+                  px: 1,
+                  cursor: "pointer",
+                  "&:hover": {
+                    background: theme.palette.grey[300],
+                  },
+                }}
+              >
+                <CardContent>
+                  <AvatarWrapperNormal>
+                    <LocalLaundryServiceIcon />
+                  </AvatarWrapperNormal>
+                  <Box
+                    sx={{
+                      pt: 3,
+                    }}
+                  >
+                    <Typography variant="h3" gutterBottom noWrap>
+                      Equipos
                     </Typography>
                   </Box>
                 </CardContent>
