@@ -414,7 +414,7 @@ const TablaClientesRenta: FC<TablaClientesRentaProps> = ({
       </Card>
       {selectedCustomer && selectedCustomer.balance < 0 && (
         <Grid item sm={12} md={12} lg={5} m={2}>
-          <Alert severity="warning">{`ATENCIÓN: Este cliente tiene saldo pendiente de $${numeral(
+          <Alert severity="error">{`ATENCIÓN: Este cliente tiene saldo pendiente de $${numeral(
             selectedCustomer?.balance
           ).format(`${selectedCustomer?.balance}0,0.00`)}`}</Alert>
         </Grid>
