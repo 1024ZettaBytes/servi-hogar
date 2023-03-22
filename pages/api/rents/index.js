@@ -1,22 +1,27 @@
 import { validateUserPermissions, getUserId } from "../auth/authUtils";
-import { saveRentData, getRentsData } from "../../../lib/data/Rents";
-
+import {
+  saveRentData,
+  getRentsData,
+  getPastRentsData,
+} from "../../../lib/data/Rents";
 
 async function saveRentAPI(req, res, userId) {
-  try{
-   const newRent = await saveRentData({...req.body, lastUpdatedBy: userId});
-   res.status(200).json({ msg: "¡Renta guardada con éxito!", ...newRent  });
-  }catch(e){
+  try {
+    const newRent = await saveRentData({ ...req.body, lastUpdatedBy: userId });
+    res.status(200).json({ msg: "¡Renta guardada con éxito!", ...newRent });
+  } catch (e) {
     console.error(e);
     res.status(500).json({ errorMsg: e.message });
   }
 }
 
 async function getRentsAPI(req, res) {
-  try{
-   const rents = await getRentsData();
-   res.status(200).json({ data: rents });
-  }catch(e){
+  try {
+    const { filter } = req.query;
+    const rents =
+      filter === "current" ? await getRentsData() : await getPastRentsData();
+    res.status(200).json({ data: rents });
+  } catch (e) {
     console.error(e);
     res.status(500).json({ errorMsg: e.message });
   }

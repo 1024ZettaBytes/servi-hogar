@@ -9,27 +9,21 @@ import Footer from "@/components/Footer";
 import TablaRentasActuales from "./TablaRentasActuales";
 import TablaRentasPasadas from "./TablaRentasPasadas";
 
-import {
-  useGetRents,
-  getFetcher,
-} from "../api/useRequest";
+import { useGetRents, getFetcher } from "../api/useRequest";
 
 import NextBreadcrumbs from "@/components/Shared/BreadCrums";
 
-
 function Rentas() {
   const paths = ["Inicio", "Rentas"];
-  const { rentsData, rentsError } = useGetRents(getFetcher);  
+  const { rentsData, rentsError } = useGetRents("current", getFetcher);
+  const { pastRentsData, pastRentsError } = useGetRents("past", getFetcher);
   return (
     <>
       <Head>
         <title>Rentas</title>
       </Head>
       <PageTitleWrapper>
-        <PageHeader
-          title={"Rentas"}
-          sutitle={""}
-        />
+        <PageHeader title={"Rentas"} sutitle={""} />
         <NextBreadcrumbs paths={paths} lastLoaded={true} />
       </PageTitleWrapper>
       <Container maxWidth="lg">
@@ -42,9 +36,7 @@ function Rentas() {
         >
           <Grid item xs={12}>
             {rentsError ? (
-              <Alert severity="error">
-                {rentsError?.message}
-              </Alert>
+              <Alert severity="error">{rentsError?.message}</Alert>
             ) : !rentsData ? (
               <Skeleton
                 variant="rectangular"
@@ -54,15 +46,13 @@ function Rentas() {
               />
             ) : (
               <Card>
-                <TablaRentasActuales
-                  rentList={rentsData.current}
-                />
+                <TablaRentasActuales rentList={rentsData} />
               </Card>
             )}
           </Grid>
         </Grid>
       </Container>
-      <Container maxWidth="lg" sx={{marginTop: 5}}>
+      <Container maxWidth="lg" sx={{ marginTop: 5 }}>
         <Grid
           container
           direction="row"
@@ -71,11 +61,9 @@ function Rentas() {
           spacing={4}
         >
           <Grid item xs={12}>
-            {rentsError ? (
-              <Alert severity="error">
-                {rentsError?.message}
-              </Alert>
-            ) : !rentsData ? (
+            {pastRentsError ? (
+              <Alert severity="error">{pastRentsError?.message}</Alert>
+            ) : !pastRentsData ? (
               <Skeleton
                 variant="rectangular"
                 width={"100%"}
@@ -84,9 +72,7 @@ function Rentas() {
               />
             ) : (
               <Card>
-                <TablaRentasPasadas
-                  rentList={rentsData.past}
-                />
+                <TablaRentasPasadas rentList={pastRentsData} />
               </Card>
             )}
           </Grid>
