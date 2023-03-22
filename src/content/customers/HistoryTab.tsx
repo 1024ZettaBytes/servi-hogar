@@ -62,7 +62,7 @@ const HistoryTab: FC<HistoryTabProps> = ({ movementsList }) => {
             <TableHead>
               <TableRow>
                 <TableCell align="center">Fecha</TableCell>
-                <TableCell align="center">Renta</TableCell>
+                <TableCell align="center">Equipo</TableCell>
                 <TableCell align="center">Descripción</TableCell>
               </TableRow>
             </TableHead>
@@ -94,7 +94,7 @@ const HistoryTab: FC<HistoryTabProps> = ({ movementsList }) => {
                         gutterBottom
                         noWrap
                       >
-                        {movement?.rent?.num}
+                        {movement?.machine?.machineNum}
                       </Typography>
                     </TableCell>
                     <TableCell align="center">

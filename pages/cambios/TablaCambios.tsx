@@ -77,6 +77,16 @@ const applyFilters = (changesList: any[], filter: string): any[] => {
               value["num"] && compareStringsForFilter(filter, value["num"]);
             return matchNumber || matchCustomerName;
           }
+          case "pickedMachine": 
+          case "leftMachine": {
+            const matchPicked =
+              value["pickedMachine"] &&
+              value["pickedMachine"].machineNum &&
+              compareStringsForFilter(filter, value["pickedMachine"].machineNum);
+            const matchLeft =
+              value["leftMachine"] && compareStringsForFilter(filter, value["leftMachine"].machineNum);
+            return matchPicked || matchLeft;
+          }
           case "status": {
             const matchText =
               statusMap["" + value] &&
