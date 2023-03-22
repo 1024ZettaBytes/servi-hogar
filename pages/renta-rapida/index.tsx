@@ -100,7 +100,7 @@ function RentaRapida({ session }) {
   const generalError =
     customerError || citiesError || customersForRentError || pricesError;
   const completeData =
-    customerList && citiesList && customersForRentList && prices;
+    customersForRentList && citiesList && prices;
   const steps = [
     {
       label: "Seleccione un cliente",
@@ -262,6 +262,7 @@ function RentaRapida({ session }) {
                               <Grid item xs={12} md={4} lg={4}>
                                 <Box flex={1} p={2}>
                                   <Button
+                                  disabled = {!customerList}
                                     fullWidth
                                     startIcon={<AddIcon />}
                                     size="medium"

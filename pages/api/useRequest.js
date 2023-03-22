@@ -93,9 +93,12 @@ export const useGetAllVehicles = (fetcher) => {
   return { vehiclesList: data?.data, vehiclesError: error };
 };
 // Rents
-export const useGetRents = (fetcher) => {
-  const { data, error } = useSWR(ROUTES.ALL_RENTS_API, fetcher);
-  return { rentsData: data?.data, rentsError: error };
+export const useGetRents = (filter, fetcher) => {
+  const url = `${ROUTES.ALL_RENTS_API}?filter=${filter}`;
+  const { data, error } = useSWR(url, fetcher);
+  return filter == "current"
+    ? { rentsData: data?.data, rentsError: error }
+    : { pastRentsData: data?.data, pastRentsError: error };
 };
 export const useGetRentById = (fetcher, id) => {
   const { data, error } = useSWR(
