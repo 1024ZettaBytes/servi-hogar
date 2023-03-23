@@ -42,6 +42,8 @@ import styles from "../tables.module.css";
 import BonusModal from "@/components/BonusModal";
 import { markWasSentPickup } from "lib/client/pickupsFetch";
 import { markWasSentChange } from "lib/client/changesFetch";
+import { getFetcher, useGetPrices } from "pages/api/useRequest";
+
 interface TablaRentasActualesProps {
   className?: string;
   rentList: any[];
@@ -145,6 +147,7 @@ const getStatusLabel = (deliverStatus: string): JSX.Element => {
 };
 const TablaRentasActuales: FC<TablaRentasActualesProps> = ({ rentList }) => {
   const { enqueueSnackbar } = useSnackbar();
+  const { prices } = useGetPrices(getFetcher);
   const [extendModalIsOpen, setExtendModalIsOpen] = useState(false);
   const [payDayModalIsOpen, setPayDayModalIsOpen] = useState(false);
   const [pickupModalIsOpen, setPickupModalIsOpen] = useState(false);
@@ -506,7 +509,8 @@ const TablaRentasActuales: FC<TablaRentasActualesProps> = ({ rentList }) => {
           formatText={getFormatForPickup(
             createdPickup.rent,
             createdPickup.pickup,
-            createdPickup.pickupTime
+            createdPickup.pickupTime,
+            prices.dayPrice
           )}
           onAccept={() => {
             setFormatIsOpen(false);
