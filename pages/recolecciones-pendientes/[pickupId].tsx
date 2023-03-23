@@ -40,14 +40,19 @@ import { completePickup } from "lib/client/pickupsFetch";
 import { useRouter } from "next/router";
 import React from "react";
 import { MuiFileInput } from "mui-file-input";
-import { convertDateToLocal, convertDateToTZ, dateDiffInDays } from "lib/client/utils";
+import {
+  convertDateToLocal,
+  convertDateToTZ,
+  dateDiffInDays,
+} from "lib/client/utils";
 
 function RecoleccionPendiente() {
   const router = useRouter();
   const { pickupId } = router.query;
   const { pickup, pickupByIdError } = useGetPickupById(getFetcher, pickupId);
   const [pickupDate, setPickupDate] = useState<any>(null);
-  const [whitDebt, setWhitDebt] = useState<number>(0);
+  const [whitDebt, setWhitDebt] = useState<number>(null);
+  const [payDone, setPayDone] = useState<boolean>(false);
   const [pickedAccesories, setPickedAccesories] = useState<any>({});
   const [attached, setAttached] = useState<any>({
     tag: { file: null, url: null },
@@ -77,6 +82,9 @@ function RecoleccionPendiente() {
   const [activeStep, setActiveStep] = useState(0);
   const generalError = pickupByIdError;
   const completeData = pickup;
+  if (pickup && whitDebt === null) {
+    setWhitDebt(expiredDays);
+  }
   if (expiredDays > 0 && whitDebt > expiredDays) {
     setWhitDebt(expiredDays);
   }
@@ -107,6 +115,7 @@ function RecoleccionPendiente() {
     const result = await completePickup(attached, {
       pickupId,
       pickupDate: pickupDate ? convertDateToTZ(pickupDate) : pickup.date,
+      payDone,
       whitDebt,
       pickedAccesories,
     });
@@ -182,7 +191,10 @@ function RecoleccionPendiente() {
                                 <DesktopDatePicker
                                   label="Fecha de recolección*"
                                   inputFormat="dd/MM/yyyy"
-                                  value={pickupDate || convertDateToLocal(new Date(pickup.date))}
+                                  value={
+                                    pickupDate ||
+                                    convertDateToLocal(new Date(pickup.date))
+                                  }
                                   maxDate={new Date()}
                                   minDate={new Date(pickup?.rent?.startDate)}
                                   onChange={(newValue) => {
@@ -221,13 +233,37 @@ function RecoleccionPendiente() {
                                       }}
                                     />
                                   </Grid>
+                                  {whitDebt > 0 && (
+                                    <Grid item xs={12} sm={12} lg={2} m={1}>
+                                      <FormControl
+                                        component="fieldset"
+                                        variant="standard"
+                                      >
+                                        <FormGroup>
+                                          <FormControlLabel
+                                            control={
+                                              <Checkbox
+                                                checked={payDone}
+                                                onChange={(event) => {
+                                                  setPayDone(
+                                                    event.target.checked
+                                                  );
+                                                }}
+                                              />
+                                            }
+                                            label={"Liquidado"}
+                                          />
+                                        </FormGroup>
+                                      </FormControl>
+                                    </Grid>
+                                  )}
                                   <Grid item mt={2} xs={12}>
                                     <Typography>
                                       {`(${expiredDays} día(s) de vencimiento)`}
                                     </Typography>
                                   </Grid>
                                   <Grid item lg={12} />
-                                  {debt !== 0 && (
+                                  {debt !== 0 && !payDone && (
                                     <Grid item m={1}>
                                       <Typography
                                         color="red"

@@ -36,6 +36,8 @@ import GenericModal from "@/components/GenericModal";
 import ModifyPickupModal from "../../src/components/ModifyPickupModal";
 import FormatModal from "@/components/FormatModal";
 import { getFormatForPickup } from "../../lib/consts/OBJ_CONTS";
+import { getFetcher, useGetPrices } from "pages/api/useRequest";
+
 
 interface TablaRecoleccionesPendientesProps {
   userRole: string;
@@ -156,6 +158,7 @@ const TablaRecoleccionesPendientes: FC<TablaRecoleccionesPendientesProps> = ({
   const [page, setPage] = useState<number>(0);
   const [limit, setLimit] = useState<number>(10);
   const [filter, setFilter] = useState<string>("");
+  const { prices } = useGetPrices(getFetcher);
   const userCanDelete = ["ADMIN", "AUX"].includes(userRole);
   const handleModifyClose = (modifiedPickup, successMessage = null) => {
     setModifyModalIsOpen(false);
@@ -438,7 +441,7 @@ const TablaRecoleccionesPendientes: FC<TablaRecoleccionesPendientesProps> = ({
                           onClick={() => {
                             setPickupToEdit(pickup);
                             setFormatText(
-                              getFormatForPickup(pickup.rent, pickup, pickup)
+                              getFormatForPickup(pickup.rent, pickup, pickup, prices.dayPrice)
                             );
                             setFormatIsOpen(true);
                           }}
