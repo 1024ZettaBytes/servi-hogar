@@ -37,6 +37,9 @@ import ModifyPickupModal from "../../src/components/ModifyPickupModal";
 import FormatModal from "@/components/FormatModal";
 import { getFormatForPickup } from "../../lib/consts/OBJ_CONTS";
 import { getFetcher, useGetPrices } from "pages/api/useRequest";
+import ImageSearchIcon from "@mui/icons-material/ImageSearch";
+import ImagesModal from "@/components/ImagesModal";
+import LocationOnIcon from "@mui/icons-material/LocationOn";
 
 
 interface TablaRecoleccionesPendientesProps {
@@ -87,8 +90,10 @@ const applyFilters = (pickupsList: any[], filter: string): any[] => {
               value["customer"] &&
               value["customer"].name &&
               compareStringsForFilter(filter, value["customer"].name);
-            const matchNumber =
-              value["num"] && compareStringsForFilter(filter, value["num"]);
+            const matchMachine =
+            value["machine"] &&
+            value["machine"].machineNum &&
+            compareStringsForFilter(filter, value["machine"].machineNum);
             const matchCityOrSector =
               value["customer"]?.currentResidence?.city?.name &&
               value["customer"]?.currentResidence?.sector?.name &&
@@ -104,12 +109,7 @@ const applyFilters = (pickupsList: any[], filter: string): any[] => {
                   filter,
                   value["customer"].currentResidence.suburb
                 ));
-            return matchNumber || matchCustomerName || matchCityOrSector;
-          }
-          case "totalNumber": {
-            const matchTNumber =
-              value && compareStringsForFilter(filter, value + "");
-            return matchTNumber;
+            return matchMachine || matchCustomerName || matchCityOrSector;
           }
           case "status": {
             const matchText =
@@ -155,10 +155,17 @@ const TablaRecoleccionesPendientes: FC<TablaRecoleccionesPendientesProps> = ({
   const [isDeleting, setIsDeleting] = useState(false);
   const [pickupToEdit, setPickupToEdit] = useState<any>(null);
   const [idToCancel, setIdToCancel] = useState<string>(null);
+  const [openImages, setOpenImages] = useState<boolean>(false);
+  const [selectedImages, setSelectedImages] = useState<null>();
   const [page, setPage] = useState<number>(0);
   const [limit, setLimit] = useState<number>(10);
   const [filter, setFilter] = useState<string>("");
   const { prices } = useGetPrices(getFetcher);
+
+  const handleOnCloseImages = () => {
+    setOpenImages(false);
+    setSelectedImages(null);
+  };
   const userCanDelete = ["ADMIN", "AUX"].includes(userRole);
   const handleModifyClose = (modifiedPickup, successMessage = null) => {
     setModifyModalIsOpen(false);
@@ -248,9 +255,9 @@ const TablaRecoleccionesPendientes: FC<TablaRecoleccionesPendientesProps> = ({
           <Table>
             <TableHead>
               <TableRow>
-                <TableCell align="center">Renta</TableCell>
-                <TableCell align="center">#</TableCell>
-                <TableCell align="center"># del día</TableCell>
+                <TableCell align="center"># Equipo</TableCell>
+                <TableCell align="center">Fotos</TableCell>
+                <TableCell align="center">Ubicación</TableCell>
                 <TableCell align="center">Cliente</TableCell>
                 <TableCell align="center">Colonia-Sector</TableCell>
                 <TableCell align="center">Estado</TableCell>
@@ -272,30 +279,54 @@ const TablaRecoleccionesPendientes: FC<TablaRecoleccionesPendientesProps> = ({
                         gutterBottom
                         noWrap
                       >
-                        {pickup?.rent?.num}
+                        {pickup?.rent?.machine?.machineNum}
                       </Typography>
                     </TableCell>
                     <TableCell align="center">
-                      <Typography
-                        variant="body1"
-                        fontWeight="bold"
-                        color="text.primary"
-                        gutterBottom
-                        noWrap
-                      >
-                        {pickup?.totalNumber}
-                      </Typography>
+                      {pickup?.rent?.imagesUrl ? (
+                        <Tooltip title="Ver fotos" arrow>
+                          <IconButton
+                            onClick={() => {
+                              setSelectedImages(pickup.rent.imagesUrl);
+                              setOpenImages(true);
+                            }}
+                            sx={{
+                              "&:hover": {
+                                background: theme.colors.primary.lighter,
+                              },
+                              color: theme.palette.primary.main,
+                            }}
+                            color="inherit"
+                            size="small"
+                          >
+                            <ImageSearchIcon fontSize="small" />
+                          </IconButton>
+                        </Tooltip>
+                      ) : (
+                        "N/A"
+                      )}
                     </TableCell>
                     <TableCell align="center">
-                      <Typography
-                        variant="body1"
-                        fontWeight="bold"
-                        color="text.secondary"
-                        gutterBottom
-                        noWrap
-                      >
-                        {pickup?.dayNumber}
-                      </Typography>
+                      {pickup?.rent?.customer?.currentResidence?.maps ? (
+                        <Tooltip title="Ver ubicación" arrow>
+                          <IconButton
+                            href={`${pickup?.rent?.customer?.currentResidence?.maps}`}
+                            target="_blank"
+                            sx={{
+                              "&:hover": {
+                                background: theme.colors.primary.lighter,
+                              },
+                              color: theme.palette.info.dark,
+                            }}
+                            color="inherit"
+                            size="small"
+                          >
+                            <LocationOnIcon  fontSize="small" />
+                          </IconButton>
+                        </Tooltip>
+                      ) : (
+                        "N/A"
+                      )}
                     </TableCell>
                     <TableCell align="center">
                       <Typography
@@ -476,6 +507,15 @@ const TablaRecoleccionesPendientes: FC<TablaRecoleccionesPendientesProps> = ({
           />
         </Box>
       </Card>
+      {openImages && selectedImages && (
+        <ImagesModal
+          open={openImages}
+          imagesObj={selectedImages}
+          title={"Fotos de la recolección"}
+          text=""
+          onClose={handleOnCloseImages}
+        />
+      )}
       {modifyModalIsOpen && (
         <ModifyPickupModal
           open={modifyModalIsOpen}
