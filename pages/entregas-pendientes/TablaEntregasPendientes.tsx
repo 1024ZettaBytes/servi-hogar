@@ -246,6 +246,7 @@ const TablaEntregasPendientes: FC<TablaEntregasPendientesProps> = ({
               <TableRow>
                 <TableCell align="center">#</TableCell>
                 <TableCell align="center"># del día</TableCell>
+                <TableCell align="center">ULT. RENTA</TableCell>
                 <TableCell align="center">Cliente</TableCell>
                 <TableCell align="center">Colonia-Sector</TableCell>
                 <TableCell align="center">Estado</TableCell>
@@ -278,6 +279,19 @@ const TablaEntregasPendientes: FC<TablaEntregasPendientesProps> = ({
                         noWrap
                       >
                         {delivery?.dayNumber}
+                      </Typography>
+                    </TableCell>
+                    <TableCell align="center">
+                      <Typography
+                        variant="body1"
+                        fontWeight="bold"
+                        color="text.primary"
+                        gutterBottom
+                        noWrap
+                      >
+                        {delivery?.rent?.customer?.lastRent ? capitalizeFirstLetter(
+                          formatTZDate(new Date(delivery?.rent?.customer?.lastRent), "MMM DD YYYY")
+                        ): "NUEVO"}
                       </Typography>
                     </TableCell>
                     <TableCell align="center">

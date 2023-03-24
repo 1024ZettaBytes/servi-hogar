@@ -81,7 +81,7 @@ function Header({username}) {
             display: { lg: 'none', xs: 'inline-block' }
           }}
         >
-          <Tooltip arrow title="Toggle Menu">
+          <Tooltip arrow title="Menu">
             <IconButton color="primary" onClick={toggleSidebar}>
               {!sidebarToggle ? (
                 <MenuTwoToneIcon fontSize="small" />
