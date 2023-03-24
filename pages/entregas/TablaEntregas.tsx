@@ -324,7 +324,7 @@ const TablaEntregas: FC<TablaEntregasProps> = ({ deliveriesList }) => {
         <ImagesModal
           open={openImages}
           imagesObj={selectedImages}
-          title={"Fotos de la recolección"}
+          title={"Fotos de la entrega"}
           text=""
           onClose={handleOnCloseImages}
         />
