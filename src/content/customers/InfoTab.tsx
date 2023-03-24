@@ -669,7 +669,7 @@ function CustomerInfoTab({
                           <ImagesModal
                             open={openImages}
                             imagesObj={customer.residenceImages}
-                            title={"Fotos del cambio"}
+                            title={"Fotos de renta"}
                             text=""
                             onClose={() => {
                               setOpenImages(false);
