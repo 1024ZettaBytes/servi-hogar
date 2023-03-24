@@ -99,8 +99,7 @@ function RentaRapida({ session }) {
   const [activeStep, setActiveStep] = useState(0);
   const generalError =
     customerError || citiesError || customersForRentError || pricesError;
-  const completeData =
-    customersForRentList && citiesList && prices;
+  const completeData = customersForRentList && citiesList && prices;
   const steps = [
     {
       label: "Seleccione un cliente",
@@ -184,7 +183,7 @@ function RentaRapida({ session }) {
     });
     const rent = {
       ...result.rent,
-      customer: selectedCustomer,
+      customer: { ...selectedCustomer, lastRent: result.lastRent },
       delivery: result.delivery,
     };
 
@@ -213,6 +212,7 @@ function RentaRapida({ session }) {
     setDeliveryTime(defaultData().deliveryTime);
     setCustomerRent(null);
   };
+
   return (
     <>
       <Head>
@@ -262,7 +262,7 @@ function RentaRapida({ session }) {
                               <Grid item xs={12} md={4} lg={4}>
                                 <Box flex={1} p={2}>
                                   <Button
-                                  disabled = {!customerList}
+                                    disabled={!customerList}
                                     fullWidth
                                     startIcon={<AddIcon />}
                                     size="medium"
