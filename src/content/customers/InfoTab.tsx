@@ -16,6 +16,9 @@ import {
   Radio,
   Autocomplete,
   Alert,
+  Tooltip,
+  IconButton,
+  useTheme,
 } from "@mui/material";
 import { useSnackbar } from "notistack";
 import { Skeleton } from "@mui/material";
@@ -28,11 +31,13 @@ import RequestQuoteIcon from "@mui/icons-material/RequestQuote";
 import DangerousIcon from "@mui/icons-material/Dangerous";
 import Text from "@/components/Text";
 import Label from "@/components/Label";
+import ImageSearchIcon from "@mui/icons-material/ImageSearch";
 import { useState } from "react";
 import { updateCustomer } from "lib/client/customersFetch";
 import { LoadingButton } from "@mui/lab";
 import { HOW_FOUND_LIST } from "lib/consts/OBJ_CONTS";
 import numeral from "numeral";
+import ImagesModal from "@/components/ImagesModal";
 
 const getHowFoundLabel = (howFoundId: string, referrer?: string) => {
   let map = { ...HOW_FOUND_LIST };
@@ -96,11 +101,13 @@ function CustomerInfoTab({
   customerList,
   citiesList,
 }) {
+  const theme = useTheme();
   const { enqueueSnackbar } = useSnackbar();
   const [isEditing, setIsEditing] = useState<any>({
     info: false,
     residence: false,
   });
+  const [openImages, setOpenImages] = useState<boolean>(false);
   const [customerToEdit, setCustomerToEdit] = useState<any>({ isSet: false });
   const [isUpdating, setIsUpdating] = useState<any>({
     info: false,
@@ -353,8 +360,8 @@ function CustomerInfoTab({
                       <Box sx={{ maxWidth: { xs: "auto", sm: 300 } }}>
                         {customer ? (
                           !isEditing.info || role !== "ADMIN" ? (
-                            <div style={{fontStyle: 'italic'}}>
-                            <Text color="black">{customer?.comments}</Text>
+                            <div style={{ fontStyle: "italic" }}>
+                              <Text color="black">{customer?.comments}</Text>
                             </div>
                           ) : (
                             <TextField
@@ -612,6 +619,65 @@ function CustomerInfoTab({
                   justifyItems="center"
                 >
                   <Grid container item spacing={0} xs={12} sm={6} md={6}>
+                    {!isEditing.residence && (
+                      <>
+                        <Grid
+                          item
+                          xs={3}
+                          sm={6}
+                          md={6}
+                          textAlign={{ sm: "right" }}
+                        >
+                          <Box pr={2} pb={2}>
+                            Fotos:
+                          </Box>
+                        </Grid>
+                        <Grid item xs={9} sm={6} md={6}>
+                          {customer ? (
+                            <>
+                              {customer.residenceImages ? (
+                                <Tooltip title="Ver fotos" arrow>
+                                  <IconButton
+                                    onClick={() => {
+                                      setOpenImages(true);
+                                    }}
+                                    sx={{
+                                      "&:hover": {
+                                        background:
+                                          theme.colors.primary.lighter,
+                                      },
+                                      color: theme.palette.primary.main,
+                                    }}
+                                    color="inherit"
+                                    size="small"
+                                  >
+                                    <ImageSearchIcon fontSize="small" />
+                                  </IconButton>
+                                </Tooltip>
+                              ) : (
+                                "N/A"
+                              )}{" "}
+                            </>
+                          ) : (
+                            <Skeleton
+                              variant="text"
+                              sx={{ fontSize: "1rem", width: "100px" }}
+                            />
+                          )}
+                        </Grid>
+                        {openImages && (
+                          <ImagesModal
+                            open={openImages}
+                            imagesObj={customer.residenceImages}
+                            title={"Fotos del cambio"}
+                            text=""
+                            onClose={() => {
+                              setOpenImages(false);
+                            }}
+                          />
+                        )}
+                      </>
+                    )}{" "}
                     <Grid item xs={3} sm={6} md={6} textAlign={{ sm: "right" }}>
                       <Box pr={2} pb={2}>
                         Calle y número:
@@ -1010,7 +1076,14 @@ function CustomerInfoTab({
                         {customer ? (
                           <Text color="black">
                             {customer?.currentRent?.totalWeeks
-                              ? `${capitalizeFirstLetter(formatTZDate(new Date(customer.currentRent.startDate), "MMM DD YYYY"))} (${customer?.currentRent?.totalWeeks} semana(s))`
+                              ? `${capitalizeFirstLetter(
+                                  formatTZDate(
+                                    new Date(customer.currentRent.startDate),
+                                    "MMM DD YYYY"
+                                  )
+                                )} (${
+                                  customer?.currentRent?.totalWeeks
+                                } semana(s))`
                               : "N/A"}
                           </Text>
                         ) : (
