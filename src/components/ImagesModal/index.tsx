@@ -24,10 +24,10 @@ export default function ImagesModal({
   text,
   imagesObj,
   onClose,
-  canEdit,
+  canEdit=false,
 }) {
-  const { enqueueSnackbar } = useSnackbar();
 
+  const { enqueueSnackbar } = useSnackbar();
   const [isSubmitting, setIsSubmitting] = React.useState<boolean>(false);
   const [hasErrorSubmitting, setHasErrorSubmitting] = React.useState<any>({
     error: false,
