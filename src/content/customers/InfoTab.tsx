@@ -674,6 +674,7 @@ function CustomerInfoTab({
                             onClose={() => {
                               setOpenImages(false);
                             }}
+                            canEdit={true}
                           />
                         )}
                       </>
