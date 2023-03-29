@@ -14,16 +14,16 @@ import { useGetRents, getFetcher } from "../api/useRequest";
 import NextBreadcrumbs from "@/components/Shared/BreadCrums";
 
 function Rentas() {
-  const paths = ["Inicio", "Rentas"];
+  const paths = ["Inicio", "Colocadas"];
   const { rentsData, rentsError } = useGetRents("current", getFetcher);
   const { pastRentsData, pastRentsError } = useGetRents("past", getFetcher);
   return (
     <>
       <Head>
-        <title>Rentas</title>
+        <title>Colocadas</title>
       </Head>
       <PageTitleWrapper>
-        <PageHeader title={"Rentas"} sutitle={""} />
+        <PageHeader title={"Colocadas"} sutitle={""} />
         <NextBreadcrumbs paths={paths} lastLoaded={true} />
       </PageTitleWrapper>
       <Container maxWidth="lg">

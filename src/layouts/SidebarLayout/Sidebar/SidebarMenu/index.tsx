@@ -234,7 +234,7 @@ function SidebarMenu({userRole}) {
                     onClick={closeSidebar}
                     startIcon={<ListIcon />}
                   >
-                    Lista de rentas
+                    Colocadas
                   </Button>
                 </NextLink>
               </ListItem>
