@@ -358,12 +358,6 @@ const TablaRentasActuales: FC<TablaRentasActualesProps> = ({ rentList }) => {
                       <Tooltip title="Cambio de equipo" arrow>
                         <span>
                           <IconButton
-                            disabled={
-                              rent.remaining < 0 ||
-                              ["EN_CAMBIO", "EN_RECOLECCION"].includes(
-                                rent.status.id
-                              )
-                            }
                             onClick={() => {
                               handleOnChangeClick(rent?._id);
                             }}
