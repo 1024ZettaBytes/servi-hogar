@@ -70,6 +70,12 @@ export const setDateToInitial = (date: Date): Date => {
   return result;
 };
 
+export const setDateToMid = (date: Date): Date => {
+  var result = new Date(date);
+  result.setHours(12, 0, 0, 0);
+  return result;
+};
+
 export const setDateToEnd = (date: Date): Date => {
   var result = new Date(date);
   result.setHours(23, 59, 59, 999);
