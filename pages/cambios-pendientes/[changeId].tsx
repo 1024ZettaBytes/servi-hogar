@@ -47,7 +47,7 @@ import { useRouter } from "next/router";
 import React from "react";
 import { MuiFileInput } from "mui-file-input";
 import { DesktopDatePicker } from "@mui/x-date-pickers";
-import { convertDateToLocal, convertDateToTZ } from "lib/client/utils";
+import { convertDateToLocal, convertDateToTZ, setDateToMid } from "lib/client/utils";
 
 function CambioPendiente() {
   const router = useRouter();
@@ -94,7 +94,7 @@ function CambioPendiente() {
     const result = await completeChange(!wasFixed ? attached : null, {
       changeId,
       wasFixed,
-      changeDate: changeDate ? convertDateToTZ(changeDate) : change?.date,
+      changeDate:  setDateToMid(changeDate ? convertDateToTZ(changeDate) : change?.date),
       problemDesc: problemDesc?.value,
       solutionDesc: solutionDesc?.value,
       newMachine: newMachine?.value,
