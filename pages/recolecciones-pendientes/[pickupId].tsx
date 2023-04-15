@@ -44,6 +44,7 @@ import {
   convertDateToLocal,
   convertDateToTZ,
   dateDiffInDays,
+  setDateToMid,
 } from "lib/client/utils";
 
 function RecoleccionPendiente() {
@@ -114,7 +115,7 @@ function RecoleccionPendiente() {
     setIsSubmitting(true);
     const result = await completePickup(attached, {
       pickupId,
-      pickupDate: pickupDate ? convertDateToTZ(pickupDate) : pickup.date,
+      pickupDate: setDateToMid(pickupDate ? convertDateToTZ(pickupDate) : pickup.date),
       payDone,
       whitDebt,
       pickedAccesories,

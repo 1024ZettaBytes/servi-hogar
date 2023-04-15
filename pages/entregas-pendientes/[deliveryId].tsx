@@ -3,7 +3,7 @@ import { getSession } from "next-auth/react";
 import { useState } from "react";
 import SidebarLayout from "@/layouts/SidebarLayout";
 import { validateServerSideSession } from "../../lib/auth";
-import { convertDateToLocal, convertDateToTZ, validateMapsUrl } from "../../lib/client/utils";
+import { convertDateToLocal, setDateToMid, validateMapsUrl } from "../../lib/client/utils";
 import PageHeader from "@/components/PageHeader";
 import PageTitleWrapper from "@/components/PageTitleWrapper";
 import Image from "next/image";
@@ -205,7 +205,7 @@ function RentaRapida() {
       payment,
       deliveredMachine,
       leftAccesories,
-      deliveryDate: deliveryDate ? convertDateToTZ(deliveryDate): new Date(delivery.date),
+      deliveryDate: setDateToMid(new Date(delivery.date)),
       isOk,
     });
     setIsSubmitting(false);
