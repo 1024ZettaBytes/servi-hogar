@@ -3,7 +3,7 @@ import { getSession } from "next-auth/react";
 import { useState } from "react";
 import SidebarLayout from "@/layouts/SidebarLayout";
 import { validateServerSideSession } from "../../lib/auth";
-import { convertDateToLocal, convertDateToTZ, setDateToMid, validateMapsUrl } from "../../lib/client/utils";
+import { convertDateToLocal, setDateToMid, validateMapsUrl } from "../../lib/client/utils";
 import PageHeader from "@/components/PageHeader";
 import PageTitleWrapper from "@/components/PageTitleWrapper";
 import Image from "next/image";
