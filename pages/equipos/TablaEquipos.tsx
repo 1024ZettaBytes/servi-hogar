@@ -105,6 +105,9 @@ const applyFilters = (machinesList: any[], filter: string): any[] => {
             return matchVehicle;
           }
           case "machineNum":
+            {
+              return compareStringsForFilter(filter, parseInt(value+"")<1000 ? ('00' + value+"").slice(-3): value+"");
+            }
           case "brand":
           case "capacity":
           case "totalChanges": {

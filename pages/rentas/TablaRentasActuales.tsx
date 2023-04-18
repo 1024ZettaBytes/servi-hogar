@@ -83,7 +83,7 @@ const applyFilters = (rentList: any[], filter: string): any[] => {
           case "machine": {
             const matchText =
               value["machineNum"] &&
-              compareStringsForFilter(filter, value["machineNum"]);
+              compareStringsForFilter(filter, parseInt(value["machineNum"])<1000 ? ('00' + value["machineNum"]).slice(-3): value["machineNum"]);
             return matchText;
           }
           case "endDate": {
