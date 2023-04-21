@@ -162,7 +162,7 @@ export const sleep = async (duration: number): Promise<void> => {
 };
 
 export const formatTZDate = (date: Date, format: string): string => {
-  return dayjs(date).utc(true).tz('America/Mexico_City').format(format);
+  return dayjs(date.toISOString()).utc(true).tz('America/Mexico_City').format(format);
 };
 
 export const convertDateToTZ = (date: Date): Date => {
