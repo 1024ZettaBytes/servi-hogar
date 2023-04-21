@@ -30,7 +30,7 @@ import CurrencyExchangeIcon from "@mui/icons-material/CurrencyExchange";
 import LocalShippingIcon from "@mui/icons-material/LocalShipping";
 import SearchIcon from "@mui/icons-material/Search";
 import ChangeCircleIcon from "@mui/icons-material/ChangeCircle";
-import RedeemIcon from '@mui/icons-material/Redeem';
+import RedeemIcon from "@mui/icons-material/Redeem";
 import ExtendRentModal from "../../src/components/ExtendRentModal";
 import ChangePayDayModal from "@/components/ChangePayDayModal";
 import SchedulePickupModal from "@/components/SchedulePickupModal";
@@ -78,12 +78,32 @@ const applyFilters = (rentList: any[], filter: string): any[] => {
           case "customer": {
             const matchText =
               value["name"] && compareStringsForFilter(filter, value["name"]);
-            return matchText;
+            const matchCityOrSector =
+              value["currentResidence"]?.city?.name &&
+              value["currentResidence"]?.sector?.name &&
+              (compareStringsForFilter(
+                filter,
+                value["currentResidence"].city.name
+              ) ||
+                compareStringsForFilter(
+                  filter,
+                  value["currentResidence"].sector.name
+                ) ||
+                compareStringsForFilter(
+                  filter,
+                  value["currentResidence"].suburb
+                ));
+            return matchText || matchCityOrSector;
           }
           case "machine": {
             const matchText =
               value["machineNum"] &&
-              compareStringsForFilter(filter, parseInt(value["machineNum"])<1000 ? ('00' + value["machineNum"]).slice(-3): value["machineNum"]);
+              compareStringsForFilter(
+                filter,
+                parseInt(value["machineNum"]) < 1000
+                  ? ("00" + value["machineNum"]).slice(-3)
+                  : value["machineNum"]
+              );
             return matchText;
           }
           case "endDate": {
@@ -189,7 +209,7 @@ const TablaRentasActuales: FC<TablaRentasActualesProps> = ({ rentList }) => {
       setFormatIsOpen(true);
     }
   };
-  
+
   const handleCloseChangeModal = (
     wasSuccess,
     changeCompleteData,
@@ -202,13 +222,10 @@ const TablaRentasActuales: FC<TablaRentasActualesProps> = ({ rentList }) => {
     }
   };
 
-  const handleCloseBonusModal = (
-    wasSuccess,
-    successMessage = null
-  ) => {
+  const handleCloseBonusModal = (wasSuccess, successMessage = null) => {
     handleCloseModal(wasSuccess, successMessage);
     if (wasSuccess) {
-// Show success message
+      // Show success message
     }
   };
 
@@ -291,6 +308,7 @@ const TablaRentasActuales: FC<TablaRentasActualesProps> = ({ rentList }) => {
               <TableRow>
                 <TableCell align="center">Equipo</TableCell>
                 <TableCell align="center">Cliente</TableCell>
+                <TableCell align="center">Colonia-Sector</TableCell>
                 <TableCell align="center">Pago</TableCell>
                 <TableCell align="center">Estado</TableCell>
                 <TableCell align="center">Días Restantes</TableCell>
@@ -315,7 +333,42 @@ const TablaRentasActuales: FC<TablaRentasActualesProps> = ({ rentList }) => {
                     <TableCell align="center">
                       {rent?.machine?.machineNum}
                     </TableCell>
-                    <TableCell align="center"><NextLink href={`/clientes/${rent?.customer?._id}` }><a className={styles.title_text}>{rent?.customer?.name}</a></NextLink></TableCell>
+                    <TableCell align="center">
+                      <NextLink href={`/clientes/${rent?.customer?._id}`}>
+                        <a className={styles.title_text}>
+                          {rent?.customer?.name}
+                        </a>
+                      </NextLink>
+                    </TableCell>
+                    <TableCell align="center">
+                      <Typography
+                        variant="body1"
+                        fontWeight="bold"
+                        color="text.primary"
+                        gutterBottom
+                        noWrap
+                      >
+                        {rent?.customer?.currentResidence?.suburb}
+                      </Typography>
+                      <Typography
+                        variant="body1"
+                        fontWeight="bold"
+                        color="text.primary"
+                        gutterBottom
+                        noWrap
+                      >
+                        {rent?.customer?.currentResidence?.sector?.name}
+                      </Typography>
+                      <Typography
+                        variant="body1"
+                        fontWeight="bold"
+                        color="text.secondary"
+                        gutterBottom
+                        noWrap
+                      >
+                        {rent?.customer?.currentResidence?.city?.name}
+                      </Typography>
+                    </TableCell>
                     <TableCell align="center">
                       <Typography
                         variant="body1"
@@ -336,7 +389,9 @@ const TablaRentasActuales: FC<TablaRentasActualesProps> = ({ rentList }) => {
                       {rent?.remaining >= 0 ? (
                         rent.remaining
                       ) : (
-                        <Typography color="error">VENCIDA (Hace {Math.abs(rent.remaining)} día(s))</Typography>
+                        <Typography color="error">
+                          VENCIDA (Hace {Math.abs(rent.remaining)} día(s))
+                        </Typography>
                       )}
                     </TableCell>
                     <TableCell align="center">
@@ -376,9 +431,9 @@ const TablaRentasActuales: FC<TablaRentasActualesProps> = ({ rentList }) => {
                       </Tooltip>
                       <Tooltip title="Cambiar día de pago" arrow>
                         <IconButton
-                        disabled={["EN_CAMBIO", "EN_RECOLECCION"].includes(
-                          rent?.status?.id
-                        )}
+                          disabled={["EN_CAMBIO", "EN_RECOLECCION"].includes(
+                            rent?.status?.id
+                          )}
                           onClick={() => {
                             handleOnDayChangeClick(rent?._id);
                           }}
@@ -417,18 +472,15 @@ const TablaRentasActuales: FC<TablaRentasActualesProps> = ({ rentList }) => {
                       <Tooltip title="Bonificar" arrow>
                         <span>
                           <IconButton
-                            disabled={
-                              ["EN_CAMBIO", "EN_RECOLECCION"].includes(
-                                rent.status.id
-                              )
-                            }
+                            disabled={["EN_CAMBIO", "EN_RECOLECCION"].includes(
+                              rent.status.id
+                            )}
                             onClick={() => {
                               handleOnBonusClick(rent);
                             }}
                             sx={{
                               "&:hover": {
-                                background: theme.colors.gradients.blue4
-                              ,
+                                background: theme.colors.gradients.blue4,
                               },
                               color: theme.colors.gradients.blue1,
                             }}

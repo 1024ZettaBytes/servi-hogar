@@ -41,7 +41,6 @@ import ImageSearchIcon from "@mui/icons-material/ImageSearch";
 import ImagesModal from "@/components/ImagesModal";
 import LocationOnIcon from "@mui/icons-material/LocationOn";
 
-
 interface TablaRecoleccionesPendientesProps {
   userRole: string;
   className?: string;
@@ -91,9 +90,14 @@ const applyFilters = (pickupsList: any[], filter: string): any[] => {
               value["customer"].name &&
               compareStringsForFilter(filter, value["customer"].name);
             const matchMachine =
-            value["machine"] &&
-            value["machine"].machineNum &&
-            compareStringsForFilter(filter, value["machine"].machineNum);
+              value["machine"] &&
+              value["machine"].machineNum &&
+              compareStringsForFilter(
+                filter,
+                parseInt(value["machine"].machineNum) < 1000
+                  ? ("00" + value["machine"].machineNum).slice(-3)
+                  : value["machine"].machineNum
+              );
             const matchCityOrSector =
               value["customer"]?.currentResidence?.city?.name &&
               value["customer"]?.currentResidence?.sector?.name &&
@@ -321,7 +325,7 @@ const TablaRecoleccionesPendientes: FC<TablaRecoleccionesPendientesProps> = ({
                             color="inherit"
                             size="small"
                           >
-                            <LocationOnIcon  fontSize="small" />
+                            <LocationOnIcon fontSize="small" />
                           </IconButton>
                         </Tooltip>
                       ) : (
@@ -472,7 +476,12 @@ const TablaRecoleccionesPendientes: FC<TablaRecoleccionesPendientesProps> = ({
                           onClick={() => {
                             setPickupToEdit(pickup);
                             setFormatText(
-                              getFormatForPickup(pickup.rent, pickup, pickup, prices.dayPrice)
+                              getFormatForPickup(
+                                pickup.rent,
+                                pickup,
+                                pickup,
+                                prices.dayPrice
+                              )
                             );
                             setFormatIsOpen(true);
                           }}
