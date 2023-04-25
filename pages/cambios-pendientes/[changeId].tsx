@@ -81,7 +81,7 @@ function CambioPendiente() {
   ];
 
   const checkEnabledButton = () => {
-    return changeDate ? changeDate.toString() !== "Invalid Date" : change?.date;
+    return changeDate ? changeDate.toString() !== "Invalid Date" && changeDate <= new Date() : change?.date && new Date(change?.date) <= new Date();
   };
 
   const nextButtonEnabled = checkEnabledButton();
