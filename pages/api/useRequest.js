@@ -1,5 +1,6 @@
 import useSWR, { mutate } from "swr";
 import { ROUTES } from "../../lib/consts/API_URL_CONST";
+import { formatTZDate } from "lib/client/utils";
 export const refreshData = async (apiUrl) => {
   await mutate(apiUrl);
 };
@@ -177,8 +178,8 @@ export const useGetReport = (
   endDate = null
 ) => {
   let url = `${ROUTES.REPORT_API}?filter=${filter}`;
-  url = url + (startDate ? `&start=${startDate.toISOString()}` : "");
-  url = url + (endDate ? `&end=${endDate.toISOString()}` : "");
+  url = url + (startDate ? `&start=${formatTZDate(startDate, "YYYY-MM-DD")}` : "");
+  url = url + (endDate ? `&end=${formatTZDate(endDate, "YYYY-MM-DD")}` : "");
   const { data, error } = useSWR(url, fetcher);
   return { reportData: data?.data, reportError: error };
 };

@@ -58,6 +58,10 @@ export const getTimeFromDate = (
   };
 };
 
+export const dateFromString = (dateString: String): Date=>{
+  const [year, month, day] = dateString.split('-');
+  return new Date(+year, +month - 1, +day);
+}
 export const addDaysToDate = (date: Date, days: number): Date => {
   var result = new Date(date);
   result.setDate(result.getDate() + days);
