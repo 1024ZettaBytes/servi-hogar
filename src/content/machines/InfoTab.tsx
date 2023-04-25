@@ -16,6 +16,7 @@ import {
 import { MACHINE_STATUS_LIST } from "../../../lib/consts/OBJ_CONTS";
 import { useSnackbar } from "notistack";
 import { Skeleton } from "@mui/material";
+import SearchIcon from '@mui/icons-material/Search';
 import TablaHistorialEquipos from "./TablaHistorialEquipos";
 import EditTwoToneIcon from "@mui/icons-material/EditTwoTone";
 import LocalShippingIcon from "@mui/icons-material/LocalShipping";
@@ -60,6 +61,13 @@ const getStatusLabel = (
 ) => {
   const notAvailable = "Información no disponible";
   switch (status) {
+    case MACHINE_STATUS_LIST.PERDIDA:
+      return (
+        <Label color="secondary">
+          <SearchIcon fontSize="small" />
+         <b>En investigación</b>
+        </Label>
+      );
     case MACHINE_STATUS_LIST.RENTADO:
       return (
         <Label color="secondary">
