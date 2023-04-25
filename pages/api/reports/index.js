@@ -2,14 +2,12 @@ import { getSummaryByDay, getSummaryByRange } from "../../../lib/data/Reports";
 async function getSummaryAPI(req, res) {
   try {
     const { filter, start, end } = req.query;
-    const startDate = new Date(start);
-    const endDate = new Date(end);
     let data = {};
     switch (filter) {
       case "day":
         data = await getSummaryByDay(startDate);
         break;
-      case "range": data = await getSummaryByRange(startDate, endDate); 
+      case "range": data = await getSummaryByRange(start, end); 
       break;
     }
     res.status(200).json({ data });
