@@ -11,6 +11,7 @@ import {
   ListItemText,
   Button,
 } from "@mui/material";
+import SearchIcon from '@mui/icons-material/Search';
 import LocalShippingIcon from "@mui/icons-material/LocalShipping";
 import CurrencyExchangeIcon from "@mui/icons-material/CurrencyExchange";
 import EventAvailableIcon from "@mui/icons-material/EventAvailable";
@@ -44,6 +45,7 @@ function ResumenEquipos({
   ready,
   waiting,
   onMaintenance,
+  lost,
   total,
 }) {
   return (
@@ -304,6 +306,40 @@ function ResumenEquipos({
                     </List>
                   </Grid>
                 )}
+              </Grid>
+            </CardContent>
+          </Card>
+        </Grid>
+        <Grid xs={12} sm={6} md={3} item>
+          <Card
+            sx={{
+              px: 1,
+              height: "150px",
+              overflowY: "auto",
+            }}
+          >
+            <CardContent>
+              <Grid
+                container
+                alignItems="center"
+                justifyItems="center"
+                textAlign={{ lg: "center" }}
+              >
+                <Grid item lg={2} md={2} xs={2}>
+                  <AvatarWrapperError>
+                    <SearchIcon />
+                  </AvatarWrapperError>
+                </Grid>
+                <Grid item lg={3} md={2} xs={2}>
+                  <Typography variant="h3" gutterBottom noWrap>
+                    {lost?.total}
+                  </Typography>
+                </Grid>
+                <Grid item lg={7} md={8} xs={8}>
+                  <Typography variant="subtitle2" noWrap textAlign="left">
+                    En investigación
+                  </Typography>
+                </Grid>
               </Grid>
             </CardContent>
           </Card>

@@ -110,6 +110,7 @@ function Equipos({ session }) {
                     ready={machinesSummary.LISTO}
                     waiting={machinesSummary.ESPE}
                     onMaintenance={machinesSummary.MANTE}
+                    lost={machinesSummary?.PERDIDA }
                     total={machinesSummary?.total}
                   />
                 </Grid>
