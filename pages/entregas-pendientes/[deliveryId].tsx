@@ -3,13 +3,17 @@ import { getSession } from "next-auth/react";
 import { useState } from "react";
 import SidebarLayout from "@/layouts/SidebarLayout";
 import { validateServerSideSession } from "../../lib/auth";
-import { convertDateToLocal, setDateToMid, validateMapsUrl } from "../../lib/client/utils";
+import {
+  convertDateToLocal,
+  replaceCoordinatesOnUrl,
+  setDateToMid,
+  validateMapsUrl,
+} from "../../lib/client/utils";
 import PageHeader from "@/components/PageHeader";
 import PageTitleWrapper from "@/components/PageTitleWrapper";
 import Image from "next/image";
 import { MuiFileInput } from "mui-file-input";
 import NextLink from "next/link";
-
 import {
   Card,
   Container,
@@ -38,6 +42,7 @@ import StepLabel from "@mui/material/StepLabel";
 import StepContent from "@mui/material/StepContent";
 import Button from "@mui/material/Button";
 import Paper from "@mui/material/Paper";
+import MyLocationIcon from "@mui/icons-material/MyLocation";
 import {
   useGetMachinesForRent,
   getFetcher,
@@ -64,6 +69,7 @@ function RentaRapida() {
   const [deliveredMachine, setDeliveredMachine] = useState<string>(null);
   const [deliveryDate, setDeliveryDate] = useState<any>(null);
   const [payment, setPayment] = useState<number>(-1);
+  const [isGettingLocation, setIsGettingLocation] = useState<boolean>(false);
   const [isOk, setIsOk] = useState<any>({
     info: true,
     residence: true,
@@ -190,7 +196,10 @@ function RentaRapida() {
         validateMapsUrl(customerToEdit?.currentResidence?.maps)
       );
     if (activeStep === 1) return deliveredMachine;
-    if (activeStep === 2) return deliveryDate ? deliveryDate.toString() !== "Invalid Date" : delivery?.date
+    if (activeStep === 2)
+      return deliveryDate
+        ? deliveryDate.toString() !== "Invalid Date"
+        : delivery?.date;
   };
 
   const nextButtonEnabled = checkEnabledButton();
@@ -205,7 +214,7 @@ function RentaRapida() {
       payment,
       deliveredMachine,
       leftAccesories,
-      deliveryDate: setDateToMid(new Date(delivery.date)),
+      deliveryDate: setDateToMid(new Date(deliveryDate || delivery.date)),
       isOk,
     });
     setIsSubmitting(false);
@@ -581,7 +590,7 @@ function RentaRapida() {
                                   multiline
                                   maxRows={5}
                                   fullWidth={true}
-                                  value={customerToEdit?.currentResidence?.maps}
+                                  value={customerToEdit?.currentResidence?.maps || ""}
                                   onChange={(e) => {
                                     setCustomerToEdit({
                                       ...customerToEdit,
@@ -592,6 +601,36 @@ function RentaRapida() {
                                     });
                                   }}
                                 />
+                                {!isOk.residence &&
+                                <>
+                                <br />
+                                <br />
+                                <LoadingButton
+                                  color="success"
+                                  loading={isGettingLocation}
+                                  startIcon={<MyLocationIcon />}
+                                  variant="contained"
+                                  onClick={()=>{
+                                    setIsGettingLocation(true);
+                                    if('geolocation' in navigator) {
+                                      // Retrieve latitude & longitude coordinates from `navigator.geolocation` Web API
+                                      navigator.geolocation.getCurrentPosition(({ coords }) => {
+                                          const { latitude, longitude } = coords;
+                                          setCustomerToEdit({
+                                            ...customerToEdit,
+                                            currentResidence: {
+                                              ...customerToEdit.currentResidence,
+                                              maps: replaceCoordinatesOnUrl({latitude,longitude}),
+                                            },
+                                          });
+                                          setIsGettingLocation(false);
+                                        
+                                  })
+                                  }}}
+                                >
+                                  Usar mi ubicación
+                                </LoadingButton>
+                                </>}
                               </Grid>
                               {!nextButtonEnabled && (
                                 <Grid item lg={6} m={1}>
@@ -675,9 +714,12 @@ function RentaRapida() {
                                 <DesktopDatePicker
                                   label="Fecha de entrega"
                                   inputFormat="dd/MM/yyyy"
-                                  value={deliveryDate || convertDateToLocal(new Date(delivery.date))}
+                                  value={
+                                    deliveryDate ||
+                                    convertDateToLocal(new Date(delivery.date))
+                                  }
                                   maxDate={new Date()}
-                                  onChange={(newValue) => { 
+                                  onChange={(newValue) => {
                                     setDeliveryDate(newValue);
                                   }}
                                   renderInput={(params) => (

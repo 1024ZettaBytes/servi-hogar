@@ -7,6 +7,7 @@ import 'dayjs/locale/es-mx';
 import utc from 'dayjs/plugin/utc';
 import tz from 'dayjs/plugin/timezone';
 import objectSupport from 'dayjs/plugin/objectSupport';
+import { MAPS_BASE_URL } from 'lib/consts/OBJ_CONTS';
 dayjs.extend(utc);
 dayjs.extend(tz);
 dayjs.extend(objectSupport);
@@ -26,14 +27,29 @@ export const capitalizeFirstLetter = (str: string) => {
 export const validateMapsUrl = (url: string) => {
   const Reg = /(https|http):\/\/(www\.|)google\.[a-z]+\/maps/;
   const lowerUrl = url.toLowerCase();
+  const splited = url.split(",");
+
   return (
     lowerUrl.match(Reg) && lowerUrl.includes('!3d') && lowerUrl.includes('!4d')
-  );
+  ) || (lowerUrl.includes("https://maps.google.com/maps?q=") && splited.length === 2 && splited[1].length > 0) ;
 };
+
+export const replaceCoordinatesOnUrl = (coordinates: any): string => {
+  const {latitude, longitude} = coordinates;
+  return MAPS_BASE_URL.replace("[LAT]", latitude).replace("[LON]", longitude);
+}
 
 export const getCoordinatesFromUrl = (
   url: string
 ): { lat: number; lng: number } => {
+  if(url.toLowerCase().includes("https://maps.google.com/maps?q=")){
+    const firstSplit = url.split("?q=")[1];
+    const finalSplit = firstSplit.split(",");
+    return {
+      lat: Number.parseFloat(finalSplit[0]),
+      lng: Number.parseFloat(finalSplit[1])
+    };
+  }
   const lowerUrl = url.toLowerCase();
   const _3dSplit = lowerUrl.split('!3d');
   let _4dSplit = _3dSplit[_3dSplit.length - 1].split('!4d');
