@@ -5,7 +5,7 @@ async function getSummaryAPI(req, res) {
     let data = {};
     switch (filter) {
       case "day":
-        data = await getSummaryByDay(startDate);
+        data = await getSummaryByDay(start);
         break;
       case "range": data = await getSummaryByRange(start, end); 
       break;
