@@ -47,7 +47,7 @@ import { useRouter } from "next/router";
 import React from "react";
 import { MuiFileInput } from "mui-file-input";
 import { DesktopDatePicker } from "@mui/x-date-pickers";
-import { convertDateToLocal, convertDateToTZ, setDateToMid } from "lib/client/utils";
+import { convertDateToLocal, convertDateToTZ, setDateToEnd, setDateToMid } from "lib/client/utils";
 
 function CambioPendiente() {
   const router = useRouter();
@@ -81,7 +81,10 @@ function CambioPendiente() {
   ];
 
   const checkEnabledButton = () => {
-    return changeDate ? changeDate.toString() !== "Invalid Date" && changeDate <= new Date() : change?.date && new Date(change?.date) <= new Date();
+    return changeDate 
+    ? ( changeDate.toString() !== "Invalid Date" && changeDate <= setDateToEnd(new Date()) )
+    : change?.date && new Date(change?.date) <= setDateToEnd(new Date()) ;
+
   };
 
   const nextButtonEnabled = checkEnabledButton();
