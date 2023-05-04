@@ -7,6 +7,7 @@ export interface IVehicle extends Document {
   year: string;
   color: string;
   machinesOn: [Schema.Types.ObjectId];
+  operator: Schema.Types.ObjectId;
   city: Schema.Types.ObjectId;
 }
 
@@ -17,6 +18,7 @@ const VehicleSchema = new Schema<IVehicle>({
   year: { type: String, required: true },
   color: { type: String, required: true },
   machinesOn: { type: [Schema.Types.ObjectId],ref: 'machines', default: [] },
+  operator: { type: Schema.Types.ObjectId, ref: 'users', required: true },
   city: { type: Schema.Types.ObjectId, ref: 'cities', required: true }
 });
 

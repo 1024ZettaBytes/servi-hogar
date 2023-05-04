@@ -206,12 +206,12 @@ function AddMachineModal(props) {
                   )}
                   <Grid item lg={12}>
                     <FormControl fullWidth>
-                      <InputLabel id="vehicle-id">Vehículo</InputLabel>
+                      <InputLabel id="vehicle-id">Operador</InputLabel>
                       <Select
                         labelId="vehicle-id"
                         id="vehicle"
                         name="vehicle"
-                        label="Vehículo"
+                        label="Operador"
                         required
                         autoComplete="off"
                         value={selectedLocation || ""}
@@ -222,7 +222,7 @@ function AddMachineModal(props) {
                         {vehiclesList
                           ? vehiclesList.map((vehicle) => (
                               <MenuItem key={vehicle._id} value={vehicle._id}>
-                                {`${vehicle.brand} ${vehicle.model} ${vehicle.color} ${vehicle.year}`}
+                                {vehicle.operator.name}
                               </MenuItem>
                             ))
                           : null}

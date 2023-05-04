@@ -30,7 +30,7 @@ async function updateCustomerAPI(req, res, userId, userRole) {
 }
 
 async function handler(req, res) {
-  const validRole = await validateUserPermissions(req, res, ["ADMIN", "AUX"]);
+  const validRole = await validateUserPermissions(req, res, ["ADMIN", "AUX", "OPE"]);
   const userId = await getUserId(req);
   if (validRole)
     switch (req.method) {

@@ -49,7 +49,7 @@ const getStatusDescription = (
       return rent ? `Renta #${rent?.num}` : notAvailable;
     case MACHINE_STATUS_LIST.VEHI:
       return vehicle
-        ? `${vehicle?.brand} ${vehicle?.model} ${vehicle?.color} ${vehicle?.year}`
+        ? `${vehicle?.operator.name}`
         : notAvailable;
     default:
       return warehouse ? warehouse?.name : notAvailable;
@@ -137,7 +137,7 @@ const TablaEquipos: FC<TablaEquiposProps> = ({ userRole, machinesList }) => {
   const [page, setPage] = useState<number>(0);
   const [limit, setLimit] = useState<number>(10);
   const [filter, setFilter] = useState<string>("");
-  const userCanDelete = ["ADMIN", "AUX"].includes(userRole);
+  const userCanDelete = ["ADMIN", "AUX", "OPE"].includes(userRole);
   const machineCanBeDeleted = (machineIsActive, machineStatus) => {
     return (
       userCanDelete &&

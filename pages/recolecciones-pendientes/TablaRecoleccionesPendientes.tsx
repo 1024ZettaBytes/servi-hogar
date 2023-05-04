@@ -170,7 +170,7 @@ const TablaRecoleccionesPendientes: FC<TablaRecoleccionesPendientesProps> = ({
     setOpenImages(false);
     setSelectedImages(null);
   };
-  const userCanDelete = ["ADMIN", "AUX"].includes(userRole);
+  const userCanDelete = ["ADMIN", "AUX", "OPE"].includes(userRole);
   const handleModifyClose = (modifiedPickup, successMessage = null) => {
     setModifyModalIsOpen(false);
     if (modifiedPickup && successMessage) {

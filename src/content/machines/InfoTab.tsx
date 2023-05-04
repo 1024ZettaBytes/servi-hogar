@@ -238,7 +238,7 @@ function MachineInfoTab({ role, machine, statusList }) {
                 Datos generales
               </Typography>
             </Box>
-            {!isEditing.info && ["ADMIN", "AUX"].includes(role) && (
+            {!isEditing.info && ["ADMIN", "AUX", "OPE"].includes(role) && (
               <Button
                 variant="text"
                 startIcon={<EditTwoToneIcon />}

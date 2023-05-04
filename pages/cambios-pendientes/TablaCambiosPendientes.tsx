@@ -151,7 +151,7 @@ const TablaCambiosPendientes: FC<TablaCambiosPendientesProps> = ({
   const [page, setPage] = useState<number>(0);
   const [limit, setLimit] = useState<number>(10);
   const [filter, setFilter] = useState<string>("");
-  const userCanDelete = ["ADMIN", "AUX"].includes(userRole);
+  const userCanDelete = ["ADMIN", "AUX", "OPE"].includes(userRole);
   const handleModifyClose = (modifiedDelivery, successMessage = null) => {
     setModifyModalIsOpen(false);
     if (modifiedDelivery && successMessage) {
