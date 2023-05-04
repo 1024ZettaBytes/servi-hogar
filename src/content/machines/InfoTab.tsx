@@ -47,7 +47,7 @@ const getStatusDescription = (
       return rent ? `Renta #${rent?.num}` : notAvailable;
     case MACHINE_STATUS_LIST.VEHI:
       return vehicle
-        ? `${vehicle?.brand} ${vehicle?.model} ${vehicle?.color} ${vehicle?.year}`
+        ? vehicle.operator.name
         : notAvailable;
     default:
       return warehouse ? warehouse?.name : notAvailable;
@@ -80,7 +80,7 @@ const getStatusLabel = (
         <Label color="info">
           <LocalShippingIcon fontSize="small" />
           <b>
-            {vehicle ? `En vehículo (${vehicle?.description})` : notAvailable}
+            {vehicle ? `En vehículo` : notAvailable}
           </b>
         </Label>
       );
@@ -470,7 +470,7 @@ function MachineInfoTab({ role, machine, statusList }) {
                                             key={vehicle._id}
                                             value={vehicle._id}
                                           >
-                                            {`${vehicle.brand} ${vehicle.model} ${vehicle.color} ${vehicle.year}`}
+                                            {vehicle.operator.name}
                                           </MenuItem>
                                         ))
                                       : null}
