@@ -21,7 +21,6 @@ import {
   InputAdornment,
 } from "@mui/material";
 import NextLink from "next/link";
-import { capitalizeFirstLetter, formatTZDate } from "lib/client/utils";
 import { format } from "date-fns";
 import es from "date-fns/locale/es";
 import { useSnackbar } from "notistack";
@@ -309,7 +308,7 @@ const TablaRentasActuales: FC<TablaRentasActualesProps> = ({ rentList }) => {
                 <TableCell align="center">Equipo</TableCell>
                 <TableCell align="center">Cliente</TableCell>
                 <TableCell align="center">Colonia-Sector</TableCell>
-                <TableCell align="center">Pago</TableCell>
+                <TableCell align="center">Días de renta</TableCell>
                 <TableCell align="center">Estado</TableCell>
                 <TableCell align="center">Días Restantes</TableCell>
                 <TableCell align="center"></TableCell>
@@ -377,9 +376,7 @@ const TablaRentasActuales: FC<TablaRentasActualesProps> = ({ rentList }) => {
                         gutterBottom
                         noWrap
                       >
-                        {capitalizeFirstLetter(
-                          formatTZDate(new Date(rent?.endDate), "MMM DD YYYY")
-                        )}
+                        {rent?.totalDays + " días"}
                       </Typography>
                     </TableCell>
                     <TableCell align="center">
