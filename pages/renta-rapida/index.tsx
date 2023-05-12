@@ -60,6 +60,7 @@ const defaultData = () => {
     rentPeriod: {
       selectedWeeks: 1,
       useFreeWeeks: true,
+      usePromo: true
     },
     deliveryTime: {
       date: convertDateToLocal(addDaysToDate(new Date(), 1)),
@@ -292,9 +293,10 @@ function RentaRapida({ session }) {
                             <RentPeriod
                               label="Se rentará por"
                               selectedWeeks={rentPeriod.selectedWeeks}
+                              usePromo={rentPeriod.usePromo}
                               useFreeWeeks={rentPeriod.useFreeWeeks}
                               freeWeeks={selectedCustomer.freeWeeks}
-                              weekPrice={prices.newWeekPrice}
+                              prices={prices}
                               onChangePeriod={onChangePeriod}
                             />
                           ) : (
