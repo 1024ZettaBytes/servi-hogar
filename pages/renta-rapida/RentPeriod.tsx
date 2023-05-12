@@ -6,7 +6,7 @@ import {
   Grid,
   Typography,
 } from "@mui/material";
-import { FC, useState } from "react";
+import { FC } from "react";
 import PropTypes from "prop-types";
 import numeral from "numeral";
 interface RentPeriodProps {
