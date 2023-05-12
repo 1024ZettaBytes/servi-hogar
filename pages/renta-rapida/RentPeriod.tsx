@@ -84,13 +84,13 @@ const RentPeriod: FC<RentPeriodProps> = ({
         )}
         <Grid item lg={3}>
           <Typography color="text.secondary" sx={{ pb: 1 }}>
-            Precio por semana regular: {numeral(prices.newWeekPrice).format(`$${prices.newWeekPrice}0,0.00`)}
+            Precio por semana regular: {numeral(prices?.newWeekPrice).format(`$${prices?.newWeekPrice}0,0.00`)}
           </Typography>
         </Grid>
         <Grid item md={12} lg={12}></Grid>
         <Grid item lg={3}>
           <Typography fontWeight={"bold"} color="text.primary" sx={{ pb: 1 }}>
-            Total: {numeral(totalPrice()).format(`$${totalPrice()}0,0.00`)}
+            Total: {prices ? numeral(totalPrice()).format(`$${totalPrice()}0,0.00`) : 0}
           </Typography>
         </Grid>
       </Grid>
