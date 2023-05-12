@@ -15,7 +15,7 @@ import {
   Typography,
 } from "@mui/material";
 import AddPaymentModal from "../AddPaymentModal";
-import RentPeriod from "../../../pages/renta-rapida/RentPeriod";
+import RentPeriodExtend from "./RentPeriodExtend";
 import { LoadingButton } from "@mui/lab";
 import {
   useGetRentById,
@@ -252,7 +252,7 @@ function ExtendRentModal(props) {
                         </Grid>
 
                         <Grid item lg={12} mt={4}>
-                          <RentPeriod
+                          <RentPeriodExtend
                             label={"Extender"}
                             selectedWeeks={rentPeriod.selectedWeeks}
                             useFreeWeeks={rentPeriod.useFreeWeeks}
