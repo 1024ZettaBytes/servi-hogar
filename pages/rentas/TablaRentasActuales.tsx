@@ -178,7 +178,7 @@ const TablaRentasActuales: FC<TablaRentasActualesProps> = ({ rentList }) => {
   const [selectedId, setSelectedId] = useState<any>(null);
   const [selectedRent, setSelectedRent] = useState<any>(null);
   const [page, setPage] = useState<number>(0);
-  const [limit, setLimit] = useState<number>(10);
+  const [limit, setLimit] = useState<number>(30);
   const [filter, setFilter] = useState<string>("");
   const handleCloseModal = (wasSuccess, successMessage = null) => {
     setExtendModalIsOpen(false);
@@ -503,7 +503,7 @@ const TablaRentasActuales: FC<TablaRentasActualesProps> = ({ rentList }) => {
             onRowsPerPageChange={handleLimitChange}
             page={page}
             rowsPerPage={limit}
-            rowsPerPageOptions={[5, 10, 25, 30]}
+            rowsPerPageOptions={filteredRents.length > 100 ? [30, 100, filteredRents.length]:[30, 100]}
           />
         </Box>
       </Card>

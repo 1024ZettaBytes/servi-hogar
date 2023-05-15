@@ -162,7 +162,7 @@ const TablaRecoleccionesPendientes: FC<TablaRecoleccionesPendientesProps> = ({
   const [openImages, setOpenImages] = useState<boolean>(false);
   const [selectedImages, setSelectedImages] = useState<null>();
   const [page, setPage] = useState<number>(0);
-  const [limit, setLimit] = useState<number>(10);
+  const [limit, setLimit] = useState<number>(30);
   const [filter, setFilter] = useState<string>("");
   const { prices } = useGetPrices(getFetcher);
 
@@ -512,7 +512,7 @@ const TablaRecoleccionesPendientes: FC<TablaRecoleccionesPendientesProps> = ({
             onRowsPerPageChange={handleLimitChange}
             page={page}
             rowsPerPage={limit}
-            rowsPerPageOptions={[5, 10, 25, 30]}
+            rowsPerPageOptions={filteredPickups.length > 100 ? [30, 100, filteredPickups.length]:[30, 100]}
           />
         </Box>
       </Card>

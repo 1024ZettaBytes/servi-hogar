@@ -149,7 +149,7 @@ const TablaCambiosPendientes: FC<TablaCambiosPendientesProps> = ({
   const [changeToEdit, setChangeToEdit] = useState<any>(null);
   const [idToCancel, setIdToCancel] = useState<string>(null);
   const [page, setPage] = useState<number>(0);
-  const [limit, setLimit] = useState<number>(10);
+  const [limit, setLimit] = useState<number>(30);
   const [filter, setFilter] = useState<string>("");
   const userCanDelete = ["ADMIN", "AUX", "OPE"].includes(userRole);
   const handleModifyClose = (modifiedDelivery, successMessage = null) => {
@@ -200,8 +200,8 @@ const TablaCambiosPendientes: FC<TablaCambiosPendientesProps> = ({
     });
   };
 
-  const filteredDeliveries = applyFilters(changesList, filter);
-  const paginatedDeliveries = applyPagination(filteredDeliveries, page, limit);
+  const filteredChanges = applyFilters(changesList, filter);
+  const paginatedDeliveries = applyPagination(filteredChanges, page, limit);
 
   const theme = useTheme();
   return (
@@ -464,12 +464,12 @@ const TablaCambiosPendientes: FC<TablaCambiosPendientesProps> = ({
         <Box p={2}>
           <TablePagination
             component="div"
-            count={filteredDeliveries.length}
+            count={filteredChanges.length}
             onPageChange={handlePageChange}
             onRowsPerPageChange={handleLimitChange}
             page={page}
             rowsPerPage={limit}
-            rowsPerPageOptions={[5, 10, 25, 30]}
+            rowsPerPageOptions={filteredChanges.length > 100 ? [30, 100, filteredChanges.length]:[30, 100]}
           />
         </Box>
       </Card>
