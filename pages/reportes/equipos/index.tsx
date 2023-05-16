@@ -30,6 +30,8 @@ const machineStyle = {
   hasMovements: { ...headerStyle, backgroundColor: "#43B91A" },
   noMovements: { ...headerStyle, backgroundColor: "#EC0000" },
   doesNotExists: { ...headerStyle, backgroundColor: "#8E8E8E" },
+  isLost: { ...headerStyle, backgroundColor: "#F66A02" },
+  isSafe: { ...headerStyle, backgroundColor: "#F6E702" },
 };
 function DayReport() {
   const [isPrinting, setIsPrinting] = useState<boolean>(false);

@@ -18,6 +18,15 @@ const MovementsReportTable: React.FC<MovementsReportTableProps> = ({
   colorStyle,
   data,
 }) => {
+  const getBackColor = (machine): string => {
+    if (!machine.exists) return "doesNotExists";
+    if (machine.isSafe) return "isSafe";
+    if (machine.isLost) return "isLost";
+    if (machine.hasMovements) return "hasMovements";
+    return "noMovements";
+    
+
+  };
   let rowsNumber = 0;
   let machinesList = [];
   if (data) {
@@ -46,15 +55,7 @@ const MovementsReportTable: React.FC<MovementsReportTableProps> = ({
                     <TableCell
                       key={"machine-" + machine.machineNum}
                       align="center"
-                      style={
-                        colorStyle?.machineStyle[
-                          machine.exists
-                            ? machine.hasMovements
-                              ? "hasMovements"
-                              : "noMovements"
-                            : "doesNotExists"
-                        ]
-                      }
+                      style={colorStyle?.machineStyle[getBackColor(machine)]}
                     >
                       {machine.machineNum}
                     </TableCell>
