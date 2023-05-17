@@ -20,7 +20,7 @@ const MovementsReportTable: React.FC<MovementsReportTableProps> = ({
 }) => {
   const getBackColor = (machine): string => {
     if (!machine.exists) return "doesNotExists";
-    if (machine.isSafe) return "isSafe";
+    if (machine.onLittleWarehouse) return "onLittleWarehouse";
     if (machine.isLost) return "isLost";
     if (machine.hasMovements) return "hasMovements";
     return "noMovements";
