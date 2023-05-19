@@ -6,6 +6,7 @@ import PageHeader from '@/components/PageHeader';
 import PageTitleWrapper from '@/components/PageTitleWrapper';
 import { Container } from '@mui/material';
 import Footer from '@/components/Footer';
+import Banner from './Banner';
 //import MovementsSummary from '@/components/MovementsSummary';
 //import AccountBalance from '@/content/Dashboards/Crypto/AccountBalance';
 //import Wallets from '@/content/Dashboards/Crypto/Wallets';
@@ -20,6 +21,7 @@ function Home({session}) {
       </Head>
       <PageTitleWrapper>
       <PageHeader title={"¡Bienvenido(a) "+user?.name+"!"} sutitle={"Esta es la página de inicio"} showAvatar={true}/>
+      <Banner/>
       </PageTitleWrapper>
       <Container maxWidth="lg">
         {/*<MovementsSummary
