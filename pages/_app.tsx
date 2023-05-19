@@ -14,9 +14,6 @@ import { SidebarProvider } from 'src/contexts/SidebarContext';
 import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { SnackbarProvider } from 'notistack';
-import "@fullcalendar/common/main.css";
-import "@fullcalendar/daygrid/main.css";
-import "@fullcalendar/timegrid/main.css";
 
 const clientSideEmotionCache = createEmotionCache();
 
