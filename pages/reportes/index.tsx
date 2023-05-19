@@ -21,6 +21,7 @@ import Footer from "@/components/Footer";
 import PageHeader from "@/components/PageHeader";
 import PageTitleWrapper from "@/components/PageTitleWrapper";
 import Head from "next/head";
+import Banner from "pages/Banner";
 
 const AvatarWrapperSuccess = styled(Avatar)(
   ({ theme }) => `
@@ -184,6 +185,7 @@ function Reportes() {
           </Grid>
         </Grid>
       </Container>
+      <Banner/>
       <Footer />
     </>
   );

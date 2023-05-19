@@ -13,6 +13,7 @@ import {
 } from "../api/useRequest";
 
 import NextBreadcrumbs from "@/components/Shared/BreadCrums";
+import Banner from "pages/Banner";
 
 function EntregasPendientes({ session }) {
   const paths = ["Inicio", "Entregas"];
@@ -33,6 +34,7 @@ function EntregasPendientes({ session }) {
         />
         <NextBreadcrumbs paths={paths} lastLoaded={true} />
       </PageTitleWrapper>
+      <Banner/>
       <Container maxWidth="lg">
         <Grid
           container

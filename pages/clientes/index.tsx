@@ -18,6 +18,7 @@ import { useSnackbar } from "notistack";
 
 import NextBreadcrumbs from "@/components/Shared/BreadCrums";
 import AddTwoTone from "@mui/icons-material/AddTwoTone";
+import Banner from "pages/Banner";
 
 function Clientes({ session }) {
   const paths = ["Inicio", "Clientes"];
@@ -60,6 +61,7 @@ function Clientes({ session }) {
         />
         <NextBreadcrumbs paths={paths} lastLoaded={true} />
       </PageTitleWrapper>
+      <Banner/>
       <Container maxWidth="lg">
         <Grid
           container

@@ -10,6 +10,7 @@ import TablaRecoleccionesPendientes from "./TablaRecoleccionesPendientes";
 import { useGetPendingPickups, getFetcher } from "../api/useRequest";
 
 import NextBreadcrumbs from "@/components/Shared/BreadCrums";
+import Banner from "pages/Banner";
 
 function Rentas({ session }) {
   const paths = ["Inicio", "Recolecciones pendientes"];
@@ -27,6 +28,7 @@ function Rentas({ session }) {
         <PageHeader title={"Recolecciones pendientes"} sutitle={""} />
         <NextBreadcrumbs paths={paths} lastLoaded={true} />
       </PageTitleWrapper>
+      <Banner/>
       <Container maxWidth="lg">
         <Grid
           container
