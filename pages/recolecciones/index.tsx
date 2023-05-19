@@ -10,6 +10,7 @@ import TablaRecolecciones from "./TablaRecolecciones";
 import { useGetPickups, getFetcher } from "../api/useRequest";
 
 import NextBreadcrumbs from "@/components/Shared/BreadCrums";
+import Banner from "pages/Banner";
 
 function Rentas({ session }) {
   const paths = ["Inicio", "Recolecciones"];
@@ -27,6 +28,8 @@ function Rentas({ session }) {
         <PageHeader title={"Recolecciones"} sutitle={""} />
         <NextBreadcrumbs paths={paths} lastLoaded={true} />
       </PageTitleWrapper>
+      <Banner/>
+
       <Container maxWidth="lg">
         <Grid
           container

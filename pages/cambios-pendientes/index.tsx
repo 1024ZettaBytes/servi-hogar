@@ -10,6 +10,7 @@ import TablaCambiosPendientes from "./TablaCambiosPendientes";
 import { useGetPendingChanges, getFetcher } from "../api/useRequest";
 
 import NextBreadcrumbs from "@/components/Shared/BreadCrums";
+import Banner from "pages/Banner";
 
 function Rentas({ session }) {
   const paths = ["Inicio", "Cambios pendientes"];
@@ -27,6 +28,7 @@ function Rentas({ session }) {
         <PageHeader title={"Cambios pendientes"} sutitle={""} />
         <NextBreadcrumbs paths={paths} lastLoaded={true} />
       </PageTitleWrapper>
+      <Banner/>
       <Container maxWidth="lg">
         <Grid
           container

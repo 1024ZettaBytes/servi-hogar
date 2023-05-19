@@ -10,6 +10,7 @@ import TablaCambios from "./TablaCambios";
 import { useGetChanges, getFetcher } from "../api/useRequest";
 
 import NextBreadcrumbs from "@/components/Shared/BreadCrums";
+import Banner from "pages/Banner";
 
 function Rentas({ session }) {
   const paths = ["Inicio", "Cambios"];
@@ -24,6 +25,7 @@ function Rentas({ session }) {
         <title>Cambios</title>
       </Head>
       <PageTitleWrapper>
+      <Banner/>
         <PageHeader title={"Cambios"} sutitle={""} />
         <NextBreadcrumbs paths={paths} lastLoaded={true} />
       </PageTitleWrapper>

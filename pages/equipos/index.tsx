@@ -24,6 +24,7 @@ import { useSnackbar } from "notistack";
 import NextBreadcrumbs from "@/components/Shared/BreadCrums";
 import ResumenEquipos from "./ResumenEquipos";
 import AddTwoTone from "@mui/icons-material/AddTwoTone";
+import Banner from "pages/Banner";
 
 function Equipos({ session }) {
   const paths = ["Inicio", "Equipos"];
@@ -70,6 +71,7 @@ function Equipos({ session }) {
         />
         <NextBreadcrumbs paths={paths} lastLoaded={true} />
       </PageTitleWrapper>
+      <Banner/>
       <Container maxWidth="lg">
         <Grid
           container
