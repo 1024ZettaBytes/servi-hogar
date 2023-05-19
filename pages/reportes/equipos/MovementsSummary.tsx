@@ -24,7 +24,7 @@ function MovementsSummary({
                   width: "100%",
                   height: 50,
                   backgroundColor:
-                    colorStyle.machineStyle.hasMovements.backgroundColor,
+                    colorStyle?.machineStyle?.hasMovements?.backgroundColor,
                 }}
               />
             </Grid>
@@ -53,7 +53,7 @@ function MovementsSummary({
                   width: "100%",
                   height: 50,
                   backgroundColor:
-                    colorStyle.machineStyle.noMovements.backgroundColor,
+                    colorStyle?.machineStyle?.noMovements?.backgroundColor,
                 }}
               />
             </Grid>
@@ -82,7 +82,7 @@ function MovementsSummary({
                   width: "100%",
                   height: 50,
                   backgroundColor:
-                    colorStyle.machineStyle.onLittleWarehouse.backgroundColor,
+                    colorStyle?.machineStyle?.onLittleWarehouse?.backgroundColor,
                 }}
               />
             </Grid>
@@ -111,7 +111,7 @@ function MovementsSummary({
                   width: "100%",
                   height: 50,
                   backgroundColor:
-                    colorStyle.machineStyle.isLost.backgroundColor,
+                    colorStyle?.machineStyle?.isLost?.backgroundColor,
                 }}
               />
             </Grid>

@@ -12,7 +12,7 @@ import MovementsSummary from "./MovementsSummary";
 
 const cellsPerRow = 20;
 interface MovementsReportTableProps {
-  colorStyle?: any;
+  colorStyle: any;
   data: any;
 }
 const MovementsReportTable: React.FC<MovementsReportTableProps> = ({
@@ -25,8 +25,6 @@ const MovementsReportTable: React.FC<MovementsReportTableProps> = ({
     if (machine.isLost) return "isLost";
     if (machine.hasMovements) return "hasMovements";
     return "noMovements";
-    
-
   };
   let rowsNumber = 0;
   let machinesList = [];
@@ -46,14 +44,16 @@ const MovementsReportTable: React.FC<MovementsReportTableProps> = ({
   }
   return (
     <div>
-      <MovementsSummary 
-        withMovements={data.summary.withMovements}
-        noMovements={data.summary.noMovements}
-        lost={data.summary.lost}
-        onLittleWarehouse={data.summary.onLittleWarehouse}
-        total={data.summary.total}
-        colorStyle={colorStyle}
-      />
+      {data && (
+        <MovementsSummary
+          withMovements={data.summary.withMovements}
+          noMovements={data.summary.noMovements}
+          lost={data.summary.lost}
+          onLittleWarehouse={data.summary.onLittleWarehouse}
+          total={data.summary.total}
+          colorStyle={colorStyle}
+        />
+      )}
       <TableContainer>
         <Table size="small" style={{ tableLayout: "fixed" }}>
           <TableBody>
