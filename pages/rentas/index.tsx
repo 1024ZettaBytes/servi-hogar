@@ -12,7 +12,6 @@ import TablaRentasPasadas from "./TablaRentasPasadas";
 import { useGetRents, getFetcher } from "../api/useRequest";
 
 import NextBreadcrumbs from "@/components/Shared/BreadCrums";
-import Banner from "pages/Banner";
 
 function Rentas() {
   const paths = ["Inicio", "Colocadas"];
@@ -27,7 +26,6 @@ function Rentas() {
         <PageHeader title={"Colocadas"} sutitle={""} />
         <NextBreadcrumbs paths={paths} lastLoaded={true} />
       </PageTitleWrapper>
-      <Banner/>
       <Container maxWidth="lg">
         <Grid
           container
