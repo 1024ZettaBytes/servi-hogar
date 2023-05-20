@@ -6,7 +6,6 @@ import PageHeader from '@/components/PageHeader';
 import PageTitleWrapper from '@/components/PageTitleWrapper';
 import { Container } from '@mui/material';
 import Footer from '@/components/Footer';
-import Banner from './Banner';
 //import MovementsSummary from '@/components/MovementsSummary';
 //import AccountBalance from '@/content/Dashboards/Crypto/AccountBalance';
 //import Wallets from '@/content/Dashboards/Crypto/Wallets';
