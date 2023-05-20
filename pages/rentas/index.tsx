@@ -12,6 +12,7 @@ import TablaRentasPasadas from "./TablaRentasPasadas";
 import { useGetRents, getFetcher } from "../api/useRequest";
 
 import NextBreadcrumbs from "@/components/Shared/BreadCrums";
+import Banner from "pages/Banner";
 
 function Rentas() {
   const paths = ["Inicio", "Colocadas"];
@@ -78,6 +79,7 @@ function Rentas() {
           </Grid>
         </Grid>
       </Container>
+      <Banner/>
       <Footer />
     </>
   );

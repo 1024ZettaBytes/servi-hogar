@@ -3,10 +3,10 @@ export default function Banner(): JSX.Element {
     const banner = useRef<HTMLDivElement>()
 
     const atOptions = {
-        'key' : '973718e57cc68b2e572b545ed824fb0b',
+        'key' : '9314d566a205949ab8c2c6c197125c11',
 		'format' : 'iframe',
-		'height' : 90,
-		'width' : 728,
+		'height' : 600,
+		'width' : 160,
 		'params' : {}
     }
     useEffect(() => {
