@@ -45,7 +45,6 @@ import { saveRent } from "lib/client/rentsFetch";
 import FormatModal from "@/components/FormatModal";
 import { getFormatForDelivery } from "../../lib/consts/OBJ_CONTS";
 import { markWasSentDelivery } from "lib/client/deliveriesFetch";
-import Banner from "pages/Banner";
 
 const defaultInitialDate = (today: Date) => {
   today.setHours(8, 0, 0);
@@ -224,7 +223,6 @@ function RentaRapida({ session }) {
         <PageHeader title={"Nueva Renta"} sutitle={""} />
         <NextBreadcrumbs paths={paths} lastLoaded={true} />
       </PageTitleWrapper>
-      <Banner/>
       <Container maxWidth="lg">
         <Grid
           container

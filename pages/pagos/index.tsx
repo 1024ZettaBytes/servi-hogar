@@ -22,7 +22,6 @@ import { useSnackbar } from "notistack";
 import NextBreadcrumbs from "@/components/Shared/BreadCrums";
 import AddPaymentModal from "@/components/AddPaymentModal";
 import AddTwoTone from "@mui/icons-material/AddTwoTone";
-import Banner from "pages/Banner";
 
 function Pagos({ }) {
   const paths = ["Inicio", "Pagos"];
@@ -64,7 +63,6 @@ function Pagos({ }) {
         />
         <NextBreadcrumbs paths={paths} lastLoaded={true} />
       </PageTitleWrapper>
-      <Banner/>
       <Container maxWidth="lg">
         <Grid
           container
