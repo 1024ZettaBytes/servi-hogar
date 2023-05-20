@@ -21,7 +21,6 @@ function Home({session}) {
       </Head>
       <PageTitleWrapper>
       <PageHeader title={"¡Bienvenido(a) "+user?.name+"!"} sutitle={"Esta es la página de inicio"} showAvatar={true}/>
-      <Banner/>
       </PageTitleWrapper>
       <Container maxWidth="lg">
         {/*<MovementsSummary
