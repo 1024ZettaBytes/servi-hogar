@@ -6,6 +6,7 @@ import { validateServerSideSession } from "../../lib/auth";
 import {
   convertDateToLocal,
   replaceCoordinatesOnUrl,
+  setDateToInitial,
   setDateToMid,
   validateMapsUrl,
 } from "../../lib/client/utils";
@@ -67,7 +68,7 @@ function RentaRapida() {
   const paths = ["Inicio", "Entregas pendientes", `${delivery?.totalNumber}`];
   const [customerToEdit, setCustomerToEdit] = useState<any>({ isSet: false });
   const [deliveredMachine, setDeliveredMachine] = useState<string>(null);
-  const [deliveryDate, setDeliveryDate] = useState<any>(null);
+  const [deliveryDate, setDeliveryDate] = useState<any>(new Date());
   const [payment, setPayment] = useState<number>(-1);
   const [isGettingLocation, setIsGettingLocation] = useState<boolean>(false);
   const [isOk, setIsOk] = useState<any>({
@@ -718,6 +719,7 @@ function RentaRapida() {
                                     deliveryDate ||
                                     convertDateToLocal(new Date(delivery.date))
                                   }
+                                  minDate={setDateToInitial(convertDateToLocal(new Date()))}
                                   maxDate={new Date()}
                                   onChange={(newValue) => {
                                     setDeliveryDate(newValue);
