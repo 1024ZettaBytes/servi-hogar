@@ -79,7 +79,6 @@ function Rentas() {
           </Grid>
         </Grid>
       </Container>
-      <Banner/>
       <Footer />
     </>
   );

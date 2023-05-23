@@ -44,6 +44,7 @@ import {
   convertDateToLocal,
   convertDateToTZ,
   dateDiffInDays,
+  setDateToInitial,
   setDateToMid,
 } from "lib/client/utils";
 
@@ -51,7 +52,7 @@ function RecoleccionPendiente() {
   const router = useRouter();
   const { pickupId } = router.query;
   const { pickup, pickupByIdError } = useGetPickupById(getFetcher, pickupId);
-  const [pickupDate, setPickupDate] = useState<any>(null);
+  const [pickupDate, setPickupDate] = useState<any>(new Date());
   const [whitDebt, setWhitDebt] = useState<number>(null);
   const [payDone, setPayDone] = useState<boolean>(false);
   const [pickedAccesories, setPickedAccesories] = useState<any>({});
@@ -197,7 +198,7 @@ function RecoleccionPendiente() {
                                     convertDateToLocal(new Date(pickup.date))
                                   }
                                   maxDate={new Date()}
-                                  minDate={new Date(pickup?.rent?.startDate)}
+                                  minDate={setDateToInitial(new Date())}
                                   onChange={(newValue) => {
                                     setPickupDate(newValue);
                                   }}

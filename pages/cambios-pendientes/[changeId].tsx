@@ -47,14 +47,14 @@ import { useRouter } from "next/router";
 import React from "react";
 import { MuiFileInput } from "mui-file-input";
 import { DesktopDatePicker } from "@mui/x-date-pickers";
-import { convertDateToLocal, convertDateToTZ, setDateToEnd, setDateToMid } from "lib/client/utils";
+import { convertDateToLocal, convertDateToTZ, setDateToEnd, setDateToInitial, setDateToMid } from "lib/client/utils";
 
 function CambioPendiente() {
   const router = useRouter();
   const { changeId } = router.query;
   const { change, changeByIdError } = useGetChangeById(getFetcher, changeId);
   const { machinesData, machinesError } = useGetMachinesForRent(getFetcher);
-  const [changeDate, setChangeDate] = useState<any>(null);
+  const [changeDate, setChangeDate] = useState<any>(new Date());
   const [changedAccesories, setChangedAccesories] = useState<any>({});
   const [attached, setAttached] = useState<any>({
     tag: { file: null, url: null },
@@ -178,6 +178,7 @@ function CambioPendiente() {
                                   label="Fecha de cambio"
                                   inputFormat="dd/MM/yyyy"
                                   value={changeDate || convertDateToLocal(new Date(change.date))}
+                                  minDate={setDateToInitial(convertDateToLocal(new Date()))}
                                   maxDate={new Date()}
                                   onChange={(newValue) => {
                                     setChangeDate(newValue);

@@ -44,7 +44,6 @@ function Home({session}) {
           </Grid>
         </Grid>*/}
       </Container>
-      <Banner/>
       <Footer />
     </>
   );
