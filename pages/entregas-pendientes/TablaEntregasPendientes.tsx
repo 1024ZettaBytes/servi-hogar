@@ -35,7 +35,9 @@ import EditIcon from "@mui/icons-material/Edit";
 import CancelIcon from "@mui/icons-material/Cancel";
 import WhatsAppIcon from "@mui/icons-material/WhatsApp";
 import SearchIcon from "@mui/icons-material/Search";
+import PersonAddAlt1Icon from "@mui/icons-material/PersonAddAlt1";
 import GenericModal from "@/components/GenericModal";
+import OperatorModal from "@/components/OperatorModal";
 import ModifyDeliveryModal from "../../src/components/ModifyDeliveryModal";
 import FormatModal from "@/components/FormatModal";
 import { getFormatForDelivery } from "../../lib/consts/OBJ_CONTS";
@@ -148,6 +150,7 @@ const TablaEntregasPendientes: FC<TablaEntregasPendientesProps> = ({
   const [modifyModalIsOpen, setModifyModalIsOpen] = useState(false);
   const [cancelModalIsOpen, setCancelModalIsOpen] = useState(false);
   const [formatIsOpen, setFormatIsOpen] = useState(false);
+  const [operatorIsOpen, setOperatorIsOpen] = useState(false);
   const [formatText, setFormatText] = useState<string>("");
   const [isDeleting, setIsDeleting] = useState(false);
   const [deliveryToEdit, setDeliveryToEdit] = useState<any>(null);
@@ -169,6 +172,26 @@ const TablaEntregasPendientes: FC<TablaEntregasPendientesProps> = ({
       });
     }
   };
+  const changeOperatorIcon = (delivery: any) => {
+    if (!["ADMIN", "AUX"].includes(userRole)) return "";
+    return (
+      <Tooltip title="Asignar/Cambiar" arrow>
+        <IconButton
+          onClick={() => handleOnOperatorClick(delivery)}
+          sx={{
+            "&:hover": {
+              background: theme.colors.primary.lighter,
+            },
+            color: theme.colors.alpha,
+          }}
+          color={delivery.operator ? "inherit" : "error"}
+          size="small"
+        >
+          <PersonAddAlt1Icon fontSize="small" />
+        </IconButton>
+      </Tooltip>
+    );
+  };
   const handleSearchChange = (e: ChangeEvent<HTMLInputElement>): void => {
     const value = e.target.value;
     setFilter(value);
@@ -189,6 +212,10 @@ const TablaEntregasPendientes: FC<TablaEntregasPendientesProps> = ({
     setIdToCancel(deliveryId);
     setCancelModalIsOpen(true);
   };
+  const handleOnOperatorClick = (delivery: any) => {
+    setDeliveryToEdit(delivery);
+    setOperatorIsOpen(true);
+  };
   const handleOnConfirmDelete = async (reason) => {
     setIsDeleting(true);
     const result = await cancelDelivery(idToCancel, reason);
@@ -203,7 +230,17 @@ const TablaEntregasPendientes: FC<TablaEntregasPendientesProps> = ({
       autoHideDuration: 2000,
     });
   };
-
+  const handleOnAsignedOperator = async () => {
+    setOperatorIsOpen(false);
+    enqueueSnackbar("Operador asignado con éxito!", {
+      variant: "success",
+      anchorOrigin: {
+        vertical: "top",
+        horizontal: "center",
+      },
+      autoHideDuration: 2000,
+    });
+  };
   const filteredDeliveries = applyFilters(deliveriesList, filter);
   const paginatedDeliveries = applyPagination(filteredDeliveries, page, limit);
 
@@ -253,6 +290,7 @@ const TablaEntregasPendientes: FC<TablaEntregasPendientesProps> = ({
                 <TableCell align="center">Fecha de entrega</TableCell>
                 <TableCell align="center">Horario Especial</TableCell>
                 <TableCell align="center">¿Enviada?</TableCell>
+                <TableCell align="center">Operador</TableCell>
                 <TableCell align="center"></TableCell>
               </TableRow>
             </TableHead>
@@ -289,9 +327,14 @@ const TablaEntregasPendientes: FC<TablaEntregasPendientesProps> = ({
                         gutterBottom
                         noWrap
                       >
-                        {delivery?.rent?.customer?.lastRent ? capitalizeFirstLetter(
-                          formatTZDate(new Date(delivery?.rent?.customer?.lastRent), "MMM DD YYYY")
-                        ): "NUEVO"}
+                        {delivery?.rent?.customer?.lastRent
+                          ? capitalizeFirstLetter(
+                              formatTZDate(
+                                new Date(delivery?.rent?.customer?.lastRent),
+                                "MMM DD YYYY"
+                              )
+                            )
+                          : "NUEVO"}
                       </Typography>
                     </TableCell>
                     <TableCell align="center">
@@ -323,7 +366,8 @@ const TablaEntregasPendientes: FC<TablaEntregasPendientesProps> = ({
                         noWrap
                       >
                         {
-                          delivery?.rent?.customer?.currentResidence?.sector?.name
+                          delivery?.rent?.customer?.currentResidence?.sector
+                            ?.name
                         }
                       </Typography>
                       <Typography
@@ -381,6 +425,18 @@ const TablaEntregasPendientes: FC<TablaEntregasPendientesProps> = ({
                         noWrap
                       >
                         {delivery?.wasSent ? "Sí" : "-"}
+                      </Typography>
+                    </TableCell>
+                    <TableCell align="center">
+                      <Typography
+                        variant="body1"
+                        fontWeight="bold"
+                        color="text.primary"
+                        gutterBottom
+                        noWrap
+                      >
+                        {delivery?.operator ? delivery.operator.name : "N/A"}
+                        {changeOperatorIcon(delivery)}
                       </Typography>
                     </TableCell>
                     <TableCell align="center">
@@ -473,7 +529,11 @@ const TablaEntregasPendientes: FC<TablaEntregasPendientesProps> = ({
             onRowsPerPageChange={handleLimitChange}
             page={page}
             rowsPerPage={limit}
-            rowsPerPageOptions={filteredDeliveries.length > 100 ? [30, 100, filteredDeliveries.length]:[30, 100]}
+            rowsPerPageOptions={
+              filteredDeliveries.length > 100
+                ? [30, 100, filteredDeliveries.length]
+                : [30, 100]
+            }
           />
         </Box>
       </Card>
@@ -510,6 +570,18 @@ const TablaEntregasPendientes: FC<TablaEntregasPendientesProps> = ({
           onCancel={() => {
             setCancelModalIsOpen(false);
             setIsDeleting(false);
+          }}
+        />
+      )}
+      {operatorIsOpen && (
+        <OperatorModal
+          open={operatorIsOpen}
+          type="delivery"
+          id={deliveryToEdit?._id}
+          currentOperator={deliveryToEdit?.operator?._id}
+          onAccept={handleOnAsignedOperator}
+          onCancel={() => {
+            setOperatorIsOpen(false);
           }}
         />
       )}

@@ -10,9 +10,9 @@ export const config = {
   },
 };
 
-async function getPendingPickupsAPI(req, res) {
+async function getPendingPickupsAPI(req, res, userId) {
   try {
-    const rents = await getPendingPickupsData();
+    const rents = await getPendingPickupsData(userId);
     res.status(200).json({ data: rents });
   } catch (e) {
     console.error(e);
@@ -51,7 +51,7 @@ async function handler(req, res) {
   if (validRole)
     switch (req.method) {
       case "GET":
-        await getPendingPickupsAPI(req, res);
+        await getPendingPickupsAPI(req, res, userId);
         break;
       case "POST":
         await completePickupAPI(req, res, userId);

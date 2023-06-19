@@ -31,9 +31,11 @@ import WhatsAppIcon from "@mui/icons-material/WhatsApp";
 import CheckIcon from "@mui/icons-material/Check";
 import EditIcon from "@mui/icons-material/Edit";
 import CancelIcon from "@mui/icons-material/Cancel";
+import PersonAddAlt1Icon from "@mui/icons-material/PersonAddAlt1";
 import SearchIcon from "@mui/icons-material/Search";
 import GenericModal from "@/components/GenericModal";
 import ModifyChangeModal from "../../src/components/ModifyChangeModal";
+import OperatorModal from "@/components/OperatorModal";
 import { getFormatForChange } from "../../lib/consts/OBJ_CONTS";
 import FormatModal from "@/components/FormatModal";
 
@@ -87,7 +89,7 @@ const applyFilters = (changesList: any[], filter: string): any[] => {
               compareStringsForFilter(filter, value["customer"].name);
             const matchNumber =
               value["num"] && compareStringsForFilter(filter, value["num"]);
-              const matchCityOrSector =
+            const matchCityOrSector =
               value["customer"]?.currentResidence?.city?.name &&
               value["customer"]?.currentResidence?.sector?.name &&
               (compareStringsForFilter(
@@ -144,6 +146,7 @@ const TablaCambiosPendientes: FC<TablaCambiosPendientesProps> = ({
   const [modifyModalIsOpen, setModifyModalIsOpen] = useState(false);
   const [cancelModalIsOpen, setCancelModalIsOpen] = useState(false);
   const [formatIsOpen, setFormatIsOpen] = useState(false);
+  const [operatorIsOpen, setOperatorIsOpen] = useState(false);
   const [formatText, setFormatText] = useState<string>("");
   const [isDeleting, setIsDeleting] = useState(false);
   const [changeToEdit, setChangeToEdit] = useState<any>(null);
@@ -181,6 +184,10 @@ const TablaCambiosPendientes: FC<TablaCambiosPendientesProps> = ({
     setChangeToEdit(change);
     setModifyModalIsOpen(true);
   };
+  const handleOnOperatorClick = (change: any) => {
+    setChangeToEdit(change);
+    setOperatorIsOpen(true);
+  };
   const handleOnDeleteClick = (changeId: string) => {
     setIdToCancel(changeId);
     setCancelModalIsOpen(true);
@@ -199,10 +206,39 @@ const TablaCambiosPendientes: FC<TablaCambiosPendientesProps> = ({
       autoHideDuration: 2000,
     });
   };
-
+  const handleOnAsignedOperator = async () => {
+    setOperatorIsOpen(false);
+    enqueueSnackbar("Operador asignado con éxito!", {
+      variant: "success",
+      anchorOrigin: {
+        vertical: "top",
+        horizontal: "center",
+      },
+      autoHideDuration: 2000,
+    });
+  };
   const filteredChanges = applyFilters(changesList, filter);
   const paginatedDeliveries = applyPagination(filteredChanges, page, limit);
-
+  const changeOperatorIcon = (change: any) => {
+    if (!["ADMIN", "AUX"].includes(userRole)) return "";
+    return (
+      <Tooltip title="Asignar/Cambiar" arrow>
+        <IconButton
+          onClick={() => handleOnOperatorClick(change)}
+          sx={{
+            "&:hover": {
+              background: theme.colors.primary.lighter,
+            },
+            color: theme.colors.alpha,
+          }}
+          color={change.operator ? "inherit" : "error"}
+          size="small"
+        >
+          <PersonAddAlt1Icon fontSize="small" />
+        </IconButton>
+      </Tooltip>
+    );
+  };
   const theme = useTheme();
   return (
     <>
@@ -249,6 +285,7 @@ const TablaCambiosPendientes: FC<TablaCambiosPendientesProps> = ({
                 <TableCell align="center">Fecha Programada</TableCell>
                 <TableCell align="center">Horario Especial</TableCell>
                 <TableCell align="center">¿Enviada?</TableCell>
+                <TableCell align="center">Operador</TableCell>
                 <TableCell align="center"></TableCell>
               </TableRow>
             </TableHead>
@@ -301,16 +338,14 @@ const TablaCambiosPendientes: FC<TablaCambiosPendientesProps> = ({
                       </Typography>
                     </TableCell>
                     <TableCell align="center">
-                    <Typography
+                      <Typography
                         variant="body1"
                         fontWeight="bold"
                         color="text.primary"
                         gutterBottom
                         noWrap
                       >
-                        {
-                          change?.rent?.customer?.currentResidence?.suburb
-                        }
+                        {change?.rent?.customer?.currentResidence?.suburb}
                       </Typography>
                       <Typography
                         variant="body1"
@@ -319,10 +354,7 @@ const TablaCambiosPendientes: FC<TablaCambiosPendientesProps> = ({
                         gutterBottom
                         noWrap
                       >
-                        {
-                          change?.rent?.customer?.currentResidence?.sector
-                            ?.name
-                        }
+                        {change?.rent?.customer?.currentResidence?.sector?.name}
                       </Typography>
                       <Typography
                         variant="body1"
@@ -360,7 +392,10 @@ const TablaCambiosPendientes: FC<TablaCambiosPendientesProps> = ({
                         noWrap
                       >
                         {change?.timeOption === "specific"
-                          ? `${formatTZDate(new Date(change?.fromTime), "h:mm A")} - ${formatTZDate(
+                          ? `${formatTZDate(
+                              new Date(change?.fromTime),
+                              "h:mm A"
+                            )} - ${formatTZDate(
                               new Date(change?.endTime),
                               "h:mm A"
                             )}`
@@ -376,6 +411,18 @@ const TablaCambiosPendientes: FC<TablaCambiosPendientesProps> = ({
                         noWrap
                       >
                         {change?.wasSent ? "Sí" : "-"}
+                      </Typography>
+                    </TableCell>
+                    <TableCell align="center">
+                      <Typography
+                        variant="body1"
+                        fontWeight="bold"
+                        color="text.primary"
+                        gutterBottom
+                        noWrap
+                      >
+                        {change?.operator ? change.operator.name : "N/A"}
+                        {changeOperatorIcon(change)}
                       </Typography>
                     </TableCell>
                     <TableCell align="center">
@@ -469,7 +516,11 @@ const TablaCambiosPendientes: FC<TablaCambiosPendientesProps> = ({
             onRowsPerPageChange={handleLimitChange}
             page={page}
             rowsPerPage={limit}
-            rowsPerPageOptions={filteredChanges.length > 100 ? [30, 100, filteredChanges.length]:[30, 100]}
+            rowsPerPageOptions={
+              filteredChanges.length > 100
+                ? [30, 100, filteredChanges.length]
+                : [30, 100]
+            }
           />
         </Box>
       </Card>
@@ -506,6 +557,18 @@ const TablaCambiosPendientes: FC<TablaCambiosPendientesProps> = ({
           onCancel={() => {
             setCancelModalIsOpen(false);
             setIsDeleting(false);
+          }}
+        />
+      )}
+      {operatorIsOpen && (
+        <OperatorModal
+          open={operatorIsOpen}
+          type="change"
+          id={changeToEdit?._id}
+          currentOperator={changeToEdit?.operator?._id}
+          onAccept={handleOnAsignedOperator}
+          onCancel={() => {
+            setOperatorIsOpen(false);
           }}
         />
       )}

@@ -10,9 +10,9 @@ export const config = {
   },
 };
 
-async function getPendingChangesAPI(req, res) {
+async function getPendingChangesAPI(req, res, userId) {
   try {
-    const rents = await getPendingChangesData();
+    const rents = await getPendingChangesData(userId);
     res.status(200).json({ data: rents });
   } catch (e) {
     console.error(e);
@@ -51,7 +51,7 @@ async function handler(req, res) {
   if (validRole)
     switch (req.method) {
       case "GET":
-        await getPendingChangesAPI(req, res);
+        await getPendingChangesAPI(req, res, userId);
         break;
       case "POST":
         await completeChangeAPI(req, res, userId);
