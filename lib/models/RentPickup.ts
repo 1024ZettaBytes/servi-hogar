@@ -16,6 +16,7 @@ export interface IRentPickup extends Document {
   wasSent: boolean;
   cancellationReason: string;
   finishedAt: Date;
+  operator: Schema.Types.ObjectId;
   createdAt: Date;
   updatedAt: Date;
   lastUpdatedBy: Schema.Types.ObjectId;
@@ -48,6 +49,7 @@ const RentPickupSchema = new Schema<IRentPickup>({
   wasSent: { type: Boolean, required:false},
   cancellationReason: { type: String, default: '' },
   finishedAt: { type: Date, default: null },
+  operator: { type: Schema.Types.ObjectId, default:null, ref: 'users' },
   createdAt: { type: Date, required: true },
   updatedAt: { type: Date, required: true },
   lastUpdatedBy: { type: Schema.Types.ObjectId, required: true, ref: 'users' }

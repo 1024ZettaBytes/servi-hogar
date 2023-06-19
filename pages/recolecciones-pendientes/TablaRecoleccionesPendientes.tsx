@@ -34,12 +34,14 @@ import CancelIcon from "@mui/icons-material/Cancel";
 import SearchIcon from "@mui/icons-material/Search";
 import GenericModal from "@/components/GenericModal";
 import ModifyPickupModal from "../../src/components/ModifyPickupModal";
+import OperatorModal from "@/components/OperatorModal";
 import FormatModal from "@/components/FormatModal";
 import { getFormatForPickup } from "../../lib/consts/OBJ_CONTS";
 import { getFetcher, useGetPrices } from "pages/api/useRequest";
 import ImageSearchIcon from "@mui/icons-material/ImageSearch";
 import ImagesModal from "@/components/ImagesModal";
 import LocationOnIcon from "@mui/icons-material/LocationOn";
+import PersonAddAlt1Icon from "@mui/icons-material/PersonAddAlt1";
 
 interface TablaRecoleccionesPendientesProps {
   userRole: string;
@@ -155,6 +157,7 @@ const TablaRecoleccionesPendientes: FC<TablaRecoleccionesPendientesProps> = ({
   const [modifyModalIsOpen, setModifyModalIsOpen] = useState(false);
   const [cancelModalIsOpen, setCancelModalIsOpen] = useState(false);
   const [formatIsOpen, setFormatIsOpen] = useState(false);
+  const [operatorIsOpen, setOperatorIsOpen] = useState(false);
   const [formatText, setFormatText] = useState<string>("");
   const [isDeleting, setIsDeleting] = useState(false);
   const [pickupToEdit, setPickupToEdit] = useState<any>(null);
@@ -200,6 +203,10 @@ const TablaRecoleccionesPendientes: FC<TablaRecoleccionesPendientesProps> = ({
     setPickupToEdit(pickup);
     setModifyModalIsOpen(true);
   };
+  const handleOnOperatorClick = (change: any) => {
+    setPickupToEdit(change);
+    setOperatorIsOpen(true);
+  };
   const handleOnDeleteClick = (pickupId: string) => {
     setIdToCancel(pickupId);
     setCancelModalIsOpen(true);
@@ -221,7 +228,37 @@ const TablaRecoleccionesPendientes: FC<TablaRecoleccionesPendientesProps> = ({
 
   const filteredPickups = applyFilters(pickupList, filter);
   const paginatedPickups = applyPagination(filteredPickups, page, limit);
-
+  const changeOperatorIcon = (pickup: any) => {
+    if (!["ADMIN", "AUX"].includes(userRole)) return "";
+    return (
+      <Tooltip title="Asignar/Cambiar" arrow>
+        <IconButton
+          onClick={() => handleOnOperatorClick(pickup)}
+          sx={{
+            "&:hover": {
+              background: theme.colors.primary.lighter,
+            },
+            color: theme.colors.alpha,
+          }}
+          color={pickup.operator ? "inherit" : "error"}
+          size="small"
+        >
+          <PersonAddAlt1Icon fontSize="small" />
+        </IconButton>
+      </Tooltip>
+    );
+  };
+  const handleOnAsignedOperator = async () => {
+    setOperatorIsOpen(false);
+    enqueueSnackbar("Operador asignado con éxito!", {
+      variant: "success",
+      anchorOrigin: {
+        vertical: "top",
+        horizontal: "center",
+      },
+      autoHideDuration: 2000,
+    });
+  };
   const theme = useTheme();
   return (
     <>
@@ -268,6 +305,7 @@ const TablaRecoleccionesPendientes: FC<TablaRecoleccionesPendientesProps> = ({
                 <TableCell align="center">Fecha Programada</TableCell>
                 <TableCell align="center">Horario Especial</TableCell>
                 <TableCell align="center">¿Enviada?</TableCell>
+                <TableCell align="center">Operador</TableCell>
                 <TableCell align="center"></TableCell>
               </TableRow>
             </TableHead>
@@ -420,6 +458,18 @@ const TablaRecoleccionesPendientes: FC<TablaRecoleccionesPendientesProps> = ({
                       </Typography>
                     </TableCell>
                     <TableCell align="center">
+                      <Typography
+                        variant="body1"
+                        fontWeight="bold"
+                        color="text.primary"
+                        gutterBottom
+                        noWrap
+                      >
+                        {pickup?.operator ? pickup.operator.name : "N/A"}
+                        {changeOperatorIcon(pickup)}
+                      </Typography>
+                    </TableCell>
+                    <TableCell align="center">
                       <NextLink
                         href={`/recolecciones-pendientes/${pickup?._id}`}
                       >
@@ -558,6 +608,18 @@ const TablaRecoleccionesPendientes: FC<TablaRecoleccionesPendientesProps> = ({
           onCancel={() => {
             setCancelModalIsOpen(false);
             setIsDeleting(false);
+          }}
+        />
+      )}
+      {operatorIsOpen && (
+        <OperatorModal
+          open={operatorIsOpen}
+          type="pickup"
+          id={pickupToEdit?._id}
+          currentOperator={pickupToEdit?.operator?._id}
+          onAccept={handleOnAsignedOperator}
+          onCancel={() => {
+            setOperatorIsOpen(false);
           }}
         />
       )}

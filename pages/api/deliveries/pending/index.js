@@ -9,9 +9,9 @@ export const config = {
     bodyParser: false,
   },
 };
-async function getPendingDeliveriesAPI(req, res) {
+async function getPendingDeliveriesAPI(req, res, userId) {
   try {
-    const rents = await getPendingDeliveriesData();
+    const rents = await getPendingDeliveriesData(userId);
     res.status(200).json({ data: rents });
   } catch (e) {
     console.error(e);
@@ -55,7 +55,7 @@ async function handler(req, res) {
   if (validRole)
     switch (req.method) {
       case "GET":
-        await getPendingDeliveriesAPI(req, res);
+        await getPendingDeliveriesAPI(req, res, userId);
         break;
       case "POST":
         await completeDeliveryAPI(req, res, userId);

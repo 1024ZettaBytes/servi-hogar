@@ -189,3 +189,9 @@ export const useGetMachinesReport = (fetcher) => {
   const { data, error } = useSWR(ROUTES.MACHINES_REPORT_API, fetcher);
   return { reportData: data?.data, reportError: error };
 };
+
+// Operators
+export const useGetOperators = (fetcher) => {
+  const { data, error } = useSWR(ROUTES.ALL_OPERATORS, fetcher);
+  return { operatorsList: data?.data, operatorsError: error };
+};
