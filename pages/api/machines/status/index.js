@@ -1,9 +1,10 @@
 import { getMachineStatusData } from "../../../../lib/data/Machines";
-import { validateUserPermissions } from "../../auth/authUtils";
+import { validateUserPermissions, getUserRole } from "../../auth/authUtils";
 
 async function getMachineStatusAPI(req, res) {
   try {
-    const allMachineStatus = await getMachineStatusData();
+    const userRole = await getUserRole(req, res);
+    const allMachineStatus = await getMachineStatusData(userRole);
     res.status(200).json({ data: allMachineStatus });
   } catch (e) {
     console.error(e);

@@ -8,7 +8,7 @@ export const validateUserPermissions = async (req, res, validRoles) => {
   const token = await getToken({ req });
   if (token && token?.user?.id) {
     const userId = token.user.id;
-    if (!isConnected(userId)) await connectToDatabase();
+    if (!isConnected()) await connectToDatabase();
     const user = await User.findById(userId).populate("role");
     const userRole = user?.role?.id;
     const hasValidRole = validRoles.includes(userRole);
@@ -25,4 +25,18 @@ export const validateUserPermissions = async (req, res, validRoles) => {
 export const getUserId = async (req) => {
   const token = await getToken({ req });
   return token?.user?.id;
+}
+
+export const getUserRole = async (req, res) => {
+  const token = await getToken({ req });
+  if (token && token?.user?.id) {
+    const userId = token.user.id;
+    if (!isConnected()) await connectToDatabase();
+    const user = await User.findById(userId).populate("role");
+    const userRole = user?.role?.id;
+    return user?.role?.id;
+  } else {
+    res.status(401).json({ errorMsg: "Por favor vuelve a iniciar sesión" });
+    return false;
+  }
 }
