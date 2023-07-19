@@ -10,11 +10,12 @@ import {
   useTheme,
 } from "@mui/material";
 import NextLink from "next/link";
-import ViewDayIcon from '@mui/icons-material/ViewDay';
-import CalendarViewWeekIcon from '@mui/icons-material/CalendarViewWeek';
-import CalendarMonthIcon from '@mui/icons-material/CalendarMonth';
+import ViewDayIcon from "@mui/icons-material/ViewDay";
+import CalendarViewWeekIcon from "@mui/icons-material/CalendarViewWeek";
+import CalendarMonthIcon from "@mui/icons-material/CalendarMonth";
 import SidebarLayout from "@/layouts/SidebarLayout";
-import LocalLaundryServiceIcon from '@mui/icons-material/LocalLaundryService';
+import LocalLaundryServiceIcon from "@mui/icons-material/LocalLaundryService";
+import RequestQuoteIcon from "@mui/icons-material/RequestQuote";
 import { validateServerSideSession } from "lib/auth";
 import { getSession } from "next-auth/react";
 import Footer from "@/components/Footer";
@@ -49,7 +50,8 @@ const AvatarWrapperNormal = styled(Avatar)(
   `
 );
 
-function Reportes() {
+function Reportes({ session }) {
+  const { user } = session;
   const theme = useTheme();
   return (
     <>
@@ -182,6 +184,36 @@ function Reportes() {
               </Card>
             </NextLink>
           </Grid>
+          {user?.role === "ADMIN" && (
+            <Grid xs={12} sm={6} md={4} item>
+              <NextLink href="/reportes/ingresos">
+                <Card
+                  sx={{
+                    px: 1,
+                    cursor: "pointer",
+                    "&:hover": {
+                      background: theme.palette.grey[300],
+                    },
+                  }}
+                >
+                  <CardContent>
+                    <AvatarWrapperError>
+                      <RequestQuoteIcon />
+                    </AvatarWrapperError>
+                    <Box
+                      sx={{
+                        pt: 3,
+                      }}
+                    >
+                      <Typography variant="h3" gutterBottom noWrap>
+                        Ingresos
+                      </Typography>
+                    </Box>
+                  </CardContent>
+                </Card>
+              </NextLink>
+            </Grid>
+          )}
         </Grid>
       </Container>
       <Footer />

@@ -1,4 +1,9 @@
-import { getSummaryByDay, getSummaryByRange } from "../../../lib/data/Reports";
+import {
+  getSummaryByDay,
+  getSummaryByRange,
+  getProfitsReport,
+} from "../../../lib/data/Reports";
+import { validateUserPermissions } from "../auth/authUtils";
 async function getSummaryAPI(req, res) {
   try {
     const { filter, start, end } = req.query;
@@ -6,11 +11,21 @@ async function getSummaryAPI(req, res) {
     switch (filter) {
       case "day":
         data = await getSummaryByDay(start);
+        res.status(200).json({ data });
         break;
-      case "range": data = await getSummaryByRange(start, end); 
-      break;
+      case "range":
+        data = await getSummaryByRange(start, end);
+        res.status(200).json({ data });
+        break;
+
+      case "profits": {
+        if(await validateUserPermissions(req, res, ["ADMIN"])){
+        data = await getProfitsReport(start);
+        res.status(200).json({ data });
+        }
+        return;
+      }
     }
-    res.status(200).json({ data });
   } catch (e) {
     console.error(e);
     res.status(500).json({
