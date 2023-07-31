@@ -1,11 +1,14 @@
+import million from 'million/compiler';
+
 /** @type {import('next').NextConfig} */
 const withTM = require("next-transpile-modules")([
   "@babel/preset-react",
 ]);
 
 
-module.exports = withTM({
+module.exports = million.next(withTM({
   // your custom config goes here
+  reactStrictMode: true,
   images: {
     remotePatterns: [
       {
@@ -20,4 +23,4 @@ module.exports = withTM({
       },
     ],
   },
-});
+}), { auto: true});
