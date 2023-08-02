@@ -78,6 +78,14 @@ const ActivityReportTable: React.FC<ActivityReportTableProps> = ({
               >
                 Pagos
               </TableCell>
+              <TableCell
+                align="center"
+                width={"8%"}
+                style={colorStyle?.currentRentsStyle}
+                colSpan={1}
+              >
+                COL.
+              </TableCell>
             </TableRow>
             <TableRow>
               <TableCell align="center" style={cellStyle}>
@@ -124,6 +132,9 @@ const ActivityReportTable: React.FC<ActivityReportTableProps> = ({
               </TableCell>
               <TableCell align="center" style={cellStyle}>
                 Realizados
+              </TableCell>
+              <TableCell align="center" style={cellStyle}>
+                
               </TableCell>
             </TableRow>
             {data?.deliveries?.days?.map((day, i) => (
@@ -253,6 +264,16 @@ const ActivityReportTable: React.FC<ActivityReportTableProps> = ({
                     {data?.payments.days[i].done}
                   </Typography>
                 </TableCell>
+                <TableCell align="center" style={cellStyle}>
+                  <Typography
+                    variant="body1"
+                    color="text.primary"
+                    gutterBottom
+                    noWrap
+                  >
+                    {data?.currentRents.days[i].current}
+                  </Typography>
+                </TableCell>
               </TableRow>
             ))}
 
@@ -320,6 +341,11 @@ const ActivityReportTable: React.FC<ActivityReportTableProps> = ({
               <TableCell align="center" style={colorStyle?.paymentStyle}>
                 <Typography variant="h5" gutterBottom noWrap>
                   {data?.payments.totalData.done}
+                </Typography>
+              </TableCell>
+              <TableCell align="center" style={colorStyle?.currentRentsStyle}>
+                <Typography variant="h5" gutterBottom noWrap>
+                  {data?.currentRents ? parseInt(data?.currentRents.average):0}
                 </Typography>
               </TableCell>
             </TableRow>
