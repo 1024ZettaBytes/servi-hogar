@@ -1,15 +1,11 @@
 import {
-  saveRentData,
-  getRentsData,
-  getPastRentsData,
+  generateCurrentRentLogData
 } from "../../../lib/data/Rents";
 
 async function generateRecordAPI(req, res) {
   try {
-    /*const rents =
-      filter === "current" ? await getRentsData() : await getPastRentsData();*/
-    const currentDate = new Date();
-    console.log("/generateRecord called at: ", currentDate.toString());
+    console.log("/generateRecord called at: ", new Date().toString());
+    await generateCurrentRentLogData();
     res.status(200).json({ data: { message: "OK" } });
   } catch (e) {
     console.error(e);
