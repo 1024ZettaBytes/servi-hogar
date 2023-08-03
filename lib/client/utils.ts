@@ -8,6 +8,7 @@ import utc from 'dayjs/plugin/utc';
 import tz from 'dayjs/plugin/timezone';
 import objectSupport from 'dayjs/plugin/objectSupport';
 import { MAPS_BASE_URL } from 'lib/consts/OBJ_CONTS';
+import { format } from 'date-fns';
 dayjs.extend(utc);
 dayjs.extend(tz);
 dayjs.extend(objectSupport);
@@ -78,6 +79,11 @@ export const dateFromString = (dateString: String): Date=>{
   const [year, month, day] = dateString.split('-');
   return new Date(+year, +month - 1, +day);
 }
+
+export const dateToPlainString = (date: Date): String=>{
+  return format(date, "dd-MM-yyyy");
+}
+
 export const addDaysToDate = (date: Date, days: number): Date => {
   var result = new Date(date);
   result.setDate(result.getDate() + days);
