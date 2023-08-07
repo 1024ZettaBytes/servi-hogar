@@ -271,7 +271,7 @@ const ActivityReportTable: React.FC<ActivityReportTableProps> = ({
                     gutterBottom
                     noWrap
                   >
-                    {data?.currentRents.days[i].current}
+                    {data?.currentRents.days[i].current || "N/A"}
                   </Typography>
                 </TableCell>
               </TableRow>
@@ -345,7 +345,7 @@ const ActivityReportTable: React.FC<ActivityReportTableProps> = ({
               </TableCell>
               <TableCell align="center" style={colorStyle?.currentRentsStyle}>
                 <Typography variant="h5" gutterBottom noWrap>
-                  {data?.currentRents ? parseInt(data?.currentRents.average):0}
+                  {data?.currentRents?.average ? parseInt(data?.currentRents?.average): "N/A"}
                 </Typography>
               </TableCell>
             </TableRow>
