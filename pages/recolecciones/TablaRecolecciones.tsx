@@ -75,7 +75,15 @@ const applyFilters = (pickupsList: any[], filter: string): any[] => {
               compareStringsForFilter(filter, value["customer"].name);
             const matchNumber =
               value["num"] && compareStringsForFilter(filter, value["num"]);
-            return matchNumber || matchCustomerName;
+              const matchMachineNum =
+              value["machine"].machineNum &&
+              compareStringsForFilter(
+                filter,
+                parseInt(value["machine"].machineNum) < 1000
+                  ? ("00" + value["machine"].machineNum).slice(-3)
+                  : value["machine"].machineNum
+              );
+            return matchNumber || matchCustomerName || matchMachineNum;
           }
           case "status": {
             const matchText =

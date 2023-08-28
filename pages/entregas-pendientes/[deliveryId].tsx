@@ -77,7 +77,11 @@ function RentaRapida() {
   });
   const { machinesData, machinesError } = useGetMachinesForRent(getFetcher);
   const { citiesList, citiesError } = useGetCities(getFetcher);
-  const [leftAccesories, setLeftAccesories] = useState<any>({});
+  const [leftAccesories, setLeftAccesories] = useState<any>({
+    MANG_CARGA: true,
+    MANG_DESCAARGA: true,
+    CODO_PVC: false,
+  });
   const [attached, setAttached] = useState<any>({
     contract: { file: null, url: null },
     front: { file: null, url: null },
@@ -591,7 +595,9 @@ function RentaRapida() {
                                   multiline
                                   maxRows={5}
                                   fullWidth={true}
-                                  value={customerToEdit?.currentResidence?.maps || ""}
+                                  value={
+                                    customerToEdit?.currentResidence?.maps || ""
+                                  }
                                   onChange={(e) => {
                                     setCustomerToEdit({
                                       ...customerToEdit,
@@ -602,36 +608,44 @@ function RentaRapida() {
                                     });
                                   }}
                                 />
-                                {!isOk.residence &&
-                                <>
-                                <br />
-                                <br />
-                                <LoadingButton
-                                  color="success"
-                                  loading={isGettingLocation}
-                                  startIcon={<MyLocationIcon />}
-                                  variant="contained"
-                                  onClick={()=>{
-                                    setIsGettingLocation(true);
-                                    if('geolocation' in navigator) {
-                                      // Retrieve latitude & longitude coordinates from `navigator.geolocation` Web API
-                                      navigator.geolocation.getCurrentPosition(({ coords }) => {
-                                          const { latitude, longitude } = coords;
-                                          setCustomerToEdit({
-                                            ...customerToEdit,
-                                            currentResidence: {
-                                              ...customerToEdit.currentResidence,
-                                              maps: replaceCoordinatesOnUrl({latitude,longitude}),
-                                            },
-                                          });
-                                          setIsGettingLocation(false);
-                                        
-                                  })
-                                  }}}
-                                >
-                                  Usar mi ubicación
-                                </LoadingButton>
-                                </>}
+                                {!isOk.residence && (
+                                  <>
+                                    <br />
+                                    <br />
+                                    <LoadingButton
+                                      color="success"
+                                      loading={isGettingLocation}
+                                      startIcon={<MyLocationIcon />}
+                                      variant="contained"
+                                      onClick={() => {
+                                        setIsGettingLocation(true);
+                                        if ("geolocation" in navigator) {
+                                          // Retrieve latitude & longitude coordinates from `navigator.geolocation` Web API
+                                          navigator.geolocation.getCurrentPosition(
+                                            ({ coords }) => {
+                                              const {
+                                                latitude,
+                                                longitude,
+                                              } = coords;
+                                              setCustomerToEdit({
+                                                ...customerToEdit,
+                                                currentResidence: {
+                                                  ...customerToEdit.currentResidence,
+                                                  maps: replaceCoordinatesOnUrl(
+                                                    { latitude, longitude }
+                                                  ),
+                                                },
+                                              });
+                                              setIsGettingLocation(false);
+                                            }
+                                          );
+                                        }
+                                      }}
+                                    >
+                                      Usar mi ubicación
+                                    </LoadingButton>
+                                  </>
+                                )}
                               </Grid>
                               {!nextButtonEnabled && (
                                 <Grid item lg={6} m={1}>
@@ -719,7 +733,9 @@ function RentaRapida() {
                                     deliveryDate ||
                                     convertDateToLocal(new Date(delivery.date))
                                   }
-                                  minDate={setDateToInitial(convertDateToLocal(new Date()))}
+                                  minDate={setDateToInitial(
+                                    convertDateToLocal(new Date())
+                                  )}
                                   maxDate={new Date()}
                                   onChange={(newValue) => {
                                     setDeliveryDate(newValue);
