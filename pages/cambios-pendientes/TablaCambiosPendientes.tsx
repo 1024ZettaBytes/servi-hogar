@@ -437,6 +437,7 @@ const TablaCambiosPendientes: FC<TablaCambiosPendientesProps> = ({
                             }}
                             color="inherit"
                             size="small"
+                            disabled={!change.operator}
                           >
                             <CheckIcon fontSize="medium" />
                           </IconButton>

@@ -46,6 +46,7 @@ const getStatusDescription = (
     case MACHINE_STATUS_LIST.RENTADO:
       return rent ? `Renta #${rent?.num}` : notAvailable;
     case MACHINE_STATUS_LIST.VEHI:
+    case MACHINE_STATUS_LIST.REC:
       return vehicle
         ? vehicle.operator.name
         : notAvailable;
