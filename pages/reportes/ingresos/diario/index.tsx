@@ -1,12 +1,10 @@
 import Head from "next/head";
-import { useTheme } from "@material-ui/core/styles";
 import { getSession } from "next-auth/react";
 import { useState } from "react";
 import SidebarLayout from "@/layouts/SidebarLayout";
-import { validateServerSideSession } from "../../../lib/auth";
+import { validateServerSideSession } from "../../../../lib/auth";
 import PageHeader from "@/components/PageHeader";
 import PageTitleWrapper from "@/components/PageTitleWrapper";
-
 import {
   Card,
   Container,
@@ -16,43 +14,75 @@ import {
   Box,
   CardHeader,
   Divider,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
   Typography,
   TextField,
   CardContent,
 } from "@mui/material";
 import Footer from "@/components/Footer";
 import { DesktopDatePicker } from "@mui/x-date-pickers";
-import { getFetcher, useGetReport } from "../../api/useRequest";
+import { getFetcher, useGetReport } from "../../../api/useRequest";
+import CloudDownloadIcon from "@mui/icons-material/CloudDownload";
 import {
   capitalizeFirstLetter,
   convertDateToLocal,
   convertDateToTZ,
   formatTZDate,
+  printElement,
+  sleep,
 } from "lib/client/utils";
-import ReportCard from "./ReportCard";
-
-import TrendingUpIcon from "@material-ui/icons/TrendingUp";
-import AccountBalanceWalletIcon from '@mui/icons-material/AccountBalanceWallet';
 import NextBreadcrumbs from "@/components/Shared/BreadCrums";
+import numeral from "numeral";
 
-function ProfitsReport() {
-  const paths = ["Inicio", "Reportes", "Ingresos"];
-  const theme = useTheme();
+const cellStyle = { border: "2px solid #374246" };
+const headerStyle = {
+  ...cellStyle,
+  backgroundColor: "#35AEE2",
+  color: "black",
+  fontWeight: "bold",
+};
+
+function DayReport() {
+  const paths = ["Inicio", "Reportes", "Ingresos", "Diario"];
   const [selectedDate, setSelectedDate] = useState<Date>(
     convertDateToLocal(new Date())
   );
+  const [isPrinting, setIsPrinting] = useState<boolean>(false);
   const { reportData, reportError } = useGetReport(
     getFetcher,
-    "profits",
+    "profits-range",
+    convertDateToTZ(selectedDate),
     convertDateToTZ(selectedDate)
   );
   const generalError = reportError;
   const completeData = reportData;
-
+  const handleClickOpen = async () => {
+    setIsPrinting(true);
+    await sleep(1000);
+    const fileName = `INGRESOS_DIARIO_${formatTZDate(
+      selectedDate,
+      "DD-MM-YYYY"
+    )}.pdf`;
+    await printElement(document, fileName);
+    setIsPrinting(false);
+  };
   const handleOnSelectDate = (newValue) => {
     if (newValue && newValue.toString() !== "Invalid Date") {
       setSelectedDate(newValue);
     }
+  };
+  const button = {
+    text: "Descargar PDF",
+    onClick: handleClickOpen,
+    startIcon: <CloudDownloadIcon />,
+    isLoading: isPrinting,
+    variant: "outlined",
+    color: "info",
   };
   const getHeader = () => {
     const weekDay = capitalizeFirstLetter(formatTZDate(selectedDate, "dddd"));
@@ -64,10 +94,14 @@ function ProfitsReport() {
   return (
     <>
       <Head>
-        <title>Reportes | Ingresos</title>
+        <title>Ingresos | Diario</title>
       </Head>
       <PageTitleWrapper>
-        <PageHeader title={"Reporte de Ingresos"} subtitle={""} />
+        <PageHeader
+          title={"Reporte de Ingresos Diario"}
+          subtitle={""}
+          button={!generalError && completeData ? button : null}
+        />
         <NextBreadcrumbs paths={paths} lastLoaded={true} />
       </PageTitleWrapper>
       <Container maxWidth="lg">
@@ -124,6 +158,10 @@ function ProfitsReport() {
                   height={500}
                   animation="wave"
                 />
+              ) : reportData.groups.length === 0 ? (
+                <Alert severity="info">
+                  No hay registros para el día seleccionado
+                </Alert>
               ) : (
                 <div>
                   <CardHeader
@@ -134,58 +172,57 @@ function ProfitsReport() {
                       justifyContent: "space-between",
                       flexWrap: "wrap",
                     }}
-                    title={"INGRESOS"}
+                    title={"REPORTE INGRESOS DIARIO"}
                     subheader={getHeader()}
                   />
                   <Divider />
-                  <Grid container spacing={3} padding={2}>
-                    <Grid item lg={3} sm={6} xs={12}>
-                      <ReportCard
-                        primary={reportData?.day?.SUM}
-                        secondary="Del día"
-                        color={theme.palette.success.main}
-                        footerData=""
-                        iconPrimary={AccountBalanceWalletIcon}
-                        iconFooter={TrendingUpIcon}
-                        refTo="ingresos/diario"
-                      />
-                    </Grid>
-                    <Grid item lg={12} />
-                    <Grid item lg={4} sm={6} xs={12}>
-                      <ReportCard
-                        primary={reportData?.week?.SUM}
-                        secondary={`De la semana ${reportData?.week?.start} - ${reportData?.week?.end}`}
-                        color={theme.palette.warning.dark}
-                        footerData=""
-                        iconPrimary={AccountBalanceWalletIcon}
-                        iconFooter={TrendingUpIcon}
-                        refTo="ingresos/semanal"
-                      />
-                    </Grid>
-                    <Grid item lg={12} />
-                    <Grid item lg={6} sm={6} xs={12}>
-                      <ReportCard
-                        primary={reportData?.month?.SUM}
-                        secondary={`Del mes de ${reportData?.month?.name}`}
-                        color={theme.palette.success.contrastText}
-                        footerData=""
-                        iconPrimary={AccountBalanceWalletIcon}
-                        iconFooter={TrendingUpIcon}
-                        refTo="ingresos/mensual"
-                      />
-                    </Grid>
-                    <Grid item lg={12} />
-                    <Grid item lg={8} sm={6} xs={12}>
-                      <ReportCard
-                        primary={reportData?.year?.SUM}
-                        secondary={`Del año ${reportData?.year?.number}`}
-                        color={theme.palette.info.dark}
-                        footerData=""
-                        iconFooter={TrendingUpIcon}
-                      />
-                    </Grid>
-                  </Grid>
+                  <TableContainer>
+                    <Table>
+                      <TableHead>
+                        <TableRow>
+                          {reportData?.groups?.map((group) => (
+                            <TableCell
+                              key={group.account}
+                              align="center"
+                              style={headerStyle}
+                            >
+                              {group.account}
+                            </TableCell>
+                          ))}
+                        </TableRow>
+                      </TableHead>
+                      <TableBody>
+                        <TableRow>
+                          {reportData?.groups?.map((group) => (
+                            <TableCell
+                              key={group.account + group.days[0].date}
+                              align="center"
+                              style={cellStyle}
+                            >
+                              <Typography
+                                variant="body1"
+                                fontWeight="bold"
+                                color="text.primary"
+                                gutterBottom
+                                noWrap
+                              >
+                                {numeral(group.days[0].done).format(
+                                  `$${group.days[0].done}0,0.00`
+                                )}
+                              </Typography>
+                            </TableCell>
+                          ))}
+                        </TableRow>
+                      </TableBody>
+                    </Table>
+                  </TableContainer>
                   <Box p={2}></Box>
+                  <Typography width="100%" align="center" padding="20px" variant="h2" style={{ color: "black" }}>
+                    TOTAL:{" "}
+                    {numeral(reportData.TOTAL).format(
+                      `$${reportData.TOTAL}0,0.00`
+                    )}
+                  </Typography>
                 </div>
               )}
             </Card>
@@ -197,10 +234,10 @@ function ProfitsReport() {
   );
 }
 
-ProfitsReport.getLayout = (page) => <SidebarLayout>{page}</SidebarLayout>;
+DayReport.getLayout = (page) => <SidebarLayout>{page}</SidebarLayout>;
 
 export async function getServerSideProps({ req, resolvedUrl }) {
   let props = await validateServerSideSession(getSession, req, resolvedUrl);
   return props;
 }
-export default ProfitsReport;
+export default DayReport;

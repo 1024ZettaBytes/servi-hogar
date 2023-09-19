@@ -483,6 +483,7 @@ const TablaRecoleccionesPendientes: FC<TablaRecoleccionesPendientesProps> = ({
                             }}
                             color="inherit"
                             size="small"
+                            disabled={!pickup.operator}
                           >
                             <CheckIcon fontSize="medium" />
                           </IconButton>

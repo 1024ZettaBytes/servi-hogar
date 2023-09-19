@@ -451,6 +451,7 @@ const TablaEntregasPendientes: FC<TablaEntregasPendientesProps> = ({
                             }}
                             color="inherit"
                             size="small"
+                            disabled={!delivery.operator}
                           >
                             <CheckIcon fontSize="medium" />
                           </IconButton>

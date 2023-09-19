@@ -2,6 +2,7 @@ import {
   getSummaryByDay,
   getSummaryByRange,
   getProfitsReport,
+  getProfitsByRange
 } from "../../../lib/data/Reports";
 import { validateUserPermissions } from "../auth/authUtils";
 async function getSummaryAPI(req, res) {
@@ -21,6 +22,13 @@ async function getSummaryAPI(req, res) {
       case "profits": {
         if(await validateUserPermissions(req, res, ["ADMIN"])){
         data = await getProfitsReport(start);
+        res.status(200).json({ data });
+        }
+        return;
+      }
+      case "profits-range": {
+        if(await validateUserPermissions(req, res, ["ADMIN"])){
+        data = await getProfitsByRange(start, end);
         res.status(200).json({ data });
         }
         return;
