@@ -67,10 +67,10 @@ const applyFilters = (paymentsList: any[], filter: string): any[] => {
               );
             return matchFormatedDate;
           }
-          case "customer": {
+          case "customers": {
             const matchCustomerName =
-              payment.customer &&
-              compareStringsForFilter(filter, payment.customer.name);
+              payment.customers &&
+              compareStringsForFilter(filter, payment.customers.name);
             return matchCustomerName;
           }
           case "description": {
@@ -200,7 +200,7 @@ const TablaPagos: FC<TablaPagosProps> = ({ paymentsList }) => {
                         gutterBottom
                         noWrap
                       >
-                        {payment?.customer?.name}
+                        {payment?.customers?.name}
                       </Typography>
                     </TableCell>
                     <TableCell align="center">

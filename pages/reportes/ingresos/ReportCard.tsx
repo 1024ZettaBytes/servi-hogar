@@ -1,6 +1,7 @@
 import React from "react";
-import { Card, CardContent, Grid, Typography } from "@mui/material";
+import { Card, CardContent, Grid, Tooltip, Typography } from "@mui/material";
 import numeral from "numeral";
+import NextLink from "next/link";
 
 const ReportCard = (props) => {
   const {
@@ -10,10 +11,21 @@ const ReportCard = (props) => {
     color,
     footerData,
     iconFooter,
+    refTo,
   } = props;
 
   const IconPrimary = iconPrimary;
-  const primaryIcon = iconPrimary ? <IconPrimary fontSize="large" /> : null;
+  const primaryIcon = iconPrimary ? (
+    <IconPrimary
+      style={{ cursor: "pointer" }}
+      fontSize="large"
+      sx={{
+        "&:hover": {
+          background: "gray",
+        },
+      }}
+    />
+  ) : null;
 
   const IconFooter = iconFooter;
   const footerIcon = iconFooter ? <IconFooter /> : null;
@@ -28,11 +40,17 @@ const ReportCard = (props) => {
               {numeral(primary).format(`$${primary}0,0.00`)}
             </Typography>
           </Grid>
-          <Grid item>
-            <Typography variant="h2" style={{ color: color }}>
-              {primaryIcon}
-            </Typography>
-          </Grid>
+          {primaryIcon && (
+            <Grid item>
+              <Typography variant="h2" style={{ color: color }}>
+                <NextLink href={refTo || ""}>
+                  <Tooltip title="Ver detalle (bancario)" arrow>
+                    {primaryIcon}
+                  </Tooltip>
+                </NextLink>
+              </Typography>
+            </Grid>
+          )}
         </Grid>
       </CardContent>
       <div style={{ background: color }}>

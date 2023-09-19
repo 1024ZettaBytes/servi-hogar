@@ -7,29 +7,41 @@ import styles from "./breadcrum.module.css";
 const getUrlPaths = (paths) => {
   let pathsArray = ["/"];
   for (let i = 1; i < paths.length; i++) {
-    if(paths[i]){ 
-    pathsArray.push("/"+paths[i].replace(" ","-")?.toLowerCase());
+    if (paths[i]) {
+      pathsArray.push(
+        pathsArray[i - 1] + paths[i].replace(" ", "-")?.toLowerCase() + "/"
+      );
     }
   }
   return pathsArray;
 };
 export default function NextBreadcrumbs({ paths, lastLoaded }) {
-const urlPaths = getUrlPaths(paths);
+  const urlPaths = getUrlPaths(paths);
+  console.log("URL APTHS: ");
+  console.log(urlPaths);
   return (
     <Breadcrumbs aria-label="breadcrumb">
       {paths.map((path, i) => (
-        <Crumb text={path} href={urlPaths[i]} key={i} last={i === paths.length - 1} lastLoaded={lastLoaded} />
+        <Crumb
+          text={path}
+          href={urlPaths[i]}
+          key={i}
+          last={i === paths.length - 1}
+          lastLoaded={lastLoaded}
+        />
       ))}
     </Breadcrumbs>
   );
 }
 
-function Crumb({ text, href, last = false, lastLoaded}) {
+function Crumb({ text, href, last = false, lastLoaded }) {
   if (last) {
-    return (
-      lastLoaded ?  <Typography className={styles.bread_text_last} color="text.primary">
+    return lastLoaded ? (
+      <Typography className={styles.bread_text_last} color="text.primary">
         {text}
-      </Typography> : <Skeleton variant="text" sx={{ fontSize: '1rem', width: '100px'}}  />
+      </Typography>
+    ) : (
+      <Skeleton variant="text" sx={{ fontSize: "1rem", width: "100px" }} />
     );
   }
 
