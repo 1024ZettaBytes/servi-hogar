@@ -17,8 +17,6 @@ const getUrlPaths = (paths) => {
 };
 export default function NextBreadcrumbs({ paths, lastLoaded }) {
   const urlPaths = getUrlPaths(paths);
-  console.log("URL APTHS: ");
-  console.log(urlPaths);
   return (
     <Breadcrumbs aria-label="breadcrumb">
       {paths.map((path, i) => (
