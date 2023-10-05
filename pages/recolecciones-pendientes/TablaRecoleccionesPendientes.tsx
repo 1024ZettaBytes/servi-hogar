@@ -571,7 +571,7 @@ const TablaRecoleccionesPendientes: FC<TablaRecoleccionesPendientesProps> = ({
         <ImagesModal
           open={openImages}
           imagesObj={selectedImages}
-          title={"Fotos de la recolección"}
+          title={"Fotos de la renta"}
           text=""
           onClose={handleOnCloseImages}
         />
