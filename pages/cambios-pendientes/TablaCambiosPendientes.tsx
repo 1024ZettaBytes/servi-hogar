@@ -38,6 +38,10 @@ import ModifyChangeModal from "../../src/components/ModifyChangeModal";
 import OperatorModal from "@/components/OperatorModal";
 import { getFormatForChange } from "../../lib/consts/OBJ_CONTS";
 import FormatModal from "@/components/FormatModal";
+import ImageSearchIcon from "@mui/icons-material/ImageSearch";
+import LocationOnIcon from "@mui/icons-material/LocationOn";
+import ImagesModal from "@/components/ImagesModal";
+
 
 interface TablaCambiosPendientesProps {
   userRole: string;
@@ -87,8 +91,6 @@ const applyFilters = (changesList: any[], filter: string): any[] => {
               value["customer"] &&
               value["customer"].name &&
               compareStringsForFilter(filter, value["customer"].name);
-            const matchNumber =
-              value["num"] && compareStringsForFilter(filter, value["num"]);
             const matchCityOrSector =
               value["customer"]?.currentResidence?.city?.name &&
               value["customer"]?.currentResidence?.sector?.name &&
@@ -104,7 +106,7 @@ const applyFilters = (changesList: any[], filter: string): any[] => {
                   filter,
                   value["customer"].currentResidence.suburb
                 ));
-            return matchNumber || matchCustomerName || matchCityOrSector;
+            return matchCustomerName || matchCityOrSector;
           }
           case "status": {
             const matchText =
@@ -150,6 +152,8 @@ const TablaCambiosPendientes: FC<TablaCambiosPendientesProps> = ({
   const [formatText, setFormatText] = useState<string>("");
   const [isDeleting, setIsDeleting] = useState(false);
   const [changeToEdit, setChangeToEdit] = useState<any>(null);
+  const [openImages, setOpenImages] = useState<boolean>(false);
+  const [selectedImages, setSelectedImages] = useState<null>();
   const [idToCancel, setIdToCancel] = useState<string>(null);
   const [page, setPage] = useState<number>(0);
   const [limit, setLimit] = useState<number>(30);
@@ -167,6 +171,10 @@ const TablaCambiosPendientes: FC<TablaCambiosPendientesProps> = ({
         autoHideDuration: 1500,
       });
     }
+  };
+  const handleOnCloseImages = () => {
+    setOpenImages(false);
+    setSelectedImages(null);
   };
   const handleSearchChange = (e: ChangeEvent<HTMLInputElement>): void => {
     const value = e.target.value;
@@ -276,9 +284,9 @@ const TablaCambiosPendientes: FC<TablaCambiosPendientesProps> = ({
           <Table>
             <TableHead>
               <TableRow>
-                <TableCell align="center">Renta</TableCell>
-                <TableCell align="center">#</TableCell>
-                <TableCell align="center"># del día</TableCell>
+                <TableCell align="center">Equipo</TableCell>
+                <TableCell align="center">Fotos</TableCell>
+                <TableCell align="center">Ubicación</TableCell>
                 <TableCell align="center">Cliente</TableCell>
                 <TableCell align="center">Colonia-Sector</TableCell>
                 <TableCell align="center">Estado</TableCell>
@@ -301,30 +309,54 @@ const TablaCambiosPendientes: FC<TablaCambiosPendientesProps> = ({
                         gutterBottom
                         noWrap
                       >
-                        {change?.rent?.num}
+                        {change?.rent?.machine?.machineNum}
                       </Typography>
                     </TableCell>
                     <TableCell align="center">
-                      <Typography
-                        variant="body1"
-                        fontWeight="bold"
-                        color="text.primary"
-                        gutterBottom
-                        noWrap
-                      >
-                        {change?.totalNumber}
-                      </Typography>
+                      {change?.rent?.imagesUrl ? (
+                        <Tooltip title="Ver fotos" arrow>
+                          <IconButton
+                            onClick={() => {
+                              setSelectedImages(change.rent.imagesUrl);
+                              setOpenImages(true);
+                            }}
+                            sx={{
+                              "&:hover": {
+                                background: theme.colors.primary.lighter,
+                              },
+                              color: theme.palette.primary.main,
+                            }}
+                            color="inherit"
+                            size="small"
+                          >
+                            <ImageSearchIcon fontSize="small" />
+                          </IconButton>
+                        </Tooltip>
+                      ) : (
+                        "N/A"
+                      )}
                     </TableCell>
                     <TableCell align="center">
-                      <Typography
-                        variant="body1"
-                        fontWeight="bold"
-                        color="text.secondary"
-                        gutterBottom
-                        noWrap
-                      >
-                        {change?.dayNumber}
-                      </Typography>
+                      {change?.rent?.customer?.currentResidence?.maps ? (
+                        <Tooltip title="Ver ubicación" arrow>
+                          <IconButton
+                            href={`${change?.rent?.customer?.currentResidence?.maps}`}
+                            target="_blank"
+                            sx={{
+                              "&:hover": {
+                                background: theme.colors.primary.lighter,
+                              },
+                              color: theme.palette.info.dark,
+                            }}
+                            color="inherit"
+                            size="small"
+                          >
+                            <LocationOnIcon fontSize="small" />
+                          </IconButton>
+                        </Tooltip>
+                      ) : (
+                        "N/A"
+                      )}
                     </TableCell>
                     <TableCell align="center">
                       <Typography
@@ -525,6 +557,15 @@ const TablaCambiosPendientes: FC<TablaCambiosPendientesProps> = ({
           />
         </Box>
       </Card>
+      {openImages && selectedImages && (
+        <ImagesModal
+          open={openImages}
+          imagesObj={selectedImages}
+          title={"Fotos de la renta"}
+          text=""
+          onClose={handleOnCloseImages}
+        />
+      )}
       {modifyModalIsOpen && (
         <ModifyChangeModal
           open={modifyModalIsOpen}
