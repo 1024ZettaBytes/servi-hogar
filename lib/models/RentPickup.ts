@@ -53,7 +53,7 @@ const RentPickupSchema = new Schema<IRentPickup>({
   operator: { type: Schema.Types.ObjectId, default:null, ref: 'users' },
   createdAt: { type: Date, required: true },
   updatedAt: { type: Date, required: true },
-  createdBy: { type: Schema.Types.ObjectId, required: true, ref: 'users' },
+  createdBy: { type: Schema.Types.ObjectId, default: null, ref: 'users' },
   lastUpdatedBy: { type: Schema.Types.ObjectId, required: true, ref: 'users' }
 });
 
