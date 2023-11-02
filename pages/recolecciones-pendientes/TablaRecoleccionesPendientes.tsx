@@ -299,6 +299,7 @@ const TablaRecoleccionesPendientes: FC<TablaRecoleccionesPendientesProps> = ({
                 <TableCell align="center"># Equipo</TableCell>
                 <TableCell align="center">Fotos</TableCell>
                 <TableCell align="center">Ubicación</TableCell>
+                <TableCell align="center">Hora Rec.</TableCell>
                 <TableCell align="center">Cliente</TableCell>
                 <TableCell align="center">Colonia-Sector</TableCell>
                 <TableCell align="center">Estado</TableCell>
@@ -369,6 +370,19 @@ const TablaRecoleccionesPendientes: FC<TablaRecoleccionesPendientesProps> = ({
                       ) : (
                         "N/A"
                       )}
+                    </TableCell>
+                    <TableCell align="center">
+                      <Typography
+                        variant="body1"
+                        fontWeight="bold"
+                        color="text.primary"
+                        gutterBottom
+                        noWrap
+                      >
+                        {
+                          format(new Date(pickup?.rent?.startDate), "hh:mm")
+                        }
+                      </Typography>
                     </TableCell>
                     <TableCell align="center">
                       <Typography
