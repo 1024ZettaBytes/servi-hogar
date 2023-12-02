@@ -4,6 +4,7 @@ export interface IUser extends Document {
   id: string;
   name: string;
   role: Schema.Types.ObjectId;
+  isActive: boolean;
   password: string;
 }
 
@@ -20,6 +21,10 @@ const UserSchema = new Schema<IUser>({
     type: Schema.Types.ObjectId,
     ref:'roles',
     required: true
+  },
+  isActive: {
+    type: Boolean,
+    default: true
   },
   password: {
     type: String,
