@@ -514,10 +514,25 @@ function SidebarMenu({ userRole }) {
                   </NextLink>
                 </ListItem>
                 <ListItem component="div">
-                  <NextLink href="/" passHref>
+                  <NextLink href="/reportes" passHref>
                     <Button
                       className={
-                        currentRoute === "/management/profile/settings"
+                        currentRoute.includes("/reportes") ? "active" : ""
+                      }
+                      disableRipple
+                      component="a"
+                      onClick={closeSidebar}
+                      startIcon={<AssessmentIcon />}
+                    >
+                      Reportes
+                    </Button>
+                  </NextLink>
+                </ListItem>
+                { userRole === "ADMIN" && <ListItem component="div">
+                  <NextLink href="/usuarios" passHref>
+                    <Button
+                      className={
+                        currentRoute === "/usuarios"
                           ? "active"
                           : ""
                       }
@@ -530,6 +545,7 @@ function SidebarMenu({ userRole }) {
                     </Button>
                   </NextLink>
                 </ListItem>
+              }
                 <ListItem component="div">
                   <NextLink href="/reportes" passHref>
                     <Button

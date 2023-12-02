@@ -195,3 +195,15 @@ export const useGetOperators = (fetcher) => {
   const { data, error } = useSWR(ROUTES.ALL_OPERATORS, fetcher);
   return { operatorsList: data?.data, operatorsError: error };
 };
+
+// Users
+export const useGetUsers = (fetcher) => {
+  const { data, error } = useSWR(ROUTES.ALL_USERS, fetcher);
+  return { userList: data?.data, userError: error };
+};
+
+// Roles
+export const useGetRoles = (fetcher) => {
+  const { data, error } = useSWR(ROUTES.ALL_ROLES, fetcher);
+  return { rolesList: data?.data, rolesError: error };
+};

@@ -17,7 +17,7 @@ export default NextAuth({
         await connectToDatabase();
       }
       const userOnDb = await User.findById(tokenUser.id).populate("role").exec();
-      if(!userOnDb){
+      if(!userOnDb || !userOnDb.isActive){
         session.user={wasRemoved:true};
         return session;
       }
