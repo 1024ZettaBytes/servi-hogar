@@ -45,6 +45,7 @@ import { getFetcher, useGetPrices } from "pages/api/useRequest";
 
 interface TablaRentasActualesProps {
   className?: string;
+  userRole: any;
   rentList: any[];
 }
 
@@ -147,7 +148,7 @@ const statusMap = {
     color: "warning",
   },
   EN_RECOLECCION: {
-    text: "En proceso de recolección",
+    text: "En recolección",
     color: "error",
   },
   FINALIZADA: {
@@ -164,7 +165,10 @@ const getStatusLabel = (deliverStatus: string): JSX.Element => {
 
   return <Label color={color}>{text}</Label>;
 };
-const TablaRentasActuales: FC<TablaRentasActualesProps> = ({ rentList }) => {
+const TablaRentasActuales: FC<TablaRentasActualesProps> = ({
+  userRole,
+  rentList,
+}) => {
   const { enqueueSnackbar } = useSnackbar();
   const { prices } = useGetPrices(getFetcher);
   const [extendModalIsOpen, setExtendModalIsOpen] = useState(false);
@@ -316,8 +320,16 @@ const TablaRentasActuales: FC<TablaRentasActualesProps> = ({ rentList }) => {
             </TableHead>
             <TableBody>
               {paginatedRents.map((rent) => {
+                const canPickup = rent?.totalDays < 180 || userRole == "ADMIN";
                 return (
-                  <TableRow hover key={rent?._id}>
+                  <TableRow
+                    sx={
+                      !canPickup
+                        ? { backgroundColor: theme.colors.success.lighter }
+                        : {}
+                    }
+                    key={rent?._id}
+                  >
                     {/*<TableCell align="center">
                     <Typography
                       variant="body1"
@@ -449,7 +461,9 @@ const TablaRentasActuales: FC<TablaRentasActualesProps> = ({ rentList }) => {
                       <Tooltip title="Retirar" arrow>
                         <span>
                           <IconButton
-                            disabled={rent.status.id !== "RENTADO"}
+                            disabled={
+                              rent.status.id !== "RENTADO" || !canPickup
+                            }
                             onClick={() => {
                               handleOnPickupClick(rent?._id);
                             }}
@@ -503,7 +517,11 @@ const TablaRentasActuales: FC<TablaRentasActualesProps> = ({ rentList }) => {
             onRowsPerPageChange={handleLimitChange}
             page={page}
             rowsPerPage={limit}
-            rowsPerPageOptions={filteredRents.length > 100 ? [30, 100, filteredRents.length]:[30, 100]}
+            rowsPerPageOptions={
+              filteredRents.length > 100
+                ? [30, 100, filteredRents.length]
+                : [30, 100]
+            }
           />
         </Box>
       </Card>
@@ -587,10 +605,12 @@ const TablaRentasActuales: FC<TablaRentasActualesProps> = ({ rentList }) => {
 };
 
 TablaRentasActuales.propTypes = {
+  userRole: PropTypes.string.isRequired,
   rentList: PropTypes.array.isRequired,
 };
 
 TablaRentasActuales.defaultProps = {
+  userRole: "",
   rentList: [],
 };
 

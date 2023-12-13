@@ -13,7 +13,8 @@ import { useGetRents, getFetcher } from "../api/useRequest";
 
 import NextBreadcrumbs from "@/components/Shared/BreadCrums";
 
-function Rentas() {
+function Rentas({ session }) {
+  const { user } = session;
   const paths = ["Inicio", "Colocadas"];
   const { rentsData, rentsError } = useGetRents("current", getFetcher);
   const { pastRentsData, pastRentsError } = useGetRents("past", getFetcher);
@@ -46,7 +47,10 @@ function Rentas() {
               />
             ) : (
               <Card>
-                <TablaRentasActuales rentList={rentsData} />
+                <TablaRentasActuales
+                  userRole={user?.role}
+                  rentList={rentsData}
+                />
               </Card>
             )}
           </Grid>
