@@ -546,21 +546,7 @@ function SidebarMenu({ userRole }) {
                   </NextLink>
                 </ListItem>
               }
-                <ListItem component="div">
-                  <NextLink href="/reportes" passHref>
-                    <Button
-                      className={
-                        currentRoute.includes("/reportes") ? "active" : ""
-                      }
-                      disableRipple
-                      component="a"
-                      onClick={closeSidebar}
-                      startIcon={<AssessmentIcon />}
-                    >
-                      Reportes
-                    </Button>
-                  </NextLink>
-                </ListItem>
+
               </List>
             </SubMenuWrapper>
           </List>
