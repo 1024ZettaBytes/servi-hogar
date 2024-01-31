@@ -17,7 +17,12 @@ import {
 import Footer from "@/components/Footer";
 import { getFetcher, useGetMachinesReport } from "../../api/useRequest";
 import CloudDownloadIcon from "@mui/icons-material/CloudDownload";
-import { printElement, sleep, formatTZDate } from "lib/client/utils";
+import {
+  printElement,
+  sleep,
+  formatTZDate,
+  capitalizeFirstLetter,
+} from "lib/client/utils";
 import ActivityReportTable from "./MovementsReportable";
 const cellStyle = { border: "2px solid #374246" };
 const headerStyle = {
@@ -38,21 +43,37 @@ function DayReport() {
   const { reportData, reportError } = useGetMachinesReport(getFetcher);
   const generalError = reportError;
   const completeData = reportData;
+  const currentdate = new Date();
+  let prevMonthDate = new Date();
+  prevMonthDate.setMonth(prevMonthDate.getMonth() - 1);
 
-  const handleClickOpen = async () => {
+  const handleClickOpen = async (type) => {
     setIsPrinting(true);
     await sleep(1000);
     const fileName = `Equipos-Mensual_${formatTZDate(
-      new Date(),
+      type === "CURRENT" ? currentdate : prevMonthDate,
       "MMMM-YYYY"
     )}.pdf`;
-    await printElement(document, fileName);
+    await printElement(
+      document,
+      fileName,
+      type === "CURRENT" ? "reportTable" : "reportTable2"
+    );
     setIsPrinting(false);
   };
 
   const button = {
     text: "Descargar PDF",
-    onClick: handleClickOpen,
+    onClick: () => handleClickOpen("CURRENT"),
+    startIcon: <CloudDownloadIcon />,
+    isLoading: isPrinting,
+    variant: "outlined",
+    color: "info",
+  };
+
+  const button2 = {
+    text: "Descargar PDF",
+    onClick: () => handleClickOpen("PREV"),
     startIcon: <CloudDownloadIcon />,
     isLoading: isPrinting,
     variant: "outlined",
@@ -101,7 +122,7 @@ function DayReport() {
                         colorStyle={{
                           machineStyle,
                         }}
-                        data={reportData}
+                        data={reportData.current}
                       />
                     </Grid>
                   </Grid>
@@ -110,6 +131,57 @@ function DayReport() {
               )}
             </Card>
           </Grid>
+          { reportData?.prev && 
+          <>
+          <Grid item lg={12} marginTop={10}>
+            <PageTitleWrapper>
+              <PageHeader
+                title={`Reporte de ${capitalizeFirstLetter(
+                  formatTZDate(prevMonthDate, "MMMM")
+                )}`}
+                subtitle={""}
+                button={!generalError && completeData ? button2 : null}
+              />
+            </PageTitleWrapper>{" "}
+          </Grid>
+          <Grid item lg={12}>
+            <Card id="reportTable2">
+              {generalError ? (
+                <Alert severity="error">{reportError?.message}</Alert>
+              ) : !completeData ? (
+                <Skeleton
+                  variant="rectangular"
+                  width={"100%"}
+                  height={500}
+                  animation="wave"
+                />
+              ) : (
+                <div>
+                  <CardHeader
+                    sx={{
+                      display: "flex",
+                      textAlign: "center",
+                      alignItems: "center",
+                      justifyContent: "space-between",
+                      flexWrap: "wrap",
+                    }}
+                  />
+                  <Grid container p={0.5}>
+                    <Grid item lg={12}>
+                      <ActivityReportTable
+                        colorStyle={{
+                          machineStyle,
+                        }}
+                        data={reportData.prev}
+                      />
+                    </Grid>
+                  </Grid>
+                  <Box p={2}></Box>
+                </div>
+              )}
+            </Card>
+          </Grid>
+          </>}
         </Grid>
       </Container>
       <Footer />

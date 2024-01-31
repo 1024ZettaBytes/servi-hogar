@@ -1,11 +1,18 @@
 import {
   generateCurrentRentLogData
 } from "../../../lib/data/Rents";
+import { generateRecordData } from "../../../lib/data/Records";
 
 async function generateRecordAPI(req, res) {
   try {
     console.log("/generateRecord called at: ", new Date().toString());
-    await generateCurrentRentLogData();
+    const { id } = req.query;
+    if(id){
+      await generateRecordData(id);
+    }
+    else{
+      await generateCurrentRentLogData();
+    }
     res.status(200).json({ data: { message: "OK" } });
   } catch (e) {
     console.error(e);

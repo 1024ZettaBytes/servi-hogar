@@ -1,31 +1,37 @@
-import { getMachinesReportData } from "../../../../lib/data/Machines";
-import { validateUserPermissions } from "../../auth/authUtils";
+import { getMachinesReportData } from '../../../../lib/data/Machines';
+import { getLastRecordData } from '../../../../lib/data/Records';
+import { validateUserPermissions } from '../../auth/authUtils';
 
 async function getMachineStatusAPI(req, res) {
   try {
-    const machinesReport = await getMachinesReportData();
-    res.status(200).json({ data: machinesReport });
+    const prev = await getLastRecordData('MACHINES_REPORT');
+    const  current = await getMachinesReportData();
+    res.status(200).json({ data: {prev, current }});
   } catch (e) {
     console.error(e);
     res.status(500).json({
       errorMsg:
-        "Hubo un problema al consultar el reporte los equipos. Por favor intente de nuevo.",
+        'Hubo un problema al consultar el reporte los equipos. Por favor intente de nuevo.'
     });
   }
 }
 
 async function handler(req, res) {
-  const validRole = await validateUserPermissions(req, res, ["ADMIN", "AUX", "OPE"]);
+  const validRole = await validateUserPermissions(req, res, [
+    'ADMIN',
+    'AUX',
+    'OPE'
+  ]);
   if (validRole)
     switch (req.method) {
-      case "GET":
+      case 'GET':
         await getMachineStatusAPI(req, res);
         break;
-      case "POST":
+      case 'POST':
         break;
-      case "PUT":
+      case 'PUT':
         break;
-      case "DELETE":
+      case 'DELETE':
     }
 }
 
