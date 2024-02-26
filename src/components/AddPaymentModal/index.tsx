@@ -50,7 +50,7 @@ function AddPaymentModal(props) {
   const [selectedReason, setSelectedReason] = useState<any>(null);
   const [selectedMethod, setSelectedMethod] = useState<any>(null);
   const [account, setAccount] = useState<string>(null);
-  const [paymentDate, setPaymentDate] = useState<Date>(convertDateToLocal(new Date()));
+  const [paymentDate, setPaymentDate] = useState<Date>(null);
   const [selectedAmount, setSelectedAmount] = useState<any>(null);
   const [selectedFolio, setSelectedFolio] = useState<any>(null);
   const [attached, setAttached] = useState<any>({
@@ -463,7 +463,7 @@ function AddPaymentModal(props) {
                               <LoadingButton
                                 loading={isSubmitting}
                                 variant="contained"
-                                disabled={customerError || !paymentDate || (paymentDate.toString()==="Invalid Date")}
+                                disabled={customerError ||  (index === 2 && !paymentDate) || (index === 2 && paymentDate.toString()==="Invalid Date")}
                                 type="submit"
                                 sx={{ mt: 1, mr: 1 }}
                               >

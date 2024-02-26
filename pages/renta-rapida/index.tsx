@@ -63,12 +63,12 @@ const defaultData = () => {
       usePromo: true
     },
     deliveryTime: {
-      date: convertDateToLocal(addDaysToDate(new Date(), 1)),
+      date: convertDateToLocal(new Date()),
       timeOption: "any",
       fromTime: defaultInitialDate(
-        convertDateToLocal(addDaysToDate(new Date(), 1))
+        convertDateToLocal(new Date())
       ),
-      endTime: defaultEndDate(convertDateToLocal(addDaysToDate(new Date(), 1))),
+      endTime: defaultEndDate(convertDateToLocal(new Date())),
     },
     selectedCustomer: null,
   };
