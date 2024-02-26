@@ -31,11 +31,7 @@ import {
   useGetPrices,
 } from "../api/useRequest";
 import { useSnackbar } from "notistack";
-import {
-  addDaysToDate,
-  convertDateToLocal,
-  convertDateToTZ,
-} from "../../lib/client/utils";
+import { convertDateToLocal, convertDateToTZ } from "../../lib/client/utils";
 import NextBreadcrumbs from "@/components/Shared/BreadCrums";
 import TablaClientesRenta from "./TablaClientesRenta";
 import RentPeriod from "./RentPeriod";
@@ -60,14 +56,12 @@ const defaultData = () => {
     rentPeriod: {
       selectedWeeks: 1,
       useFreeWeeks: true,
-      usePromo: true
+      usePromo: true,
     },
     deliveryTime: {
       date: convertDateToLocal(new Date()),
       timeOption: "any",
-      fromTime: defaultInitialDate(
-        convertDateToLocal(new Date())
-      ),
+      fromTime: defaultInitialDate(convertDateToLocal(new Date())),
       endTime: defaultEndDate(convertDateToLocal(new Date())),
     },
     selectedCustomer: null,
