@@ -25,10 +25,10 @@ import {
   MenuItem,
   InputAdornment,
 } from "@mui/material";
-import dayjs from 'dayjs'
+import dayjs from "dayjs";
 import LocalizedFormat from "dayjs/plugin/localizedFormat";
-import 'dayjs/locale/es-mx'
-dayjs.locale('es-mx')
+import "dayjs/locale/es-mx";
+dayjs.locale("es-mx");
 dayjs.extend(LocalizedFormat);
 import AccountBalanceWalletIcon from "@mui/icons-material/AccountBalanceWallet";
 import Image from "next/image";
@@ -42,7 +42,7 @@ import {
 import { MuiFileInput } from "mui-file-input";
 import numeral from "numeral";
 import { DesktopDatePicker } from "@mui/x-date-pickers";
-import { convertDateToLocal, convertDateToTZ } from "lib/client/utils";
+import { convertDateToTZ } from "lib/client/utils";
 function AddPaymentModal(props) {
   const { customerId, handleOnClose, open, reason, amount } = props;
   const { customerList, customerError } = useGetAllCustomers(getFetcher);
@@ -50,7 +50,7 @@ function AddPaymentModal(props) {
   const [selectedReason, setSelectedReason] = useState<any>(null);
   const [selectedMethod, setSelectedMethod] = useState<any>(null);
   const [account, setAccount] = useState<string>(null);
-  const [paymentDate, setPaymentDate] = useState<Date>(convertDateToLocal(new Date()));
+  const [paymentDate, setPaymentDate] = useState<Date>(null);
   const [selectedAmount, setSelectedAmount] = useState<any>(null);
   const [selectedFolio, setSelectedFolio] = useState<any>(null);
   const [attached, setAttached] = useState<any>({
@@ -299,40 +299,41 @@ function AddPaymentModal(props) {
                                   </Select>
                                 </FormControl>
                               </Grid>
-                              {selectedMethod && !["CASH", "CASH_OFFICE"].includes(
-                                selectedMethod
-                              ) && (
-                                <Grid item lg={2} m={1}>
-                                  <TextField
-                                    label="Cuenta"
-                                    required
-                                    value={account}
-                                    variant="outlined"
-                                    InputProps={{
-                                      startAdornment: (
-                                        <InputAdornment position="start">
-                                          <AccountBalanceWalletIcon />
-                                        </InputAdornment>
-                                      ),
-                                    }}
-                                    onChange={(event) => {
-                                      setAccount(event.target.value);
-                                    }}
-                                  />
-                                </Grid>
-                              )}
+                              {selectedMethod &&
+                                !["CASH", "CASH_OFFICE"].includes(
+                                  selectedMethod
+                                ) && (
+                                  <Grid item lg={2} m={1}>
+                                    <TextField
+                                      label="Cuenta"
+                                      required
+                                      value={account}
+                                      variant="outlined"
+                                      InputProps={{
+                                        startAdornment: (
+                                          <InputAdornment position="start">
+                                            <AccountBalanceWalletIcon />
+                                          </InputAdornment>
+                                        ),
+                                      }}
+                                      onChange={(event) => {
+                                        setAccount(event.target.value);
+                                      }}
+                                    />
+                                  </Grid>
+                                )}
                             </Grid>
                           )}
                           {activeStep === 2 && (
                             <Grid container>
-                               <Grid item lg={12} m={1}>
+                              <Grid item lg={12} m={1}>
                                 <DesktopDatePicker
                                   label="Fecha de pago"
                                   inputFormat="dd/MM/yyyy"
                                   value={paymentDate}
                                   maxDate={new Date()}
                                   onChange={(newValue) => {
-                                    setPaymentDate(newValue)
+                                    setPaymentDate(newValue);
                                   }}
                                   renderInput={(params) => (
                                     <TextField {...params} />
@@ -463,7 +464,12 @@ function AddPaymentModal(props) {
                               <LoadingButton
                                 loading={isSubmitting}
                                 variant="contained"
-                                disabled={customerError || !paymentDate || (paymentDate.toString()==="Invalid Date")}
+                                disabled={
+                                  customerError ||
+                                  (index === 2 && !paymentDate) ||
+                                  (index === 2 &&
+                                    paymentDate.toString() === "Invalid Date")
+                                }
                                 type="submit"
                                 sx={{ mt: 1, mr: 1 }}
                               >
