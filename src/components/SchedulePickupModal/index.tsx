@@ -23,6 +23,7 @@ import {
   convertDateToTZ,
   dateDiffInDays,
   formatTZDate,
+  setDateToMid,
 } from "lib/client/utils";
 import { format } from "date-fns";
 import numeral from "numeral";
@@ -41,7 +42,7 @@ function SchedulePickupModal(props) {
   const { rentId, handleOnClose, open } = props;
   const { rent, rentByIdError } = useGetRentById(getFetcher, rentId);
   const [pickupTime, setPickupTime] = useState<any>({
-    date: new Date(),
+    date: setDateToMid(new Date()),
     timeOption: "any",
     fromTime: defaultInitialDate(convertDateToLocal(new Date())),
     endTime: defaultEndDate(convertDateToLocal(new Date())),
@@ -75,7 +76,7 @@ function SchedulePickupModal(props) {
       rentId,
       pickupTime: {
         ...pickupTime,
-        date: convertDateToTZ(pickupTime.date),
+        date: convertDateToTZ(setDateToMid(pickupTime.date)),
         fromTime: convertDateToTZ(pickupTime.fromTime),
         endTime: convertDateToTZ(pickupTime.endTime),
       },

@@ -25,6 +25,7 @@ import {
   formatTZDate,
   convertDateToLocal,
   convertDateToTZ,
+  setDateToMid,
 } from "lib/client/utils";
 import numeral from "numeral";
 import OperationTime from "pages/renta-rapida/OperationTime";
@@ -41,7 +42,7 @@ function ScheduleChangeModal(props) {
   const { rentId, handleOnClose, open } = props;
   const { rent, rentByIdError } = useGetRentById(getFetcher, rentId);
   const [changeTime, setChangeTime] = useState<any>({
-    date: addDaysToDate(new Date(), 1),
+    date: addDaysToDate(setDateToMid(new Date()), 1),
     timeOption: "any",
     fromTime: defaultInitialDate(
       convertDateToLocal(addDaysToDate(new Date(), 1))
@@ -73,7 +74,7 @@ function ScheduleChangeModal(props) {
       rentId,
       changeTime: {
         ...changeTime,
-        date: convertDateToTZ(changeTime.date),
+        date: convertDateToTZ(setDateToMid(changeTime.date)),
         fromTime: convertDateToTZ(changeTime.fromTime),
         endTime: convertDateToTZ(changeTime.endTime),
       },
