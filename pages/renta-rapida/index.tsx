@@ -31,7 +31,11 @@ import {
   useGetPrices,
 } from "../api/useRequest";
 import { useSnackbar } from "notistack";
-import { convertDateToLocal, convertDateToTZ } from "../../lib/client/utils";
+import {
+  convertDateToLocal,
+  convertDateToTZ,
+  setDateToMid,
+} from "../../lib/client/utils";
 import NextBreadcrumbs from "@/components/Shared/BreadCrums";
 import TablaClientesRenta from "./TablaClientesRenta";
 import RentPeriod from "./RentPeriod";
@@ -59,7 +63,7 @@ const defaultData = () => {
       usePromo: true,
     },
     deliveryTime: {
-      date: convertDateToLocal(new Date()),
+      date: convertDateToLocal(setDateToMid(new Date())),
       timeOption: "any",
       fromTime: defaultInitialDate(convertDateToLocal(new Date())),
       endTime: defaultEndDate(convertDateToLocal(new Date())),
@@ -171,7 +175,7 @@ function RentaRapida({ session }) {
       rentPeriod,
       deliveryTime: {
         ...deliveryTime,
-        date: convertDateToTZ(deliveryTime.date),
+        date: convertDateToTZ(setDateToMid(deliveryTime.date)),
         fromTime: convertDateToTZ(deliveryTime.fromTime),
         endTime: convertDateToTZ(deliveryTime.endTime),
       },
