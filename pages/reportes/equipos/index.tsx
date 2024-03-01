@@ -172,7 +172,7 @@ function DayReport() {
                         colorStyle={{
                           machineStyle,
                         }}
-                        data={reportData.prev}
+                        data={reportData.prev?._record}
                       />
                     </Grid>
                   </Grid>
