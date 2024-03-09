@@ -174,13 +174,12 @@ function CustomerInfoTab({
     field: string,
     minLength: number,
     maxLength: number,
-    required: boolean = true
   ) => (
     <TextField
       fullWidth
       inputProps={{ minLength, maxLength }}
       autoComplete="off"
-      required={required}
+      required
       id={field}
       name={field}
       variant="outlined"
@@ -312,10 +311,10 @@ function CustomerInfoTab({
                     <Grid item xs={9} sm={6} md={6}>
                       <Box sx={{ maxWidth: { xs: "auto", sm: 300 } }}>
                         {customer ? (
-                          !isEditing.info ? (
+                          !isEditing.info || role !== "ADMIN" ? (
                             <Text color="black">{customer?.email}</Text>
                           ) : (
-                            getInfoTextField("email", 0, 100, false)
+                            getInfoTextField("email", 0, 100)
                           )
                         ) : (
                           <Skeleton

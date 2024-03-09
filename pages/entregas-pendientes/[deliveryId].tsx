@@ -140,7 +140,6 @@ function RentaRapida() {
     minLength: number,
     maxLength: number,
     disabled: boolean,
-    required: boolean = true,
     type: string = 'text'
   ) => (
     <TextField
@@ -150,7 +149,7 @@ function RentaRapida() {
       autoComplete="off"
       disabled={disabled}
       label={label}
-      required={required}
+      required
       id={field}
       name={field}
       variant="outlined"
@@ -387,7 +386,6 @@ function RentaRapida() {
                                     0,
                                     100,
                                     isOk.info,
-                                    false,
                                     'email'
                                   )
                                 ) : (
