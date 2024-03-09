@@ -139,15 +139,18 @@ function RentaRapida() {
     field: string,
     minLength: number,
     maxLength: number,
-    disabled: boolean
+    disabled: boolean,
+    required: boolean = true,
+    type: string = 'text'
   ) => (
     <TextField
       fullWidth
+      type={type}
       inputProps={{ minLength, maxLength }}
       autoComplete="off"
       disabled={disabled}
       label={label}
-      required
+      required={required}
       id={field}
       name={field}
       variant="outlined"
@@ -368,6 +371,24 @@ function RentaRapida() {
                                     10,
                                     10,
                                     isOk.info
+                                  )
+                                ) : (
+                                  <Skeleton
+                                    variant="text"
+                                    sx={{ fontSize: "1rem", width: "100px" }}
+                                  />
+                                )}
+                              </Grid>
+                              <Grid item lg={3} m={1}>
+                                {customerToEdit.isSet ? (
+                                  getInfoTextField(
+                                    "Correo",
+                                    "email",
+                                    0,
+                                    100,
+                                    isOk.info,
+                                    false,
+                                    'email'
                                   )
                                 ) : (
                                   <Skeleton
