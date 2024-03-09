@@ -3,6 +3,7 @@ import mongoose, { Model, model, Schema } from 'mongoose';
 export interface ICustomer extends Document {
   name: string;
   cell: string;
+  email: string;
   residences: [Schema.Types.ObjectId];
   currentResidence: Schema.Types.ObjectId;
   level: Schema.Types.ObjectId;
@@ -29,6 +30,7 @@ export interface ICustomer extends Document {
 const CustomerSchema = new Schema<ICustomer>({
   name: { type: 'string', required: true },
   cell: { type: 'string', required: true },
+  email: { type: 'string', default: '' },
   residences: [
     {
       type: Schema.Types.ObjectId,

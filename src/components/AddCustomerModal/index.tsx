@@ -59,6 +59,7 @@ function AddCustomerModal(props) {
     const result = await saveCustomer({
       name: event.target.name.value,
       cell: event.target.cell.value,
+      email: event.target.email.value,
       howFound: event.target.howFound.value,
       referredBy: referredBy,
       street: event.target.street.value,
@@ -133,6 +134,16 @@ function AddCustomerModal(props) {
                   id="cell"
                   name="cell"
                   label="Celular"
+                  fullWidth={true}
+                />
+              </Grid>
+              <Grid item lg={12}>
+                <TextField
+                  autoComplete="off"
+                  id="email"
+                  name="email"
+                  label="Correo"
+                  type="email"
                   fullWidth={true}
                 />
               </Grid>

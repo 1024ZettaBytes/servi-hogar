@@ -173,13 +173,14 @@ function CustomerInfoTab({
   const getInfoTextField = (
     field: string,
     minLength: number,
-    maxLength: number
+    maxLength: number,
+    required: boolean = true
   ) => (
     <TextField
       fullWidth
       inputProps={{ minLength, maxLength }}
       autoComplete="off"
-      required
+      required={required}
       id={field}
       name={field}
       variant="outlined"
@@ -294,6 +295,27 @@ function CustomerInfoTab({
                             <Text color="black">{customer?.cell}</Text>
                           ) : (
                             getInfoTextField("cell", 10, 10)
+                          )
+                        ) : (
+                          <Skeleton
+                            variant="text"
+                            sx={{ fontSize: "1rem", width: "100px" }}
+                          />
+                        )}
+                      </Box>
+                    </Grid>
+                    <Grid item xs={3} sm={6} md={6} textAlign={{ sm: "right" }}>
+                      <Box pr={2} pb={2}>
+                        Correo:
+                      </Box>
+                    </Grid>
+                    <Grid item xs={9} sm={6} md={6}>
+                      <Box sx={{ maxWidth: { xs: "auto", sm: 300 } }}>
+                        {customer ? (
+                          !isEditing.info ? (
+                            <Text color="black">{customer?.email}</Text>
+                          ) : (
+                            getInfoTextField("email", 0, 100, false)
                           )
                         ) : (
                           <Skeleton
