@@ -140,6 +140,7 @@ function AddCustomerModal(props) {
               <Grid item lg={12}>
                 <TextField
                   autoComplete="off"
+                  required
                   id="email"
                   name="email"
                   label="Correo"
