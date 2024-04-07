@@ -8,7 +8,7 @@ export const validateUserPermissions = async (req, res, validRoles) => {
   const token = await getToken({ req });
   if (token && token?.user?.id) {
     const userId = token.user.id;
-    if (!isConnected()) await connectToDatabase();
+    await connectToDatabase();
     const user = await User.findById(userId).populate("role");
     const userRole = user?.role?.id;
     const hasValidRole = validRoles.includes(userRole);
@@ -31,7 +31,7 @@ export const getUserRole = async (req, res) => {
   const token = await getToken({ req });
   if (token && token?.user?.id) {
     const userId = token.user.id;
-    if (!isConnected()) await connectToDatabase();
+    await connectToDatabase();
     const user = await User.findById(userId).populate("role");
     const userRole = user?.role?.id;
     return user?.role?.id;

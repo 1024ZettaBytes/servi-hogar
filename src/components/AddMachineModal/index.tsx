@@ -15,12 +15,14 @@ import {
   FormControl,
   MenuItem,
   Alert,
+  Skeleton,
 } from "@mui/material";
 import { LoadingButton } from "@mui/lab";
 import {
   useGetAllWarehousesOverview,
   getFetcher,
   useGetAllVehicles,
+  useGetPartners,
 } from "../../../pages/api/useRequest";
 import { saveMachine } from "../../../lib/client/machinesFetch";
 import { MACHINE_STATUS_LIST } from "../../../lib/consts/OBJ_CONTS";
@@ -29,6 +31,7 @@ function AddMachineModal(props) {
     getFetcher
   );
   const { vehiclesList, vehiclesError } = useGetAllVehicles(getFetcher);
+  const { partnersList, partnersError } = useGetPartners(getFetcher);
   const { handleOnClose, open, machinesStatusList } = props;
   const [isLoading, setIsLoading] = useState(false);
   const [hasError, setHasError] = useState({ error: false, msg: "" });
@@ -38,6 +41,7 @@ function AddMachineModal(props) {
     typeWarehouse: false,
   });
   const [selectedLocation, setSelectedLocation] = useState();
+  const [selectedPartner, setSelectedPartner] = useState(null);
   const isWarehouseStatus = selectedStatus?.typeWarehouse;
   const isVehicleStatus = selectedStatus?.id === MACHINE_STATUS_LIST.VEHI;
   function handleStatusSelection(status) {
@@ -61,6 +65,7 @@ function AddMachineModal(props) {
       cost: event.target.cost.value,
       status: selectedStatus?._id,
       location: selectedLocation,
+      partner: selectedPartner
     });
     setIsLoading(false);
     if (!result.error) {
@@ -231,6 +236,38 @@ function AddMachineModal(props) {
                   </Grid>
                 </>
               )}
+              <Grid item lg={12}>
+                {partnersError ? (
+                  <Alert severity="error">{partnersError?.message}</Alert>
+                ):!partnersList?<Skeleton
+                variant="rectangular"
+                width={"100%"}
+                height={500}
+                animation="wave"
+              />:<FormControl fullWidth>
+              <InputLabel id="partner-id">Socio (opcional)</InputLabel>
+              <Select
+                labelId="partner-id"
+                id="partner"
+                name="partner"
+                label="Socio"
+                autoComplete="off"
+                value={selectedPartner || ""}
+                onChange={(event) =>
+                  setSelectedPartner(event.target.value)
+                }
+              >
+                {partnersList
+                  ? partnersList.map((partner) => (
+                      <MenuItem key={partner._id} value={partner._id}>
+                        {partner.name}
+                      </MenuItem>
+                    ))
+                  : null}
+              </Select>
+            </FormControl>}
+
+              </Grid>
               <Grid item lg={12}>
                 {hasError.error ? (
                   <Grid item>
