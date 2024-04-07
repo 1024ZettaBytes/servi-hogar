@@ -17,6 +17,7 @@ export interface IMachine extends Document {
   createdAt: Date;
   updatedAt: Date;
   lastUpdatedBy: Schema.Types.ObjectId;
+  partner: Schema.Types.ObjectId;
   active: boolean;
 }
 
@@ -44,6 +45,7 @@ const MachineSchema = new Schema<IMachine>({
   createdAt: { type: Date, required: true },
   updatedAt: { type: Date, required: true },
   lastUpdatedBy: { type: Schema.Types.ObjectId, required: true, ref: 'users' },
+  partner: { type: Schema.Types.ObjectId, default: null, ref: 'partners' },
   active: { type: 'boolean', default: true }
 });
 

@@ -1,6 +1,11 @@
-import useSWR, { mutate } from "swr";
-import { ROUTES } from "../../lib/consts/API_URL_CONST";
-import { formatTZDate } from "lib/client/utils";
+import useSWR, { mutate } from 'swr';
+import { ROUTES } from '../../lib/consts/API_URL_CONST';
+import { formatTZDate } from 'lib/client/utils';
+const noRefreshOptions = {
+  revalidateIfStale: false,
+  revalidateOnFocus: false,
+  revalidateOnReconnect: true
+};
 export const refreshData = async (apiUrl) => {
   await mutate(apiUrl);
 };
@@ -18,9 +23,9 @@ export const getFetcher = async (url) => {
         return {
           ok: false,
           errorMsg:
-            "Hubo un problema de conexión. Si persiste contacte al administrador.",
+            'Hubo un problema de conexión. Si persiste contacte al administrador.'
         };
-      },
+      }
     };
   });
   await errorHandler(res);
@@ -43,7 +48,7 @@ export const useGetCustomerLevels = (fetcher) => {
 
 export const useGetCustomerById = (fetcher, id) => {
   const { data, error } = useSWR(
-    id ? ROUTES.CUSTOMER_BY_ID_API.replace(":id", id) : null,
+    id ? ROUTES.CUSTOMER_BY_ID_API.replace(':id', id) : null,
     fetcher
   );
   return { customer: data?.data, customerByIdError: error };
@@ -78,7 +83,7 @@ export const useGetAllMachinesLocations = (fetcher) => {
 
 export const useGetMachineById = (fetcher, id) => {
   const { data, error } = useSWR(
-    id ? ROUTES.MACHINE_BY_ID_API.replace(":id", id) : null,
+    id ? ROUTES.MACHINE_BY_ID_API.replace(':id', id) : null,
     fetcher
   );
   return { machine: data?.data, machineByIdError: error };
@@ -97,13 +102,13 @@ export const useGetAllVehicles = (fetcher) => {
 export const useGetRents = (filter, fetcher) => {
   const url = `${ROUTES.ALL_RENTS_API}?filter=${filter}`;
   const { data, error } = useSWR(url, fetcher);
-  return filter == "current"
+  return filter == 'current'
     ? { rentsData: data?.data, rentsError: error }
     : { pastRentsData: data?.data, pastRentsError: error };
 };
 export const useGetRentById = (fetcher, id) => {
   const { data, error } = useSWR(
-    id ? ROUTES.RENT_BY_ID_API.replace(":id", id) : null,
+    id ? ROUTES.RENT_BY_ID_API.replace(':id', id) : null,
     fetcher
   );
   return { rent: data?.data, rentByIdError: error };
@@ -124,7 +129,7 @@ export const useGetDeliveries = (fetcher) => {
 };
 export const useGetDeliveryById = (fetcher, id) => {
   const { data, error } = useSWR(
-    id ? ROUTES.DELIVERY_BY_ID_API.replace(":id", id) : null,
+    id ? ROUTES.DELIVERY_BY_ID_API.replace(':id', id) : null,
     fetcher
   );
   return { delivery: data?.data, deliveryByIdError: error };
@@ -141,7 +146,7 @@ export const useGetPickups = (fetcher) => {
 };
 export const useGetPickupById = (fetcher, id) => {
   const { data, error } = useSWR(
-    id ? ROUTES.PICKUP_BY_ID_API.replace(":id", id) : null,
+    id ? ROUTES.PICKUP_BY_ID_API.replace(':id', id) : null,
     fetcher
   );
   return { pickup: data?.data, pickupByIdError: error };
@@ -158,7 +163,7 @@ export const useGetChanges = (fetcher) => {
 };
 export const useGetChangeById = (fetcher, id) => {
   const { data, error } = useSWR(
-    id ? ROUTES.CHANGE_BY_ID_API.replace(":id", id) : null,
+    id ? ROUTES.CHANGE_BY_ID_API.replace(':id', id) : null,
     fetcher
   );
   return { change: data?.data, changeByIdError: error };
@@ -178,8 +183,9 @@ export const useGetReport = (
   endDate = null
 ) => {
   let url = `${ROUTES.REPORT_API}?filter=${filter}`;
-  url = url + (startDate ? `&start=${formatTZDate(startDate, "YYYY-MM-DD")}` : "");
-  url = url + (endDate ? `&end=${formatTZDate(endDate, "YYYY-MM-DD")}` : "");
+  url =
+    url + (startDate ? `&start=${formatTZDate(startDate, 'YYYY-MM-DD')}` : '');
+  url = url + (endDate ? `&end=${formatTZDate(endDate, 'YYYY-MM-DD')}` : '');
   const { data, error } = useSWR(url, fetcher);
   return { reportData: data?.data, reportError: error };
 };
@@ -206,4 +212,29 @@ export const useGetUsers = (fetcher) => {
 export const useGetRoles = (fetcher) => {
   const { data, error } = useSWR(ROUTES.ALL_ROLES, fetcher);
   return { rolesList: data?.data, rolesError: error };
+};
+
+// Partners
+export const useGetPartners = (fetcher, detailed = false) => {
+  const { data, error } = useSWR(
+    ROUTES.ALL_PARTNERS + (detailed ? '?detailed=true' : ''),
+    fetcher,
+    noRefreshOptions
+  );
+  return { partnersList: data?.data, partnersError: error };
+};
+
+export const useGetPartnerMachines = (fetcher) => {
+  const { data, error } = useSWR(
+    ROUTES.PARTNER_MACHINES,
+    fetcher,
+    noRefreshOptions
+  );
+  return { machinesList: data?.data, machinesListError: error };
+};
+
+// Partners
+export const useGetPayouts = (fetcher) => {
+  const { data, error } = useSWR(ROUTES.ALL_PAYOUTS, fetcher, noRefreshOptions);
+  return { payoutsList: data?.data, payoutsError: error };
 };
