@@ -71,6 +71,28 @@ function ResumenMisEquipos({ machinesList }) {
                           </b>
                         </Label>
                       </Grid>
+                      {machine?.isOnRent && (
+                        <>
+                          <Grid item lg={3} md={2} xs={2} />
+                          <Grid item lg={9} md={2} xs={2}>
+                            <Label
+                              color={
+                                machine?.isOnChange
+                                  ? "warning"
+                                  : machine?.isOnPickup
+                                  ? "error"
+                                  : "info"
+                              }
+                            >
+                              {machine?.isOnChange
+                                ? "Cambio solicitado"
+                                : machine?.isOnPickup
+                                ? `Finaliza en ${machine?.endDays} día(s)`
+                                : `Próximo pago en ${machine?.nextPay} día(s)`}
+                            </Label>
+                          </Grid>
+                        </>
+                      )}
                       <Grid item lg={6} md={8} xs={8}>
                         <Typography variant="h5" noWrap textAlign="left">
                           <b>Costo</b>
