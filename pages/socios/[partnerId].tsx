@@ -6,19 +6,25 @@ import PageHeader from "@/components/PageHeader";
 import PageTitleWrapper from "@/components/PageTitleWrapper";
 import { Card, Container, Grid, Skeleton, Alert } from "@mui/material";
 import Footer from "@/components/Footer";
-import ResumenMisEquipos from "./ResumenMisEquipos";
+import ResumenMisEquipos from "../espacio-socios/ResumenMisEquipos";
 import {
   useGetPartnerMachines,
   useGetPayouts,
   getFetcher,
 } from "../api/useRequest";
 import NextBreadcrumbs from "@/components/Shared/BreadCrums";
-import TablaMisPagos from "./TablaMisPagos";
+import TablaMisPagos from "../espacio-socios/TablaMisPagos";
+import { useRouter } from "next/router";
 
 function Socios({}) {
-  const paths = ["Inicio", "Mi espacio"];
-  const { machinesList, machinesListError } = useGetPartnerMachines(getFetcher);
-  const { payoutsList, payoutsError } = useGetPayouts(getFetcher);
+  const router = useRouter();
+  const { partnerId } = router.query;
+  const { machinesList, machinesListError } = useGetPartnerMachines(
+    getFetcher,
+    partnerId
+  );
+  const { payoutsList, payoutsError } = useGetPayouts(getFetcher, partnerId);
+  const paths = ["Inicio", "Socios", machinesList?.name];
 
   return (
     <>
@@ -27,7 +33,10 @@ function Socios({}) {
       </Head>
       <PageTitleWrapper>
         <PageHeader title={"Socios"} sutitle={""} />
-        <NextBreadcrumbs paths={paths} lastLoaded={true} />
+        <NextBreadcrumbs
+          paths={paths}
+          lastLoaded={!machinesListError && machinesList}
+        />
       </PageTitleWrapper>
       <Container maxWidth="lg">
         <Grid
@@ -49,7 +58,7 @@ function Socios({}) {
               />
             ) : (
               <ResumenMisEquipos
-                title="Mis equipos"
+                title="Equipos del socio"
                 machinesList={machinesList.list}
               />
             )}

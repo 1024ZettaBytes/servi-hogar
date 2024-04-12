@@ -18,7 +18,7 @@ const AvatarWrapperMachine = styled(Avatar)(
         height: 60px;
   `
 );
-function ResumenMisEquipos({ machinesList }) {
+function ResumenMisEquipos({ title, machinesList }) {
   return (
     <>
       <Box
@@ -29,7 +29,7 @@ function ResumenMisEquipos({ machinesList }) {
           pb: 3,
         }}
       >
-        <Typography variant="h4">Mis Equipos</Typography>
+        <Typography variant="h4">{title}</Typography>
       </Box>
       <Grid container spacing={1}>
         {machinesList
@@ -38,7 +38,7 @@ function ResumenMisEquipos({ machinesList }) {
                 <Card
                   sx={{
                     px: 1,
-                    height: "150px",
+                    height: "200px",
                     overflowY: "auto",
                   }}
                 >
@@ -49,14 +49,14 @@ function ResumenMisEquipos({ machinesList }) {
                       justifyItems="center"
                       textAlign={{ lg: "center" }}
                     >
-                      <Grid item lg={3} md={2} xs={2}>
+                      <Grid item lg={3} md={3} xs={3}>
                         <AvatarWrapperMachine>
                           <Typography>
                             <b>{machine?.machineNum}</b>
                           </Typography>
                         </AvatarWrapperMachine>
                       </Grid>
-                      <Grid item lg={9} md={2} xs={2}>
+                      <Grid item lg={9} md={8} xs={8}>
                         <Label
                           color={machine?.isOnRent ? "success" : "secondary"}
                         >
@@ -73,8 +73,8 @@ function ResumenMisEquipos({ machinesList }) {
                       </Grid>
                       {machine?.isOnRent && (
                         <>
-                          <Grid item lg={3} md={2} xs={2} />
-                          <Grid item lg={9} md={2} xs={2}>
+                          <Grid item lg={3} md={3} xs={3} />
+                          <Grid item lg={9} md={8} xs={8}>
                             <Label
                               color={
                                 machine?.isOnChange
@@ -93,7 +93,8 @@ function ResumenMisEquipos({ machinesList }) {
                           </Grid>
                         </>
                       )}
-                      <Grid item lg={6} md={8} xs={8}>
+                      <Grid item lg={12} md={12} xs={12} marginTop={2} />
+                      <Grid item lg={6} md={6} xs={6}>
                         <Typography variant="h5" noWrap textAlign="left">
                           <b>Costo</b>
                         </Typography>
@@ -101,7 +102,7 @@ function ResumenMisEquipos({ machinesList }) {
                           {numeral(machine?.cost).format(`$0,0.00`)}
                         </Typography>
                       </Grid>
-                      <Grid item lg={6} md={8} xs={8}>
+                      <Grid item lg={6} md={6} xs={6}>
                         <Typography variant="h5" noWrap textAlign="left">
                           <b>Ganancias</b>
                         </Typography>

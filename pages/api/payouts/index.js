@@ -7,9 +7,17 @@ export const config = {
     bodyParser: false
   }
 };
-async function getPayoutsAPI(req, res, userRole, userId) {
+async function getPayoutsAPI(req, res, userRole) {
   try {
-    const payouts = await getPayoutsData(userRole, userId);
+    let { partner } = req.query;
+    if (partner && !['ADMIN', 'AUX'].includes(userRole)) {
+      res.status(403).json({ errorMsg: 'No tienes permisos para ver esto :(' });
+      return;
+    }
+    if (!partner && userRole === 'PARTNER') {
+      partner = await getUserId(req);
+    }
+    const payouts = await getPayoutsData(userRole, partner);
     res.status(200).json({ data: payouts });
   } catch (e) {
     console.error(e);
@@ -21,7 +29,6 @@ async function getPayoutsAPI(req, res, userRole, userId) {
 }
 async function updatePayoutAPI(req, res, userId) {
   try {
-
     const form = new formidable.IncomingForm();
     const { fields, files } = await new Promise(function (resolve, reject) {
       form.parse(req, function (err, fields, files) {
@@ -54,12 +61,12 @@ async function updatePayoutAPI(req, res, userId) {
 async function handler(req, res) {
   const userRole = await validateUserPermissions(req, res, [
     'ADMIN',
-    'PARTNER'
+    'PARTNER',
+    'AUX'
   ]);
-  const userId = await getUserId(req);
   switch (req.method) {
     case 'GET':
-      await getPayoutsAPI(req, res, userRole, userId);
+      await getPayoutsAPI(req, res, userRole);
       break;
     case 'POST':
       break;
