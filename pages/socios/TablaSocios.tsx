@@ -17,7 +17,11 @@ import {
   CardHeader,
   TextField,
   InputAdornment,
+  IconButton,
+  useTheme,
 } from "@mui/material";
+import NextLink from "next/link";
+import VisibilityIcon from "@mui/icons-material/Visibility";
 
 import SearchIcon from "@mui/icons-material/Search";
 import { capitalizeFirstLetter, formatTZDate } from "lib/client/utils";
@@ -90,6 +94,8 @@ const TablaSocios: FC<TablaSociosProps> = ({ partnersList }) => {
 
   const filteredMachines = applyFilters(partnersList, filter);
   const paginatedMachines = applyPagination(filteredMachines, page, limit);
+  const theme = useTheme();
+
   return (
     <>
       <Card>
@@ -128,6 +134,7 @@ const TablaSocios: FC<TablaSociosProps> = ({ partnersList }) => {
                 <TableCell align="center">Nombre</TableCell>
                 <TableCell align="center">Cant. Equipos</TableCell>
                 <TableCell align="center">Antiguedad</TableCell>
+                <TableCell align="center"></TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
@@ -169,6 +176,24 @@ const TablaSocios: FC<TablaSociosProps> = ({ partnersList }) => {
                           formatTZDate(partner?.createdAt, "MMMM DD YYYY")
                         )}
                       </Typography>
+                    </TableCell>
+                    <TableCell align="center">
+                      <NextLink href={`/socios/${partner?.user?._id}`}>
+                        <Tooltip title="Detalle" arrow>
+                          <IconButton
+                            sx={{
+                              "&:hover": {
+                                background: theme.colors.primary.lighter,
+                              },
+                              color: theme.palette.primary.main,
+                            }}
+                            color="inherit"
+                            size="small"
+                          >
+                            <VisibilityIcon fontSize="small" />
+                          </IconButton>
+                        </Tooltip>
+                      </NextLink>
                     </TableCell>
                   </TableRow>
                 );

@@ -20,6 +20,7 @@ import {
   InputAdornment,
   Tooltip,
   IconButton,
+  Grid,
 } from "@mui/material";
 
 import HomeIcon from "@mui/icons-material/Home";
@@ -143,8 +144,15 @@ const TablaMisPagos: FC<TablaMisPagosProps> = ({ payoutsList }) => {
         );
     }
   };
-  const filteredMachines = applyFilters(payoutsList, filter);
-  const paginatedMachines = applyPagination(filteredMachines, page, limit);
+  const filteredPayouts = applyFilters(payoutsList, filter);
+  const paginatedPayouts = applyPagination(filteredPayouts, page, limit);
+  const total = () => {
+    let t = 0;
+    paginatedPayouts?.forEach((p) => {
+      t += p.toPay;
+    });
+    return t;
+  };
   const theme = useTheme();
   return (
     <>
@@ -195,7 +203,7 @@ const TablaMisPagos: FC<TablaMisPagosProps> = ({ payoutsList }) => {
               </TableRow>
             </TableHead>
             <TableBody>
-              {paginatedMachines.map((payout) => {
+              {paginatedPayouts.map((payout) => {
                 return (
                   <TableRow key={payout?._id}>
                     <TableCell align="center">
@@ -328,10 +336,21 @@ const TablaMisPagos: FC<TablaMisPagosProps> = ({ payoutsList }) => {
             </TableBody>
           </Table>
         </TableContainer>
+        <Grid container>
+          <Grid item xs={12} md={12} lg={12}>
+            <Grid container padding={3}>
+              <Grid item xs={12} md={12} lg={12} textAlign={"end"}>
+                <Typography variant="h5" color="green">
+                  {"TOTAL: $" + numeral(total()).format(`0,0.00`)}
+                </Typography>
+              </Grid>
+            </Grid>
+          </Grid>
+        </Grid>
         <Box p={2}>
           <TablePagination
             component="div"
-            count={filteredMachines.length}
+            count={filteredPayouts.length}
             onPageChange={handlePageChange}
             onRowsPerPageChange={handleLimitChange}
             page={page}

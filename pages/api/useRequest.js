@@ -224,9 +224,9 @@ export const useGetPartners = (fetcher, detailed = false) => {
   return { partnersList: data?.data, partnersError: error };
 };
 
-export const useGetPartnerMachines = (fetcher) => {
+export const useGetPartnerMachines = (fetcher, partnerId = null) => {
   const { data, error } = useSWR(
-    ROUTES.PARTNER_MACHINES,
+    ROUTES.PARTNER_MACHINES + (partnerId ? '?partner=' + partnerId : ''),
     fetcher,
     noRefreshOptions
   );
@@ -234,7 +234,11 @@ export const useGetPartnerMachines = (fetcher) => {
 };
 
 // Partners
-export const useGetPayouts = (fetcher) => {
-  const { data, error } = useSWR(ROUTES.ALL_PAYOUTS, fetcher, noRefreshOptions);
+export const useGetPayouts = (fetcher, partnerId = null) => {
+  const { data, error } = useSWR(
+    ROUTES.ALL_PAYOUTS + (partnerId ? '?partner=' + partnerId : ''),
+    fetcher,
+    noRefreshOptions
+  );
   return { payoutsList: data?.data, payoutsError: error };
 };
