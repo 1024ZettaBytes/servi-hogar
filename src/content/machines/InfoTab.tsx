@@ -193,7 +193,8 @@ function MachineInfoTab({ role, machine, statusList }) {
   const getInfoTextField = (
     field: string,
     minLength: number,
-    maxLength: number
+    maxLength: number,
+    type: string = "text"
   ) => (
     <TextField
       fullWidth
@@ -205,6 +206,7 @@ function MachineInfoTab({ role, machine, statusList }) {
       variant="outlined"
       size="small"
       value={machineToEdit[field]}
+      type={type}
       onChange={(e) => {
         setMachineToEdit({
           ...machineToEdit,
@@ -293,6 +295,29 @@ function MachineInfoTab({ role, machine, statusList }) {
                             <Text color="black">{machine?.brand}</Text>
                           ) : (
                             getInfoTextField("brand", 1, 20)
+                          )
+                        ) : (
+                          <Skeleton
+                            variant="text"
+                            sx={{ fontSize: "1rem", width: "100px" }}
+                          />
+                        )}
+                      </Box>
+                    </Grid>
+                    <Grid item xs={3} sm={6} md={6} textAlign={{ sm: "right" }}>
+                      <Box pr={2} pb={2}>
+                        Costo:
+                      </Box>
+                    </Grid>
+                    <Grid item xs={9} sm={6} md={6}>
+                      <Box sx={{ maxWidth: { xs: "auto", sm: 300 } }}>
+                        {machine ? (
+                          !isEditing.info ? (
+                            <Text color="black">
+                              {numeral(machine.cost).format(`$0,0.00`)}
+                            </Text>
+                          ) : (
+                            getInfoTextField("cost", 1, 10, "number")
                           )
                         ) : (
                           <Skeleton
