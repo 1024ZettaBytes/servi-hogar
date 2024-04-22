@@ -72,7 +72,7 @@ async function handler(req, res) {
     case 'POST':
       break;
     case 'PUT':
-      await updatePayoutAPI(req, res, userId);
+      await updatePayoutAPI(req, res);
       break;
     case 'DELETE':
       break;
