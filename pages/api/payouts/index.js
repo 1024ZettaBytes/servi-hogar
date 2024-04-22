@@ -27,7 +27,7 @@ async function getPayoutsAPI(req, res, userRole) {
     });
   }
 }
-async function updatePayoutAPI(req, res, userId) {
+async function updatePayoutAPI(req, res) {
   try {
     const form = new formidable.IncomingForm();
     const { fields, files } = await new Promise(function (resolve, reject) {
@@ -44,7 +44,7 @@ async function updatePayoutAPI(req, res, userId) {
         resolve({ fields, files });
       });
     });
-
+    const userId = await getUserId(req);
     const body = JSON.parse(fields?.body);
     await updatePayoutData({
       ...body,
@@ -64,6 +64,7 @@ async function handler(req, res) {
     'PARTNER',
     'AUX'
   ]);
+
   switch (req.method) {
     case 'GET':
       await getPayoutsAPI(req, res, userRole);
