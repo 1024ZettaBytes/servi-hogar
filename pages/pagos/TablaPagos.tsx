@@ -1,7 +1,7 @@
-import { FC, ChangeEvent, useState } from "react";
-import numeral from "numeral";
-import * as str from "string";
-import PropTypes from "prop-types";
+import { FC, ChangeEvent, useState } from 'react';
+import numeral from 'numeral';
+import * as str from 'string';
+import PropTypes from 'prop-types';
 import {
   Tooltip,
   Divider,
@@ -19,16 +19,13 @@ import {
   useTheme,
   CardHeader,
   TextField,
-  InputAdornment,
-} from "@mui/material";
+  InputAdornment
+} from '@mui/material';
 
-
-
-
-import ImageSearchIcon from "@mui/icons-material/ImageSearch";
-import SearchIcon from "@mui/icons-material/Search";
-import { capitalizeFirstLetter, formatTZDate } from "lib/client/utils";
-import { PAYMENT_METHODS } from "../../lib/consts/OBJ_CONTS";
+import ImageSearchIcon from '@mui/icons-material/ImageSearch';
+import SearchIcon from '@mui/icons-material/Search';
+import { capitalizeFirstLetter, formatTZDate } from 'lib/client/utils';
+import { PAYMENT_METHODS } from '../../lib/consts/OBJ_CONTS';
 interface TablaPagosProps {
   className?: string;
   paymentsList: any[];
@@ -42,7 +39,7 @@ const compareStringsForFilter = (keyWord: string, field: string) => {
 };
 const applyFilters = (paymentsList: any[], filter: string): any[] => {
   return paymentsList.filter((payment) => {
-    if (!filter || filter === "") {
+    if (!filter || filter === '') {
       return true;
     }
     return (
@@ -53,32 +50,38 @@ const applyFilters = (paymentsList: any[], filter: string): any[] => {
           return false;
         }
         switch (key) {
-          case "number": {
+          case 'number': {
             const matchNumber =
-              value && compareStringsForFilter(filter, payment.number + "");
+              value && compareStringsForFilter(filter, payment.number + '');
             return matchNumber;
           }
-          case "date": {
+          case 'date': {
             const matchFormatedDate =
               value &&
               compareStringsForFilter(
                 filter,
-                formatTZDate(payment?.date, "MMMM DD YYYY")
+                formatTZDate(payment?.date, 'MMMM DD YYYY')
               );
             return matchFormatedDate;
           }
-          case "customer": {
+          case 'customer': {
             const matchCustomerName =
               payment.customer &&
               compareStringsForFilter(filter, payment.customer.name);
             return matchCustomerName;
           }
-          case "description": {
+          case 'lastUpdatedBy': {
+            const matchUserName =
+              payment.lastUpdatedBy &&
+              compareStringsForFilter(filter, payment.lastUpdatedBy.name);
+            return matchUserName;
+          }
+          case 'description': {
             const matchDescription =
               value && compareStringsForFilter(filter, payment.description);
             return matchDescription;
           }
-          case "method": {
+          case 'method': {
             const matchMethod =
               value &&
               compareStringsForFilter(filter, PAYMENT_METHODS[payment.method]);
@@ -101,7 +104,7 @@ const applyPagination = (
 const TablaPagos: FC<TablaPagosProps> = ({ paymentsList }) => {
   const [page, setPage] = useState<number>(0);
   const [limit, setLimit] = useState<number>(10);
-  const [filter, setFilter] = useState<string>("");
+  const [filter, setFilter] = useState<string>('');
   const handleSearchChange = (e: ChangeEvent<HTMLInputElement>): void => {
     const value = e.target.value;
     setFilter(value);
@@ -134,17 +137,17 @@ const TablaPagos: FC<TablaPagosProps> = ({ paymentsList }) => {
                     <InputAdornment position="start">
                       <SearchIcon />
                     </InputAdornment>
-                  ),
+                  )
                 }}
-                sx={{ marginTop: "20px" }}
+                sx={{ marginTop: '20px' }}
               />
             </Box>
           }
           sx={{
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "space-between",
-            flexWrap: "wrap",
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            flexWrap: 'wrap'
           }}
           title=""
         />
@@ -162,6 +165,7 @@ const TablaPagos: FC<TablaPagosProps> = ({ paymentsList }) => {
                 <TableCell align="center">Folio</TableCell>
                 <TableCell align="center">Comprobante</TableCell>
                 <TableCell align="center">Importe</TableCell>
+                <TableCell align="center">Usuario</TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
@@ -187,9 +191,9 @@ const TablaPagos: FC<TablaPagosProps> = ({ paymentsList }) => {
                         gutterBottom
                         noWrap
                       >
-                        {
-                        capitalizeFirstLetter(formatTZDate(payment?.date, "MMMM DD YYYY"))
-                        }
+                        {capitalizeFirstLetter(
+                          formatTZDate(payment?.date, 'MMMM DD YYYY')
+                        )}
                       </Typography>
                     </TableCell>
                     <TableCell align="center">
@@ -233,7 +237,7 @@ const TablaPagos: FC<TablaPagosProps> = ({ paymentsList }) => {
                         gutterBottom
                         noWrap
                       >
-                        {payment?.account ? payment?.account : "N/A"}
+                        {payment?.account ? payment?.account : 'N/A'}
                       </Typography>
                     </TableCell>
                     <TableCell align="center">
@@ -257,10 +261,10 @@ const TablaPagos: FC<TablaPagosProps> = ({ paymentsList }) => {
                           <Tooltip title="Ver comprobante" arrow>
                             <IconButton
                               sx={{
-                                "&:hover": {
-                                  background: theme.colors.primary.lighter,
+                                '&:hover': {
+                                  background: theme.colors.primary.lighter
                                 },
-                                color: theme.palette.primary.main,
+                                color: theme.palette.primary.main
                               }}
                               color="inherit"
                               size="small"
@@ -276,6 +280,16 @@ const TablaPagos: FC<TablaPagosProps> = ({ paymentsList }) => {
                         {numeral(payment?.amount).format(
                           `$${payment.amount}0,0.00`
                         )}
+                      </Typography>
+                    </TableCell>
+                    <TableCell align="center">
+                      <Typography
+                        variant="body1"
+                        fontWeight="bold"
+                        color="text.primary"
+                        gutterBottom
+                      >
+                        {payment?.lastUpdatedBy?.name}
                       </Typography>
                     </TableCell>
                   </TableRow>
@@ -301,11 +315,11 @@ const TablaPagos: FC<TablaPagosProps> = ({ paymentsList }) => {
 };
 
 TablaPagos.propTypes = {
-  paymentsList: PropTypes.array.isRequired,
+  paymentsList: PropTypes.array.isRequired
 };
 
 TablaPagos.defaultProps = {
-  paymentsList: [],
+  paymentsList: []
 };
 
 export default TablaPagos;
