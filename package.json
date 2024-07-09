@@ -41,6 +41,7 @@
     "dayjs": "^1.11.6",
     "formidable": "^2.0.1",
     "html-to-image": "^1.11.4",
+    "image-conversion": "^2.1.1",
     "jspdf": "^2.5.1",
     "mongoose": "^6.6.5",
     "mui-file-input": "^1.1.3",
