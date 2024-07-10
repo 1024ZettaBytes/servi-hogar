@@ -4,6 +4,7 @@ import { useState } from 'react';
 import SidebarLayout from '@/layouts/SidebarLayout';
 import { validateServerSideSession } from '../../lib/auth';
 import * as imageConversion from 'image-conversion';
+import Compressor from 'compressorjs';
 import {
   convertDateToLocal,
   replaceCoordinatesOnUrl,
@@ -138,8 +139,7 @@ function RentaRapida() {
   async function handleImageSelection(imageFile, key) {
     if (
       imageFile &&
-      !imageFile.type.includes('image/') &&
-      !imageFile.type.includes('/pdf')
+      (!imageFile.type.includes('image/') || imageFile.type.includes('/heic'))
     ) {
       setBadFormat({
         ...badFormat,
@@ -166,12 +166,40 @@ function RentaRapida() {
       });
       return;
     }
-    const url = URL.createObjectURL(imageFile);
-    const res = await imageConversion.compress(imageFile, 0.2);
+    let compressedFile;
+    let url;
+    try {
+      compressedFile = new File(
+        [await imageConversion.compress(imageFile, 0.2)],
+        imageFile.name
+      );
+      console.log('Compressed using conversion');
+    } catch (error) {
+      console.error(error);
+      compressedFile = new File(
+        [
+          await new Promise((resolve, reject) => {
+            new Compressor(imageFile, {
+              quality: 0.6,
+              success: resolve,
+              error: reject
+            });
+          })
+        ],
+        imageFile.name
+      );
+      console.log('Compressed using compressorjs');
+    }
+    try {
+      url = URL.createObjectURL(compressedFile);
+    } catch (error) {
+      console.error(error);
+      url = URL.createObjectURL(imageFile);
+    }
     setAttached({
       ...attached,
       [key]: {
-        file: new File([res], imageFile.name),
+        file: compressedFile,
         url,
         error: false
       }
