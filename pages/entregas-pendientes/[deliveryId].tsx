@@ -1,20 +1,22 @@
-import Head from "next/head";
-import { getSession } from "next-auth/react";
-import { useState } from "react";
-import SidebarLayout from "@/layouts/SidebarLayout";
-import { validateServerSideSession } from "../../lib/auth";
+import Head from 'next/head';
+import { getSession } from 'next-auth/react';
+import { useState } from 'react';
+import SidebarLayout from '@/layouts/SidebarLayout';
+import { validateServerSideSession } from '../../lib/auth';
+import * as imageConversion from 'image-conversion';
+import Compressor from 'compressorjs';
 import {
   convertDateToLocal,
   replaceCoordinatesOnUrl,
   setDateToInitial,
   setDateToMid,
-  validateMapsUrl,
-} from "../../lib/client/utils";
-import PageHeader from "@/components/PageHeader";
-import PageTitleWrapper from "@/components/PageTitleWrapper";
-import Image from "next/image";
-import { MuiFileInput } from "mui-file-input";
-import NextLink from "next/link";
+  validateMapsUrl
+} from '../../lib/client/utils';
+import PageHeader from '@/components/PageHeader';
+import PageTitleWrapper from '@/components/PageTitleWrapper';
+import Image from 'next/image';
+import { MuiFileInput } from 'mui-file-input';
+import NextLink from 'next/link';
 import {
   Card,
   Container,
@@ -34,29 +36,29 @@ import {
   InputLabel,
   FormGroup,
   Checkbox,
-  InputAdornment,
-} from "@mui/material";
-import Footer from "@/components/Footer";
-import Stepper from "@mui/material/Stepper";
-import Step from "@mui/material/Step";
-import StepLabel from "@mui/material/StepLabel";
-import StepContent from "@mui/material/StepContent";
-import Button from "@mui/material/Button";
-import Paper from "@mui/material/Paper";
-import MyLocationIcon from "@mui/icons-material/MyLocation";
+  InputAdornment
+} from '@mui/material';
+import Footer from '@/components/Footer';
+import Stepper from '@mui/material/Stepper';
+import Step from '@mui/material/Step';
+import StepLabel from '@mui/material/StepLabel';
+import StepContent from '@mui/material/StepContent';
+import Button from '@mui/material/Button';
+import Paper from '@mui/material/Paper';
+import MyLocationIcon from '@mui/icons-material/MyLocation';
 import {
   useGetMachinesForRent,
   getFetcher,
   useGetCities,
-  useGetDeliveryById,
-} from "../api/useRequest";
-import { ACCESORIES_LIST } from "../../lib/consts/OBJ_CONTS";
-import NextBreadcrumbs from "@/components/Shared/BreadCrums";
-import { LoadingButton } from "@mui/lab";
-import { completeDelivery } from "lib/client/deliveriesFetch";
-import { useRouter } from "next/router";
-import React from "react";
-import { DesktopDatePicker } from "@mui/x-date-pickers";
+  useGetDeliveryById
+} from '../api/useRequest';
+import { ACCESORIES_LIST } from '../../lib/consts/OBJ_CONTS';
+import NextBreadcrumbs from '@/components/Shared/BreadCrums';
+import { LoadingButton } from '@mui/lab';
+import { completeDelivery } from 'lib/client/deliveriesFetch';
+import { useRouter } from 'next/router';
+import React from 'react';
+import { DesktopDatePicker } from '@mui/x-date-pickers';
 function RentaRapida() {
   const router = useRouter();
   const { deliveryId } = router.query;
@@ -65,7 +67,7 @@ function RentaRapida() {
     deliveryId
   );
   const customer = delivery?.rent?.customer;
-  const paths = ["Inicio", "Entregas pendientes", `${delivery?.totalNumber}`];
+  const paths = ['Inicio', 'Entregas pendientes', `${delivery?.totalNumber}`];
   const [customerToEdit, setCustomerToEdit] = useState<any>({ isSet: false });
   const [deliveredMachine, setDeliveredMachine] = useState<string>(null);
   const [deliveryDate, setDeliveryDate] = useState<any>(new Date());
@@ -73,34 +75,34 @@ function RentaRapida() {
   const [isGettingLocation, setIsGettingLocation] = useState<boolean>(false);
   const [isOk, setIsOk] = useState<any>({
     info: true,
-    residence: true,
+    residence: true
   });
   const { machinesData, machinesError } = useGetMachinesForRent(getFetcher);
   const { citiesList, citiesError } = useGetCities(getFetcher);
   const [leftAccesories, setLeftAccesories] = useState<any>({
     MANG_CARGA: true,
     MANG_DESCAARGA: true,
-    CODO_PVC: false,
+    CODO_PVC: false
   });
   const [attached, setAttached] = useState<any>({
     contract: { file: null, url: null },
     front: { file: null, url: null },
     board: { file: null, url: null },
-    tag: { file: null, url: null },
+    tag: { file: null, url: null }
   });
 
   const [badFormat, setBadFormat] = useState<any>({
     contract: false,
     front: false,
     board: false,
-    tag: false,
+    tag: false
   });
 
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
 
   const [hasErrorSubmitting, setHasErrorSubmitting] = useState<any>({
     error: false,
-    msg: "",
+    msg: ''
   });
   const [activeStep, setActiveStep] = useState(0);
   const generalError = deliveryByIdError || citiesError || machinesError;
@@ -108,14 +110,14 @@ function RentaRapida() {
 
   const steps = [
     {
-      label: "Verifique los datos del cliente",
+      label: 'Verifique los datos del cliente'
     },
     {
-      label: "Equipo y accesorios",
+      label: 'Equipo y accesorios'
     },
     {
-      label: "Entrega",
-    },
+      label: 'Entrega'
+    }
   ];
   function handleCitySelection(cityId) {
     const filteredCity = citiesList.filter((c) => c._id === cityId);
@@ -123,7 +125,7 @@ function RentaRapida() {
     const sector = {};
     setCustomerToEdit({
       ...customerToEdit,
-      currentResidence: { ...customerToEdit.currentResidence, city, sector },
+      currentResidence: { ...customerToEdit.currentResidence, city, sector }
     });
   }
 
@@ -131,9 +133,76 @@ function RentaRapida() {
     const sector = { _id: sectorId };
     setCustomerToEdit({
       ...customerToEdit,
-      currentResidence: { ...customerToEdit.currentResidence, sector },
+      currentResidence: { ...customerToEdit.currentResidence, sector }
     });
   }
+  async function handleImageSelection(imageFile, key) {
+    if (
+      imageFile &&
+      (!imageFile.type.includes('image/') || imageFile.type.includes('/heic'))
+    ) {
+      setBadFormat({
+        ...badFormat,
+        [key]: true
+      });
+
+      setAttached({
+        ...attached,
+        [key]: {
+          ...attached[key],
+          error: true
+        }
+      });
+      return;
+    }
+    if (!imageFile) {
+      setAttached({
+        ...attached,
+        [key]: {
+          file: null,
+          url: null,
+          error: false
+        }
+      });
+      return;
+    }
+    let compressedFile;
+    let url;
+    try {
+      compressedFile = new File(
+        [await imageConversion.compress(imageFile, 0.2)],
+        imageFile.name
+      );
+    } catch (error) {
+      compressedFile = new File(
+        [
+          await new Promise((resolve, reject) => {
+            new Compressor(imageFile, {
+              quality: 0.6,
+              success: resolve,
+              error: reject
+            });
+          })
+        ],
+        imageFile.name
+      );
+    }
+    try {
+      url = URL.createObjectURL(compressedFile);
+    } catch (error) {
+      console.error(error);
+      url = URL.createObjectURL(imageFile);
+    }
+    setAttached({
+      ...attached,
+      [key]: {
+        file: compressedFile,
+        url,
+        error: false
+      }
+    });
+  }
+
   const getInfoTextField = (
     label: string,
     field: string,
@@ -158,7 +227,7 @@ function RentaRapida() {
       onChange={(e) => {
         setCustomerToEdit({
           ...customerToEdit,
-          [field]: e.target.value,
+          [field]: e.target.value
         });
       }}
     />
@@ -188,8 +257,8 @@ function RentaRapida() {
           ...customerToEdit,
           currentResidence: {
             ...customerToEdit.currentResidence,
-            [field]: e.target.value,
-          },
+            [field]: e.target.value
+          }
         });
       }}
     />
@@ -205,7 +274,7 @@ function RentaRapida() {
     if (activeStep === 1) return deliveredMachine;
     if (activeStep === 2)
       return deliveryDate
-        ? deliveryDate.toString() !== "Invalid Date"
+        ? deliveryDate.toString() !== 'Invalid Date'
         : delivery?.date;
   };
 
@@ -213,7 +282,7 @@ function RentaRapida() {
 
   const handleOnSubmit = async (event) => {
     event.preventDefault();
-    setHasErrorSubmitting({ error: false, msg: "" });
+    setHasErrorSubmitting({ error: false, msg: '' });
     setIsSubmitting(true);
     const result = await completeDelivery(attached, {
       deliveryId,
@@ -222,7 +291,7 @@ function RentaRapida() {
       deliveredMachine,
       leftAccesories,
       deliveryDate: setDateToMid(new Date(deliveryDate || delivery.date)),
-      isOk,
+      isOk
     });
     setIsSubmitting(false);
     if (!result.error) {
@@ -259,7 +328,7 @@ function RentaRapida() {
         <title>Completar entrega</title>
       </Head>
       <PageTitleWrapper>
-        <PageHeader title={"Completar entrega"} sutitle={""} />
+        <PageHeader title={'Completar entrega'} sutitle={''} />
         <NextBreadcrumbs
           paths={paths}
           lastLoaded={!deliveryByIdError && delivery}
@@ -283,7 +352,7 @@ function RentaRapida() {
             ) : !completeData ? (
               <Skeleton
                 variant="rectangular"
-                width={"100%"}
+                width={'100%'}
                 height={500}
                 animation="wave"
               />
@@ -292,7 +361,7 @@ function RentaRapida() {
                 <Stepper
                   activeStep={activeStep}
                   orientation="vertical"
-                  sx={{ backgroundColor: "transparent" }}
+                  sx={{ backgroundColor: 'transparent' }}
                 >
                   {steps.map((step, index) => (
                     <Step key={step.label}>
@@ -326,11 +395,11 @@ function RentaRapida() {
                                   row
                                   aria-labelledby="demo-controlled-radio-buttons-group"
                                   name="controlled-radio-buttons-group"
-                                  value={isOk.info ? "si" : "no"}
+                                  value={isOk.info ? 'si' : 'no'}
                                   onChange={(event) => {
                                     onChangeOk(
-                                      "info",
-                                      event.target.value === "si"
+                                      'info',
+                                      event.target.value === 'si'
                                     );
                                   }}
                                 >
@@ -349,8 +418,8 @@ function RentaRapida() {
                               <Grid item lg={3} m={1}>
                                 {customerToEdit.isSet ? (
                                   getInfoTextField(
-                                    "Nombre",
-                                    "name",
+                                    'Nombre',
+                                    'name',
                                     1,
                                     100,
                                     isOk.info
@@ -358,15 +427,15 @@ function RentaRapida() {
                                 ) : (
                                   <Skeleton
                                     variant="text"
-                                    sx={{ fontSize: "1rem", width: "100px" }}
+                                    sx={{ fontSize: '1rem', width: '100px' }}
                                   />
                                 )}
                               </Grid>
                               <Grid item lg={3} m={1}>
                                 {customerToEdit.isSet ? (
                                   getInfoTextField(
-                                    "Teléfono",
-                                    "cell",
+                                    'Teléfono',
+                                    'cell',
                                     10,
                                     10,
                                     isOk.info
@@ -374,15 +443,15 @@ function RentaRapida() {
                                 ) : (
                                   <Skeleton
                                     variant="text"
-                                    sx={{ fontSize: "1rem", width: "100px" }}
+                                    sx={{ fontSize: '1rem', width: '100px' }}
                                   />
                                 )}
                               </Grid>
                               <Grid item lg={3} m={1}>
                                 {customerToEdit.isSet ? (
                                   getInfoTextField(
-                                    "Correo",
-                                    "email",
+                                    'Correo',
+                                    'email',
                                     0,
                                     100,
                                     isOk.info,
@@ -391,7 +460,7 @@ function RentaRapida() {
                                 ) : (
                                   <Skeleton
                                     variant="text"
-                                    sx={{ fontSize: "1rem", width: "100px" }}
+                                    sx={{ fontSize: '1rem', width: '100px' }}
                                   />
                                 )}
                               </Grid>
@@ -413,11 +482,11 @@ function RentaRapida() {
                                   row
                                   aria-labelledby="demo-controlled-radio-buttons-group"
                                   name="controlled-radio-buttons-group"
-                                  value={isOk.residence ? "si" : "no"}
+                                  value={isOk.residence ? 'si' : 'no'}
                                   onChange={(event) => {
                                     onChangeOk(
-                                      "residence",
-                                      event.target.value === "si"
+                                      'residence',
+                                      event.target.value === 'si'
                                     );
                                   }}
                                 >
@@ -436,8 +505,8 @@ function RentaRapida() {
                               <Grid item xs={9} sm={6} md={3} m={1}>
                                 {customerToEdit.isSet ? (
                                   getResidenceTextField(
-                                    "Calle y número",
-                                    "street",
+                                    'Calle y número',
+                                    'street',
                                     1,
                                     100,
                                     isOk.residence
@@ -445,15 +514,15 @@ function RentaRapida() {
                                 ) : (
                                   <Skeleton
                                     variant="text"
-                                    sx={{ fontSize: "1rem", width: "100px" }}
+                                    sx={{ fontSize: '1rem', width: '100px' }}
                                   />
                                 )}
                               </Grid>
                               <Grid item xs={9} sm={6} lg={3} m={1}>
                                 {customerToEdit.isSet ? (
                                   getResidenceTextField(
-                                    "Colonia",
-                                    "suburb",
+                                    'Colonia',
+                                    'suburb',
                                     1,
                                     100,
                                     isOk.residence
@@ -461,13 +530,13 @@ function RentaRapida() {
                                 ) : (
                                   <Skeleton
                                     variant="text"
-                                    sx={{ fontSize: "1rem", width: "100px" }}
+                                    sx={{ fontSize: '1rem', width: '100px' }}
                                   />
                                 )}
                               </Grid>
                               <Grid item xs={9} sm={6} lg={2} m={1}>
                                 {customerToEdit.isSet ? (
-                                  <FormControl sx={{ width: "100%" }}>
+                                  <FormControl sx={{ width: '100%' }}>
                                     <InputLabel id="city-id">
                                       Ciudad*
                                     </InputLabel>
@@ -482,7 +551,7 @@ function RentaRapida() {
                                       size="small"
                                       value={
                                         customerToEdit?.currentResidence?.city
-                                          ?._id || ""
+                                          ?._id || ''
                                       }
                                       onChange={(event) =>
                                         handleCitySelection(event.target.value)
@@ -503,13 +572,13 @@ function RentaRapida() {
                                 ) : (
                                   <Skeleton
                                     variant="text"
-                                    sx={{ fontSize: "1rem", width: "100px" }}
+                                    sx={{ fontSize: '1rem', width: '100px' }}
                                   />
                                 )}
                               </Grid>
                               <Grid item xs={9} sm={6} lg={2} m={1}>
                                 {customerToEdit.isSet ? (
-                                  <FormControl sx={{ width: "100%" }}>
+                                  <FormControl sx={{ width: '100%' }}>
                                     <InputLabel id="sector-id">
                                       Sector*
                                     </InputLabel>
@@ -524,7 +593,7 @@ function RentaRapida() {
                                       placeholder="Seleccione un valor"
                                       value={
                                         customerToEdit?.currentResidence?.sector
-                                          ._id || ""
+                                          ._id || ''
                                       }
                                       disabled={isOk.residence}
                                       onChange={(event) =>
@@ -551,15 +620,15 @@ function RentaRapida() {
                                 ) : (
                                   <Skeleton
                                     variant="text"
-                                    sx={{ fontSize: "1rem", width: "100px" }}
+                                    sx={{ fontSize: '1rem', width: '100px' }}
                                   />
                                 )}
                               </Grid>
                               <Grid item xs={9} sm={6} lg={3} m={1}>
                                 {customerToEdit.isSet ? (
                                   getResidenceTextField(
-                                    "Domicilio referencia",
-                                    "residenceRef",
+                                    'Domicilio referencia',
+                                    'residenceRef',
                                     1,
                                     250,
                                     isOk.residence
@@ -567,15 +636,15 @@ function RentaRapida() {
                                 ) : (
                                   <Skeleton
                                     variant="text"
-                                    sx={{ fontSize: "1rem", width: "100px" }}
+                                    sx={{ fontSize: '1rem', width: '100px' }}
                                   />
                                 )}
                               </Grid>
                               <Grid item xs={9} sm={6} lg={3} m={1}>
                                 {customerToEdit.isSet ? (
                                   getResidenceTextField(
-                                    "Nombre referencia",
-                                    "nameRef",
+                                    'Nombre referencia',
+                                    'nameRef',
                                     1,
                                     100,
                                     isOk.residence
@@ -583,15 +652,15 @@ function RentaRapida() {
                                 ) : (
                                   <Skeleton
                                     variant="text"
-                                    sx={{ fontSize: "1rem", width: "100px" }}
+                                    sx={{ fontSize: '1rem', width: '100px' }}
                                   />
                                 )}
                               </Grid>
                               <Grid item xs={9} sm={6} lg={3} m={1}>
                                 {customerToEdit.isSet ? (
                                   getResidenceTextField(
-                                    "Teléfono referencia",
-                                    "telRef",
+                                    'Teléfono referencia',
+                                    'telRef',
                                     10,
                                     10,
                                     isOk.residence
@@ -599,7 +668,7 @@ function RentaRapida() {
                                 ) : (
                                   <Skeleton
                                     variant="text"
-                                    sx={{ fontSize: "1rem", width: "100px" }}
+                                    sx={{ fontSize: '1rem', width: '100px' }}
                                   />
                                 )}
                               </Grid>
@@ -607,7 +676,7 @@ function RentaRapida() {
                                 <TextField
                                   autoComplete="off"
                                   required
-                                  label={"Maps"}
+                                  label={'Maps'}
                                   id="maps"
                                   name="maps"
                                   disabled={isOk.residence}
@@ -615,15 +684,15 @@ function RentaRapida() {
                                   maxRows={5}
                                   fullWidth={true}
                                   value={
-                                    customerToEdit?.currentResidence?.maps || ""
+                                    customerToEdit?.currentResidence?.maps || ''
                                   }
                                   onChange={(e) => {
                                     setCustomerToEdit({
                                       ...customerToEdit,
                                       currentResidence: {
                                         ...customerToEdit.currentResidence,
-                                        maps: e.target.value,
-                                      },
+                                        maps: e.target.value
+                                      }
                                     });
                                   }}
                                 />
@@ -638,22 +707,20 @@ function RentaRapida() {
                                       variant="contained"
                                       onClick={() => {
                                         setIsGettingLocation(true);
-                                        if ("geolocation" in navigator) {
+                                        if ('geolocation' in navigator) {
                                           // Retrieve latitude & longitude coordinates from `navigator.geolocation` Web API
                                           navigator.geolocation.getCurrentPosition(
                                             ({ coords }) => {
-                                              const {
-                                                latitude,
-                                                longitude,
-                                              } = coords;
+                                              const { latitude, longitude } =
+                                                coords;
                                               setCustomerToEdit({
                                                 ...customerToEdit,
                                                 currentResidence: {
                                                   ...customerToEdit.currentResidence,
                                                   maps: replaceCoordinatesOnUrl(
                                                     { latitude, longitude }
-                                                  ),
-                                                },
+                                                  )
+                                                }
                                               });
                                               setIsGettingLocation(false);
                                             }
@@ -669,7 +736,7 @@ function RentaRapida() {
                               {!nextButtonEnabled && (
                                 <Grid item lg={6} m={1}>
                                   <Alert severity="warning">
-                                    {"Ingrese los datos faltantes"}
+                                    {'Ingrese los datos faltantes'}
                                   </Alert>
                                 </Grid>
                               )}
@@ -679,7 +746,7 @@ function RentaRapida() {
                             <Grid container>
                               <Grid item xs={9} sm={6} lg={2} m={1}>
                                 <FormControl
-                                  sx={{ width: "100%", textAlign: "center" }}
+                                  sx={{ width: '100%', textAlign: 'center' }}
                                 >
                                   <InputLabel id="machine-id">
                                     Equipo entregado*
@@ -691,7 +758,7 @@ function RentaRapida() {
                                     name="machine"
                                     required
                                     size="medium"
-                                    value={deliveredMachine || ""}
+                                    value={deliveredMachine || ''}
                                     onChange={(event) =>
                                       setDeliveredMachine(event.target.value)
                                     }
@@ -729,7 +796,7 @@ function RentaRapida() {
                                             onChange={(event) => {
                                               setLeftAccesories({
                                                 ...leftAccesories,
-                                                [key]: event.target.checked,
+                                                [key]: event.target.checked
                                               });
                                             }}
                                           />
@@ -780,8 +847,8 @@ function RentaRapida() {
                                     ),
                                     inputProps: {
                                       min: 0,
-                                      style: { textAlign: "center" },
-                                    },
+                                      style: { textAlign: 'center' }
+                                    }
                                   }}
                                   onChange={(event) => {
                                     setPayment(Number(event.target.value));
@@ -790,7 +857,7 @@ function RentaRapida() {
                               </Grid>
                               {attached.contract?.url &&
                                 !attached.contract.file.name.includes(
-                                  "pdf"
+                                  'pdf'
                                 ) && (
                                   <Grid item lg={12} m={1}>
                                     <Image
@@ -804,35 +871,11 @@ function RentaRapida() {
                               <Grid item lg={4} m={1}>
                                 <MuiFileInput
                                   required={!attached.contract.file}
-                                  placeholder={"No seleccionada"}
-                                  label={"Foto de contrato"}
+                                  placeholder={'No seleccionada'}
+                                  label={'Foto de contrato'}
                                   value={attached.contract?.file}
                                   onChange={(file) => {
-                                    if (
-                                      file &&
-                                      !file.type.includes("image/") &&
-                                      !file.type.includes("/pdf")
-                                    ) {
-                                      setBadFormat({
-                                        ...badFormat,
-                                        contract: true,
-                                      });
-                                      setAttached({
-                                        ...attached,
-                                        contract: {
-                                          ...attached.contract,
-                                          error: true,
-                                        },
-                                      });
-                                      return;
-                                    }
-                                    const url = file
-                                      ? URL.createObjectURL(file)
-                                      : null;
-                                    setAttached({
-                                      ...attached,
-                                      contract: { file, url, error: false },
-                                    });
+                                    handleImageSelection(file, 'contract');
                                   }}
                                 />
                               </Grid>
@@ -846,7 +889,7 @@ function RentaRapida() {
                                 </Grid>
                               )}
                               {attached.front?.url &&
-                                !attached.front.file.name.includes("pdf") && (
+                                !attached.front.file.name.includes('pdf') && (
                                   <Grid item lg={12} m={1}>
                                     <Image
                                       src={attached.front.url}
@@ -859,35 +902,11 @@ function RentaRapida() {
                               <Grid item lg={4} m={1}>
                                 <MuiFileInput
                                   required={!attached.front.file}
-                                  placeholder={"No seleccionada"}
-                                  label={"Foto de frente"}
+                                  placeholder={'No seleccionada'}
+                                  label={'Foto de frente'}
                                   value={attached.front?.file}
                                   onChange={(file) => {
-                                    if (
-                                      file &&
-                                      !file.type.includes("image/") &&
-                                      !file.type.includes("/pdf")
-                                    ) {
-                                      setBadFormat({
-                                        ...badFormat,
-                                        front: true,
-                                      });
-                                      setAttached({
-                                        ...attached,
-                                        front: {
-                                          ...attached.front,
-                                          error: true,
-                                        },
-                                      });
-                                      return;
-                                    }
-                                    const url = file
-                                      ? URL.createObjectURL(file)
-                                      : null;
-                                    setAttached({
-                                      ...attached,
-                                      front: { file, url, error: false },
-                                    });
+                                    handleImageSelection(file, 'front');
                                   }}
                                 />
                               </Grid>
@@ -901,7 +920,7 @@ function RentaRapida() {
                                 </Grid>
                               )}
                               {attached.board?.url &&
-                                !attached.board.file.name.includes("pdf") && (
+                                !attached.board.file.name.includes('pdf') && (
                                   <Grid item lg={12} m={1}>
                                     <Image
                                       src={attached.board.url}
@@ -914,35 +933,11 @@ function RentaRapida() {
                               <Grid item lg={4} m={1}>
                                 <MuiFileInput
                                   required={!attached.board.file}
-                                  placeholder={"No seleccionada"}
-                                  label={"Foto de tablero"}
+                                  placeholder={'No seleccionada'}
+                                  label={'Foto de tablero'}
                                   value={attached.board?.file}
                                   onChange={(file) => {
-                                    if (
-                                      file &&
-                                      !file.type.includes("image/") &&
-                                      !file.type.includes("/pdf")
-                                    ) {
-                                      setBadFormat({
-                                        ...badFormat,
-                                        board: true,
-                                      });
-                                      setAttached({
-                                        ...attached,
-                                        board: {
-                                          ...attached.board,
-                                          error: true,
-                                        },
-                                      });
-                                      return;
-                                    }
-                                    const url = file
-                                      ? URL.createObjectURL(file)
-                                      : null;
-                                    setAttached({
-                                      ...attached,
-                                      board: { file, url, error: false },
-                                    });
+                                    handleImageSelection(file, 'board');
                                   }}
                                 />
                               </Grid>
@@ -956,7 +951,7 @@ function RentaRapida() {
                                 </Grid>
                               )}
                               {attached.tag?.url &&
-                                !attached.tag.file.name.includes("pdf") && (
+                                !attached.tag.file.name.includes('pdf') && (
                                   <Grid item lg={12} m={1}>
                                     <Image
                                       src={attached.tag.url}
@@ -969,35 +964,11 @@ function RentaRapida() {
                               <Grid item lg={4} m={1}>
                                 <MuiFileInput
                                   required={!attached.tag.file}
-                                  placeholder={"No seleccionada"}
-                                  label={"Foto de etiqueta"}
+                                  placeholder={'No seleccionada'}
+                                  label={'Foto de etiqueta'}
                                   value={attached.tag?.file}
                                   onChange={(file) => {
-                                    if (
-                                      file &&
-                                      !file.type.includes("image/") &&
-                                      !file.type.includes("/pdf")
-                                    ) {
-                                      setBadFormat({
-                                        ...badFormat,
-                                        tag: true,
-                                      });
-                                      setAttached({
-                                        ...attached,
-                                        tag: {
-                                          ...attached.tag,
-                                          error: true,
-                                        },
-                                      });
-                                      return;
-                                    }
-                                    const url = file
-                                      ? URL.createObjectURL(file)
-                                      : null;
-                                    setAttached({
-                                      ...attached,
-                                      tag: { file, url, error: false },
-                                    });
+                                    handleImageSelection(file, 'tag');
                                   }}
                                 />
                               </Grid>
@@ -1038,8 +1009,8 @@ function RentaRapida() {
                                 sx={{ mt: 1, mr: 1 }}
                               >
                                 {index === steps.length - 1
-                                  ? "Entregado"
-                                  : "Siguiente"}
+                                  ? 'Entregado'
+                                  : 'Siguiente'}
                               </LoadingButton>
                             </div>
                           </Box>
