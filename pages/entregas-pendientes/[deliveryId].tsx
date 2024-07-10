@@ -173,9 +173,7 @@ function RentaRapida() {
         [await imageConversion.compress(imageFile, 0.2)],
         imageFile.name
       );
-      console.log('Compressed using conversion');
     } catch (error) {
-      console.error(error);
       compressedFile = new File(
         [
           await new Promise((resolve, reject) => {
@@ -188,7 +186,6 @@ function RentaRapida() {
         ],
         imageFile.name
       );
-      console.log('Compressed using compressorjs');
     }
     try {
       url = URL.createObjectURL(compressedFile);
