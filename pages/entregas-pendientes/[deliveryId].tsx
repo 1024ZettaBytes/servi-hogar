@@ -1,10 +1,49 @@
-import Head from 'next/head';
-import { getSession } from 'next-auth/react';
-import { useState } from 'react';
+import Footer from '@/components/Footer';
+import PageHeader from '@/components/PageHeader';
+import PageTitleWrapper from '@/components/PageTitleWrapper';
+import NextBreadcrumbs from '@/components/Shared/BreadCrums';
 import SidebarLayout from '@/layouts/SidebarLayout';
-import { validateServerSideSession } from '../../lib/auth';
-import * as imageConversion from 'image-conversion';
+import MyLocationIcon from '@mui/icons-material/MyLocation';
+import { LoadingButton } from '@mui/lab';
+import {
+  Alert,
+  Box,
+  Card,
+  Checkbox,
+  Container,
+  FormControl,
+  FormControlLabel,
+  FormGroup,
+  FormLabel,
+  Grid,
+  InputAdornment,
+  InputLabel,
+  MenuItem,
+  Radio,
+  RadioGroup,
+  Select,
+  Skeleton,
+  TextField,
+  Typography
+} from '@mui/material';
+import Button from '@mui/material/Button';
+import Paper from '@mui/material/Paper';
+import Step from '@mui/material/Step';
+import StepContent from '@mui/material/StepContent';
+import StepLabel from '@mui/material/StepLabel';
+import Stepper from '@mui/material/Stepper';
+import { DesktopDatePicker } from '@mui/x-date-pickers';
 import Compressor from 'compressorjs';
+import * as imageConversion from 'image-conversion';
+import { completeDelivery } from 'lib/client/deliveriesFetch';
+import { MuiFileInput } from 'mui-file-input';
+import { getSession } from 'next-auth/react';
+import Head from 'next/head';
+import Image from 'next/image';
+import NextLink from 'next/link';
+import { useRouter } from 'next/router';
+import { useState } from 'react';
+import { validateServerSideSession } from '../../lib/auth';
 import {
   convertDateToLocal,
   replaceCoordinatesOnUrl,
@@ -12,53 +51,13 @@ import {
   setDateToMid,
   validateMapsUrl
 } from '../../lib/client/utils';
-import PageHeader from '@/components/PageHeader';
-import PageTitleWrapper from '@/components/PageTitleWrapper';
-import Image from 'next/image';
-import { MuiFileInput } from 'mui-file-input';
-import NextLink from 'next/link';
+import { ACCESORIES_LIST } from '../../lib/consts/OBJ_CONTS';
 import {
-  Card,
-  Container,
-  Grid,
-  Skeleton,
-  Alert,
-  Box,
-  Typography,
-  TextField,
-  FormLabel,
-  RadioGroup,
-  FormControlLabel,
-  Radio,
-  FormControl,
-  MenuItem,
-  Select,
-  InputLabel,
-  FormGroup,
-  Checkbox,
-  InputAdornment
-} from '@mui/material';
-import Footer from '@/components/Footer';
-import Stepper from '@mui/material/Stepper';
-import Step from '@mui/material/Step';
-import StepLabel from '@mui/material/StepLabel';
-import StepContent from '@mui/material/StepContent';
-import Button from '@mui/material/Button';
-import Paper from '@mui/material/Paper';
-import MyLocationIcon from '@mui/icons-material/MyLocation';
-import {
-  useGetMachinesForRent,
   getFetcher,
   useGetCities,
-  useGetDeliveryById
+  useGetDeliveryById,
+  useGetMachinesForRent
 } from '../api/useRequest';
-import { ACCESORIES_LIST } from '../../lib/consts/OBJ_CONTS';
-import NextBreadcrumbs from '@/components/Shared/BreadCrums';
-import { LoadingButton } from '@mui/lab';
-import { completeDelivery } from 'lib/client/deliveriesFetch';
-import { useRouter } from 'next/router';
-import React from 'react';
-import { DesktopDatePicker } from '@mui/x-date-pickers';
 function RentaRapida() {
   const router = useRouter();
   const { deliveryId } = router.query;
@@ -855,13 +854,13 @@ function RentaRapida() {
                                   }}
                                 />
                               </Grid>
-                              {attached.contract?.url &&
+                              {(delivery?.rent?.imagesUrl || (attached.contract?.url &&
                                 !attached.contract.file.name.includes(
                                   'pdf'
-                                ) && (
+                                ))) && (
                                   <Grid item lg={12} m={1}>
                                     <Image
-                                      src={attached.contract.url}
+                                      src={attached.contract.url || delivery?.rent?.imagesUrl?.contract}
                                       alt="Picture of the author"
                                       width={300}
                                       height={400}
@@ -870,8 +869,8 @@ function RentaRapida() {
                                 )}
                               <Grid item lg={4} m={1}>
                                 <MuiFileInput
-                                  required={!attached.contract.file}
-                                  placeholder={'No seleccionada'}
+                                  required={!delivery?.rent?.imagesUrl?.contract && !attached.contract.file}
+                                  placeholder={delivery?.rent?.imagesUrl?.contract ? 'Usar anterior' :'No seleccionada'}
                                   label={'Foto de contrato'}
                                   value={attached.contract?.file}
                                   onChange={(file) => {
@@ -888,11 +887,11 @@ function RentaRapida() {
                                   </Typography>
                                 </Grid>
                               )}
-                              {attached.front?.url &&
-                                !attached.front.file.name.includes('pdf') && (
+                              {(delivery?.rent?.imagesUrl || (attached.front?.url &&
+                                !attached.front.file.name.includes('pdf'))) && (
                                   <Grid item lg={12} m={1}>
                                     <Image
-                                      src={attached.front.url}
+                                      src={attached.front.url || delivery?.rent?.imagesUrl?.front}
                                       alt="Picture of the author"
                                       width={300}
                                       height={400}
@@ -901,8 +900,8 @@ function RentaRapida() {
                                 )}
                               <Grid item lg={4} m={1}>
                                 <MuiFileInput
-                                  required={!attached.front.file}
-                                  placeholder={'No seleccionada'}
+                                  required={!delivery?.rent?.imagesUrl?.contract && !attached.front.file}
+                                  placeholder={delivery?.rent?.imagesUrl?.contract ? 'Usar anterior' : 'No seleccionada'}
                                   label={'Foto de frente'}
                                   value={attached.front?.file}
                                   onChange={(file) => {
