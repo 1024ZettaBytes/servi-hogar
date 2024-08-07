@@ -173,14 +173,16 @@ export const printElement = async (
 
 export const getFirstWeekDay = (date: Date): Date => {
   const day = date.getDay();
-  if (day === 6) return setDateToInitial(date);
-  else return setDateToInitial(addDaysToDate(date, -(day + 1)));
+  if (day === 5) return setDateToInitial(date);
+  if (day > 5) return setDateToInitial(addDaysToDate(date, -(day - 5)));
+  else return setDateToInitial(addDaysToDate(date, -(day + 2)));
 };
 
 export const getLastWeekDay = (date: Date): Date => {
   const day = date.getDay();
-  if (day === 6) return setDateToEnd(addDaysToDate(date, 6));
-  else return setDateToEnd(addDaysToDate(date, 5 - day));
+  if (day === 5) return setDateToEnd(addDaysToDate(date, 6));
+  if (day > 5) return setDateToInitial(addDaysToDate(date, 5 + (6 - day)));
+  else return setDateToEnd(addDaysToDate(date, 4 - day));
 };
 
 export const getFirstDayMonth = (date: Date): Date => {
