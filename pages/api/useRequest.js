@@ -134,7 +134,8 @@ export const useGetDeliveries = (fetcher, limit, page, searchTerm=null) => {
     getPaginatedUrl(ROUTES.ALL_DELIVERIES_API, limit, page, searchTerm),
     fetcher
   );
-}
+  return { deliveriesList: data?.data, deliveriesError: error };
+};
 export const useGetDeliveryById = (fetcher, id) => {
   const { data, error } = useSWR(
     id ? ROUTES.DELIVERY_BY_ID_API.replace(':id', id) : null,
