@@ -8,7 +8,8 @@ import {
 
 async function getDeliveriesAPI(req, res) {
   try {
-    const rents = await getPastDeliveriesData();
+    const {page, limit} = req.query;
+    const rents = await getPastDeliveriesData(page, limit);
     res.status(200).json({ data: rents });
   } catch (e) {
     console.error(e);

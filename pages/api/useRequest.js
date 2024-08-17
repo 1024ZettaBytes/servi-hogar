@@ -6,6 +6,12 @@ const noRefreshOptions = {
   revalidateOnFocus: false,
   revalidateOnReconnect: true
 };
+function getPaginatedUrl(url, limit, page, searchTerm) {
+  return (
+    `${url}?limit=${limit}&page=${page}` +
+    (searchTerm && searchTerm.trim() !== '' ? `&searchTerm=${searchTerm}` : '')
+  );
+}
 export const refreshData = async (apiUrl) => {
   await mutate(apiUrl);
 };
@@ -123,8 +129,11 @@ export const useGetPendingDeliveries = (fetcher) => {
   const { data, error } = useSWR(ROUTES.ALL_PENDING_DELIVERIES_API, fetcher);
   return { pendingDeliveriesList: data?.data, pendingDeliveriesError: error };
 };
-export const useGetDeliveries = (fetcher) => {
-  const { data, error } = useSWR(ROUTES.ALL_DELIVERIES_API, fetcher);
+export const useGetDeliveries = (fetcher, limit, page, searchTerm=null) => {
+  const { data, error } = useSWR(
+    getPaginatedUrl(ROUTES.ALL_DELIVERIES_API, limit, page, searchTerm),
+    fetcher
+  );
   return { deliveriesList: data?.data, deliveriesError: error };
 };
 export const useGetDeliveryById = (fetcher, id) => {
