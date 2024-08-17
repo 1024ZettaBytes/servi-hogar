@@ -4,23 +4,16 @@ import SidebarLayout from "@/layouts/SidebarLayout";
 import { validateServerSideSession } from "../../lib/auth";
 import PageHeader from "@/components/PageHeader";
 import PageTitleWrapper from "@/components/PageTitleWrapper";
-import { Card, Container, Grid, Skeleton, Alert } from "@mui/material";
+import { Card, Container, Grid} from "@mui/material";
 import Footer from "@/components/Footer";
 import TablaEntregas from "./TablaEntregas";
-import {
-  useGetDeliveries,
-  getFetcher,
-} from "../api/useRequest";
 
 import NextBreadcrumbs from "@/components/Shared/BreadCrums";
 
 function EntregasPendientes({ session }) {
   const paths = ["Inicio", "Entregas"];
-  const { deliveriesList, deliveriesError } = useGetDeliveries(getFetcher);
-  const generalError = deliveriesError;
-  const completeData = deliveriesList;
-  const { user } = session;
   
+  const { user } = session;
   return (
     <>
       <Head>
@@ -42,25 +35,13 @@ function EntregasPendientes({ session }) {
           spacing={4}
         >
           <Grid item xs={12}>
-            {generalError ? (
-              <Alert severity="error">
-                {deliveriesError?.message}
-              </Alert>
-            ) : !completeData ? (
-              <Skeleton
-                variant="rectangular"
-                width={"100%"}
-                height={500}
-                animation="wave"
-              />
-            ) : (
+
               <Card>
                 <TablaEntregas
                   userRole={user?.role}
-                  deliveriesList={deliveriesList}
                 />
               </Card>
-            )}
+            
           </Grid>
         </Grid>
       </Container>
