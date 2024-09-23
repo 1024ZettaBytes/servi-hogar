@@ -19,8 +19,6 @@ async function getMachineStatusAPI(req, res) {
 async function handler(req, res) {
   const validRole = await validateUserPermissions(req, res, [
     'ADMIN',
-    'AUX',
-    'OPE'
   ]);
   if (validRole)
     switch (req.method) {

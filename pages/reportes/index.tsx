@@ -156,7 +156,7 @@ function Reportes({ session }) {
               </Card>
             </NextLink>
           </Grid>
-          <Grid xs={12} sm={6} md={4} item>
+          { user?.role === "ADMIN" && (<Grid xs={12} sm={6} md={4} item>
             <NextLink href="/reportes/equipos">
               <Card
                 sx={{
@@ -183,7 +183,7 @@ function Reportes({ session }) {
                 </CardContent>
               </Card>
             </NextLink>
-          </Grid>
+          </Grid>)}
           {user?.role === "ADMIN" && (
             <Grid xs={12} sm={6} md={4} item>
               <NextLink href="/reportes/ingresos">
