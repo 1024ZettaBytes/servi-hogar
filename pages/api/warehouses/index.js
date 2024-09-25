@@ -1,9 +1,10 @@
 import { getWarehousesOverviewData } from "../../../lib/data/Warehouses";
-import { validateUserPermissions } from "../auth/authUtils";
+import { validateUserPermissions, getUserRole } from "../auth/authUtils";
 
 async function getWarehousesOverviewAPI(req, res) {
   try {
-    const allWarehousesOverview = await getWarehousesOverviewData();
+    const userRole = await getUserRole(req, res);
+    const allWarehousesOverview = await getWarehousesOverviewData(userRole);
     res.status(200).json({ data: allWarehousesOverview });
   } catch (e) {
     console.error(e);
