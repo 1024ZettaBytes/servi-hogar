@@ -129,7 +129,7 @@ export const useGetPendingDeliveries = (fetcher) => {
   const { data, error } = useSWR(ROUTES.ALL_PENDING_DELIVERIES_API, fetcher);
   return { pendingDeliveriesList: data?.data, pendingDeliveriesError: error };
 };
-export const useGetDeliveries = (fetcher, limit, page, searchTerm=null) => {
+export const useGetDeliveries = (fetcher, limit, page, searchTerm = null) => {
   const { data, error } = useSWR(
     getPaginatedUrl(ROUTES.ALL_DELIVERIES_API, limit, page, searchTerm),
     fetcher
@@ -250,4 +250,32 @@ export const useGetPayouts = (fetcher, partnerId = null) => {
     noRefreshOptions
   );
   return { payoutsList: data?.data, payoutsError: error };
+};
+// Inventory
+export const useGetProducts = (fetcher, term = null, detailed = true) => {
+  const hasTerm = term && term.trim().length > 0;
+  const detChar = hasTerm ? '&' : '?';
+  const { data, error, isLoading } = useSWR(
+    ROUTES.ALL_PRODUCTS +
+      (hasTerm ? '?term=' + term : '') +
+      (detailed ? `${detChar}detailed=true` : ''),
+    fetcher
+  );
+  return {
+    productsList: data?.data,
+    productsError: error,
+    isLoadingProducts: isLoading
+  };
+};
+
+export const useGetProductEntries = (fetcher) => {
+  const { data, error, isLoading } = useSWR(
+    ROUTES.ALL_PRODUCTS_ENTRIES,
+    fetcher
+  );
+  return {
+    entriesList: data?.data,
+    entriesError: error,
+    isLoadingEntries: isLoading
+  };
 };

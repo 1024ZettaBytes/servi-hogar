@@ -18,7 +18,7 @@ import HomeIcon from "@mui/icons-material/Home";
 import PendingActionsIcon from "@mui/icons-material/PendingActions";
 import ListIcon from "@mui/icons-material/List";
 import LocalShippingIcon from "@mui/icons-material/LocalShipping";
-//import ArrowCircleUpIcon from '@mui/icons-material/ArrowCircleUp';
+import InventoryIcon from '@mui/icons-material/Inventory';
 import HailIcon from "@mui/icons-material/Hail";
 import ChangeCircleIcon from "@mui/icons-material/ChangeCircle";
 import PaidIcon from "@mui/icons-material/Paid";
@@ -545,6 +545,21 @@ function SidebarMenu({ userRole }) {
                         startIcon={<HandshakeIcon />}
                       >
                         Socios
+                      </Button>
+                    </NextLink>
+                  </ListItem>
+                )}
+                {userRole === "ADMIN" && (
+                  <ListItem component="div">
+                    <NextLink href="/inventario" passHref>
+                      <Button
+                        className={currentRoute === "/inventario" ? "active" : ""}
+                        disableRipple
+                        component="a"
+                        onClick={closeSidebar}
+                        startIcon={<InventoryIcon />}
+                      >
+                        Inventario
                       </Button>
                     </NextLink>
                   </ListItem>
