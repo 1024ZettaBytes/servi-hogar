@@ -1,6 +1,6 @@
-import { FC, ChangeEvent, useState } from "react";
-import * as str from "string";
-import PropTypes from "prop-types";
+import { FC, ChangeEvent, useState } from 'react';
+import * as str from 'string';
+import PropTypes from 'prop-types';
 import {
   Divider,
   Box,
@@ -18,17 +18,18 @@ import {
   InputAdornment,
   Tooltip,
   IconButton,
-  useTheme,
-} from "@mui/material";
-import ImageSearchIcon from "@mui/icons-material/ImageSearch";
+  useTheme
+} from '@mui/material';
+import ImageSearchIcon from '@mui/icons-material/ImageSearch';
 
-import { capitalizeFirstLetter, formatTZDate } from "lib/client/utils";
-import { format } from "date-fns";
-import es from "date-fns/locale/es";
-import Label from "@/components/Label";
-import SearchIcon from "@mui/icons-material/Search";
-import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
-import ImagesModal from "@/components/ImagesModal";
+import { capitalizeFirstLetter, formatTZDate } from 'lib/client/utils';
+import { format } from 'date-fns';
+import es from 'date-fns/locale/es';
+import Label from '@/components/Label';
+import SearchIcon from '@mui/icons-material/Search';
+import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
+import ReportProblemIcon from '@mui/icons-material/ReportProblem';
+import ImagesModal from '@/components/ImagesModal';
 interface TablaCambiosProps {
   userRole: string;
   className?: string;
@@ -36,18 +37,18 @@ interface TablaCambiosProps {
 }
 const statusMap = {
   CANCELADO: {
-    text: "Cancelado",
-    color: "error",
+    text: 'Cancelado',
+    color: 'error'
   },
   FINALIZADO: {
-    text: "Realizado",
-    color: "success",
-  },
+    text: 'Realizado',
+    color: 'success'
+  }
 };
-const getStatusLabel = (changeStatus: string): JSX.Element => {
+const getStatusLabel = (changeStatus: string, wasFixed=false): JSX.Element => {
   const { text, color }: any = statusMap[changeStatus];
 
-  return <Label color={color}>{text}</Label>;
+  return <Label color={color}>{wasFixed ? "Solucionado": text}</Label>;
 };
 const compareStringsForFilter = (keyWord: string, field: string) => {
   return str(field)
@@ -57,7 +58,7 @@ const compareStringsForFilter = (keyWord: string, field: string) => {
 };
 const applyFilters = (changesList: any[], filter: string): any[] => {
   return changesList.filter((change) => {
-    if (!filter || filter === "") {
+    if (!filter || filter === '') {
       return true;
     }
     return (
@@ -68,51 +69,55 @@ const applyFilters = (changesList: any[], filter: string): any[] => {
           return false;
         }
         switch (key) {
-          case "rent": {
+          case 'rent': {
             const matchCustomerName =
-              value["customer"] &&
-              value["customer"].name &&
-              compareStringsForFilter(filter, value["customer"].name);
+              value['customer'] &&
+              value['customer'].name &&
+              compareStringsForFilter(filter, value['customer'].name);
             const matchNumber =
-              value["num"] && compareStringsForFilter(filter, value["num"]);
+              value['num'] && compareStringsForFilter(filter, value['num']);
             return matchNumber || matchCustomerName;
           }
-          case "pickedMachine": 
-          case "leftMachine": {
+          case 'pickedMachine':
+          case 'leftMachine': {
             const matchPicked =
-              value["pickedMachine"] &&
-              value["pickedMachine"].machineNum &&
-              compareStringsForFilter(filter, value["pickedMachine"].machineNum);
+              value['pickedMachine'] &&
+              value['pickedMachine'].machineNum &&
+              compareStringsForFilter(
+                filter,
+                value['pickedMachine'].machineNum
+              );
             const matchLeft =
-              value["leftMachine"] && compareStringsForFilter(filter, value["leftMachine"].machineNum);
+              value['leftMachine'] &&
+              compareStringsForFilter(filter, value['leftMachine'].machineNum);
             return matchPicked || matchLeft;
           }
-          case "status": {
+          case 'status': {
             const matchText =
-              statusMap["" + value] &&
-              statusMap["" + value].text &&
-              compareStringsForFilter(filter, statusMap["" + value].text);
+              statusMap['' + value] &&
+              statusMap['' + value].text &&
+              compareStringsForFilter(filter, statusMap['' + value].text);
             return matchText;
           }
-          case "date": {
+          case 'date': {
             const matchFormatedDate =
               value &&
               compareStringsForFilter(
                 filter,
-                format(new Date(change?.date), "LLL dd yyyy", {
-                  locale: es,
+                format(new Date(change?.date), 'LLL dd yyyy', {
+                  locale: es
                 })
               );
             return matchFormatedDate;
           }
 
-          case "finishedAt": {
+          case 'finishedAt': {
             const matchFormatedDate =
               value &&
               compareStringsForFilter(
                 filter,
-                format(new Date(change?.finishedAt), "LLL dd yyyy", {
-                  locale: es,
+                format(new Date(change?.finishedAt), 'LLL dd yyyy', {
+                  locale: es
                 })
               );
             return matchFormatedDate;
@@ -134,7 +139,7 @@ const applyPagination = (
 const TablaCambios: FC<TablaCambiosProps> = ({ changesList }) => {
   const [page, setPage] = useState<number>(0);
   const [limit, setLimit] = useState<number>(10);
-  const [filter, setFilter] = useState<string>("");
+  const [filter, setFilter] = useState<string>('');
   const [openImages, setOpenImages] = useState<boolean>(false);
   const [selectedImages, setSelectedImages] = useState<null>();
 
@@ -176,17 +181,17 @@ const TablaCambios: FC<TablaCambiosProps> = ({ changesList }) => {
                     <InputAdornment position="start">
                       <SearchIcon />
                     </InputAdornment>
-                  ),
+                  )
                 }}
-                sx={{ marginTop: "20px" }}
+                sx={{ marginTop: '20px' }}
               />
             </Box>
           }
           sx={{
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "space-between",
-            flexWrap: "wrap",
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            flexWrap: 'wrap'
           }}
           title=""
         />
@@ -197,12 +202,11 @@ const TablaCambios: FC<TablaCambiosProps> = ({ changesList }) => {
             <TableHead>
               <TableRow>
                 <TableCell align="center">Renta</TableCell>
-                <TableCell align="center">#</TableCell>
-                <TableCell align="center"># del día</TableCell>
+                <TableCell align="center">Razón</TableCell>
                 <TableCell align="center">Cliente</TableCell>
                 <TableCell align="center">Solicitado</TableCell>
                 <TableCell align="center">Realizado</TableCell>
-                <TableCell align="center">Equipo recogido</TableCell>
+                <TableCell align="center">Equipo cliente</TableCell>
                 <TableCell align="center">Equipo dejado</TableCell>
                 <TableCell align="center">Fotos</TableCell>
                 <TableCell align="center">Resultado</TableCell>
@@ -224,26 +228,9 @@ const TablaCambios: FC<TablaCambiosProps> = ({ changesList }) => {
                       </Typography>
                     </TableCell>
                     <TableCell align="center">
-                      <Typography
-                        variant="body1"
-                        fontWeight="bold"
-                        color="text.primary"
-                        gutterBottom
-                        noWrap
-                      >
-                        {change?.totalNumber}
-                      </Typography>
-                    </TableCell>
-                    <TableCell align="center">
-                      <Typography
-                        variant="body1"
-                        fontWeight="bold"
-                        color="text.secondary"
-                        gutterBottom
-                        noWrap
-                      >
-                        {change?.dayNumber}
-                      </Typography>
+                      <Tooltip title={change?.reason || 'SIN RAZÓN'} arrow>
+                        <ReportProblemIcon fontSize="small" />
+                      </Tooltip>
                     </TableCell>
                     <TableCell align="center">
                       <Typography
@@ -266,7 +253,7 @@ const TablaCambios: FC<TablaCambiosProps> = ({ changesList }) => {
                         noWrap
                       >
                         {capitalizeFirstLetter(
-                          formatTZDate(new Date(change?.date), "MMM DD YYYY")
+                          formatTZDate(new Date(change?.date), 'MMM DD YYYY')
                         )}
                       </Typography>
                     </TableCell>
@@ -282,21 +269,23 @@ const TablaCambios: FC<TablaCambiosProps> = ({ changesList }) => {
                           ? capitalizeFirstLetter(
                               formatTZDate(
                                 new Date(change?.finishedAt),
-                                "MMM DD YYYY"
+                                'MMM DD YYYY'
                               )
                             )
-                          : "N/A"}
+                          : 'N/A'}
                       </Typography>
                     </TableCell>
                     <TableCell align="center">
                       {change.pickedMachine
                         ? change.pickedMachine.machineNum
-                        : "N/A"}
+                        : 'N/A'}
                     </TableCell>
                     <TableCell align="center">
-                      {change.leftMachine
+                      {change?.wasFixed
+                        ? 'Solucionado'
+                        : change.leftMachine
                         ? change.leftMachine.machineNum
-                        : "N/A"}
+                        : 'N/A'}
                     </TableCell>
                     <TableCell align="center">
                       {change.imagesUrl ? (
@@ -307,10 +296,10 @@ const TablaCambios: FC<TablaCambiosProps> = ({ changesList }) => {
                               setOpenImages(true);
                             }}
                             sx={{
-                              "&:hover": {
-                                background: theme.colors.primary.lighter,
+                              '&:hover': {
+                                background: theme.colors.primary.lighter
                               },
-                              color: theme.palette.primary.main,
+                              color: theme.palette.primary.main
                             }}
                             color="inherit"
                             size="small"
@@ -319,21 +308,21 @@ const TablaCambios: FC<TablaCambiosProps> = ({ changesList }) => {
                           </IconButton>
                         </Tooltip>
                       ) : (
-                        "N/A"
+                        'N/A'
                       )}
                     </TableCell>
                     <TableCell
                       align="center"
                       sx={{
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "center",
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center'
                       }}
                     >
-                      {getStatusLabel(change?.status)}
-                      {change?.status === "CANCELADO" && (
+                      {getStatusLabel(change?.status, change?.wasFixed)}
+                      {change?.status === 'CANCELADO' && (
                         <Tooltip
-                          title={change?.cancellationReason || "SIN RAZÓN"}
+                          title={change?.cancellationReason || 'SIN RAZÓN'}
                           arrow
                         >
                           <InfoOutlinedIcon fontSize="small" />
@@ -362,7 +351,7 @@ const TablaCambios: FC<TablaCambiosProps> = ({ changesList }) => {
         <ImagesModal
           open={openImages}
           imagesObj={selectedImages}
-          title={"Fotos del cambio"}
+          title={'Fotos del cambio'}
           text=""
           onClose={handleOnCloseImages}
         />
@@ -373,12 +362,12 @@ const TablaCambios: FC<TablaCambiosProps> = ({ changesList }) => {
 
 TablaCambios.propTypes = {
   userRole: PropTypes.string.isRequired,
-  changesList: PropTypes.array.isRequired,
+  changesList: PropTypes.array.isRequired
 };
 
 TablaCambios.defaultProps = {
-  userRole: "",
-  changesList: [],
+  userRole: '',
+  changesList: []
 };
 
 export default TablaCambios;
