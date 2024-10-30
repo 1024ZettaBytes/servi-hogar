@@ -104,7 +104,6 @@ const TablaEntregas: FC<TablaEntregasProps> = ({ }) => {
             <TableHead>
               <TableRow>
                 <TableCell align="center">#</TableCell>
-                <TableCell align="center"># del día</TableCell>
                 <TableCell align="center">Cliente</TableCell>
                 <TableCell align="center">Fecha Programada</TableCell>
                 <TableCell align="center">Entregada</TableCell>
@@ -125,16 +124,6 @@ const TablaEntregas: FC<TablaEntregasProps> = ({ }) => {
                         noWrap
                       >
                         {delivery?.totalNumber}
-                      </Typography>
-                    </TableCell>
-                    <TableCell align="center">
-                      <Typography
-                        variant="body1"
-                        color="text.secondary"
-                        gutterBottom
-                        noWrap
-                      >
-                        {delivery?.dayNumber}
                       </Typography>
                     </TableCell>
                     <TableCell align="center">

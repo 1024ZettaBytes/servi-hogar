@@ -195,8 +195,6 @@ const TablaRecolecciones: FC<TablaRecoleccionesProps> = ({ pickupsList }) => {
             <TableHead>
               <TableRow>
                 <TableCell align="center">Renta</TableCell>
-                <TableCell align="center">#</TableCell>
-                <TableCell align="center"># del día</TableCell>
                 <TableCell align="center">Cliente</TableCell>
                 <TableCell align="center">Solicitada</TableCell>
                 <TableCell align="center">Recolectada</TableCell>
@@ -218,28 +216,6 @@ const TablaRecolecciones: FC<TablaRecoleccionesProps> = ({ pickupsList }) => {
                         noWrap
                       >
                         {pickup?.rent?.num}
-                      </Typography>
-                    </TableCell>
-                    <TableCell align="center">
-                      <Typography
-                        variant="body1"
-                        fontWeight="bold"
-                        color="text.primary"
-                        gutterBottom
-                        noWrap
-                      >
-                        {pickup?.totalNumber}
-                      </Typography>
-                    </TableCell>
-                    <TableCell align="center">
-                      <Typography
-                        variant="body1"
-                        fontWeight="bold"
-                        color="text.secondary"
-                        gutterBottom
-                        noWrap
-                      >
-                        {pickup?.dayNumber}
                       </Typography>
                     </TableCell>
                     <TableCell align="center">
