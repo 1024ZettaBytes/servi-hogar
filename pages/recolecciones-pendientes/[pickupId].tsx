@@ -360,7 +360,7 @@ function RecoleccionPendiente() {
                                 <MuiFileInput
                                   required={!attached.tag.file}
                                   placeholder={"No seleccionada"}
-                                  label={"Foto de frente"}
+                                  label={"Foto de casa"}
                                   value={attached.tag?.file}
                                   onChange={(file) => {
                                     if (
