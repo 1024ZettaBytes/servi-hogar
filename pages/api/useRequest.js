@@ -179,9 +179,11 @@ export const useGetChangeById = (fetcher, id) => {
 };
 
 // Payments
-export const useGetPayments = (fetcher) => {
-  const { data, error } = useSWR(ROUTES.ALL_PAYMENTS_API, fetcher);
-  return { paymentsList: data?.data, paymentsError: error };
+export const useGetPayments = (fetcher, limit, page, searchTerm = null) => {
+  
+  
+  const { data, error } = useSWR(getPaginatedUrl(ROUTES.ALL_PAYMENTS_API, limit,page, searchTerm), fetcher);
+  return { payments: data?.data, paymentsError: error };
 };
 
 // Reports
