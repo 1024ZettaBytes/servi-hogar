@@ -871,7 +871,7 @@ function RentaRapida() {
                                 <MuiFileInput
                                   required={!delivery?.rent?.imagesUrl?.contract && !attached.contract.file}
                                   placeholder={delivery?.rent?.imagesUrl?.contract ? 'Usar anterior' :'No seleccionada'}
-                                  label={'Foto de contrato'}
+                                  label={'Foto de INE'}
                                   value={attached.contract?.file}
                                   onChange={(file) => {
                                     handleImageSelection(file, 'contract');

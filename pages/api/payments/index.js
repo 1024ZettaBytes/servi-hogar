@@ -9,7 +9,8 @@ export const config = {
 
 async function getPaymentsAPI(req, res){
   try {
-    const payments = await getPaymentsData();
+    const { page, limit, searchTerm } = req.query;
+    const payments = await getPaymentsData(page, limit, searchTerm);
     res.status(200).json({ data: payments });
   } catch (e) {
     console.error(e);

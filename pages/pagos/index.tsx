@@ -1,36 +1,26 @@
-import Head from "next/head";
-import { getSession } from "next-auth/react";
-import { useState } from "react";
-import SidebarLayout from "@/layouts/SidebarLayout";
-import { validateServerSideSession } from "../../lib/auth";
-import PageHeader from "@/components/PageHeader";
-import PageTitleWrapper from "@/components/PageTitleWrapper";
-import {
-  Card,
-  Container,
-  Grid,
-  Skeleton,
-  Alert,
-} from "@mui/material";
-import Footer from "@/components/Footer";
-import TablaPagos from "./TablaPagos";
-import {
-  useGetPayments,
-  getFetcher,
-} from "../api/useRequest";
-import { useSnackbar } from "notistack";
-import NextBreadcrumbs from "@/components/Shared/BreadCrums";
-import AddPaymentModal from "@/components/AddPaymentModal";
-import AddTwoTone from "@mui/icons-material/AddTwoTone";
+import Head from 'next/head';
+import { getSession } from 'next-auth/react';
+import { useState } from 'react';
+import SidebarLayout from '@/layouts/SidebarLayout';
+import { validateServerSideSession } from '../../lib/auth';
+import PageHeader from '@/components/PageHeader';
+import PageTitleWrapper from '@/components/PageTitleWrapper';
+import { Container, Grid } from '@mui/material';
+import Footer from '@/components/Footer';
+import TablaPagos from './TablaPagos';
+import { useSnackbar } from 'notistack';
+import NextBreadcrumbs from '@/components/Shared/BreadCrums';
+import AddPaymentModal from '@/components/AddPaymentModal';
+import AddTwoTone from '@mui/icons-material/AddTwoTone';
 
-function Pagos({ }) {
-  const paths = ["Inicio", "Pagos"];
+function Pagos({}) {
+  const paths = ['Inicio', 'Pagos'];
   const { enqueueSnackbar } = useSnackbar();
-  const { paymentsList, paymentsError } = useGetPayments(getFetcher);
+
+
 
   const [addModalIsOpen, setAddModalIsOpen] = useState(false);
-  const generalError = paymentsError;
-  const completeData = paymentsList;
+
 
   const handleClickOpen = () => {
     setAddModalIsOpen(true);
@@ -40,27 +30,28 @@ function Pagos({ }) {
     setAddModalIsOpen(false);
     if (addedPayment && successMessage) {
       enqueueSnackbar(successMessage, {
-        variant: "success",
+        variant: 'success',
         anchorOrigin: {
-          vertical: "top",
-          horizontal: "center",
+          vertical: 'top',
+          horizontal: 'center'
         },
-        autoHideDuration: 1500,
+        autoHideDuration: 1500
       });
     }
   };
-  const button = { text: "Nuevo pago", onClick: handleClickOpen, startIcon: <AddTwoTone/>, variant:"contained" };
+  const button = {
+    text: 'Nuevo pago',
+    onClick: handleClickOpen,
+    startIcon: <AddTwoTone />,
+    variant: 'contained'
+  };
   return (
     <>
       <Head>
         <title>Pagos</title>
       </Head>
       <PageTitleWrapper>
-        <PageHeader
-          title={"Lista de pagos"}
-          sutitle={""}
-          button={!generalError && completeData ? button : null}
-        />
+        <PageHeader title={'Lista de pagos'} sutitle={''} button={button} />
         <NextBreadcrumbs paths={paths} lastLoaded={true} />
       </PageTitleWrapper>
       <Container maxWidth="lg">
@@ -71,33 +62,11 @@ function Pagos({ }) {
           alignItems="stretch"
           spacing={4}
         >
-          <Grid item xs={12}>
-            {generalError ? (
-              <Alert severity="error">
-                {paymentsError?.message}
-              </Alert>
-            ) : !completeData ? (
-              <Skeleton
-                variant="rectangular"
-                width={"100%"}
-                height={500}
-                animation="wave"
-              />
-            ) : (
-              <Card>
-                <TablaPagos
-                  paymentsList={paymentsList}
-                />
-              </Card>
-            )}
-          </Grid>
+          <TablaPagos />
         </Grid>
       </Container>
-      {addModalIsOpen && completeData ? (
-        <AddPaymentModal
-          open={addModalIsOpen}
-          handleOnClose={handleClose}
-        />
+      {addModalIsOpen ? (
+        <AddPaymentModal open={addModalIsOpen} handleOnClose={handleClose} />
       ) : null}
       <Footer />
     </>

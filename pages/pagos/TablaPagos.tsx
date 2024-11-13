@@ -1,7 +1,5 @@
-import { FC, ChangeEvent, useState } from 'react';
+import { FC, useState } from 'react';
 import numeral from 'numeral';
-import * as str from 'string';
-import PropTypes from 'prop-types';
 import {
   Tooltip,
   Divider,
@@ -19,119 +17,81 @@ import {
   useTheme,
   CardHeader,
   TextField,
-  InputAdornment
+  InputAdornment,
+  Grid,
+  Alert,
+  Skeleton
 } from '@mui/material';
 
 import ImageSearchIcon from '@mui/icons-material/ImageSearch';
 import SearchIcon from '@mui/icons-material/Search';
 import { capitalizeFirstLetter, formatTZDate } from 'lib/client/utils';
 import { PAYMENT_METHODS } from '../../lib/consts/OBJ_CONTS';
+import { getFetcher, useGetPayments } from 'pages/api/useRequest';
 interface TablaPagosProps {
   className?: string;
-  paymentsList: any[];
 }
 
-const compareStringsForFilter = (keyWord: string, field: string) => {
-  return str(field)
-    .latinise()
-    .toLowerCase()
-    .includes(str(keyWord).latinise().toLowerCase());
-};
-const applyFilters = (paymentsList: any[], filter: string): any[] => {
-  return paymentsList.filter((payment) => {
-    if (!filter || filter === '') {
-      return true;
-    }
-    return (
-      Object.entries(payment).filter((keyValue) => {
-        const key = keyValue[0];
-        const value = keyValue[1];
-        if (!value) {
-          return false;
-        }
-        switch (key) {
-          case 'number': {
-            const matchNumber =
-              value && compareStringsForFilter(filter, payment.number + '');
-            return matchNumber;
-          }
-          case 'date': {
-            const matchFormatedDate =
-              value &&
-              compareStringsForFilter(
-                filter,
-                formatTZDate(payment?.date, 'MMMM DD YYYY')
-              );
-            return matchFormatedDate;
-          }
-          case 'customer': {
-            const matchCustomerName =
-              payment.customer &&
-              compareStringsForFilter(filter, payment.customer.name);
-            return matchCustomerName;
-          }
-          case 'lastUpdatedBy': {
-            const matchUserName =
-              payment.lastUpdatedBy &&
-              compareStringsForFilter(filter, payment.lastUpdatedBy.name);
-            return matchUserName;
-          }
-          case 'description': {
-            const matchDescription =
-              value && compareStringsForFilter(filter, payment.description);
-            return matchDescription;
-          }
-          case 'method': {
-            const matchMethod =
-              value &&
-              compareStringsForFilter(filter, PAYMENT_METHODS[payment.method]);
-            return matchMethod;
-          }
-        }
-      }).length > 0
-    );
-  });
-};
 
-const applyPagination = (
-  paymentsList: any[],
-  page: number,
-  limit: number
-): any[] => {
-  return paymentsList.slice(page * limit, page * limit + limit);
-};
+const TablaPagos: FC<TablaPagosProps> = () => {
+  const [page, setPage] = useState(0);
+  const [limit, setLimit] = useState(30);
+  const [searchTerm, setSearchTerm] = useState(null);
+  const [searchText, setSearchText] = useState(null);
 
-const TablaPagos: FC<TablaPagosProps> = ({ paymentsList }) => {
-  const [page, setPage] = useState<number>(0);
-  const [limit, setLimit] = useState<number>(10);
-  const [filter, setFilter] = useState<string>('');
-  const handleSearchChange = (e: ChangeEvent<HTMLInputElement>): void => {
-    const value = e.target.value;
-    setFilter(value);
-  };
+  const { payments, paymentsError } = useGetPayments(
+    getFetcher,
+    limit,
+    page +  1,
+    searchTerm
+  );
+  const generalError = paymentsError;
+  const completeData = payments;
 
-  const handlePageChange = (_event: any, newPage: number): void => {
+  const handlePageChange = (_event, newPage) => {
     setPage(newPage);
   };
-
-  const handleLimitChange = (event: ChangeEvent<HTMLInputElement>): void => {
+  const handleLimitChange = (event) => {
     setLimit(parseInt(event.target.value));
   };
 
-  const filteredMachines = applyFilters(paymentsList, filter);
-  const paginatedMachines = applyPagination(filteredMachines, page, limit);
   const theme = useTheme();
   return (
-    <>
+    <Grid item xs={12}>
+    {generalError ? (
+      <Alert severity="error">
+        {paymentsError?.message}
+      </Alert>
+    ) : !completeData ? (
+      <Skeleton
+        variant="rectangular"
+        width={"100%"}
+        height={500}
+        animation="wave"
+      />
+    ) : (
+      <Card>
+        
+
       <Card>
         <CardHeader
           action={
             <Box width={200}>
               <TextField
                 size="small"
+                helperText="Escriba y presione ENTER"
                 id="input-search-payment"
                 label="Buscar"
-                onChange={handleSearchChange}
+                value={searchText}
+                onChange={(event) => {
+                  setSearchText(event.target.value);
+                }}
+                onKeyDown={(ev) => {
+                  if (ev.key === "Enter") {
+                    ev.preventDefault();
+                    setSearchTerm(searchText);
+                  }
+                }}
                 InputProps={{
                   startAdornment: (
                     <InputAdornment position="start">
@@ -169,7 +129,7 @@ const TablaPagos: FC<TablaPagosProps> = ({ paymentsList }) => {
               </TableRow>
             </TableHead>
             <TableBody>
-              {paginatedMachines.map((payment) => {
+              {payments?.list?.map((payment) => {
                 return (
                   <TableRow key={payment?._id}>
                     <TableCell align="center">
@@ -301,7 +261,7 @@ const TablaPagos: FC<TablaPagosProps> = ({ paymentsList }) => {
         <Box p={2}>
           <TablePagination
             component="div"
-            count={filteredMachines.length}
+            count={payments.total}
             onPageChange={handlePageChange}
             onRowsPerPageChange={handleLimitChange}
             page={page}
@@ -310,16 +270,11 @@ const TablaPagos: FC<TablaPagosProps> = ({ paymentsList }) => {
           />
         </Box>
       </Card>
-    </>
+      </Card>
+    )}
+  </Grid>
+
   );
-};
-
-TablaPagos.propTypes = {
-  paymentsList: PropTypes.array.isRequired
-};
-
-TablaPagos.defaultProps = {
-  paymentsList: []
 };
 
 export default TablaPagos;
