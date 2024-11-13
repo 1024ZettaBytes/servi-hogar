@@ -79,6 +79,7 @@ const TablaPagos: FC<TablaPagosProps> = () => {
             <Box width={200}>
               <TextField
                 size="small"
+                helperText="Escriba y presione ENTER"
                 id="input-search-payment"
                 label="Buscar"
                 value={searchText}
