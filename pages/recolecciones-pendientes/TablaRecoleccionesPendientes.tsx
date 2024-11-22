@@ -37,7 +37,6 @@ import ModifyPickupModal from '../../src/components/ModifyPickupModal';
 import OperatorModal from '@/components/OperatorModal';
 import FormatModal from '@/components/FormatModal';
 import {
-  getCustomerDebt,
   getFormatForPickup
 } from '../../lib/consts/OBJ_CONTS';
 import { getFetcher, useGetPrices } from 'pages/api/useRequest';
@@ -46,7 +45,6 @@ import ImagesModal from '@/components/ImagesModal';
 import LocationOnIcon from '@mui/icons-material/LocationOn';
 import PersonAddAlt1Icon from '@mui/icons-material/PersonAddAlt1';
 import dayjs from 'dayjs';
-import numeral from 'numeral';
 
 interface TablaRecoleccionesPendientesProps {
   userRole: string;
