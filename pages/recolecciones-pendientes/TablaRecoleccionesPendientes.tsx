@@ -319,10 +319,10 @@ const TablaRecoleccionesPendientes: FC<TablaRecoleccionesPendientesProps> = ({
             </TableHead>
             <TableBody>
               {paginatedPickups.map((pickup) => {
-                const debt = getCustomerDebt(
-                  pickup.rent.remaining,
-                  pickup?.rent?.customer?.level?.dayPrice
-                );
+                let debtDays =
+                  pickup.rent.remaining < 0
+                    ? Math.abs(pickup.rent.remaining)
+                    : 0;
                 return (
                   <TableRow hover key={pickup?._id}>
                     <TableCell align="center">
@@ -410,11 +410,11 @@ const TablaRecoleccionesPendientes: FC<TablaRecoleccionesPendientesProps> = ({
                       <Typography
                         variant="body1"
                         fontWeight="bold"
-                        color={debt>0 ? "error": "text.primary"}
+                        color={debtDays > 0 ? 'error' : 'text.primary'}
                         gutterBottom
                         noWrap
                       >
-                        {debt > 0 ? numeral(debt).format(`$${debt}0,0.00`): "-"}
+                        {(debtDays > 0 ? debtDays : '-') + " días"}
                       </Typography>
                     </TableCell>
                     <TableCell align="center">
