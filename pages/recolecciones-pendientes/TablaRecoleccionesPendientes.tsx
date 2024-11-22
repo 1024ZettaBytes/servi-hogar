@@ -1,6 +1,6 @@
-import { FC, ChangeEvent, useState } from "react";
-import * as str from "string";
-import PropTypes from "prop-types";
+import { FC, ChangeEvent, useState } from 'react';
+import * as str from 'string';
+import PropTypes from 'prop-types';
 import {
   Tooltip,
   Divider,
@@ -18,31 +18,35 @@ import {
   useTheme,
   CardHeader,
   TextField,
-  InputAdornment,
-} from "@mui/material";
-import NextLink from "next/link";
-import { capitalizeFirstLetter, formatTZDate } from "lib/client/utils";
-import { format } from "date-fns";
-import es from "date-fns/locale/es";
-import { cancelPickup, markWasSentPickup } from "../../lib/client/pickupsFetch";
-import { useSnackbar } from "notistack";
-import Label from "@/components/Label";
-import WhatsAppIcon from "@mui/icons-material/WhatsApp";
-import CheckIcon from "@mui/icons-material/Check";
-import EditIcon from "@mui/icons-material/Edit";
-import CancelIcon from "@mui/icons-material/Cancel";
-import SearchIcon from "@mui/icons-material/Search";
-import GenericModal from "@/components/GenericModal";
-import ModifyPickupModal from "../../src/components/ModifyPickupModal";
-import OperatorModal from "@/components/OperatorModal";
-import FormatModal from "@/components/FormatModal";
-import { getFormatForPickup } from "../../lib/consts/OBJ_CONTS";
-import { getFetcher, useGetPrices } from "pages/api/useRequest";
-import ImageSearchIcon from "@mui/icons-material/ImageSearch";
-import ImagesModal from "@/components/ImagesModal";
-import LocationOnIcon from "@mui/icons-material/LocationOn";
-import PersonAddAlt1Icon from "@mui/icons-material/PersonAddAlt1";
-import dayjs from "dayjs";
+  InputAdornment
+} from '@mui/material';
+import NextLink from 'next/link';
+import { capitalizeFirstLetter, formatTZDate } from 'lib/client/utils';
+import { format } from 'date-fns';
+import es from 'date-fns/locale/es';
+import { cancelPickup, markWasSentPickup } from '../../lib/client/pickupsFetch';
+import { useSnackbar } from 'notistack';
+import Label from '@/components/Label';
+import WhatsAppIcon from '@mui/icons-material/WhatsApp';
+import CheckIcon from '@mui/icons-material/Check';
+import EditIcon from '@mui/icons-material/Edit';
+import CancelIcon from '@mui/icons-material/Cancel';
+import SearchIcon from '@mui/icons-material/Search';
+import GenericModal from '@/components/GenericModal';
+import ModifyPickupModal from '../../src/components/ModifyPickupModal';
+import OperatorModal from '@/components/OperatorModal';
+import FormatModal from '@/components/FormatModal';
+import {
+  getCustomerDebt,
+  getFormatForPickup
+} from '../../lib/consts/OBJ_CONTS';
+import { getFetcher, useGetPrices } from 'pages/api/useRequest';
+import ImageSearchIcon from '@mui/icons-material/ImageSearch';
+import ImagesModal from '@/components/ImagesModal';
+import LocationOnIcon from '@mui/icons-material/LocationOn';
+import PersonAddAlt1Icon from '@mui/icons-material/PersonAddAlt1';
+import dayjs from 'dayjs';
+import numeral from 'numeral';
 
 interface TablaRecoleccionesPendientesProps {
   userRole: string;
@@ -51,18 +55,19 @@ interface TablaRecoleccionesPendientesProps {
 }
 const statusMap = {
   ESPERA: {
-    text: "En espera",
-    color: "warning",
+    text: 'En espera',
+    color: 'warning'
   },
   EN_CAMINO: {
-    text: "En espera",
-    color: "warning",
+    text: 'En espera',
+    color: 'warning'
   },
   ENTREGADA: {
-    text: "Entregada",
-    color: "success",
-  },
+    text: 'Entregada',
+    color: 'success'
+  }
 };
+
 const getStatusLabel = (deliverStatus: string): JSX.Element => {
   const { text, color }: any = statusMap[deliverStatus];
 
@@ -76,7 +81,7 @@ const compareStringsForFilter = (keyWord: string, field: string) => {
 };
 const applyFilters = (pickupsList: any[], filter: string): any[] => {
   return pickupsList.filter((pickup) => {
-    if (!filter || filter === "") {
+    if (!filter || filter === '') {
       return true;
     }
     return (
@@ -87,51 +92,51 @@ const applyFilters = (pickupsList: any[], filter: string): any[] => {
           return false;
         }
         switch (key) {
-          case "rent": {
+          case 'rent': {
             const matchCustomerName =
-              value["customer"] &&
-              value["customer"].name &&
-              compareStringsForFilter(filter, value["customer"].name);
+              value['customer'] &&
+              value['customer'].name &&
+              compareStringsForFilter(filter, value['customer'].name);
             const matchMachine =
-              value["machine"] &&
-              value["machine"].machineNum &&
+              value['machine'] &&
+              value['machine'].machineNum &&
               compareStringsForFilter(
                 filter,
-                parseInt(value["machine"].machineNum) < 1000
-                  ? ("00" + value["machine"].machineNum).slice(-3)
-                  : value["machine"].machineNum
+                parseInt(value['machine'].machineNum) < 1000
+                  ? ('00' + value['machine'].machineNum).slice(-3)
+                  : value['machine'].machineNum
               );
             const matchCityOrSector =
-              value["customer"]?.currentResidence?.city?.name &&
-              value["customer"]?.currentResidence?.sector?.name &&
+              value['customer']?.currentResidence?.city?.name &&
+              value['customer']?.currentResidence?.sector?.name &&
               (compareStringsForFilter(
                 filter,
-                value["customer"].currentResidence.city.name
+                value['customer'].currentResidence.city.name
               ) ||
                 compareStringsForFilter(
                   filter,
-                  value["customer"].currentResidence.sector.name
+                  value['customer'].currentResidence.sector.name
                 ) ||
                 compareStringsForFilter(
                   filter,
-                  value["customer"].currentResidence.suburb
+                  value['customer'].currentResidence.suburb
                 ));
             return matchMachine || matchCustomerName || matchCityOrSector;
           }
-          case "status": {
+          case 'status': {
             const matchText =
-              statusMap["" + value] &&
-              statusMap["" + value].text &&
-              compareStringsForFilter(filter, statusMap["" + value].text);
+              statusMap['' + value] &&
+              statusMap['' + value].text &&
+              compareStringsForFilter(filter, statusMap['' + value].text);
             return matchText;
           }
-          case "date": {
+          case 'date': {
             const matchFormatedDate =
               value &&
               compareStringsForFilter(
                 filter,
-                format(new Date(pickup?.date), "LLL dd yyyy", {
-                  locale: es,
+                format(new Date(pickup?.date), 'LLL dd yyyy', {
+                  locale: es
                 })
               );
             return matchFormatedDate;
@@ -152,14 +157,14 @@ const applyPagination = (
 
 const TablaRecoleccionesPendientes: FC<TablaRecoleccionesPendientesProps> = ({
   userRole,
-  pickupList,
+  pickupList
 }) => {
   const { enqueueSnackbar } = useSnackbar();
   const [modifyModalIsOpen, setModifyModalIsOpen] = useState(false);
   const [cancelModalIsOpen, setCancelModalIsOpen] = useState(false);
   const [formatIsOpen, setFormatIsOpen] = useState(false);
   const [operatorIsOpen, setOperatorIsOpen] = useState(false);
-  const [formatText, setFormatText] = useState<string>("");
+  const [formatText, setFormatText] = useState<string>('');
   const [isDeleting, setIsDeleting] = useState(false);
   const [pickupToEdit, setPickupToEdit] = useState<any>(null);
   const [idToCancel, setIdToCancel] = useState<string>(null);
@@ -167,24 +172,24 @@ const TablaRecoleccionesPendientes: FC<TablaRecoleccionesPendientesProps> = ({
   const [selectedImages, setSelectedImages] = useState<null>();
   const [page, setPage] = useState<number>(0);
   const [limit, setLimit] = useState<number>(30);
-  const [filter, setFilter] = useState<string>("");
+  const [filter, setFilter] = useState<string>('');
   const { prices } = useGetPrices(getFetcher);
 
   const handleOnCloseImages = () => {
     setOpenImages(false);
     setSelectedImages(null);
   };
-  const userCanDelete = ["ADMIN", "AUX", "OPE"].includes(userRole);
+  const userCanDelete = ['ADMIN', 'AUX', 'OPE'].includes(userRole);
   const handleModifyClose = (modifiedPickup, successMessage = null) => {
     setModifyModalIsOpen(false);
     if (modifiedPickup && successMessage) {
       enqueueSnackbar(successMessage, {
-        variant: "success",
+        variant: 'success',
         anchorOrigin: {
-          vertical: "top",
-          horizontal: "center",
+          vertical: 'top',
+          horizontal: 'center'
         },
-        autoHideDuration: 1500,
+        autoHideDuration: 1500
       });
     }
   };
@@ -218,30 +223,30 @@ const TablaRecoleccionesPendientes: FC<TablaRecoleccionesPendientesProps> = ({
     setCancelModalIsOpen(false);
     setIsDeleting(false);
     enqueueSnackbar(result.msg, {
-      variant: !result.error ? "success" : "error",
+      variant: !result.error ? 'success' : 'error',
       anchorOrigin: {
-        vertical: "top",
-        horizontal: "center",
+        vertical: 'top',
+        horizontal: 'center'
       },
-      autoHideDuration: 2000,
+      autoHideDuration: 2000
     });
   };
 
   const filteredPickups = applyFilters(pickupList, filter);
   const paginatedPickups = applyPagination(filteredPickups, page, limit);
   const changeOperatorIcon = (pickup: any) => {
-    if (!["ADMIN", "AUX"].includes(userRole)) return "";
+    if (!['ADMIN', 'AUX'].includes(userRole)) return '';
     return (
       <Tooltip title="Asignar/Cambiar" arrow>
         <IconButton
           onClick={() => handleOnOperatorClick(pickup)}
           sx={{
-            "&:hover": {
-              background: theme.colors.primary.lighter,
+            '&:hover': {
+              background: theme.colors.primary.lighter
             },
-            color: theme.colors.alpha,
+            color: theme.colors.alpha
           }}
-          color={pickup.operator ? "inherit" : "error"}
+          color={pickup.operator ? 'inherit' : 'error'}
           size="small"
         >
           <PersonAddAlt1Icon fontSize="small" />
@@ -251,13 +256,13 @@ const TablaRecoleccionesPendientes: FC<TablaRecoleccionesPendientesProps> = ({
   };
   const handleOnAsignedOperator = async () => {
     setOperatorIsOpen(false);
-    enqueueSnackbar("Operador asignado con éxito!", {
-      variant: "success",
+    enqueueSnackbar('Operador asignado con éxito!', {
+      variant: 'success',
       anchorOrigin: {
-        vertical: "top",
-        horizontal: "center",
+        vertical: 'top',
+        horizontal: 'center'
       },
-      autoHideDuration: 2000,
+      autoHideDuration: 2000
     });
   };
   const theme = useTheme();
@@ -277,17 +282,17 @@ const TablaRecoleccionesPendientes: FC<TablaRecoleccionesPendientesProps> = ({
                     <InputAdornment position="start">
                       <SearchIcon />
                     </InputAdornment>
-                  ),
+                  )
                 }}
-                sx={{ marginTop: "20px" }}
+                sx={{ marginTop: '20px' }}
               />
             </Box>
           }
           sx={{
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "space-between",
-            flexWrap: "wrap",
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            flexWrap: 'wrap'
           }}
           title=""
         />
@@ -302,6 +307,7 @@ const TablaRecoleccionesPendientes: FC<TablaRecoleccionesPendientesProps> = ({
                 <TableCell align="center">Ubicación</TableCell>
                 <TableCell align="center">Hora Rec.</TableCell>
                 <TableCell align="center">Cliente</TableCell>
+                <TableCell align="center">Adeudo</TableCell>
                 <TableCell align="center">Colonia-Sector</TableCell>
                 <TableCell align="center">Estado</TableCell>
                 <TableCell align="center">Fecha Programada</TableCell>
@@ -313,6 +319,10 @@ const TablaRecoleccionesPendientes: FC<TablaRecoleccionesPendientesProps> = ({
             </TableHead>
             <TableBody>
               {paginatedPickups.map((pickup) => {
+                const debt = getCustomerDebt(
+                  pickup.rent.remaining,
+                  pickup?.rent?.customer?.level?.dayPrice
+                );
                 return (
                   <TableRow hover key={pickup?._id}>
                     <TableCell align="center">
@@ -335,10 +345,10 @@ const TablaRecoleccionesPendientes: FC<TablaRecoleccionesPendientesProps> = ({
                               setOpenImages(true);
                             }}
                             sx={{
-                              "&:hover": {
-                                background: theme.colors.primary.lighter,
+                              '&:hover': {
+                                background: theme.colors.primary.lighter
                               },
-                              color: theme.palette.primary.main,
+                              color: theme.palette.primary.main
                             }}
                             color="inherit"
                             size="small"
@@ -347,7 +357,7 @@ const TablaRecoleccionesPendientes: FC<TablaRecoleccionesPendientesProps> = ({
                           </IconButton>
                         </Tooltip>
                       ) : (
-                        "N/A"
+                        'N/A'
                       )}
                     </TableCell>
                     <TableCell align="center">
@@ -357,10 +367,10 @@ const TablaRecoleccionesPendientes: FC<TablaRecoleccionesPendientesProps> = ({
                             href={`${pickup?.rent?.customer?.currentResidence?.maps}`}
                             target="_blank"
                             sx={{
-                              "&:hover": {
-                                background: theme.colors.primary.lighter,
+                              '&:hover': {
+                                background: theme.colors.primary.lighter
                               },
-                              color: theme.palette.info.dark,
+                              color: theme.palette.info.dark
                             }}
                             color="inherit"
                             size="small"
@@ -369,7 +379,7 @@ const TablaRecoleccionesPendientes: FC<TablaRecoleccionesPendientesProps> = ({
                           </IconButton>
                         </Tooltip>
                       ) : (
-                        "N/A"
+                        'N/A'
                       )}
                     </TableCell>
                     <TableCell align="center">
@@ -380,9 +390,9 @@ const TablaRecoleccionesPendientes: FC<TablaRecoleccionesPendientesProps> = ({
                         gutterBottom
                         noWrap
                       >
-                        {
-                          dayjs(new Date(pickup?.rent?.startDate)).format("h:mm A")
-                        }
+                        {dayjs(new Date(pickup?.rent?.startDate)).format(
+                          'h:mm A'
+                        )}
                       </Typography>
                     </TableCell>
                     <TableCell align="center">
@@ -394,6 +404,17 @@ const TablaRecoleccionesPendientes: FC<TablaRecoleccionesPendientesProps> = ({
                         noWrap
                       >
                         {pickup?.rent?.customer?.name}
+                      </Typography>
+                    </TableCell>
+                    <TableCell align="center">
+                      <Typography
+                        variant="body1"
+                        fontWeight="bold"
+                        color={debt>0 ? "error": "text.primary"}
+                        gutterBottom
+                        noWrap
+                      >
+                        {debt > 0 ? numeral(debt).format(`$${debt}0,0.00`): "-"}
                       </Typography>
                     </TableCell>
                     <TableCell align="center">
@@ -437,7 +458,7 @@ const TablaRecoleccionesPendientes: FC<TablaRecoleccionesPendientesProps> = ({
                         noWrap
                       >
                         {capitalizeFirstLetter(
-                          formatTZDate(new Date(pickup?.date), "MMM DD YYYY")
+                          formatTZDate(new Date(pickup?.date), 'MMM DD YYYY')
                         )}
                       </Typography>
                     </TableCell>
@@ -450,15 +471,15 @@ const TablaRecoleccionesPendientes: FC<TablaRecoleccionesPendientesProps> = ({
                         gutterBottom
                         noWrap
                       >
-                        {pickup?.timeOption === "specific"
+                        {pickup?.timeOption === 'specific'
                           ? `${formatTZDate(
                               new Date(pickup?.fromTime),
-                              "h:mm A"
+                              'h:mm A'
                             )} - ${formatTZDate(
                               new Date(pickup?.endTime),
-                              "h:mm A"
+                              'h:mm A'
                             )}`
-                          : "-"}
+                          : '-'}
                       </Typography>
                     </TableCell>
                     <TableCell align="center">
@@ -469,7 +490,7 @@ const TablaRecoleccionesPendientes: FC<TablaRecoleccionesPendientesProps> = ({
                         gutterBottom
                         noWrap
                       >
-                        {pickup?.wasSent ? "Sí" : "-"}
+                        {pickup?.wasSent ? 'Sí' : '-'}
                       </Typography>
                     </TableCell>
                     <TableCell align="center">
@@ -480,7 +501,7 @@ const TablaRecoleccionesPendientes: FC<TablaRecoleccionesPendientesProps> = ({
                         gutterBottom
                         noWrap
                       >
-                        {pickup?.operator ? pickup.operator.name : "N/A"}
+                        {pickup?.operator ? pickup.operator.name : 'N/A'}
                         {changeOperatorIcon(pickup)}
                       </Typography>
                     </TableCell>
@@ -491,10 +512,10 @@ const TablaRecoleccionesPendientes: FC<TablaRecoleccionesPendientesProps> = ({
                         <Tooltip title="Marcar recolectada" arrow>
                           <IconButton
                             sx={{
-                              "&:hover": {
-                                background: theme.colors.primary.lighter,
+                              '&:hover': {
+                                background: theme.colors.primary.lighter
                               },
-                              color: theme.colors.success.light,
+                              color: theme.colors.success.light
                             }}
                             color="inherit"
                             size="small"
@@ -508,10 +529,10 @@ const TablaRecoleccionesPendientes: FC<TablaRecoleccionesPendientesProps> = ({
                         <IconButton
                           onClick={() => handleOnModifyClick(pickup)}
                           sx={{
-                            "&:hover": {
-                              background: theme.colors.primary.lighter,
+                            '&:hover': {
+                              background: theme.colors.primary.lighter
                             },
-                            color: theme.palette.primary.main,
+                            color: theme.palette.primary.main
                           }}
                           color="inherit"
                           size="small"
@@ -525,10 +546,10 @@ const TablaRecoleccionesPendientes: FC<TablaRecoleccionesPendientesProps> = ({
                           <IconButton
                             onClick={() => handleOnDeleteClick(pickup._id)}
                             sx={{
-                              "&:hover": {
-                                background: theme.colors.error.lighter,
+                              '&:hover': {
+                                background: theme.colors.error.lighter
                               },
-                              color: theme.palette.error.main,
+                              color: theme.palette.error.main
                             }}
                             color="inherit"
                             size="small"
@@ -552,10 +573,10 @@ const TablaRecoleccionesPendientes: FC<TablaRecoleccionesPendientesProps> = ({
                             setFormatIsOpen(true);
                           }}
                           sx={{
-                            "&:hover": {
-                              background: theme.colors.primary.lighter,
+                            '&:hover': {
+                              background: theme.colors.primary.lighter
                             },
-                            color: theme.colors.success.light,
+                            color: theme.colors.success.light
                           }}
                           color="inherit"
                           size="small"
@@ -578,7 +599,11 @@ const TablaRecoleccionesPendientes: FC<TablaRecoleccionesPendientesProps> = ({
             onRowsPerPageChange={handleLimitChange}
             page={page}
             rowsPerPage={limit}
-            rowsPerPageOptions={filteredPickups.length > 100 ? [30, 100, filteredPickups.length]:[30, 100]}
+            rowsPerPageOptions={
+              filteredPickups.length > 100
+                ? [30, 100, filteredPickups.length]
+                : [30, 100]
+            }
           />
         </Box>
       </Card>
@@ -586,7 +611,7 @@ const TablaRecoleccionesPendientes: FC<TablaRecoleccionesPendientesProps> = ({
         <ImagesModal
           open={openImages}
           imagesObj={selectedImages}
-          title={"Fotos de la renta"}
+          title={'Fotos de la renta'}
           text=""
           onClose={handleOnCloseImages}
         />
@@ -603,12 +628,12 @@ const TablaRecoleccionesPendientes: FC<TablaRecoleccionesPendientesProps> = ({
           open={formatIsOpen}
           selectedId={pickupToEdit?._id}
           title="Formato de recolección"
-          text={pickupToEdit?.wasSent ? "ENVIADO" : null}
+          text={pickupToEdit?.wasSent ? 'ENVIADO' : null}
           textColor="green"
           formatText={formatText}
           onAccept={() => {
             setFormatIsOpen(false);
-            setFormatText("");
+            setFormatText('');
           }}
           onSubmitAction={markWasSentPickup}
         />
@@ -617,7 +642,7 @@ const TablaRecoleccionesPendientes: FC<TablaRecoleccionesPendientesProps> = ({
         <GenericModal
           open={cancelModalIsOpen}
           title="Atención"
-          text={"¿Está seguro de cancelar la recolección seleccionada?"}
+          text={'¿Está seguro de cancelar la recolección seleccionada?'}
           requiredReason
           isLoading={isDeleting}
           onAccept={handleOnConfirmDelete}
@@ -645,12 +670,12 @@ const TablaRecoleccionesPendientes: FC<TablaRecoleccionesPendientesProps> = ({
 
 TablaRecoleccionesPendientes.propTypes = {
   userRole: PropTypes.string.isRequired,
-  pickupList: PropTypes.array.isRequired,
+  pickupList: PropTypes.array.isRequired
 };
 
 TablaRecoleccionesPendientes.defaultProps = {
-  userRole: "",
-  pickupList: [],
+  userRole: '',
+  pickupList: []
 };
 
 export default TablaRecoleccionesPendientes;
