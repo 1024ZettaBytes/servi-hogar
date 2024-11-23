@@ -45,7 +45,7 @@ import { DesktopDatePicker } from "@mui/x-date-pickers";
 import { convertDateToTZ } from "lib/client/utils";
 function AddPaymentModal(props) {
   const { customerId, handleOnClose, open, reason, amount } = props;
-  const { customerList, customerError } = useGetAllCustomers(getFetcher);
+  const { customerList, customerError } = useGetAllCustomers(getFetcher, false);
   const [selectedCustomer, setSelectedCustomer] = useState<any>(null);
   const [selectedReason, setSelectedReason] = useState<any>(null);
   const [selectedMethod, setSelectedMethod] = useState<any>(null);
