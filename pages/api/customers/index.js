@@ -7,8 +7,8 @@ import {
 } from "../../../lib/data/Customers";
 async function getCustomersAPI( req, res ) {
   try {
-    
-    const allCustomers = await getCustomersData();
+    const { noDetail } = req.query;
+    const allCustomers = await getCustomersData(false, noDetail);
     res.status(200).json({ data: allCustomers });
   } catch (e) {
     console.error(e);
