@@ -38,8 +38,11 @@ export const getFetcher = async (url) => {
   return res.json();
 };
 // Customers
-export const useGetAllCustomers = (fetcher) => {
-  const { data, error } = useSWR(ROUTES.ALL_CUSTOMERS_API, fetcher);
+export const useGetAllCustomers = (fetcher, detailed = true) => {
+  const { data, error } = useSWR(
+    ROUTES.ALL_CUSTOMERS_API + (!detailed ? '?noDetail=true' : ''),
+    fetcher
+  );
   return { customerList: data?.data, customerError: error };
 };
 
@@ -180,9 +183,10 @@ export const useGetChangeById = (fetcher, id) => {
 
 // Payments
 export const useGetPayments = (fetcher, limit, page, searchTerm = null) => {
-  
-  
-  const { data, error } = useSWR(getPaginatedUrl(ROUTES.ALL_PAYMENTS_API, limit,page, searchTerm), fetcher);
+  const { data, error } = useSWR(
+    getPaginatedUrl(ROUTES.ALL_PAYMENTS_API, limit, page, searchTerm),
+    fetcher
+  );
   return { payments: data?.data, paymentsError: error };
 };
 
