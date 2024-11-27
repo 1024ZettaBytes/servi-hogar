@@ -1,21 +1,17 @@
-import Head from "next/head";
-import { getSession } from "next-auth/react";
-import SidebarLayout from "@/layouts/SidebarLayout";
-import { validateServerSideSession } from "../../lib/auth";
-import PageHeader from "@/components/PageHeader";
-import PageTitleWrapper from "@/components/PageTitleWrapper";
-import { Card, Container, Grid, Skeleton, Alert } from "@mui/material";
-import Footer from "@/components/Footer";
-import TablaRecolecciones from "./TablaRecolecciones";
-import { useGetPickups, getFetcher } from "../api/useRequest";
+import Head from 'next/head';
+import { getSession } from 'next-auth/react';
+import SidebarLayout from '@/layouts/SidebarLayout';
+import { validateServerSideSession } from '../../lib/auth';
+import PageHeader from '@/components/PageHeader';
+import PageTitleWrapper from '@/components/PageTitleWrapper';
+import { Container, Grid } from '@mui/material';
+import Footer from '@/components/Footer';
+import TablaRecolecciones from './TablaRecolecciones';
 
-import NextBreadcrumbs from "@/components/Shared/BreadCrums";
+import NextBreadcrumbs from '@/components/Shared/BreadCrums';
 
 function Rentas({ session }) {
-  const paths = ["Inicio", "Recolecciones"];
-  const { pickupsList, pickupsError } = useGetPickups(getFetcher);
-  const generalError = pickupsError;
-  const completeData = pickupsList;
+  const paths = ['Inicio', 'Recolecciones'];
   const { user } = session;
 
   return (
@@ -24,7 +20,7 @@ function Rentas({ session }) {
         <title>Recolecciones</title>
       </Head>
       <PageTitleWrapper>
-        <PageHeader title={"Recolecciones"} sutitle={""} />
+        <PageHeader title={'Recolecciones'} sutitle={''} />
         <NextBreadcrumbs paths={paths} lastLoaded={true} />
       </PageTitleWrapper>
       <Container maxWidth="lg">
@@ -35,25 +31,7 @@ function Rentas({ session }) {
           alignItems="stretch"
           spacing={4}
         >
-          <Grid item xs={12}>
-            {generalError ? (
-              <Alert severity="error">{pickupsError?.message}</Alert>
-            ) : !completeData ? (
-              <Skeleton
-                variant="rectangular"
-                width={"100%"}
-                height={500}
-                animation="wave"
-              />
-            ) : (
-              <Card>
-                <TablaRecolecciones
-                  userRole={user?.role}
-                  pickupsList={pickupsList}
-                />
-              </Card>
-            )}
-          </Grid>
+          <TablaRecolecciones userRole={user?.role} />
         </Grid>
       </Container>
       <Footer />
