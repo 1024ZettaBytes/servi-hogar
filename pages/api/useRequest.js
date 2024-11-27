@@ -152,9 +152,12 @@ export const useGetPendingPickups = (fetcher) => {
   const { data, error } = useSWR(ROUTES.ALL_PENDING_PICKUPS_API, fetcher);
   return { pendingPickupsList: data?.data, pendingPickupsError: error };
 };
-export const useGetPickups = (fetcher) => {
-  const { data, error } = useSWR(ROUTES.ALL_PICKUP_API, fetcher);
-  return { pickupsList: data?.data, pickupsError: error };
+export const useGetPickups = (fetcher, limit, page, searchTerm = null) => {
+  const { data, error } = useSWR(
+    getPaginatedUrl(ROUTES.ALL_PICKUP_API, limit, page, searchTerm),
+    fetcher
+  );
+  return { pickups: data?.data, pickupsError: error };
 };
 export const useGetPickupById = (fetcher, id) => {
   const { data, error } = useSWR(
@@ -169,9 +172,13 @@ export const useGetPendingChanges = (fetcher) => {
   const { data, error } = useSWR(ROUTES.ALL_PENDING_CHANGES_API, fetcher);
   return { pendingChangesList: data?.data, pendingChangesError: error };
 };
-export const useGetChanges = (fetcher) => {
-  const { data, error } = useSWR(ROUTES.ALL_CHANGES_API, fetcher);
-  return { changesList: data?.data, changesError: error };
+
+export const useGetChanges = (fetcher, limit, page, searchTerm = null) => {
+  const { data, error } = useSWR(
+    getPaginatedUrl(ROUTES.ALL_CHANGES_API, limit, page, searchTerm),
+    fetcher
+  );
+  return { changes: data?.data, changesError: error };
 };
 export const useGetChangeById = (fetcher, id) => {
   const { data, error } = useSWR(

@@ -8,7 +8,8 @@ import { validateUserPermissions, getUserId } from "../auth/authUtils";
 
 async function getChangesAPI(req, res) {
   try {
-    const rents = await getPastChangesData();
+    const { page, limit } = req.query;
+    const rents = await getPastChangesData(page, limit, );
     res.status(200).json({ data: rents });
   } catch (e) {
     console.error(e);
