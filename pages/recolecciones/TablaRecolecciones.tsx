@@ -18,12 +18,15 @@ import {
   useTheme,
   Skeleton,
   Grid,
-  Alert
+  Alert,
+  TextField,
+  InputAdornment
 } from '@mui/material';
 import { capitalizeFirstLetter, formatTZDate } from 'lib/client/utils';
 import Label from '@/components/Label';
 import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
 import ImageSearchIcon from '@mui/icons-material/ImageSearch';
+import SearchIcon from '@mui/icons-material/Search';
 import ImagesModal from '@/components/ImagesModal';
 import { getFetcher, useGetPickups } from 'pages/api/useRequest';
 
@@ -52,8 +55,10 @@ const TablaRecolecciones: FC<TablaRecoleccionesProps> = () => {
   const [selectedImages, setSelectedImages] = useState<null>();
   const [page, setPage] = useState(0);
   const [limit, setLimit] = useState(30);
+  const [searchTerm, setSearchTerm] = useState(null);
+  const [searchText, setSearchText] = useState(null);
 
-  const { pickups, pickupsError } = useGetPickups(getFetcher, limit, page + 1);
+  const { pickups, pickupsError } = useGetPickups(getFetcher, limit, page + 1, searchTerm);
 
   const handlePageChange = (_event, newPage) => {
     setPage(newPage);
@@ -81,6 +86,34 @@ const TablaRecolecciones: FC<TablaRecoleccionesProps> = () => {
       ) : (
         <Card>
           <CardHeader
+          action={
+            <Box width={200}>
+              <TextField
+                size="small"
+                helperText="Escriba y presione ENTER"
+                id="input-search-payment"
+                label="Buscar"
+                value={searchText}
+                onChange={(event) => {
+                  setSearchText(event.target.value);
+                }}
+                onKeyDown={(ev) => {
+                  if (ev.key === "Enter") {
+                    ev.preventDefault();
+                    setSearchTerm(searchText);
+                  }
+                }}
+                InputProps={{
+                  startAdornment: (
+                    <InputAdornment position="start">
+                      <SearchIcon />
+                    </InputAdornment>
+                  )
+                }}
+                sx={{ marginTop: '20px' }}
+              />
+            </Box>
+          }
             sx={{
               display: 'flex',
               alignItems: 'center',
