@@ -18,12 +18,16 @@ import {
   useTheme,
   Alert,
   Skeleton,
+  TextField,
+  InputAdornment,
 } from "@mui/material";
 import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
 import { capitalizeFirstLetter, formatTZDate } from "lib/client/utils";
 import Label from "@/components/Label";
 import ImageSearchIcon from "@mui/icons-material/ImageSearch";
+import SearchIcon from '@mui/icons-material/Search';
 import ImagesModal from "@/components/ImagesModal";
+
 import { getFetcher, useGetDeliveries } from "pages/api/useRequest";
 
 interface TablaEntregasProps {
@@ -51,7 +55,10 @@ const TablaEntregas: FC<TablaEntregasProps> = ({ }) => {
   
   const [page, setPage] = useState<number>(0);
   const [limit, setLimit] = useState<number>(10);
-  const { deliveriesList: data, deliveriesError } = useGetDeliveries(getFetcher, limit, page+1);
+  const [searchTerm, setSearchTerm] = useState(null);
+  const [searchText, setSearchText] = useState(null);
+
+  const { deliveriesList: data, deliveriesError } = useGetDeliveries(getFetcher, limit, page+1, searchTerm);
   const generalError = deliveriesError;
   const completeData = data?.list;
   const [openImages, setOpenImages] = useState<boolean>(false);
@@ -81,6 +88,34 @@ const TablaEntregas: FC<TablaEntregasProps> = ({ }) => {
     <>
       <Card>
         <CardHeader
+        action={
+          <Box width={200}>
+            <TextField
+              size="small"
+              helperText="Escriba y presione ENTER"
+              id="input-search-payment"
+              label="Buscar"
+              value={searchText}
+              onChange={(event) => {
+                setSearchText(event.target.value);
+              }}
+              onKeyDown={(ev) => {
+                if (ev.key === "Enter") {
+                  ev.preventDefault();
+                  setSearchTerm(searchText);
+                }
+              }}
+              InputProps={{
+                startAdornment: (
+                  <InputAdornment position="start">
+                    <SearchIcon />
+                  </InputAdornment>
+                )
+              }}
+              sx={{ marginTop: '20px' }}
+            />
+          </Box>
+        }
           sx={{
             display: "flex",
             alignItems: "center",
