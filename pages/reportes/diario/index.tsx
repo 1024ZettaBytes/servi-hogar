@@ -42,6 +42,7 @@ const pickupStyle = { ...headerStyle, backgroundColor: "#EE5656" };
 const changeStyle = { ...headerStyle, backgroundColor: "#FFC300" };
 const customerStyle = { ...headerStyle, backgroundColor: "#E570EE" };
 const paymentStyle = { ...headerStyle, backgroundColor: "#A580EE" };
+const bonusStyle = { ...headerStyle, backgroundColor: "#C7C6BC" };
 function DayReport() {
   const [selectedDate, setSelectedDate] = useState<Date>(convertDateToLocal(new Date()));
   const [isPrinting, setIsPrinting] = useState<boolean>(false);
@@ -343,6 +344,39 @@ function DayReport() {
                               noWrap
                             >
                               {reportData?.payments?.monthTotal}
+                            </Typography>
+                          </TableCell>
+                        </TableRow>
+                        <TableRow>
+                          <TableCell align="center" style={bonusStyle}>
+                            <Typography
+                              variant="body1"
+                              fontWeight="bold"
+                              color="text.primary"
+                              gutterBottom
+                              noWrap
+                            >
+                              Bonificaciones
+                            </Typography>
+                          </TableCell>
+                          <TableCell align="center" style={cellStyle}>
+                            <Typography
+                              variant="body1"
+                              color="text.primary"
+                              gutterBottom
+                              noWrap
+                            >
+                              {reportData?.bonuses?.dayTotal}
+                            </Typography>
+                          </TableCell>
+                          <TableCell align="center" style={cellStyle}>
+                            <Typography
+                              variant="body1"
+                              color="text.primary"
+                              gutterBottom
+                              noWrap
+                            >
+                              {reportData?.bonuses?.monthTotal}
                             </Typography>
                           </TableCell>
                         </TableRow>

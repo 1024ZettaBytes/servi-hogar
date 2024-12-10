@@ -52,6 +52,7 @@ const customerStyle = {
 };
 const paymentStyle = { ...headerStyle, backgroundColor: "#89C3F4" };
 const currentRentsStyle = { ...headerStyle, backgroundColor: "#D597F2" };
+const bonusStyle = { ...headerStyle, backgroundColor: "#C7C6BC" };
 function DayReport() {
   const [selectedDate, setSelectedDate] = useState<Date>(convertDateToLocal(new Date()));
   const [start, setStart] = useState<Date>(getFirstDayMonth(convertDateToLocal(new Date())));
@@ -169,7 +170,8 @@ function DayReport() {
                           pickupStyle,
                           customerStyle,
                           paymentStyle,
-                          currentRentsStyle
+                          currentRentsStyle,
+                          bonusStyle
                         }}
                         data={reportData}
                       />
