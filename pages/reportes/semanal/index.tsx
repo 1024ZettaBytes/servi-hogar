@@ -46,6 +46,7 @@ const pickupStyle = { ...headerStyle, backgroundColor: "#EE5656" };
 const changeStyle = { ...headerStyle, backgroundColor: "#FFC300" };
 const customerStyle = { ...headerStyle, backgroundColor: "#F4F189" };
 const paymentStyle = { ...headerStyle, backgroundColor: "#89C3F4" };
+const bonusStyle = { ...headerStyle, backgroundColor: "#C7C6BC" };
 function DayReport() {
   const [selectedDate, setSelectedDate] = useState<Date>(convertDateToLocal(new Date()));
   const [start, setStart] = useState<Date>(getFirstWeekDay(convertDateToLocal(new Date())));
@@ -204,6 +205,14 @@ function DayReport() {
                         colorStyle={customerStyle}
                         totalData={reportData.customers.totalData}
                         list={reportData.customers.days}
+                      />
+                    </Grid>
+                    <Grid item lg={6}>
+                      <RegistersReportTable
+                        header="BONIFICACIONES"
+                        colorStyle={bonusStyle}
+                        totalData={reportData.bonuses.totalData}
+                        list={reportData.bonuses.days}
                       />
                     </Grid>
                   </Grid>

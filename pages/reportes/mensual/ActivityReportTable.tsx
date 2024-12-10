@@ -81,6 +81,14 @@ const ActivityReportTable: React.FC<ActivityReportTableProps> = ({
               <TableCell
                 align="center"
                 width={"8%"}
+                style={colorStyle?.bonusStyle}
+                colSpan={1}
+              >
+                Bon.
+              </TableCell>
+              <TableCell
+                align="center"
+                width={"8%"}
                 style={colorStyle?.currentRentsStyle}
                 colSpan={1}
               >
@@ -133,9 +141,8 @@ const ActivityReportTable: React.FC<ActivityReportTableProps> = ({
               <TableCell align="center" style={cellStyle}>
                 Realizados
               </TableCell>
-              <TableCell align="center" style={cellStyle}>
-                
-              </TableCell>
+              <TableCell align="center" style={cellStyle}/>
+              <TableCell align="center" style={cellStyle}/>
             </TableRow>
             {data?.deliveries?.days?.map((day, i) => (
               <TableRow
@@ -271,6 +278,16 @@ const ActivityReportTable: React.FC<ActivityReportTableProps> = ({
                     gutterBottom
                     noWrap
                   >
+                    {data?.payments.days[i].done}
+                  </Typography>
+                </TableCell>
+                <TableCell align="center" style={cellStyle}>
+                  <Typography
+                    variant="body1"
+                    color="text.primary"
+                    gutterBottom
+                    noWrap
+                  >
                     {data?.currentRents.days[i].current || "N/A"}
                   </Typography>
                 </TableCell>
@@ -341,6 +358,11 @@ const ActivityReportTable: React.FC<ActivityReportTableProps> = ({
               <TableCell align="center" style={colorStyle?.paymentStyle}>
                 <Typography variant="h5" gutterBottom noWrap>
                   {data?.payments.totalData.done}
+                </Typography>
+              </TableCell>
+              <TableCell align="center" style={colorStyle?.bonusStyle}>
+                <Typography variant="h5" gutterBottom noWrap>
+                  {data?.bonuses.totalData.done}
                 </Typography>
               </TableCell>
               <TableCell align="center" style={colorStyle?.currentRentsStyle}>
