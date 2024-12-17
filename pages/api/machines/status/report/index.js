@@ -1,6 +1,6 @@
-import { getMachinesReportData } from '../../../../lib/data/Machines';
-import { getLastRecordData } from '../../../../lib/data/Records';
-import { validateUserPermissions } from '../../auth/authUtils';
+import { getMachinesReportData } from '../../../../../lib/data/Machines';
+import { getLastRecordData } from '../../../../../lib/data/Records';
+import { validateUserPermissions } from '../../../auth/authUtils';
 
 async function getMachineStatusAPI(req, res) {
   try {
