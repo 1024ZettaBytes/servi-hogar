@@ -20,7 +20,6 @@ import {
 } from "@mui/material";
 import Footer from "@/components/Footer";
 import { getFetcher, useGetMachinesOnRentReport } from "../../api/useRequest";
-import numeral from "numeral";
 
 const cellStyle = { border: "2px solid #374246" };
 const headerStyle = {
