@@ -218,6 +218,12 @@ export const useGetMachinesReport = (fetcher) => {
   return { reportData: data?.data, reportError: error };
 };
 
+
+export const useGetMachinesOnRentReport = (fetcher) => {
+  const { data, error } = useSWR(ROUTES.MACHINES_RENTED_REPORT_API, fetcher);
+  return { reportData: data?.data, reportError: error };
+};
+
 // Operators
 export const useGetOperators = (fetcher) => {
   const { data, error } = useSWR(ROUTES.ALL_OPERATORS, fetcher);

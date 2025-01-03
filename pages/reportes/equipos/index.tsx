@@ -24,6 +24,7 @@ import {
   capitalizeFirstLetter,
 } from "lib/client/utils";
 import ActivityReportTable from "./MovementsReportable";
+import RentsTable from "./RentsTable";
 const cellStyle = { border: "2px solid #374246" };
 const headerStyle = {
   ...cellStyle,
@@ -129,6 +130,9 @@ function DayReport() {
                   <Box p={2}></Box>
                 </div>
               )}
+              <Grid item lg={12}>
+                      <RentsTable/>
+                    </Grid>
             </Card>
           </Grid>
           { reportData?.prev && 
