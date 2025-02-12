@@ -1,5 +1,5 @@
-import { useContext } from "react";
-import { useRouter } from "next/router";
+import { useContext } from 'react';
+import { useRouter } from 'next/router';
 
 import {
   ListSubheader,
@@ -8,25 +8,25 @@ import {
   List,
   styled,
   Button,
-  ListItem,
-} from "@mui/material";
-import NextLink from "next/link";
-import { SidebarContext } from "src/contexts/SidebarContext";
+  ListItem
+} from '@mui/material';
+import NextLink from 'next/link';
+import { SidebarContext } from 'src/contexts/SidebarContext';
 
-import AddBusinessIcon from "@mui/icons-material/AddBusiness";
-import HomeIcon from "@mui/icons-material/Home";
-import PendingActionsIcon from "@mui/icons-material/PendingActions";
-import ListIcon from "@mui/icons-material/List";
-import LocalShippingIcon from "@mui/icons-material/LocalShipping";
+import AddBusinessIcon from '@mui/icons-material/AddBusiness';
+import HomeIcon from '@mui/icons-material/Home';
+import PendingActionsIcon from '@mui/icons-material/PendingActions';
+import ListIcon from '@mui/icons-material/List';
+import LocalShippingIcon from '@mui/icons-material/LocalShipping';
 import InventoryIcon from '@mui/icons-material/Inventory';
-import HailIcon from "@mui/icons-material/Hail";
-import ChangeCircleIcon from "@mui/icons-material/ChangeCircle";
-import PaidIcon from "@mui/icons-material/Paid";
-import LocalLaundryServiceIcon from "@mui/icons-material/LocalLaundryService";
-import ShoppingBagIcon from "@mui/icons-material/ShoppingBag";
-import GroupIcon from "@mui/icons-material/Group";
-import AssessmentIcon from "@mui/icons-material/Assessment";
-import HandshakeIcon from "@mui/icons-material/Handshake";
+import HailIcon from '@mui/icons-material/Hail';
+import ChangeCircleIcon from '@mui/icons-material/ChangeCircle';
+import PaidIcon from '@mui/icons-material/Paid';
+import LocalLaundryServiceIcon from '@mui/icons-material/LocalLaundryService';
+import ShoppingBagIcon from '@mui/icons-material/ShoppingBag';
+import GroupIcon from '@mui/icons-material/Group';
+import AssessmentIcon from '@mui/icons-material/Assessment';
+import HandshakeIcon from '@mui/icons-material/Handshake';
 const MenuWrapper = styled(Box)(
   ({ theme }) => `
   .MuiList-root {
@@ -78,7 +78,7 @@ const SubMenuWrapper = styled(Box)(
 
           .MuiButton-startIcon,
           .MuiButton-endIcon {
-            transition: ${theme.transitions.create(["color"])};
+            transition: ${theme.transitions.create(['color'])};
 
             .MuiSvgIcon-root {
               font-size: inherit;
@@ -142,8 +142,8 @@ const SubMenuWrapper = styled(Box)(
                 background: ${theme.colors.alpha.trueWhite[100]};
                 opacity: 0;
                 transition: ${theme.transitions.create([
-                  "transform",
-                  "opacity",
+                  'transform',
+                  'opacity'
                 ])};
                 width: 6px;
                 height: 6px;
@@ -183,7 +183,7 @@ function SidebarMenu({ userRole }) {
               <ListItem component="div">
                 <NextLink href="/" passHref>
                   <Button
-                    className={currentRoute === "/" ? "active" : ""}
+                    className={currentRoute === '/' ? 'active' : ''}
                     disableRipple
                     component="a"
                     onClick={closeSidebar}
@@ -193,25 +193,27 @@ function SidebarMenu({ userRole }) {
                   </Button>
                 </NextLink>
               </ListItem>
-              {userRole === "PARTNER" && (
-                  <ListItem component="div">
-                    <NextLink href="/espacio-socios" passHref>
-                      <Button
-                        className={currentRoute === "/espacio-socios" ? "active" : ""}
-                        disableRipple
-                        component="a"
-                        onClick={closeSidebar}
-                        startIcon={<HandshakeIcon />}
-                      >
-                        Socios
-                      </Button>
-                    </NextLink>
-                  </ListItem>
-                )}
+              {userRole === 'PARTNER' && (
+                <ListItem component="div">
+                  <NextLink href="/espacio-socios" passHref>
+                    <Button
+                      className={
+                        currentRoute === '/espacio-socios' ? 'active' : ''
+                      }
+                      disableRipple
+                      component="a"
+                      onClick={closeSidebar}
+                      startIcon={<HandshakeIcon />}
+                    >
+                      Socios
+                    </Button>
+                  </NextLink>
+                </ListItem>
+              )}
             </List>
           </SubMenuWrapper>
         </List>
-        {["ADMIN", "AUX"].includes(userRole) && (
+        {['ADMIN', 'AUX'].includes(userRole) && (
           <List
             component="div"
             subheader={
@@ -226,7 +228,7 @@ function SidebarMenu({ userRole }) {
                   <NextLink href="/renta-rapida" passHref>
                     <Button
                       className={
-                        currentRoute === "/renta-rapida" ? "active" : ""
+                        currentRoute === '/renta-rapida' ? 'active' : ''
                       }
                       disableRipple
                       component="a"
@@ -241,10 +243,10 @@ function SidebarMenu({ userRole }) {
                   <NextLink href="/rentas" passHref>
                     <Button
                       className={
-                        !currentRoute.includes("/rentas-") &&
-                        currentRoute.includes("/rentas")
-                          ? "active"
-                          : ""
+                        !currentRoute.includes('/rentas-') &&
+                        currentRoute.includes('/rentas')
+                          ? 'active'
+                          : ''
                       }
                       disableRipple
                       component="a"
@@ -260,7 +262,7 @@ function SidebarMenu({ userRole }) {
           </List>
         )}
 
-        {["ADMIN", "AUX", "OPE"].includes(userRole) && (
+        {['ADMIN', 'AUX', 'OPE', 'SUB'].includes(userRole) && (
           <>
             <List
               component="div"
@@ -276,9 +278,9 @@ function SidebarMenu({ userRole }) {
                     <NextLink href="/entregas-pendientes" passHref>
                       <Button
                         className={
-                          currentRoute.includes("/entregas-pendientes")
-                            ? "active"
-                            : ""
+                          currentRoute.includes('/entregas-pendientes')
+                            ? 'active'
+                            : ''
                         }
                         disableRipple
                         component="a"
@@ -289,19 +291,23 @@ function SidebarMenu({ userRole }) {
                       </Button>
                     </NextLink>
                   </ListItem>
-                  <ListItem component="div">
-                    <NextLink href="/entregas" passHref>
-                      <Button
-                        className={currentRoute === "/entregas" ? "active" : ""}
-                        disableRipple
-                        component="a"
-                        onClick={closeSidebar}
-                        startIcon={<LocalShippingIcon />}
-                      >
-                        Lista de entregas
-                      </Button>
-                    </NextLink>
-                  </ListItem>
+                  {['ADMIN', 'AUX', 'OPE'].includes(userRole) && (
+                    <ListItem component="div">
+                      <NextLink href="/entregas" passHref>
+                        <Button
+                          className={
+                            currentRoute === '/entregas' ? 'active' : ''
+                          }
+                          disableRipple
+                          component="a"
+                          onClick={closeSidebar}
+                          startIcon={<LocalShippingIcon />}
+                        >
+                          Lista de entregas
+                        </Button>
+                      </NextLink>
+                    </ListItem>
+                  )}
                 </List>
               </SubMenuWrapper>
             </List>
@@ -319,9 +325,9 @@ function SidebarMenu({ userRole }) {
                     <NextLink href="/cambios-pendientes" passHref>
                       <Button
                         className={
-                          currentRoute.includes("/cambios-pendientes")
-                            ? "active"
-                            : ""
+                          currentRoute.includes('/cambios-pendientes')
+                            ? 'active'
+                            : ''
                         }
                         disableRipple
                         component="a"
@@ -335,7 +341,7 @@ function SidebarMenu({ userRole }) {
                   <ListItem component="div">
                     <NextLink href="/cambios" passHref>
                       <Button
-                        className={currentRoute === "/cambios" ? "active" : ""}
+                        className={currentRoute === '/cambios' ? 'active' : ''}
                         disableRipple
                         component="a"
                         onClick={closeSidebar}
@@ -348,51 +354,53 @@ function SidebarMenu({ userRole }) {
                 </List>
               </SubMenuWrapper>
             </List>
-            <List
-              component="div"
-              subheader={
-                <ListSubheader component="div" disableSticky>
-                  RECOLECCIONES
-                </ListSubheader>
-              }
-            >
-              <SubMenuWrapper>
-                <List component="div">
-                  <ListItem component="div">
-                    <NextLink href="/recolecciones-pendientes" passHref>
-                      <Button
-                        className={
-                          currentRoute.includes("/recolecciones-pendientes")
-                            ? "active"
-                            : ""
-                        }
-                        disableRipple
-                        component="a"
-                        onClick={closeSidebar}
-                        startIcon={<PendingActionsIcon />}
-                      >
-                        Recolecciones pendientes
-                      </Button>
-                    </NextLink>
-                  </ListItem>
-                  <ListItem component="div">
-                    <NextLink href="/recolecciones" passHref>
-                      <Button
-                        className={
-                          currentRoute === "/recolecciones" ? "active" : ""
-                        }
-                        disableRipple
-                        component="a"
-                        onClick={closeSidebar}
-                        startIcon={<HailIcon />}
-                      >
-                        Lista de recolecciones
-                      </Button>
-                    </NextLink>
-                  </ListItem>
-                </List>
-              </SubMenuWrapper>
-            </List>
+            {['ADMIN', 'AUX', 'OPE'].includes(userRole) && (
+              <List
+                component="div"
+                subheader={
+                  <ListSubheader component="div" disableSticky>
+                    RECOLECCIONES
+                  </ListSubheader>
+                }
+              >
+                <SubMenuWrapper>
+                  <List component="div">
+                    <ListItem component="div">
+                      <NextLink href="/recolecciones-pendientes" passHref>
+                        <Button
+                          className={
+                            currentRoute.includes('/recolecciones-pendientes')
+                              ? 'active'
+                              : ''
+                          }
+                          disableRipple
+                          component="a"
+                          onClick={closeSidebar}
+                          startIcon={<PendingActionsIcon />}
+                        >
+                          Recolecciones pendientes
+                        </Button>
+                      </NextLink>
+                    </ListItem>
+                    <ListItem component="div">
+                      <NextLink href="/recolecciones" passHref>
+                        <Button
+                          className={
+                            currentRoute === '/recolecciones' ? 'active' : ''
+                          }
+                          disableRipple
+                          component="a"
+                          onClick={closeSidebar}
+                          startIcon={<HailIcon />}
+                        >
+                          Lista de recolecciones
+                        </Button>
+                      </NextLink>
+                    </ListItem>
+                  </List>
+                </SubMenuWrapper>
+              </List>
+            )}
           </>
         )}
         {/*<List
@@ -476,7 +484,7 @@ function SidebarMenu({ userRole }) {
             </List>
           </SubMenuWrapper>
                   </List>*/}
-        {["ADMIN", "AUX"].includes(userRole) ? (
+        {['ADMIN', 'AUX', 'SUB'].includes(userRole) ? (
           <List
             component="div"
             subheader={
@@ -486,11 +494,12 @@ function SidebarMenu({ userRole }) {
             }
           >
             <SubMenuWrapper>
-              <List component="div">
+            <List component="div">
+            {['ADMIN', 'AUX'].includes(userRole) && <>
                 <ListItem component="div">
                   <NextLink href="/pagos" passHref>
                     <Button
-                      className={currentRoute === "/pagos" ? "active" : ""}
+                      className={currentRoute === '/pagos' ? 'active' : ''}
                       disableRipple
                       component="a"
                       onClick={closeSidebar}
@@ -504,10 +513,10 @@ function SidebarMenu({ userRole }) {
                   <NextLink href="/equipos" passHref>
                     <Button
                       className={
-                        currentRoute.includes("/equipos") &&
-                        !currentRoute.includes("/reportes")
-                          ? "active"
-                          : ""
+                        currentRoute.includes('/equipos') &&
+                        !currentRoute.includes('/reportes')
+                          ? 'active'
+                          : ''
                       }
                       disableRipple
                       component="a"
@@ -523,7 +532,7 @@ function SidebarMenu({ userRole }) {
                   <NextLink href="/clientes" passHref>
                     <Button
                       className={
-                        currentRoute.includes("/clientes") ? "active" : ""
+                        currentRoute.includes('/clientes') ? 'active' : ''
                       }
                       disableRipple
                       component="a"
@@ -534,11 +543,12 @@ function SidebarMenu({ userRole }) {
                     </Button>
                   </NextLink>
                 </ListItem>
-                {userRole === "ADMIN" && (
+                </>}
+                {userRole === 'ADMIN' && (
                   <ListItem component="div">
                     <NextLink href="/socios" passHref>
                       <Button
-                        className={currentRoute === "/socios" ? "active" : ""}
+                        className={currentRoute === '/socios' ? 'active' : ''}
                         disableRipple
                         component="a"
                         onClick={closeSidebar}
@@ -549,11 +559,13 @@ function SidebarMenu({ userRole }) {
                     </NextLink>
                   </ListItem>
                 )}
-                {userRole === "ADMIN" && (
+                {userRole === 'ADMIN' && (
                   <ListItem component="div">
                     <NextLink href="/inventario" passHref>
                       <Button
-                        className={currentRoute === "/inventario" ? "active" : ""}
+                        className={
+                          currentRoute === '/inventario' ? 'active' : ''
+                        }
                         disableRipple
                         component="a"
                         onClick={closeSidebar}
@@ -565,10 +577,10 @@ function SidebarMenu({ userRole }) {
                   </ListItem>
                 )}
                 <ListItem component="div">
-                  <NextLink href="/reportes" passHref>
+                  <NextLink href={userRole === "SUB" ? "/reportes/semanal" :"/reportes"} passHref>
                     <Button
                       className={
-                        currentRoute.includes("/reportes") ? "active" : ""
+                        currentRoute.includes('/reportes') ? 'active' : ''
                       }
                       disableRipple
                       component="a"
@@ -579,11 +591,11 @@ function SidebarMenu({ userRole }) {
                     </Button>
                   </NextLink>
                 </ListItem>
-                {userRole === "ADMIN" && (
+                {userRole === 'ADMIN' && (
                   <ListItem component="div">
                     <NextLink href="/usuarios" passHref>
                       <Button
-                        className={currentRoute === "/usuarios" ? "active" : ""}
+                        className={currentRoute === '/usuarios' ? 'active' : ''}
                         disableRipple
                         component="a"
                         onClick={closeSidebar}

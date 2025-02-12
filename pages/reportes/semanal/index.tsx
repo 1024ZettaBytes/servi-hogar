@@ -1,10 +1,10 @@
-import Head from "next/head";
-import { getSession } from "next-auth/react";
-import { useState } from "react";
-import SidebarLayout from "@/layouts/SidebarLayout";
-import { validateServerSideSession } from "../../../lib/auth";
-import PageHeader from "@/components/PageHeader";
-import PageTitleWrapper from "@/components/PageTitleWrapper";
+import Head from 'next/head';
+import { getSession } from 'next-auth/react';
+import { useState } from 'react';
+import SidebarLayout from '@/layouts/SidebarLayout';
+import { validateServerSideSession } from '../../../lib/auth';
+import PageHeader from '@/components/PageHeader';
+import PageTitleWrapper from '@/components/PageTitleWrapper';
 import {
   Card,
   Container,
@@ -15,11 +15,11 @@ import {
   CardHeader,
   Divider,
   Typography,
-  CardContent,
-} from "@mui/material";
-import Footer from "@/components/Footer";
-import { getFetcher, useGetReport } from "../../api/useRequest";
-import CloudDownloadIcon from "@mui/icons-material/CloudDownload";
+  CardContent
+} from '@mui/material';
+import Footer from '@/components/Footer';
+import { getFetcher, useGetReport } from '../../api/useRequest';
+import CloudDownloadIcon from '@mui/icons-material/CloudDownload';
 import {
   capitalizeFirstLetter,
   getLastWeekDay,
@@ -28,33 +28,43 @@ import {
   sleep,
   formatTZDate,
   convertDateToLocal,
-  convertDateToTZ,
-} from "lib/client/utils";
-import WeekPicker from "@/components/WeekPicker";
-import ActivityReportTable from "./ActivityReportTable";
-import RegistersReportTable from "./RegistersReportTable";
+  convertDateToTZ
+} from 'lib/client/utils';
+import WeekPicker from '@/components/WeekPicker';
+import ActivityReportTable from './ActivityReportTable';
+import RegistersReportTable from './RegistersReportTable';
 
-const cellStyle = { border: "2px solid #374246" };
+const cellStyle = { border: '2px solid #374246' };
 const headerStyle = {
   ...cellStyle,
-  backgroundColor: "#35AEE2",
-  color: "black",
-  fontWeight: "bold",
+  backgroundColor: '#35AEE2',
+  color: 'black',
+  fontWeight: 'bold'
 };
-const deliveryStyle = { ...headerStyle, backgroundColor: "#DAF7A6" };
-const pickupStyle = { ...headerStyle, backgroundColor: "#EE5656" };
-const changeStyle = { ...headerStyle, backgroundColor: "#FFC300" };
-const customerStyle = { ...headerStyle, backgroundColor: "#F4F189" };
-const paymentStyle = { ...headerStyle, backgroundColor: "#89C3F4" };
-const bonusStyle = { ...headerStyle, backgroundColor: "#C7C6BC" };
-function DayReport() {
-  const [selectedDate, setSelectedDate] = useState<Date>(convertDateToLocal(new Date()));
-  const [start, setStart] = useState<Date>(getFirstWeekDay(convertDateToLocal(new Date())));
-  const [end, setEnd] = useState<Date>(getLastWeekDay(convertDateToLocal(new Date())));
+const deliveryStyle = { ...headerStyle, backgroundColor: '#DAF7A6' };
+const pickupStyle = { ...headerStyle, backgroundColor: '#EE5656' };
+const changeStyle = { ...headerStyle, backgroundColor: '#FFC300' };
+const customerStyle = { ...headerStyle, backgroundColor: '#F4F189' };
+const paymentStyle = { ...headerStyle, backgroundColor: '#89C3F4' };
+const bonusStyle = { ...headerStyle, backgroundColor: '#C7C6BC' };
+function DayReport({ session }) {
+
+  const { user } = session;
+  const userRole = user.role;
+  const onlyChanges = userRole === 'SUB';
+  const [selectedDate, setSelectedDate] = useState<Date>(
+    convertDateToLocal(new Date())
+  );
+  const [start, setStart] = useState<Date>(
+    getFirstWeekDay(convertDateToLocal(new Date()))
+  );
+  const [end, setEnd] = useState<Date>(
+    getLastWeekDay(convertDateToLocal(new Date()))
+  );
   const [isPrinting, setIsPrinting] = useState<boolean>(false);
   const { reportData, reportError } = useGetReport(
     getFetcher,
-    "range",
+    'range',
     convertDateToTZ(start),
     convertDateToTZ(end)
   );
@@ -64,34 +74,33 @@ function DayReport() {
   const handleClickOpen = async () => {
     setIsPrinting(true);
     await sleep(1000);
-    const fileName = `SEMANAL_${formatTZDate(start, "DD-MMMM-YYYY")}_al_${formatTZDate(end, "DD-MMMM-YYYY")}.pdf`;
+    const fileName = `SEMANAL_${formatTZDate(
+      start,
+      'DD-MMMM-YYYY'
+    )}_al_${formatTZDate(end, 'DD-MMMM-YYYY')}.pdf`;
     await printElement(document, fileName);
     setIsPrinting(false);
   };
   const handleOnSelectDate = (newValue) => {
-    if (newValue && newValue.toString() !== "Invalid Date") {
+    if (newValue && newValue.toString() !== 'Invalid Date') {
       setSelectedDate(newValue);
       setStart(getFirstWeekDay(newValue));
       setEnd(getLastWeekDay(newValue));
     }
   };
   const button = {
-    text: "Descargar PDF",
+    text: 'Descargar PDF',
     onClick: handleClickOpen,
     startIcon: <CloudDownloadIcon />,
     isLoading: isPrinting,
-    variant: "outlined",
-    color: "info",
+    variant: 'outlined',
+    color: 'info'
   };
   const getHeader = () => {
     const startMonthDay = start.getDate();
     const endMonthDay = end.getDate();
-    const startMonth = capitalizeFirstLetter(
-      formatTZDate(start, "MMMM")
-    );
-    const endMonth = capitalizeFirstLetter(
-      formatTZDate(end, "MMMM")
-    );
+    const startMonth = capitalizeFirstLetter(formatTZDate(start, 'MMMM'));
+    const endMonth = capitalizeFirstLetter(formatTZDate(end, 'MMMM'));
     const startYear = start.getFullYear();
     const endYear = end.getFullYear();
     return `${startMonthDay}/${startMonth}/${startYear} - ${endMonthDay}/${endMonth}/${endYear}`;
@@ -103,8 +112,8 @@ function DayReport() {
       </Head>
       <PageTitleWrapper>
         <PageHeader
-          title={"Reporte Semanal"}
-          subtitle={""}
+          title={'Reporte Semanal'}
+          subtitle={''}
           button={!generalError && completeData ? button : null}
         />
       </PageTitleWrapper>
@@ -112,7 +121,7 @@ function DayReport() {
         <Card
           sx={{
             px: 1,
-            mb: 1,
+            mb: 1
           }}
         >
           <CardContent>
@@ -125,8 +134,8 @@ function DayReport() {
                 lg={12}
                 mr={1}
               >
-                <Typography fontWeight={"bold"} fontSize={16}>
-                  Seleccione la semana:{" "}
+                <Typography fontWeight={'bold'} fontSize={16}>
+                  Seleccione la semana:{' '}
                 </Typography>
               </Grid>
               <Grid item lg={12}>
@@ -148,7 +157,7 @@ function DayReport() {
               ) : !completeData ? (
                 <Skeleton
                   variant="rectangular"
-                  width={"100%"}
+                  width={'100%'}
                   height={500}
                   animation="wave"
                 />
@@ -156,26 +165,28 @@ function DayReport() {
                 <div>
                   <CardHeader
                     sx={{
-                      display: "flex",
-                      textAlign: "center",
-                      alignItems: "center",
-                      justifyContent: "space-between",
-                      flexWrap: "wrap",
+                      display: 'flex',
+                      textAlign: 'center',
+                      alignItems: 'center',
+                      justifyContent: 'space-between',
+                      flexWrap: 'wrap'
                     }}
-                    title={"REPORTE SEMANAL"}
+                    title={'REPORTE SEMANAL'}
                     subheader={getHeader()}
                   />
                   <Divider />
                   <Grid container spacing={4} p={2}>
-                    <Grid item lg={6}>
-                      <ActivityReportTable
-                        header="ENTREGAS"
-                        colorStyle={deliveryStyle}
-                        totalData={reportData?.deliveries?.totalData}
-                        list={reportData?.deliveries?.days}
-                      />
-                    </Grid>
-                    <Grid item lg={6}>
+                    {!onlyChanges && (
+                      <Grid item lg={6}>
+                        <ActivityReportTable
+                          header="ENTREGAS"
+                          colorStyle={deliveryStyle}
+                          totalData={reportData?.deliveries?.totalData}
+                          list={reportData?.deliveries?.days}
+                        />
+                      </Grid>
+                    )}
+                    <Grid item lg={onlyChanges ? 12 : 6}>
                       <ActivityReportTable
                         header="CAMBIOS"
                         colorStyle={changeStyle}
@@ -184,36 +195,44 @@ function DayReport() {
                       />
                     </Grid>
                     <Grid item lg={6}>
-                      <ActivityReportTable
-                        header="RECOLECCIONES"
-                        colorStyle={pickupStyle}
-                        totalData={reportData?.pickups.totalData}
-                        list={reportData?.pickups.days}
-                      />
+                      {!onlyChanges && (
+                        <ActivityReportTable
+                          header="RECOLECCIONES"
+                          colorStyle={pickupStyle}
+                          totalData={reportData?.pickups.totalData}
+                          list={reportData?.pickups.days}
+                        />
+                      )}
                     </Grid>
                     <Grid item lg={6}>
-                      <RegistersReportTable
-                        header="DEPOSITOS"
-                        colorStyle={paymentStyle}
-                        totalData={reportData.payments.totalData}
-                        list={reportData.payments.days}
-                      />
+                      {!onlyChanges && (
+                        <RegistersReportTable
+                          header="DEPOSITOS"
+                          colorStyle={paymentStyle}
+                          totalData={reportData.payments.totalData}
+                          list={reportData.payments.days}
+                        />
+                      )}
                     </Grid>
                     <Grid item lg={6}>
-                      <RegistersReportTable
-                        header="CLIENTES NUEVOS"
-                        colorStyle={customerStyle}
-                        totalData={reportData.customers.totalData}
-                        list={reportData.customers.days}
-                      />
+                      {!onlyChanges && (
+                        <RegistersReportTable
+                          header="CLIENTES NUEVOS"
+                          colorStyle={customerStyle}
+                          totalData={reportData.customers.totalData}
+                          list={reportData.customers.days}
+                        />
+                      )}
                     </Grid>
                     <Grid item lg={6}>
-                      <RegistersReportTable
-                        header="BONIFICACIONES"
-                        colorStyle={bonusStyle}
-                        totalData={reportData.bonuses.totalData}
-                        list={reportData.bonuses.days}
-                      />
+                      {!onlyChanges && (
+                        <RegistersReportTable
+                          header="BONIFICACIONES"
+                          colorStyle={bonusStyle}
+                          totalData={reportData.bonuses.totalData}
+                          list={reportData.bonuses.days}
+                        />
+                      )}
                     </Grid>
                   </Grid>
                   <Box p={2}></Box>

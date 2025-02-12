@@ -7,21 +7,21 @@ import {
   Avatar,
   styled,
   Container,
-  useTheme,
-} from "@mui/material";
-import NextLink from "next/link";
-import ViewDayIcon from "@mui/icons-material/ViewDay";
-import CalendarViewWeekIcon from "@mui/icons-material/CalendarViewWeek";
-import CalendarMonthIcon from "@mui/icons-material/CalendarMonth";
-import SidebarLayout from "@/layouts/SidebarLayout";
-import LocalLaundryServiceIcon from "@mui/icons-material/LocalLaundryService";
-import RequestQuoteIcon from "@mui/icons-material/RequestQuote";
-import { validateServerSideSession } from "lib/auth";
-import { getSession } from "next-auth/react";
-import Footer from "@/components/Footer";
-import PageHeader from "@/components/PageHeader";
-import PageTitleWrapper from "@/components/PageTitleWrapper";
-import Head from "next/head";
+  useTheme
+} from '@mui/material';
+import NextLink from 'next/link';
+import ViewDayIcon from '@mui/icons-material/ViewDay';
+import CalendarViewWeekIcon from '@mui/icons-material/CalendarViewWeek';
+import CalendarMonthIcon from '@mui/icons-material/CalendarMonth';
+import SidebarLayout from '@/layouts/SidebarLayout';
+import LocalLaundryServiceIcon from '@mui/icons-material/LocalLaundryService';
+import RequestQuoteIcon from '@mui/icons-material/RequestQuote';
+import { validateServerSideSession } from 'lib/auth';
+import { getSession } from 'next-auth/react';
+import Footer from '@/components/Footer';
+import PageHeader from '@/components/PageHeader';
+import PageTitleWrapper from '@/components/PageTitleWrapper';
+import Head from 'next/head';
 
 const AvatarWrapperSuccess = styled(Avatar)(
   ({ theme }) => `
@@ -52,6 +52,7 @@ const AvatarWrapperNormal = styled(Avatar)(
 
 function Reportes({ session }) {
   const { user } = session;
+  const onlyChanges = user?.role === 'SUB';
   const theme = useTheme();
   return (
     <>
@@ -59,7 +60,7 @@ function Reportes({ session }) {
         <title>Servi Hogar | Reportes</title>
       </Head>
       <PageTitleWrapper>
-        <PageHeader title={"Reportes"} />
+        <PageHeader title={'Reportes'} />
       </PageTitleWrapper>
       <Container maxWidth="lg">
         <Box
@@ -67,48 +68,50 @@ function Reportes({ session }) {
           alignItems="center"
           justifyContent="space-between"
           sx={{
-            pb: 3,
+            pb: 3
           }}
         ></Box>
         <Grid container spacing={3}>
-          <Grid xs={12} sm={6} md={4} item>
-            <NextLink href="/reportes/diario">
-              <Card
-                sx={{
-                  px: 1,
-                  cursor: "pointer",
-                  "&:hover": {
-                    background: theme.palette.grey[300],
-                  },
-                }}
-              >
-                <CardContent>
-                  <AvatarWrapperSuccess>
-                    <ViewDayIcon />
-                  </AvatarWrapperSuccess>
+          {!onlyChanges && (
+            <Grid xs={12} sm={6} md={4} item>
+              <NextLink href="/reportes/diario">
+                <Card
+                  sx={{
+                    px: 1,
+                    cursor: 'pointer',
+                    '&:hover': {
+                      background: theme.palette.grey[300]
+                    }
+                  }}
+                >
+                  <CardContent>
+                    <AvatarWrapperSuccess>
+                      <ViewDayIcon />
+                    </AvatarWrapperSuccess>
 
-                  <Box
-                    sx={{
-                      pt: 3,
-                    }}
-                  >
-                    <Typography variant="h3" gutterBottom noWrap>
-                      Diario
-                    </Typography>
-                  </Box>
-                </CardContent>
-              </Card>
-            </NextLink>
-          </Grid>
+                    <Box
+                      sx={{
+                        pt: 3
+                      }}
+                    >
+                      <Typography variant="h3" gutterBottom noWrap>
+                        Diario
+                      </Typography>
+                    </Box>
+                  </CardContent>
+                </Card>
+              </NextLink>
+            </Grid>
+          )}
           <Grid xs={12} sm={6} md={4} item>
             <NextLink href="/reportes/semanal">
               <Card
                 sx={{
                   px: 1,
-                  cursor: "pointer",
-                  "&:hover": {
-                    background: theme.palette.grey[300],
-                  },
+                  cursor: 'pointer',
+                  '&:hover': {
+                    background: theme.palette.grey[300]
+                  }
                 }}
               >
                 <CardContent>
@@ -117,7 +120,7 @@ function Reportes({ session }) {
                   </AvatarWrapperWarning>
                   <Box
                     sx={{
-                      pt: 3,
+                      pt: 3
                     }}
                   >
                     <Typography variant="h3" gutterBottom noWrap>
@@ -128,72 +131,76 @@ function Reportes({ session }) {
               </Card>
             </NextLink>
           </Grid>
-          <Grid xs={12} sm={6} md={4} item>
-            <NextLink href="/reportes/mensual">
-              <Card
-                sx={{
-                  px: 1,
-                  cursor: "pointer",
-                  "&:hover": {
-                    background: theme.palette.grey[300],
-                  },
-                }}
-              >
-                <CardContent>
-                  <AvatarWrapperError>
-                    <CalendarMonthIcon />
-                  </AvatarWrapperError>
-                  <Box
-                    sx={{
-                      pt: 3,
-                    }}
-                  >
-                    <Typography variant="h3" gutterBottom noWrap>
-                      Mensual
-                    </Typography>
-                  </Box>
-                </CardContent>
-              </Card>
-            </NextLink>
-          </Grid>
-          { user?.role === "ADMIN" && (<Grid xs={12} sm={6} md={4} item>
-            <NextLink href="/reportes/equipos">
-              <Card
-                sx={{
-                  px: 1,
-                  cursor: "pointer",
-                  "&:hover": {
-                    background: theme.palette.grey[300],
-                  },
-                }}
-              >
-                <CardContent>
-                  <AvatarWrapperNormal>
-                    <LocalLaundryServiceIcon />
-                  </AvatarWrapperNormal>
-                  <Box
-                    sx={{
-                      pt: 3,
-                    }}
-                  >
-                    <Typography variant="h3" gutterBottom noWrap>
-                      Equipos
-                    </Typography>
-                  </Box>
-                </CardContent>
-              </Card>
-            </NextLink>
-          </Grid>)}
-          {user?.role === "ADMIN" && (
+          {!onlyChanges && (
+            <Grid xs={12} sm={6} md={4} item>
+              <NextLink href="/reportes/mensual">
+                <Card
+                  sx={{
+                    px: 1,
+                    cursor: 'pointer',
+                    '&:hover': {
+                      background: theme.palette.grey[300]
+                    }
+                  }}
+                >
+                  <CardContent>
+                    <AvatarWrapperError>
+                      <CalendarMonthIcon />
+                    </AvatarWrapperError>
+                    <Box
+                      sx={{
+                        pt: 3
+                      }}
+                    >
+                      <Typography variant="h3" gutterBottom noWrap>
+                        Mensual
+                      </Typography>
+                    </Box>
+                  </CardContent>
+                </Card>
+              </NextLink>
+            </Grid>
+          )}
+          {user?.role === 'ADMIN' && (
+            <Grid xs={12} sm={6} md={4} item>
+              <NextLink href="/reportes/equipos">
+                <Card
+                  sx={{
+                    px: 1,
+                    cursor: 'pointer',
+                    '&:hover': {
+                      background: theme.palette.grey[300]
+                    }
+                  }}
+                >
+                  <CardContent>
+                    <AvatarWrapperNormal>
+                      <LocalLaundryServiceIcon />
+                    </AvatarWrapperNormal>
+                    <Box
+                      sx={{
+                        pt: 3
+                      }}
+                    >
+                      <Typography variant="h3" gutterBottom noWrap>
+                        Equipos
+                      </Typography>
+                    </Box>
+                  </CardContent>
+                </Card>
+              </NextLink>
+            </Grid>
+          )}
+          {user?.role === 'ADMIN' && (
             <Grid xs={12} sm={6} md={4} item>
               <NextLink href="/reportes/ingresos">
                 <Card
                   sx={{
                     px: 1,
-                    cursor: "pointer",
-                    "&:hover": {
-                      background: theme.palette.grey[300],
-                    },
+                    cursor: 'pointer',
+                    '&:hover': {
+                      background: theme.palette.grey[300]
+                    }
                   }}
                 >
                   <CardContent>
@@ -202,7 +209,7 @@ function Reportes({ session }) {
                     </AvatarWrapperError>
                     <Box
                       sx={{
-                        pt: 3,
+                        pt: 3
                       }}
                     >
                       <Typography variant="h3" gutterBottom noWrap>
