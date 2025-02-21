@@ -148,7 +148,7 @@ const TablaMisPagos: FC<TablaMisPagosProps> = ({ payoutsList }) => {
   const paginatedPayouts = applyPagination(filteredPayouts, page, limit);
   const total = () => {
     let t = 0;
-    paginatedPayouts?.forEach((p) => {
+    payoutsList?.forEach((p) => {
       t += p.toPay;
     });
     return t;
