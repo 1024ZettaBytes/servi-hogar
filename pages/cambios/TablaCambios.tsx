@@ -1,4 +1,4 @@
-import { FC, useState } from 'react';
+import React, { FC, useState } from 'react';
 import PropTypes from 'prop-types';
 import {
   Divider,
@@ -20,17 +20,29 @@ import {
   Alert,
   Grid,
   TextField,
-  InputAdornment
+  InputAdornment,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogContentText,
+  DialogActions,
+  Slide
 } from '@mui/material';
 import ImageSearchIcon from '@mui/icons-material/ImageSearch';
 import SearchIcon from '@mui/icons-material/Search';
 
-import { capitalizeFirstLetter, formatTZDate } from 'lib/client/utils';
+import useDeviceType, {
+  capitalizeFirstLetter,
+  formatTZDate
+} from 'lib/client/utils';
 import Label from '@/components/Label';
 import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
 import ReportProblemIcon from '@mui/icons-material/ReportProblem';
+import VisibilityIcon from '@mui/icons-material/Visibility';
 import ImagesModal from '@/components/ImagesModal';
 import { getFetcher, useGetChanges } from 'pages/api/useRequest';
+import Button from '@mui/material/Button';
+import { TransitionProps } from '@mui/material/transitions';
 interface TablaCambiosProps {
   userRole: string;
   className?: string;
@@ -53,7 +65,14 @@ const getStatusLabel = (
 
   return <Label color={color}>{wasFixed ? 'Solucionado' : text}</Label>;
 };
-
+const Transition = React.forwardRef(function Transition(
+  props: TransitionProps & {
+    children: React.ReactElement<any, any>;
+  },
+  ref: React.Ref<unknown>
+) {
+  return <Slide direction="up" ref={ref} {...props} />;
+});
 
 const TablaCambios: FC<TablaCambiosProps> = () => {
   const [page, setPage] = useState(0);
@@ -63,9 +82,12 @@ const TablaCambios: FC<TablaCambiosProps> = () => {
   const { changes, changesError } = useGetChanges(
     getFetcher,
     limit,
-    page +  1,
+    page + 1,
     searchTerm
   );
+  const { isMobile } = useDeviceType();
+  const [reasonModalIsOpen, setReasonModalIsOpen] = useState(false);
+  const [reason, setReason] = useState(null);
 
   const handlePageChange = (_event, newPage) => {
     setPage(newPage);
@@ -98,34 +120,34 @@ const TablaCambios: FC<TablaCambiosProps> = () => {
         <Card>
           <Card>
             <CardHeader
-            action={
-              <Box width={200}>
-                <TextField
-                  size="small"
-                  helperText="Escriba y presione ENTER"
-                  id="input-search-payment"
-                  label="Buscar"
-                  value={searchText}
-                  onChange={(event) => {
-                    setSearchText(event.target.value);
-                  }}
-                  onKeyDown={(ev) => {
-                    if (ev.key === "Enter") {
-                      ev.preventDefault();
-                      setSearchTerm(searchText);
-                    }
-                  }}
-                  InputProps={{
-                    startAdornment: (
-                      <InputAdornment position="start">
-                        <SearchIcon />
-                      </InputAdornment>
-                    )
-                  }}
-                  sx={{ marginTop: '20px' }}
-                />
-              </Box>
-            }
+              action={
+                <Box width={200}>
+                  <TextField
+                    size="small"
+                    helperText="Escriba y presione ENTER"
+                    id="input-search-payment"
+                    label="Buscar"
+                    value={searchText}
+                    onChange={(event) => {
+                      setSearchText(event.target.value);
+                    }}
+                    onKeyDown={(ev) => {
+                      if (ev.key === 'Enter') {
+                        ev.preventDefault();
+                        setSearchTerm(searchText);
+                      }
+                    }}
+                    InputProps={{
+                      startAdornment: (
+                        <InputAdornment position="start">
+                          <SearchIcon />
+                        </InputAdornment>
+                      )
+                    }}
+                    sx={{ marginTop: '20px' }}
+                  />
+                </Box>
+              }
               sx={{
                 display: 'flex',
                 alignItems: 'center',
@@ -167,9 +189,31 @@ const TablaCambios: FC<TablaCambiosProps> = () => {
                           </Typography>
                         </TableCell>
                         <TableCell align="center">
-                          <Tooltip title={change?.reason || 'SIN RAZÓN'} arrow>
-                            <ReportProblemIcon fontSize="small" />
-                          </Tooltip>
+                          {isMobile ? (
+                            <IconButton
+                              onClick={() => {
+                                setReason(change?.reason || 'SIN RAZÓN')
+                                setReasonModalIsOpen(true);
+                              }}
+                              sx={{
+                                '&:hover': {
+                                  background: theme.colors.primary.lighter
+                                },
+                                color: theme.palette.primary.main
+                              }}
+                              color="inherit"
+                              size="small"
+                            >
+                              <VisibilityIcon fontSize="small" />
+                            </IconButton>
+                          ) : (
+                            <Tooltip
+                              title={change?.reason || 'SIN RAZÓN'}
+                              arrow
+                            >
+                              <ReportProblemIcon fontSize="small" />
+                            </Tooltip>
+                          )}
                         </TableCell>
                         <TableCell align="center">
                           <Typography
@@ -299,6 +343,31 @@ const TablaCambios: FC<TablaCambiosProps> = () => {
               onClose={handleOnCloseImages}
             />
           )}
+          <Dialog
+            open={reasonModalIsOpen}
+            TransitionComponent={Transition}
+            keepMounted
+            onClose={() => {
+              setReasonModalIsOpen(false);
+            }}
+            aria-describedby="alert-dialog-slide-description"
+          >
+            <DialogTitle>{"Razón del cambio"}</DialogTitle>
+            <DialogContent>
+              <DialogContentText id="alert-dialog-slide-description" color={'error'}>
+                {reason}
+              </DialogContentText>
+            </DialogContent>
+            <DialogActions>
+              <Button
+                onClick={() => {
+                  setReasonModalIsOpen(false);
+                }}
+              >
+                Cerrar
+              </Button>
+            </DialogActions>
+          </Dialog>
         </Card>
       )}
       ;

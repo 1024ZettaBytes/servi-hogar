@@ -9,6 +9,7 @@ import tz from 'dayjs/plugin/timezone';
 import objectSupport from 'dayjs/plugin/objectSupport';
 import { MAPS_BASE_URL, PAYOUT_CONSTS } from 'lib/consts/OBJ_CONTS';
 import { format } from 'date-fns';
+import { useMediaQuery } from '@mui/material';
 dayjs.extend(utc);
 dayjs.extend(tz);
 dayjs.extend(objectSupport);
@@ -250,3 +251,10 @@ export const machineCalculations = (
   data.toPay = income - data.mantainance - data.comision;
   return data;
 };
+
+const useDeviceType = () => {
+  const isMobile = useMediaQuery('(max-width: 768px)'); // Adjust breakpoint as needed
+  return { isMobile, isDesktop: !isMobile };
+};
+
+export default useDeviceType;
