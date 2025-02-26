@@ -1,6 +1,6 @@
-import PropTypes from "prop-types";
-import { useState } from "react";
-import Dialog from "@mui/material/Dialog";
+import PropTypes from 'prop-types';
+import { useState } from 'react';
+import Dialog from '@mui/material/Dialog';
 import {
   Box,
   Button,
@@ -23,26 +23,26 @@ import {
   InputLabel,
   Select,
   MenuItem,
-  InputAdornment,
-} from "@mui/material";
-import dayjs from "dayjs";
-import LocalizedFormat from "dayjs/plugin/localizedFormat";
-import "dayjs/locale/es-mx";
-dayjs.locale("es-mx");
+  InputAdornment
+} from '@mui/material';
+import dayjs from 'dayjs';
+import LocalizedFormat from 'dayjs/plugin/localizedFormat';
+import 'dayjs/locale/es-mx';
+dayjs.locale('es-mx');
 dayjs.extend(LocalizedFormat);
-import AccountBalanceWalletIcon from "@mui/icons-material/AccountBalanceWallet";
-import Image from "next/image";
-import { LoadingButton } from "@mui/lab";
-import { useGetAllCustomers, getFetcher } from "../../../pages/api/useRequest";
-import { savePayment } from "../../../lib/client/paymentsFetch";
+import AccountBalanceWalletIcon from '@mui/icons-material/AccountBalanceWallet';
+import Image from 'next/image';
+import { LoadingButton } from '@mui/lab';
+import { useGetAllCustomers, getFetcher } from '../../../pages/api/useRequest';
+import { savePayment } from '../../../lib/client/paymentsFetch';
 import {
   PAYMENT_REASONS,
-  PAYMENT_METHODS,
-} from "../../../lib/consts/OBJ_CONTS";
-import { MuiFileInput } from "mui-file-input";
-import numeral from "numeral";
-import { DesktopDatePicker } from "@mui/x-date-pickers";
-import { convertDateToTZ } from "lib/client/utils";
+  PAYMENT_METHODS
+} from '../../../lib/consts/OBJ_CONTS';
+import { MuiFileInput } from 'mui-file-input';
+import numeral from 'numeral';
+import { DesktopDatePicker } from '@mui/x-date-pickers';
+import { convertDateToTZ, dateDiffInDays } from 'lib/client/utils';
 function AddPaymentModal(props) {
   const { customerId, handleOnClose, open, reason, amount } = props;
   const { customerList, customerError } = useGetAllCustomers(getFetcher, false);
@@ -54,17 +54,17 @@ function AddPaymentModal(props) {
   const [selectedAmount, setSelectedAmount] = useState<any>(null);
   const [selectedFolio, setSelectedFolio] = useState<any>(null);
   const [attached, setAttached] = useState<any>({
-    voucher: { file: null, url: null },
+    voucher: { file: null, url: null }
   });
   const [badFormat, setBadFormat] = useState<any>({
-    voucher: false,
+    voucher: false
   });
 
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
 
   const [hasErrorSubmitting, setHasErrorSubmitting] = useState<any>({
     error: false,
-    msg: "",
+    msg: ''
   });
   const handleCustomerSelect = (selected: any) => {
     const found = customerList.filter(
@@ -76,19 +76,19 @@ function AddPaymentModal(props) {
   const [activeStep, setActiveStep] = useState(0);
   const steps = [
     {
-      label: "Seleccione el cliente y concepto",
+      label: 'Método de pago'
     },
     {
-      label: "Método de pago",
+      label: 'Cantidad y comprobante'
     },
     {
-      label: "Cantidad y comprobante",
-    },
+      label: 'Seleccione el cliente y concepto'
+    }
   ];
 
   const handleOnSubmit = async (event) => {
     event.preventDefault();
-    setHasErrorSubmitting({ error: false, msg: "" });
+    setHasErrorSubmitting({ error: false, msg: '' });
     setIsSubmitting(true);
     const result = await savePayment(attached.voucher.file, {
       customerId: selectedCustomer._id,
@@ -97,7 +97,7 @@ function AddPaymentModal(props) {
       account,
       paymentDate: convertDateToTZ(paymentDate),
       amount: selectedAmount,
-      folio: selectedFolio,
+      folio: selectedFolio
     });
     setIsSubmitting(false);
     if (!result.error) {
@@ -115,7 +115,7 @@ function AddPaymentModal(props) {
   };
 
   const handleClose = () => {
-    setHasErrorSubmitting({ error: false, msg: "" });
+    setHasErrorSubmitting({ error: false, msg: '' });
     setIsSubmitting(false);
     handleOnClose(false);
   };
@@ -131,18 +131,18 @@ function AddPaymentModal(props) {
   if (amount && !selectedAmount) {
     setSelectedAmount(amount);
   }
-  if (customerId && reason && activeStep === 0) {
+  /*if (customerId && reason && activeStep === 0) {
     setActiveStep(1);
-  }
+  }*/
 
   return (
-    <Dialog open={open} fullWidth={true} maxWidth={"md"} scroll={"body"}>
+    <Dialog open={open} fullWidth={true} maxWidth={'md'} scroll={'body'}>
       <Card>
         <CardHeader title="Nuevo pago" />
         <Divider />
         <CardContent>
           <Box>
-            <Container maxWidth="lg">
+            <Container>
               {customerError ? (
                 <Grid item m={1}>
                   <Alert severity="error">{customerError.message}</Alert>
@@ -151,14 +151,14 @@ function AddPaymentModal(props) {
                 <Stepper
                   activeStep={activeStep}
                   orientation="vertical"
-                  sx={{ backgroundColor: "transparent" }}
+                  sx={{ backgroundColor: 'transparent' }}
                 >
                   {steps.map((step, index) => (
                     <Step key={step.label}>
                       <StepLabel>
-                        {index === 0 && selectedCustomer && selectedReason
+                        {index === 2 && selectedCustomer && selectedReason
                           ? `${step.label} (${selectedCustomer.name} - ${PAYMENT_REASONS[selectedReason]})`
-                          : index === 1 && selectedMethod
+                          : index === 0 && selectedMethod
                           ? `${step.label} (${PAYMENT_METHODS[selectedMethod]})`
                           : step.label}
                       </StepLabel>
@@ -173,103 +173,18 @@ function AddPaymentModal(props) {
                         >
                           {activeStep === 0 && (
                             <Grid container>
-                              <Grid item lg={6} m={1}>
-                                {(
-                                  customerId ? selectedCustomer : customerList
-                                ) ? (
-                                  <Autocomplete
-                                    disablePortal
-                                    id="combo-box-demo"
-                                    options={customerList.map((customer) => {
-                                      return {
-                                        label: `${customer.name} (${customer.cell})`,
-                                        id: customer._id,
-                                      };
-                                    })}
-                                    onChange={(
-                                      event: any,
-                                      newValue: string | null
-                                    ) => {
-                                      event.target;
-                                      handleCustomerSelect(newValue);
-                                    }}
-                                    value={
-                                      selectedCustomer
-                                        ? {
-                                            label: `${selectedCustomer.name} (${selectedCustomer.cell})`,
-                                            id: selectedCustomer._id,
-                                          }
-                                        : null
-                                    }
-                                    fullWidth
-                                    isOptionEqualToValue={(
-                                      option: any,
-                                      value: any
-                                    ) => option.id === value.id}
-                                    renderInput={(params) => (
-                                      <TextField
-                                        required
-                                        {...params}
-                                        label="Cliente"
-                                      />
-                                    )}
+                              {attached?.voucher?.url && (
+                                <Grid item lg={12}>
+                                  <Image
+                                    src={attached.voucher.url}
+                                    alt="Comprobante de pago"
+                                    width={200}
+                                    height={300}
                                   />
-                                ) : (
-                                  <Skeleton
-                                    variant="text"
-                                    sx={{ fontSize: "1rem", width: "100px" }}
-                                  />
-                                )}
-                              </Grid>
-                              {selectedCustomer && (
-                                <Grid item m={1}>
-                                  <Typography variant="h5">Saldo</Typography>
-                                  <Typography variant="subtitle2">
-                                    {numeral(selectedCustomer.balance).format(
-                                      `$${selectedCustomer.balance}0,0.00`
-                                    )}
-                                  </Typography>
                                 </Grid>
                               )}
-                              <Grid item xs={12} sm={12} lg={12} />
-
                               <Grid item lg={3} m={1}>
-                                <FormControl sx={{ width: "100%" }}>
-                                  <InputLabel id="reason-id">
-                                    Concepto*
-                                  </InputLabel>
-                                  <Select
-                                    labelId="reason-id"
-                                    label="Concepto*"
-                                    id="reason"
-                                    name="reason"
-                                    required
-                                    autoComplete="off"
-                                    size="medium"
-                                    value={selectedReason || ""}
-                                    onChange={(event) =>
-                                      setSelectedReason(event.target.value)
-                                    }
-                                  >
-                                    {Object.keys(PAYMENT_REASONS).map(
-                                      (reasonKey) => (
-                                        <MenuItem
-                                          key={reasonKey}
-                                          value={reasonKey}
-                                        >
-                                          {PAYMENT_REASONS[reasonKey]}
-                                        </MenuItem>
-                                      )
-                                    )}
-                                  </Select>
-                                </FormControl>
-                              </Grid>
-                            </Grid>
-                          )}
-                          {activeStep === 1 && (
-                            <Grid container>
-                              <Grid item lg={3} m={1}>
-                                <FormControl sx={{ width: "100%" }}>
+                                <FormControl sx={{ width: '100%' }}>
                                   <InputLabel id="method-id">
                                     Método*
                                   </InputLabel>
@@ -281,7 +196,7 @@ function AddPaymentModal(props) {
                                     required
                                     autoComplete="off"
                                     size="medium"
-                                    value={selectedMethod || ""}
+                                    value={selectedMethod || ''}
                                     onChange={(event) =>
                                       setSelectedMethod(event.target.value)
                                     }
@@ -300,7 +215,7 @@ function AddPaymentModal(props) {
                                 </FormControl>
                               </Grid>
                               {selectedMethod &&
-                                !["CASH", "CASH_OFFICE"].includes(
+                                !['CASH', 'CASH_OFFICE'].includes(
                                   selectedMethod
                                 ) && (
                                   <Grid item lg={2} m={1}>
@@ -314,7 +229,7 @@ function AddPaymentModal(props) {
                                           <InputAdornment position="start">
                                             <AccountBalanceWalletIcon />
                                           </InputAdornment>
-                                        ),
+                                        )
                                       }}
                                       onChange={(event) => {
                                         setAccount(event.target.value);
@@ -324,7 +239,7 @@ function AddPaymentModal(props) {
                                 )}
                             </Grid>
                           )}
-                          {activeStep === 2 && (
+                          {activeStep === 1 && (
                             <Grid container>
                               <Grid item lg={12} m={1}>
                                 <DesktopDatePicker
@@ -336,7 +251,7 @@ function AddPaymentModal(props) {
                                     setPaymentDate(newValue);
                                   }}
                                   renderInput={(params) => (
-                                    <TextField {...params} />
+                                    <TextField {...params } required />
                                   )}
                                 />
                               </Grid>
@@ -356,8 +271,8 @@ function AddPaymentModal(props) {
                                     ),
                                     inputProps: {
                                       min: 0,
-                                      style: { textAlign: "center" },
-                                    },
+                                      style: { textAlign: 'center' }
+                                    }
                                   }}
                                   onChange={(event) => {
                                     setSelectedAmount(event.target.value);
@@ -370,10 +285,10 @@ function AddPaymentModal(props) {
                                   fullWidth
                                   label="Folio comprobante"
                                   required={
-                                    selectedMethod !== "CASH" &&
-                                    selectedMethod !== "CASH_OFFICE"
+                                    selectedMethod !== 'CASH' &&
+                                    selectedMethod !== 'CASH_OFFICE'
                                   }
-                                  value={selectedFolio || ""}
+                                  value={selectedFolio || ''}
                                   variant="outlined"
                                   size="small"
                                   onChange={(event) => {
@@ -383,7 +298,7 @@ function AddPaymentModal(props) {
                               </Grid>
                               <Grid item xs={12} sm={12} lg={12} />
                               {attached.voucher?.url &&
-                                !attached.voucher.file.name.includes("pdf") && (
+                                !attached.voucher.file.name.includes('pdf') && (
                                   <Grid item lg={12} m={1}>
                                     <Image
                                       src={attached.voucher.url}
@@ -396,29 +311,29 @@ function AddPaymentModal(props) {
                               <Grid item lg={4} m={1}>
                                 <MuiFileInput
                                   required={
-                                    selectedMethod !== "CASH" &&
-                                    selectedMethod !== "CASH_OFFICE" &&
+                                    selectedMethod !== 'CASH' &&
+                                    selectedMethod !== 'CASH_OFFICE' &&
                                     !attached.voucher.file
                                   }
-                                  placeholder={"No seleccionada"}
-                                  label={"Foto de comprobante"}
+                                  placeholder={'No seleccionada'}
+                                  label={'Foto de comprobante'}
                                   value={attached.voucher?.file}
                                   onChange={(file) => {
                                     if (
                                       file &&
-                                      !file.type.includes("image/") &&
-                                      !file.type.includes("/pdf")
+                                      !file.type.includes('image/') &&
+                                      !file.type.includes('/pdf')
                                     ) {
                                       setBadFormat({
                                         ...badFormat,
-                                        voucher: true,
+                                        voucher: true
                                       });
                                       setAttached({
                                         ...attached,
                                         voucher: {
                                           ...attached.voucher,
-                                          error: true,
-                                        },
+                                          error: true
+                                        }
                                       });
                                       return;
                                     }
@@ -427,7 +342,7 @@ function AddPaymentModal(props) {
                                       : null;
                                     setAttached({
                                       ...attached,
-                                      voucher: { file, url, error: false },
+                                      voucher: { file, url, error: false }
                                     });
                                   }}
                                 />
@@ -441,6 +356,111 @@ function AddPaymentModal(props) {
                                   </Typography>
                                 </Grid>
                               )}
+                            </Grid>
+                          )}
+                          {activeStep === 2 && (
+                            <Grid container>
+                              {attached?.voucher?.url && (
+                                <Grid item lg={12}>
+                                  <Image
+                                    src={attached.voucher.url}
+                                    alt="Comprobante de pago"
+                                    width={200}
+                                    height={300}
+                                  />
+                                </Grid>
+                              )}
+                              <Grid item lg={6} m={1}>
+                                {(
+                                  customerId ? selectedCustomer : customerList
+                                ) ? (
+                                  <Autocomplete
+                                    disablePortal
+                                    id="combo-box-demo"
+                                    options={customerList.map((customer) => {
+                                      return {
+                                        label: `${customer.name} (${customer.cell})`,
+                                        id: customer._id
+                                      };
+                                    })}
+                                    onChange={(
+                                      event: any,
+                                      newValue: string | null
+                                    ) => {
+                                      event.target;
+                                      handleCustomerSelect(newValue);
+                                    }}
+                                    value={
+                                      selectedCustomer
+                                        ? {
+                                            label: `${selectedCustomer.name} (${selectedCustomer.cell})`,
+                                            id: selectedCustomer._id
+                                          }
+                                        : null
+                                    }
+                                    fullWidth
+                                    isOptionEqualToValue={(
+                                      option: any,
+                                      value: any
+                                    ) => option.id === value.id}
+                                    renderInput={(params) => (
+                                      <TextField
+                                        required
+                                        {...params}
+                                        label="Cliente"
+                                      />
+                                    )}
+                                  />
+                                ) : (
+                                  <Skeleton
+                                    variant="text"
+                                    sx={{ fontSize: '1rem', width: '100px' }}
+                                  />
+                                )}
+                              </Grid>
+                              {selectedCustomer && (
+                                <Grid item m={1}>
+                                  <Typography variant="h5">Saldo</Typography>
+                                  <Typography variant="subtitle2">
+                                    {numeral(selectedCustomer.balance).format(
+                                      `$${selectedCustomer.balance}0,0.00`
+                                    )}
+                                  </Typography>
+                                </Grid>
+                              )}
+                              <Grid item xs={12} sm={12} lg={12} />
+
+                              <Grid item lg={3} m={1}>
+                                <FormControl sx={{ width: '100%' }}>
+                                  <InputLabel id="reason-id">
+                                    Concepto*
+                                  </InputLabel>
+                                  <Select
+                                    labelId="reason-id"
+                                    label="Concepto*"
+                                    id="reason"
+                                    name="reason"
+                                    required
+                                    autoComplete="off"
+                                    size="medium"
+                                    value={selectedReason || ''}
+                                    onChange={(event) =>
+                                      setSelectedReason(event.target.value)
+                                    }
+                                  >
+                                    {Object.keys(PAYMENT_REASONS).map(
+                                      (reasonKey) => (
+                                        <MenuItem
+                                          key={reasonKey}
+                                          value={reasonKey}
+                                        >
+                                          {PAYMENT_REASONS[reasonKey]}
+                                        </MenuItem>
+                                      )
+                                    )}
+                                  </Select>
+                                </FormControl>
+                              </Grid>
                             </Grid>
                           )}
                           {hasErrorSubmitting.error && (
@@ -466,16 +486,16 @@ function AddPaymentModal(props) {
                                 variant="contained"
                                 disabled={
                                   customerError ||
-                                  (index === 2 && !paymentDate) ||
-                                  (index === 2 &&
-                                    paymentDate.toString() === "Invalid Date")
+                                  (index === 1 && !paymentDate) ||
+                                  (index === 1 &&
+                                    (paymentDate.toString() === 'Invalid Date' || dateDiffInDays(new Date(), paymentDate) > 0))
                                 }
                                 type="submit"
                                 sx={{ mt: 1, mr: 1 }}
                               >
                                 {index === steps.length - 1
-                                  ? "Guardar"
-                                  : "Siguiente"}
+                                  ? 'Guardar'
+                                  : 'Siguiente'}
                               </LoadingButton>
                             </div>
                           </Box>
@@ -490,7 +510,7 @@ function AddPaymentModal(props) {
           <Grid item lg={12}>
             <Grid
               container
-              alignItems={"right"}
+              alignItems={'right'}
               direction="row"
               justifyContent="right"
               spacing={2}
@@ -517,7 +537,7 @@ AddPaymentModal.propTypes = {
   open: PropTypes.bool.isRequired,
   customerId: PropTypes.string,
   reason: PropTypes.string,
-  amount: PropTypes.number,
+  amount: PropTypes.number
 };
 
 export default AddPaymentModal;

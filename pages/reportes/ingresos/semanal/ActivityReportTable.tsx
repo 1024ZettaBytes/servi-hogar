@@ -13,6 +13,7 @@ import {
 } from "@mui/material";
 
 import numeral from "numeral";
+import { PAYMENT_METHODS } from "lib/consts/OBJ_CONTS";
 
 interface ActivityReportTableProps {
   colorStyle: object;
@@ -40,11 +41,11 @@ const ActivityReportTable: React.FC<ActivityReportTableProps> = ({
               </TableCell>
               {list?.map((group) => (
                 <TableCell
-                  key={group.account}
+                  key={group.account || group.method}
                   align="center"
                   style={colorStyle}
                 >
-                  {group.account}
+                  {group.account ||  PAYMENT_METHODS[group.method]}
                 </TableCell>
               ))}
             </TableRow>

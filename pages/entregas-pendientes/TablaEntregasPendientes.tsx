@@ -1,6 +1,6 @@
-import { FC, ChangeEvent, useState } from "react";
-import * as str from "string";
-import PropTypes from "prop-types";
+import { FC, ChangeEvent, useState } from 'react';
+import * as str from 'string';
+import PropTypes from 'prop-types';
 import {
   Tooltip,
   Divider,
@@ -18,29 +18,29 @@ import {
   useTheme,
   CardHeader,
   TextField,
-  InputAdornment,
-} from "@mui/material";
-import NextLink from "next/link";
-import { capitalizeFirstLetter, formatTZDate } from "lib/client/utils";
-import { format } from "date-fns";
-import es from "date-fns/locale/es";
+  InputAdornment
+} from '@mui/material';
+import NextLink from 'next/link';
+import { capitalizeFirstLetter, formatTZDate } from 'lib/client/utils';
+import { format } from 'date-fns';
+import es from 'date-fns/locale/es';
 import {
   cancelDelivery,
-  markWasSentDelivery,
-} from "../../lib/client/deliveriesFetch";
-import { useSnackbar } from "notistack";
-import Label from "@/components/Label";
-import CheckIcon from "@mui/icons-material/Check";
-import EditIcon from "@mui/icons-material/Edit";
-import CancelIcon from "@mui/icons-material/Cancel";
-import WhatsAppIcon from "@mui/icons-material/WhatsApp";
-import SearchIcon from "@mui/icons-material/Search";
-import PersonAddAlt1Icon from "@mui/icons-material/PersonAddAlt1";
-import GenericModal from "@/components/GenericModal";
-import OperatorModal from "@/components/OperatorModal";
-import ModifyDeliveryModal from "../../src/components/ModifyDeliveryModal";
-import FormatModal from "@/components/FormatModal";
-import { getFormatForDelivery } from "../../lib/consts/OBJ_CONTS";
+  markWasSentDelivery
+} from '../../lib/client/deliveriesFetch';
+import { useSnackbar } from 'notistack';
+import Label from '@/components/Label';
+import CheckIcon from '@mui/icons-material/Check';
+import EditIcon from '@mui/icons-material/Edit';
+import CancelIcon from '@mui/icons-material/Cancel';
+import WhatsAppIcon from '@mui/icons-material/WhatsApp';
+import SearchIcon from '@mui/icons-material/Search';
+import PersonAddAlt1Icon from '@mui/icons-material/PersonAddAlt1';
+import GenericModal from '@/components/GenericModal';
+import OperatorModal from '@/components/OperatorModal';
+import ModifyDeliveryModal from '../../src/components/ModifyDeliveryModal';
+import FormatModal from '@/components/FormatModal';
+import { getFormatForDelivery } from '../../lib/consts/OBJ_CONTS';
 
 interface TablaEntregasPendientesProps {
   userRole: string;
@@ -49,17 +49,17 @@ interface TablaEntregasPendientesProps {
 }
 const statusMap = {
   ESPERA: {
-    text: "En espera",
-    color: "warning",
+    text: 'En espera',
+    color: 'warning'
   },
   EN_CAMINO: {
-    text: "En espera",
-    color: "warning",
+    text: 'En espera',
+    color: 'warning'
   },
   ENTREGADA: {
-    text: "Entregada",
-    color: "success",
-  },
+    text: 'Entregada',
+    color: 'success'
+  }
 };
 
 const getStatusLabel = (deliverStatus: string): JSX.Element => {
@@ -75,7 +75,7 @@ const compareStringsForFilter = (keyWord: string, field: string) => {
 };
 const applyFilters = (deliveriesList: any[], filter: string): any[] => {
   return deliveriesList.filter((delivery) => {
-    if (!filter || filter === "") {
+    if (!filter || filter === '') {
       return true;
     }
     return (
@@ -86,44 +86,44 @@ const applyFilters = (deliveriesList: any[], filter: string): any[] => {
           return false;
         }
         switch (key) {
-          case "rent": {
+          case 'rent': {
             const matchCustomerName =
-              value["customer"] &&
-              value["customer"].name &&
-              compareStringsForFilter(filter, value["customer"].name);
+              value['customer'] &&
+              value['customer'].name &&
+              compareStringsForFilter(filter, value['customer'].name);
             const matchNumber =
-              value["num"] && compareStringsForFilter(filter, value["num"]);
+              value['num'] && compareStringsForFilter(filter, value['num']);
             const matchCityOrSector =
-              value["customer"]?.currentResidence?.city?.name &&
-              value["customer"]?.currentResidence?.sector?.name &&
+              value['customer']?.currentResidence?.city?.name &&
+              value['customer']?.currentResidence?.sector?.name &&
               (compareStringsForFilter(
                 filter,
-                value["customer"].currentResidence.city.name
+                value['customer'].currentResidence.city.name
               ) ||
                 compareStringsForFilter(
                   filter,
-                  value["customer"].currentResidence.sector.name
+                  value['customer'].currentResidence.sector.name
                 ) ||
                 compareStringsForFilter(
                   filter,
-                  value["customer"].currentResidence.suburb
+                  value['customer'].currentResidence.suburb
                 ));
             return matchNumber || matchCustomerName || matchCityOrSector;
           }
-          case "status": {
+          case 'status': {
             const matchText =
-              statusMap["" + value] &&
-              statusMap["" + value].text &&
-              compareStringsForFilter(filter, statusMap["" + value].text);
+              statusMap['' + value] &&
+              statusMap['' + value].text &&
+              compareStringsForFilter(filter, statusMap['' + value].text);
             return matchText;
           }
-          case "date": {
+          case 'date': {
             const matchFormatedDate =
               value &&
               compareStringsForFilter(
                 filter,
-                format(new Date(delivery?.date), "LLL dd yyyy", {
-                  locale: es,
+                format(new Date(delivery?.date), 'LLL dd yyyy', {
+                  locale: es
                 })
               );
             return matchFormatedDate;
@@ -144,47 +144,48 @@ const applyPagination = (
 
 const TablaEntregasPendientes: FC<TablaEntregasPendientesProps> = ({
   userRole,
-  deliveriesList,
+  deliveriesList
 }) => {
   const { enqueueSnackbar } = useSnackbar();
   const [modifyModalIsOpen, setModifyModalIsOpen] = useState(false);
   const [cancelModalIsOpen, setCancelModalIsOpen] = useState(false);
   const [formatIsOpen, setFormatIsOpen] = useState(false);
   const [operatorIsOpen, setOperatorIsOpen] = useState(false);
-  const [formatText, setFormatText] = useState<string>("");
+  const [formatText, setFormatText] = useState<string>('');
   const [isDeleting, setIsDeleting] = useState(false);
   const [deliveryToEdit, setDeliveryToEdit] = useState<any>(null);
   const [idToCancel, setIdToCancel] = useState<string>(null);
   const [page, setPage] = useState<number>(0);
   const [limit, setLimit] = useState<number>(30);
-  const [filter, setFilter] = useState<string>("");
-  const userCanDelete = ["ADMIN", "AUX", "OPE"].includes(userRole);
+  const [filter, setFilter] = useState<string>('');
+  const userCanDelete = ['ADMIN', 'AUX', 'OPE'].includes(userRole);
+  const userOnlyRead = userRole === 'SUB';
   const handleModifyClose = (modifiedDelivery, successMessage = null) => {
     setModifyModalIsOpen(false);
     if (modifiedDelivery && successMessage) {
       enqueueSnackbar(successMessage, {
-        variant: "success",
+        variant: 'success',
         anchorOrigin: {
-          vertical: "top",
-          horizontal: "center",
+          vertical: 'top',
+          horizontal: 'center'
         },
-        autoHideDuration: 1500,
+        autoHideDuration: 1500
       });
     }
   };
   const changeOperatorIcon = (delivery: any) => {
-    if (!["ADMIN", "AUX"].includes(userRole)) return "";
+    if (!['ADMIN', 'AUX'].includes(userRole)) return '';
     return (
       <Tooltip title="Asignar/Cambiar" arrow>
         <IconButton
           onClick={() => handleOnOperatorClick(delivery)}
           sx={{
-            "&:hover": {
-              background: theme.colors.primary.lighter,
+            '&:hover': {
+              background: theme.colors.primary.lighter
             },
-            color: theme.colors.alpha,
+            color: theme.colors.alpha
           }}
-          color={delivery.operator ? "inherit" : "error"}
+          color={delivery.operator ? 'inherit' : 'error'}
           size="small"
         >
           <PersonAddAlt1Icon fontSize="small" />
@@ -222,23 +223,23 @@ const TablaEntregasPendientes: FC<TablaEntregasPendientesProps> = ({
     setCancelModalIsOpen(false);
     setIsDeleting(false);
     enqueueSnackbar(result.msg, {
-      variant: !result.error ? "success" : "error",
+      variant: !result.error ? 'success' : 'error',
       anchorOrigin: {
-        vertical: "top",
-        horizontal: "center",
+        vertical: 'top',
+        horizontal: 'center'
       },
-      autoHideDuration: 2000,
+      autoHideDuration: 2000
     });
   };
   const handleOnAsignedOperator = async () => {
     setOperatorIsOpen(false);
-    enqueueSnackbar("Operador asignado con éxito!", {
-      variant: "success",
+    enqueueSnackbar('Operador asignado con éxito!', {
+      variant: 'success',
       anchorOrigin: {
-        vertical: "top",
-        horizontal: "center",
+        vertical: 'top',
+        horizontal: 'center'
       },
-      autoHideDuration: 2000,
+      autoHideDuration: 2000
     });
   };
   const filteredDeliveries = applyFilters(deliveriesList, filter);
@@ -261,17 +262,17 @@ const TablaEntregasPendientes: FC<TablaEntregasPendientesProps> = ({
                     <InputAdornment position="start">
                       <SearchIcon />
                     </InputAdornment>
-                  ),
+                  )
                 }}
-                sx={{ marginTop: "20px" }}
+                sx={{ marginTop: '20px' }}
               />
             </Box>
           }
           sx={{
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "space-between",
-            flexWrap: "wrap",
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            flexWrap: 'wrap'
           }}
           title=""
         />
@@ -291,7 +292,7 @@ const TablaEntregasPendientes: FC<TablaEntregasPendientesProps> = ({
                 <TableCell align="center">Horario Especial</TableCell>
                 <TableCell align="center">¿Enviada?</TableCell>
                 <TableCell align="center">Operador</TableCell>
-                <TableCell align="center"></TableCell>
+                {!userOnlyRead && <TableCell align="center"></TableCell>}
               </TableRow>
             </TableHead>
             <TableBody>
@@ -331,10 +332,10 @@ const TablaEntregasPendientes: FC<TablaEntregasPendientesProps> = ({
                           ? capitalizeFirstLetter(
                               formatTZDate(
                                 new Date(delivery?.rent?.customer?.lastRent),
-                                "MMM DD YYYY"
+                                'MMM DD YYYY'
                               )
                             )
-                          : "NUEVO"}
+                          : 'NUEVO'}
                       </Typography>
                     </TableCell>
                     <TableCell align="center">
@@ -392,7 +393,7 @@ const TablaEntregasPendientes: FC<TablaEntregasPendientesProps> = ({
                         noWrap
                       >
                         {capitalizeFirstLetter(
-                          formatTZDate(new Date(delivery?.date), "MMM DD YYYY")
+                          formatTZDate(new Date(delivery?.date), 'MMM DD YYYY')
                         )}
                       </Typography>
                     </TableCell>
@@ -405,15 +406,15 @@ const TablaEntregasPendientes: FC<TablaEntregasPendientesProps> = ({
                         gutterBottom
                         noWrap
                       >
-                        {delivery?.timeOption === "specific"
+                        {delivery?.timeOption === 'specific'
                           ? `${formatTZDate(
                               new Date(delivery?.fromTime),
-                              "h:mm A"
+                              'h:mm A'
                             )} - ${formatTZDate(
                               new Date(delivery?.endTime),
-                              "h:mm A"
+                              'h:mm A'
                             )}`
-                          : "-"}
+                          : '-'}
                       </Typography>
                     </TableCell>
                     <TableCell align="center">
@@ -424,7 +425,7 @@ const TablaEntregasPendientes: FC<TablaEntregasPendientesProps> = ({
                         gutterBottom
                         noWrap
                       >
-                        {delivery?.wasSent ? "Sí" : "-"}
+                        {delivery?.wasSent ? 'Sí' : '-'}
                       </Typography>
                     </TableCell>
                     <TableCell align="center">
@@ -435,87 +436,91 @@ const TablaEntregasPendientes: FC<TablaEntregasPendientesProps> = ({
                         gutterBottom
                         noWrap
                       >
-                        {delivery?.operator ? delivery.operator.name : "N/A"}
+                        {delivery?.operator ? delivery.operator.name : 'N/A'}
                         {changeOperatorIcon(delivery)}
                       </Typography>
                     </TableCell>
-                    <TableCell align="center">
-                      <NextLink href={`/entregas-pendientes/${delivery?._id}`}>
-                        <Tooltip title="Marcar entregada" arrow>
+                    {!userOnlyRead && (
+                      <TableCell align="center">
+                        <NextLink
+                          href={`/entregas-pendientes/${delivery?._id}`}
+                        >
+                          <Tooltip title="Marcar entregada" arrow>
+                            <IconButton
+                              sx={{
+                                '&:hover': {
+                                  background: theme.colors.primary.lighter
+                                },
+                                color: theme.colors.success.light
+                              }}
+                              color="inherit"
+                              size="small"
+                              disabled={!delivery.operator}
+                            >
+                              <CheckIcon fontSize="medium" />
+                            </IconButton>
+                          </Tooltip>
+                        </NextLink>
+                        <Tooltip title="Modificar" arrow>
                           <IconButton
+                            onClick={() => handleOnModifyClick(delivery)}
                             sx={{
-                              "&:hover": {
-                                background: theme.colors.primary.lighter,
+                              '&:hover': {
+                                background: theme.colors.primary.lighter
                               },
-                              color: theme.colors.success.light,
+                              color: theme.palette.primary.main
                             }}
                             color="inherit"
                             size="small"
-                            disabled={!delivery.operator}
                           >
-                            <CheckIcon fontSize="medium" />
+                            <EditIcon fontSize="small" />
                           </IconButton>
                         </Tooltip>
-                      </NextLink>
-                      <Tooltip title="Modificar" arrow>
-                        <IconButton
-                          onClick={() => handleOnModifyClick(delivery)}
-                          sx={{
-                            "&:hover": {
-                              background: theme.colors.primary.lighter,
-                            },
-                            color: theme.palette.primary.main,
-                          }}
-                          color="inherit"
-                          size="small"
-                        >
-                          <EditIcon fontSize="small" />
-                        </IconButton>
-                      </Tooltip>
 
-                      {userCanDelete && (
-                        <Tooltip title="Cancelar entrega" arrow>
+                        {userCanDelete && (
+                          <Tooltip title="Cancelar entrega" arrow>
+                            <IconButton
+                              onClick={() => handleOnDeleteClick(delivery._id)}
+                              sx={{
+                                '&:hover': {
+                                  background: theme.colors.error.lighter
+                                },
+                                color: theme.palette.error.main
+                              }}
+                              color="inherit"
+                              size="small"
+                            >
+                              <CancelIcon fontSize="small" />
+                            </IconButton>
+                          </Tooltip>
+                        )}
+                        <Tooltip title="Ver formato" arrow>
                           <IconButton
-                            onClick={() => handleOnDeleteClick(delivery._id)}
+                            onClick={() => {
+                              setDeliveryToEdit(delivery);
+                              setFormatText(
+                                getFormatForDelivery(
+                                  delivery.rent,
+                                  delivery,
+                                  delivery
+                                )
+                              );
+                              setFormatIsOpen(true);
+                            }}
                             sx={{
-                              "&:hover": {
-                                background: theme.colors.error.lighter,
+                              '&:hover': {
+                                background: theme.colors.primary.lighter
                               },
-                              color: theme.palette.error.main,
+                              color: theme.colors.success.light
                             }}
                             color="inherit"
                             size="small"
                           >
-                            <CancelIcon fontSize="small" />
+                            <WhatsAppIcon fontSize="small" />
                           </IconButton>
                         </Tooltip>
-                      )}
-                      <Tooltip title="Ver formato" arrow>
-                        <IconButton
-                          onClick={() => {
-                            setDeliveryToEdit(delivery);
-                            setFormatText(
-                              getFormatForDelivery(
-                                delivery.rent,
-                                delivery,
-                                delivery
-                              )
-                            );
-                            setFormatIsOpen(true);
-                          }}
-                          sx={{
-                            "&:hover": {
-                              background: theme.colors.primary.lighter,
-                            },
-                            color: theme.colors.success.light,
-                          }}
-                          color="inherit"
-                          size="small"
-                        >
-                          <WhatsAppIcon fontSize="small" />
-                        </IconButton>
-                      </Tooltip>
-                    </TableCell>
+                      </TableCell>
+                    )}
                   </TableRow>
                 );
               })}
@@ -550,12 +555,12 @@ const TablaEntregasPendientes: FC<TablaEntregasPendientesProps> = ({
           selectedId={deliveryToEdit?._id}
           open={formatIsOpen}
           title="Formato de entrega"
-          text={deliveryToEdit?.wasSent ? "ENVIADO" : null}
-          textColor={"green"}
+          text={deliveryToEdit?.wasSent ? 'ENVIADO' : null}
+          textColor={'green'}
           formatText={formatText}
           onAccept={() => {
             setFormatIsOpen(false);
-            setFormatText("");
+            setFormatText('');
           }}
           onSubmitAction={markWasSentDelivery}
         />
@@ -564,7 +569,7 @@ const TablaEntregasPendientes: FC<TablaEntregasPendientesProps> = ({
         <GenericModal
           open={cancelModalIsOpen}
           title="Atención"
-          text={"¿Está seguro de cancelar la entrega seleccionada?"}
+          text={'¿Está seguro de cancelar la entrega seleccionada?'}
           isLoading={isDeleting}
           requiredReason
           onAccept={handleOnConfirmDelete}
@@ -592,12 +597,12 @@ const TablaEntregasPendientes: FC<TablaEntregasPendientesProps> = ({
 
 TablaEntregasPendientes.propTypes = {
   userRole: PropTypes.string.isRequired,
-  deliveriesList: PropTypes.array.isRequired,
+  deliveriesList: PropTypes.array.isRequired
 };
 
 TablaEntregasPendientes.defaultProps = {
-  userRole: "",
-  deliveriesList: [],
+  userRole: '',
+  deliveriesList: []
 };
 
 export default TablaEntregasPendientes;

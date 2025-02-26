@@ -50,14 +50,14 @@ async function completeDeliveryAPI(req, res, userId) {
 }
 
 async function handler(req, res) {
-  const validRole = await validateUserPermissions(req, res, ["ADMIN", "AUX", "OPE"]);
   const userId = await getUserId(req);
-  if (validRole)
     switch (req.method) {
       case "GET":
+        await validateUserPermissions(req, res, ["ADMIN", "AUX", "OPE", "SUB"]);
         await getPendingDeliveriesAPI(req, res, userId);
         break;
       case "POST":
+        await validateUserPermissions(req, res, ["ADMIN", "AUX", "OPE"]);
         await completeDeliveryAPI(req, res, userId);
         break;
       case "PUT":

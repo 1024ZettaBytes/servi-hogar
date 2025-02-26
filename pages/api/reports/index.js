@@ -44,7 +44,7 @@ async function getSummaryAPI(req, res) {
 }
 async function handler(req, res) {
   const { filter } = req.query;
-  const validRole = await validateUserPermissions(req, res, filter === "profits" ? ["ADMIN"] : ["ADMIN", "AUX", "OPE"]);
+  const validRole = await validateUserPermissions(req, res, filter === "profits" ? ["ADMIN"] : ["ADMIN", "AUX", "OPE", "SUB"]);
   if(validRole)
   switch (req.method) {
     case "GET":
