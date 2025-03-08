@@ -559,7 +559,7 @@ function SidebarMenu({ userRole }) {
                     </NextLink>
                   </ListItem>
                 )}
-                {userRole === 'ADMIN' && (
+                {['ADMIN', 'AUX'].includes(userRole) && (
                   <ListItem component="div">
                     <NextLink href="/inventario" passHref>
                       <Button
