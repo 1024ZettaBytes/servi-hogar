@@ -74,7 +74,8 @@ const Transition = React.forwardRef(function Transition(
   return <Slide direction="up" ref={ref} {...props} />;
 });
 
-const TablaCambios: FC<TablaCambiosProps> = () => {
+const TablaCambios: FC<TablaCambiosProps> = ({userRole}) => {
+  const showUser = userRole === 'ADMIN';
   const [page, setPage] = useState(0);
   const [limit, setLimit] = useState(30);
   const [searchTerm, setSearchTerm] = useState(null);
@@ -162,7 +163,9 @@ const TablaCambios: FC<TablaCambiosProps> = () => {
               <Table>
                 <TableHead>
                   <TableRow>
-                    <TableCell align="center">Renta</TableCell>
+                    {
+                      //<TableCell align="center">Renta</TableCell>
+                    }
                     <TableCell align="center">Razón</TableCell>
                     <TableCell align="center">Cliente</TableCell>
                     <TableCell align="center">Solicitado</TableCell>
@@ -171,13 +174,14 @@ const TablaCambios: FC<TablaCambiosProps> = () => {
                     <TableCell align="center">Equipo dejado</TableCell>
                     <TableCell align="center">Fotos</TableCell>
                     <TableCell align="center">Resultado</TableCell>
+                    {showUser && <TableCell align="center">Usuario</TableCell>}
                   </TableRow>
                 </TableHead>
                 <TableBody>
                   {changes?.list?.map((change) => {
                     return (
                       <TableRow hover key={change?._id}>
-                        <TableCell align="center">
+                        {/*<TableCell align="center">
                           <Typography
                             variant="body1"
                             fontWeight="bold"
@@ -187,7 +191,7 @@ const TablaCambios: FC<TablaCambiosProps> = () => {
                           >
                             {change?.rent?.num}
                           </Typography>
-                        </TableCell>
+                        </TableCell>*/}
                         <TableCell align="center">
                           {isMobile ? (
                             <IconButton
@@ -314,7 +318,18 @@ const TablaCambios: FC<TablaCambiosProps> = () => {
                               <InfoOutlinedIcon fontSize="small" />
                             </Tooltip>
                           )}
+                          
                         </TableCell>
+                        {showUser && <TableCell align="center">
+                        <Typography
+                            variant="body1"
+                            color="text.primary"
+                            gutterBottom
+                            noWrap
+                          >
+                          {change?.lastUpdatedBy?.name || 'N/A'}
+                          </Typography>
+                        </TableCell>}
                       </TableRow>
                     );
                   })}

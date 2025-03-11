@@ -50,7 +50,8 @@ const getStatusLabel = (pickupStatus: string): JSX.Element => {
   return <Label color={color}>{text}</Label>;
 };
 
-const TablaRecolecciones: FC<TablaRecoleccionesProps> = () => {
+const TablaRecolecciones: FC<TablaRecoleccionesProps> = ({userRole}) => {
+  const showUser = userRole === 'ADMIN';
   const [openImages, setOpenImages] = useState<boolean>(false);
   const [selectedImages, setSelectedImages] = useState<null>();
   const [page, setPage] = useState(0);
@@ -58,7 +59,12 @@ const TablaRecolecciones: FC<TablaRecoleccionesProps> = () => {
   const [searchTerm, setSearchTerm] = useState(null);
   const [searchText, setSearchText] = useState(null);
 
-  const { pickups, pickupsError } = useGetPickups(getFetcher, limit, page + 1, searchTerm);
+  const { pickups, pickupsError } = useGetPickups(
+    getFetcher,
+    limit,
+    page + 1,
+    searchTerm
+  );
 
   const handlePageChange = (_event, newPage) => {
     setPage(newPage);
@@ -86,34 +92,34 @@ const TablaRecolecciones: FC<TablaRecoleccionesProps> = () => {
       ) : (
         <Card>
           <CardHeader
-          action={
-            <Box width={200}>
-              <TextField
-                size="small"
-                helperText="Escriba y presione ENTER"
-                id="input-search-payment"
-                label="Buscar"
-                value={searchText}
-                onChange={(event) => {
-                  setSearchText(event.target.value);
-                }}
-                onKeyDown={(ev) => {
-                  if (ev.key === "Enter") {
-                    ev.preventDefault();
-                    setSearchTerm(searchText);
-                  }
-                }}
-                InputProps={{
-                  startAdornment: (
-                    <InputAdornment position="start">
-                      <SearchIcon />
-                    </InputAdornment>
-                  )
-                }}
-                sx={{ marginTop: '20px' }}
-              />
-            </Box>
-          }
+            action={
+              <Box width={200}>
+                <TextField
+                  size="small"
+                  helperText="Escriba y presione ENTER"
+                  id="input-search-payment"
+                  label="Buscar"
+                  value={searchText}
+                  onChange={(event) => {
+                    setSearchText(event.target.value);
+                  }}
+                  onKeyDown={(ev) => {
+                    if (ev.key === 'Enter') {
+                      ev.preventDefault();
+                      setSearchTerm(searchText);
+                    }
+                  }}
+                  InputProps={{
+                    startAdornment: (
+                      <InputAdornment position="start">
+                        <SearchIcon />
+                      </InputAdornment>
+                    )
+                  }}
+                  sx={{ marginTop: '20px' }}
+                />
+              </Box>
+            }
             sx={{
               display: 'flex',
               alignItems: 'center',
@@ -135,6 +141,7 @@ const TablaRecolecciones: FC<TablaRecoleccionesProps> = () => {
                   <TableCell align="center">Resultado</TableCell>
                   <TableCell align="center"># Equipo</TableCell>
                   <TableCell align="center">Fotos</TableCell>
+                  {showUser && <TableCell align="center">Usuario</TableCell>}
                 </TableRow>
               </TableHead>
               <TableBody>
@@ -248,6 +255,9 @@ const TablaRecolecciones: FC<TablaRecoleccionesProps> = () => {
                           'N/A'
                         )}
                       </TableCell>
+                      {showUser && <TableCell align="center">
+                        {pickup?.lastUpdatedBy?.name || 'N/A'}
+                      </TableCell>}
                     </TableRow>
                   );
                 })}
