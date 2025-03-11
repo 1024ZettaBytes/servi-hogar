@@ -192,14 +192,22 @@ const TablaRecolecciones: FC<TablaRecoleccionesProps> = ({userRole}) => {
                           gutterBottom
                           noWrap
                         >
-                          {pickup?.finishedAt
+                          {(pickup?.finishedAt
                             ? capitalizeFirstLetter(
                                 formatTZDate(
                                   new Date(pickup?.finishedAt),
                                   'MMM DD YYYY'
                                 )
                               )
-                            : 'N/A'}
+                            : 'N/A')
+                            +" "+ (pickup?.finishedAt
+                            ? capitalizeFirstLetter(
+                                formatTZDate(
+                                  new Date(pickup?.rent?.updatedAt),
+                                  'hh:mm a'
+                                )
+                              )
+                            : '')}
                         </Typography>
                       </TableCell>
                       <TableCell
