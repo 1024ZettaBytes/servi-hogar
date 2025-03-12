@@ -13,11 +13,12 @@ export interface IMachine extends Document {
   lastRent: Schema.Types.ObjectId;
   movements: [Schema.Types.ObjectId];
   totalChanges: number;
-  imageUrl: String,
+  imageUrl: String;
   createdAt: Date;
   updatedAt: Date;
   lastUpdatedBy: Schema.Types.ObjectId;
   partner: Schema.Types.ObjectId;
+  evidencesUrls: [String];
   active: boolean;
 }
 
@@ -33,8 +34,16 @@ const MachineSchema = new Schema<IMachine>({
     ref: 'machine_statuses',
     required: true
   },
-  currentWarehouse:{ type: Schema.Types.ObjectId, default: null, ref: 'warehouses'},
-  currentVehicle:{ type: Schema.Types.ObjectId, default: null, ref: 'vehicles'},
+  currentWarehouse: {
+    type: Schema.Types.ObjectId,
+    default: null,
+    ref: 'warehouses'
+  },
+  currentVehicle: {
+    type: Schema.Types.ObjectId,
+    default: null,
+    ref: 'vehicles'
+  },
   lastRent: { type: Schema.Types.ObjectId, ref: 'rents', default: null },
   movements: {
     type: [Schema.Types.ObjectId],
@@ -46,6 +55,7 @@ const MachineSchema = new Schema<IMachine>({
   updatedAt: { type: Date, required: true },
   lastUpdatedBy: { type: Schema.Types.ObjectId, required: true, ref: 'users' },
   partner: { type: Schema.Types.ObjectId, default: null, ref: 'partners' },
+  evidencesUrls: { type: [String], default: [] },
   active: { type: 'boolean', default: true }
 });
 

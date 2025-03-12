@@ -1,4 +1,4 @@
-import { capitalizeFirstLetter, formatTZDate } from "../../../lib/client/utils";
+import { capitalizeFirstLetter, formatTZDate } from '../../../lib/client/utils';
 import {
   Grid,
   Typography,
@@ -11,37 +11,39 @@ import {
   Alert,
   FormControl,
   Select,
-  MenuItem,
-} from "@mui/material";
-import { MACHINE_STATUS_LIST } from "../../../lib/consts/OBJ_CONTS";
-import { useSnackbar } from "notistack";
-import { Skeleton } from "@mui/material";
-import SearchIcon from "@mui/icons-material/Search";
-import TablaHistorialEquipos from "./TablaHistorialEquipos";
-import EditTwoToneIcon from "@mui/icons-material/EditTwoTone";
-import LocalShippingIcon from "@mui/icons-material/LocalShipping";
-import CurrencyExchangeIcon from "@mui/icons-material/CurrencyExchange";
-import EventAvailableIcon from "@mui/icons-material/EventAvailable";
-import HourglassEmptyIcon from "@mui/icons-material/HourglassEmpty";
-import BuildIcon from "@mui/icons-material/Build";
-import Text from "@/components/Text";
-import Label from "@/components/Label";
-import { useState } from "react";
-import { updateMachine } from "lib/client/machinesFetch";
-import { LoadingButton } from "@mui/lab";
-import numeral from "numeral";
+  MenuItem
+} from '@mui/material';
+import { MACHINE_STATUS_LIST } from '../../../lib/consts/OBJ_CONTS';
+import { useSnackbar } from 'notistack';
+import { Skeleton } from '@mui/material';
+import SearchIcon from '@mui/icons-material/Search';
+import TablaHistorialEquipos from './TablaHistorialEquipos';
+import EditTwoToneIcon from '@mui/icons-material/EditTwoTone';
+import LocalShippingIcon from '@mui/icons-material/LocalShipping';
+import CurrencyExchangeIcon from '@mui/icons-material/CurrencyExchange';
+import EventAvailableIcon from '@mui/icons-material/EventAvailable';
+import HourglassEmptyIcon from '@mui/icons-material/HourglassEmpty';
+import BuildIcon from '@mui/icons-material/Build';
+import Text from '@/components/Text';
+import Label from '@/components/Label';
+import { useState } from 'react';
+import { updateMachine } from 'lib/client/machinesFetch';
+import { LoadingButton } from '@mui/lab';
+import numeral from 'numeral';
 import {
   getFetcher,
   useGetAllVehicles,
-  useGetAllWarehousesOverview,
-} from "pages/api/useRequest";
+  useGetAllWarehousesOverview
+} from 'pages/api/useRequest';
+import { MuiFileInput } from 'mui-file-input';
+import Image from 'next/image';
 const getStatusDescription = (
   status: String,
   rent: any,
   vehicle: any,
   warehouse: any
 ) => {
-  const notAvailable = "Información no disponible";
+  const notAvailable = 'Información no disponible';
   switch (status) {
     case MACHINE_STATUS_LIST.RENTADO:
       return rent ? `Renta #${rent?.num}` : notAvailable;
@@ -59,7 +61,7 @@ const getStatusLabel = (
   vehicle: any,
   warehouse: any
 ) => {
-  const notAvailable = "Información no disponible";
+  const notAvailable = 'Información no disponible';
   switch (status) {
     case MACHINE_STATUS_LIST.PERDIDA:
       return (
@@ -120,20 +122,25 @@ const getIdOperation = (type: string) => (
     name="type"
     variant="outlined"
     size="small"
-    sx={{ display: "none" }}
+    sx={{ display: 'none' }}
     value={type}
   />
 );
 
 function MachineInfoTab({ role, machine, statusList }) {
   const { enqueueSnackbar } = useSnackbar();
-  const { warehousesList, warehousesError } = useGetAllWarehousesOverview(
-    getFetcher
-  );
+  const { warehousesList, warehousesError } =
+    useGetAllWarehousesOverview(getFetcher);
   const { vehiclesList, vehiclesError } = useGetAllVehicles(getFetcher);
   const [isEditing, setIsEditing] = useState<any>({
     info: false,
-    residence: false,
+    residence: false
+  });
+  const [attached, setAttached] = useState<any>({
+    evidence: { file: null, url: null }
+  });
+  const [badFormat, setBadFormat] = useState<any>({
+    evidence: false
   });
   const [machineToEdit, setMachineToEdit] = useState<any>({ isSet: false });
   const [selectedLocation, setSelectedLocation] = useState();
@@ -142,10 +149,16 @@ function MachineInfoTab({ role, machine, statusList }) {
     machineToEdit.status?.id === MACHINE_STATUS_LIST.RENTADO;
   const isWarehouseStatus = machineToEdit.status?.typeWarehouse;
   const isVehicleStatus = machineToEdit.status?.id === MACHINE_STATUS_LIST.VEHI;
+  const askForImage =
+    originalStatus !== machineToEdit?.status?.id &&
+    (originalStatus === MACHINE_STATUS_LIST.REC ||
+      originalStatus === MACHINE_STATUS_LIST.VEHI ||
+      (originalStatus === MACHINE_STATUS_LIST.LISTO &&
+        machineToEdit?.status?.id === MACHINE_STATUS_LIST.VEHI));
 
   const [isUpdating, setIsUpdating] = useState<any>({ info: false });
   const [hasErrorUpdating, setHasErrorUpdating] = useState<any>({
-    info: { error: false, msg: "" },
+    info: { error: false, msg: '' }
   });
 
   async function handleUpdateMachine(event) {
@@ -153,29 +166,31 @@ function MachineInfoTab({ role, machine, statusList }) {
     const type = event.target.type.value;
     setHasErrorUpdating({
       ...hasErrorUpdating,
-      [type]: { error: false, msg: "" },
+      [type]: { error: false, msg: '' }
     });
     setIsUpdating({ ...isUpdating, [type]: true });
-    const result = await updateMachine({
+    const result = await updateMachine(attached, {
       ...machineToEdit,
       location: selectedLocation,
-      [type]: true,
+      [type]: true
     });
     setIsUpdating({ ...isUpdating, [type]: false });
     if (!result.error) {
       setIsEditing({ ...isEditing, [type]: false });
+      setOriginalStatus(machineToEdit?.status?.id);
       enqueueSnackbar(result.msg, {
-        variant: "success",
+        variant: 'success',
         anchorOrigin: {
-          vertical: "top",
-          horizontal: "center",
+          vertical: 'top',
+          horizontal: 'center'
         },
-        autoHideDuration: 1500,
+        autoHideDuration: 1500
       });
+      setAttached({ evidence: { file: null, url: null } });
     } else {
       setHasErrorUpdating({
         ...hasErrorUpdating,
-        [type]: { error: true, msg: result.msg },
+        [type]: { error: true, msg: result.msg }
       });
     }
   }
@@ -183,7 +198,7 @@ function MachineInfoTab({ role, machine, statusList }) {
     const selected = statusList.find((s) => s._id === status);
     setMachineToEdit({
       ...machineToEdit,
-      status: selected,
+      status: selected
     });
     setSelectedLocation(undefined);
   }
@@ -194,7 +209,7 @@ function MachineInfoTab({ role, machine, statusList }) {
     field: string,
     minLength: number,
     maxLength: number,
-    type: string = "text"
+    type: string = 'text'
   ) => (
     <TextField
       fullWidth
@@ -210,7 +225,7 @@ function MachineInfoTab({ role, machine, statusList }) {
       onChange={(e) => {
         setMachineToEdit({
           ...machineToEdit,
-          [field]: e.target.value,
+          [field]: e.target.value
         });
       }}
     />
@@ -240,7 +255,7 @@ function MachineInfoTab({ role, machine, statusList }) {
                 Datos generales
               </Typography>
             </Box>
-            {!isEditing.info && ["ADMIN", "AUX", "OPE"].includes(role) && (
+            {!isEditing.info && ['ADMIN', 'AUX', 'OPE'].includes(role) && (
               <Button
                 variant="text"
                 startIcon={<EditTwoToneIcon />}
@@ -259,12 +274,12 @@ function MachineInfoTab({ role, machine, statusList }) {
               <Box component="form" onSubmit={handleUpdateMachine}>
                 <Grid
                   container
-                  direction={"row"}
+                  direction={'row'}
                   alignItems="left"
                   justifyItems="left"
                 >
                   <Grid container item spacing={0} xs={12} sm={6} md={6}>
-                    <Grid item xs={3} sm={6} md={6} textAlign={{ sm: "right" }}>
+                    <Grid item xs={3} sm={6} md={6} textAlign={{ sm: 'right' }}>
                       <Box pr={2} pb={2}>
                         # de Equipo:
                       </Box>
@@ -274,82 +289,105 @@ function MachineInfoTab({ role, machine, statusList }) {
                         !isEditing.info ? (
                           <Text color="black">{machine?.machineNum}</Text>
                         ) : (
-                          getInfoTextField("machineNum", 1, 5)
+                          getInfoTextField('machineNum', 1, 5)
                         )
                       ) : (
                         <Skeleton
                           variant="text"
-                          sx={{ fontSize: "1rem", width: "100px" }}
+                          sx={{ fontSize: '1rem', width: '100px' }}
                         />
                       )}
                     </Grid>
-                    <Grid item xs={3} sm={6} md={6} textAlign={{ sm: "right" }}>
+                    {!isEditing.info && machine && machine?.evidencesUrls?.length > 0  && (
+                      <>
+                        <Grid
+                          item
+                          xs={6}
+                          sm={6}
+                          md={6}
+                          textAlign={{ sm: 'right' }}
+                        >
+                          <Box pr={2} pb={2}>
+                            Foto:
+                          </Box>
+                        </Grid>
+                        <Grid item xs={12} sm={6} md={6}>
+                          <Image
+                            src={machine.evidencesUrls[machine.evidencesUrls.length - 1]}
+                            alt="Ultima foto del equipo"
+                            width={300}
+                            height={400}
+                          />
+                        </Grid>
+                      </>
+                    )}
+                    <Grid item xs={3} sm={6} md={6} textAlign={{ sm: 'right' }}>
                       <Box pr={2} pb={2}>
                         Marca:
                       </Box>
                     </Grid>
                     <Grid item xs={9} sm={6} md={6}>
-                      <Box sx={{ maxWidth: { xs: "auto", sm: 300 } }}>
+                      <Box sx={{ maxWidth: { xs: 'auto', sm: 300 } }}>
                         {machine ? (
                           !isEditing.info ? (
                             <Text color="black">{machine?.brand}</Text>
                           ) : (
-                            getInfoTextField("brand", 1, 20)
+                            getInfoTextField('brand', 1, 20)
                           )
                         ) : (
                           <Skeleton
                             variant="text"
-                            sx={{ fontSize: "1rem", width: "100px" }}
+                            sx={{ fontSize: '1rem', width: '100px' }}
                           />
                         )}
                       </Box>
                     </Grid>
-                    <Grid item xs={3} sm={6} md={6} textAlign={{ sm: "right" }}>
+                    <Grid item xs={3} sm={6} md={6} textAlign={{ sm: 'right' }}>
                       <Box pr={2} pb={2}>
                         Costo:
                       </Box>
                     </Grid>
                     <Grid item xs={9} sm={6} md={6}>
-                      <Box sx={{ maxWidth: { xs: "auto", sm: 300 } }}>
+                      <Box sx={{ maxWidth: { xs: 'auto', sm: 300 } }}>
                         {machine ? (
                           !isEditing.info ? (
                             <Text color="black">
                               {numeral(machine.cost).format(`$0,0.00`)}
                             </Text>
                           ) : (
-                            getInfoTextField("cost", 1, 10, "number")
+                            getInfoTextField('cost', 1, 10, 'number')
                           )
                         ) : (
                           <Skeleton
                             variant="text"
-                            sx={{ fontSize: "1rem", width: "100px" }}
+                            sx={{ fontSize: '1rem', width: '100px' }}
                           />
                         )}
                       </Box>
                     </Grid>
-                    <Grid item xs={6} sm={6} md={6} textAlign={{ sm: "right" }}>
+                    <Grid item xs={6} sm={6} md={6} textAlign={{ sm: 'right' }}>
                       <Box pr={2} pb={2}>
                         Características:
                       </Box>
                     </Grid>
                     <Grid item xs={6} sm={6} md={6}>
-                      <Box sx={{ maxWidth: { xs: "auto", sm: 300 } }}>
+                      <Box sx={{ maxWidth: { xs: 'auto', sm: 300 } }}>
                         {machine ? (
                           !isEditing.info ? (
                             <Text color="black">{machine?.capacity}</Text>
                           ) : (
-                            getInfoTextField("capacity", 1, 8)
+                            getInfoTextField('capacity', 1, 8)
                           )
                         ) : (
                           <Skeleton
                             variant="text"
-                            sx={{ fontSize: "1rem", width: "100px" }}
+                            sx={{ fontSize: '1rem', width: '100px' }}
                           />
                         )}
                       </Box>
                     </Grid>
 
-                    <Grid item xs={3} sm={6} md={6} textAlign={{ sm: "right" }}>
+                    <Grid item xs={3} sm={6} md={6} textAlign={{ sm: 'right' }}>
                       <Box pr={2} pb={2}>
                         Estado actual:
                       </Box>
@@ -373,7 +411,7 @@ function MachineInfoTab({ role, machine, statusList }) {
                               name="level"
                               required
                               autoComplete="off"
-                              value={machineToEdit?.status._id || ""}
+                              value={machineToEdit?.status._id || ''}
                               onChange={(event) =>
                                 handleStatusSelection(event.target.value)
                               }
@@ -381,14 +419,14 @@ function MachineInfoTab({ role, machine, statusList }) {
                               {statusList
                                 ? statusList
                                     .filter((s) => {
-                                      if (originalStatus === "REC") {
+                                      if (originalStatus === 'REC') {
                                         return ![
-                                          "RENTADO",
-                                          "PERDIDO",
-                                          "VEHI",
+                                          'RENTADO',
+                                          'PERDIDO',
+                                          'VEHI'
                                         ].includes(s.id);
                                       }
-                                      return !["REC", "RENTADO"].includes(s.id);
+                                      return !['REC', 'RENTADO'].includes(s.id);
                                     })
                                     .map((status) => {
                                       return (
@@ -404,12 +442,12 @@ function MachineInfoTab({ role, machine, statusList }) {
                             </Select>
                           </FormControl>
                         ) : (
-                          getErrorMessage("Error al obtener los estados")
+                          getErrorMessage('Error al obtener los estados')
                         )
                       ) : (
                         <Skeleton
                           variant="text"
-                          sx={{ fontSize: "1rem", width: "100px" }}
+                          sx={{ fontSize: '1rem', width: '100px' }}
                         />
                       )}
                     </Grid>
@@ -421,7 +459,7 @@ function MachineInfoTab({ role, machine, statusList }) {
                           xs={3}
                           sm={6}
                           md={6}
-                          textAlign={{ sm: "right" }}
+                          textAlign={{ sm: 'right' }}
                         >
                           <Box pr={2} pb={2}>
                             Ubicación:
@@ -461,7 +499,7 @@ function MachineInfoTab({ role, machine, statusList }) {
                                         name="warehouse"
                                         required
                                         autoComplete="off"
-                                        value={selectedLocation || ""}
+                                        value={selectedLocation || ''}
                                         onChange={(event) =>
                                           handleLocationSelection(
                                             event.target.value
@@ -501,7 +539,7 @@ function MachineInfoTab({ role, machine, statusList }) {
                                         required
                                         size="small"
                                         autoComplete="off"
-                                        value={selectedLocation || ""}
+                                        value={selectedLocation || ''}
                                         onChange={(event) =>
                                           handleLocationSelection(
                                             event.target.value
@@ -528,7 +566,7 @@ function MachineInfoTab({ role, machine, statusList }) {
                         </Grid>
                       </>
                     )}
-                    <Grid item xs={3} sm={6} md={6} textAlign={{ sm: "right" }}>
+                    <Grid item xs={3} sm={6} md={6} textAlign={{ sm: 'right' }}>
                       <Box pr={2} pb={2}>
                         Cambios:
                       </Box>
@@ -539,11 +577,11 @@ function MachineInfoTab({ role, machine, statusList }) {
                       ) : (
                         <Skeleton
                           variant="text"
-                          sx={{ fontSize: "1rem", width: "100px" }}
+                          sx={{ fontSize: '1rem', width: '100px' }}
                         />
                       )}
                     </Grid>
-                    <Grid item xs={6} sm={6} md={6} textAlign={{ sm: "right" }}>
+                    <Grid item xs={6} sm={6} md={6} textAlign={{ sm: 'right' }}>
                       <Box pr={2} pb={2}>
                         Fecha de ingreso:
                       </Box>
@@ -554,23 +592,95 @@ function MachineInfoTab({ role, machine, statusList }) {
                           {capitalizeFirstLetter(
                             formatTZDate(
                               new Date(machine?.createdAt),
-                              "MMMM DD YYYY HH:mm:ss"
+                              'MMMM DD YYYY HH:mm:ss'
                             )
                           )}
                         </Text>
                       ) : (
                         <Skeleton
                           variant="text"
-                          sx={{ fontSize: "1rem", width: "100px" }}
+                          sx={{ fontSize: '1rem', width: '100px' }}
                         />
                       )}
                     </Grid>
+                    {askForImage && isEditing.info && (
+                      <>
+                        <Grid
+                          item
+                          xs={6}
+                          sm={6}
+                          md={6}
+                          textAlign={{ sm: 'right' }}
+                        >
+                          <Box pr={2} pb={2}>
+                            Foto Evidencia:
+                          </Box>
+                        </Grid>
+                        <Grid item container xs={12} sm={6} md={6}>
+                          {attached.evidence?.url &&
+                            !attached.evidence.file.name.includes('pdf') && (
+                              <Grid item lg={12} sm={12} md={12} m={1}>
+                                <Image
+                                  src={attached.evidence.url}
+                                  alt="Picture of the author"
+                                  width={300}
+                                  height={400}
+                                />
+                              </Grid>
+                            )}
+                          <Grid item lg={12} m={1}>
+                            <MuiFileInput
+                              required={!attached.evidence?.file}
+                              placeholder={'No seleccionada'}
+                              label={''}
+                              value={attached.evidence?.file}
+                              onChange={(file) => {
+                                if (
+                                  file &&
+                                  !file.type.includes('image/') &&
+                                  !file.type.includes('/pdf')
+                                ) {
+                                  setBadFormat({
+                                    ...badFormat,
+                                    evidence: true
+                                  });
+                                  setAttached({
+                                    ...attached,
+                                    evidence: {
+                                      ...attached.evidence,
+                                      error: true
+                                    }
+                                  });
+                                  return;
+                                }
+                                const url = file
+                                  ? URL.createObjectURL(file)
+                                  : null;
+                                setAttached({
+                                  ...attached,
+                                  evidence: { file, url, error: false }
+                                });
+                              }}
+                            />
+                          </Grid>
+                          <Grid item lg={12} />
+                          {attached.evidence?.error && (
+                            <Grid item lg={12} m={1}>
+                              <Typography color="error">
+                                Seleccione un archivo válido(*.jpg, *.jpeg,
+                                *.png).
+                              </Typography>
+                            </Grid>
+                          )}
+                        </Grid>
+                      </>
+                    )}
                   </Grid>
                 </Grid>
                 {isEditing.info && (
                   <>
                     {hasErrorUpdating.info.error && (
-                      <Grid item xs={12} sm={12} md={12} textAlign={"center"}>
+                      <Grid item xs={12} sm={12} md={12} textAlign={'center'}>
                         <br />
                         <Alert severity="error">
                           {hasErrorUpdating.info.msg}
@@ -582,14 +692,14 @@ function MachineInfoTab({ role, machine, statusList }) {
                       xs={0}
                       sm={0}
                       md={0}
-                      textAlign={{ sm: "right" }}
+                      textAlign={{ sm: 'right' }}
                     ></Grid>
                     <Grid
                       item
                       xs={12}
                       sm={12}
                       md={12}
-                      textAlign={"center"}
+                      textAlign={'center'}
                       marginTop={2}
                     >
                       <Button
@@ -599,7 +709,7 @@ function MachineInfoTab({ role, machine, statusList }) {
                           setIsEditing({ ...isEditing, info: false });
                           setHasErrorUpdating({
                             ...hasErrorUpdating,
-                            info: false,
+                            info: false
                           });
                           setIsUpdating({ ...isUpdating, info: false });
                         }}
@@ -616,7 +726,7 @@ function MachineInfoTab({ role, machine, statusList }) {
                       >
                         Guardar
                       </LoadingButton>
-                      {getIdOperation("info")}
+                      {getIdOperation('info')}
                     </Grid>
                   </>
                 )}
@@ -648,7 +758,7 @@ function MachineInfoTab({ role, machine, statusList }) {
                 ) : (
                   <Skeleton
                     variant="rectangular"
-                    width={"100%"}
+                    width={'100%'}
                     height={500}
                     animation="wave"
                   />
@@ -660,7 +770,7 @@ function MachineInfoTab({ role, machine, statusList }) {
                   <Grid container padding={3}>
                     <Grid item xs={12} md={4} lg={3}>
                       <Typography variant="h5">
-                        {"Costo: $" +
+                        {'Costo: $' +
                           numeral(machine?.cost).format(
                             `${machine?.cost}0,0.00`
                           )}
@@ -668,7 +778,7 @@ function MachineInfoTab({ role, machine, statusList }) {
                     </Grid>
                     <Grid item xs={12} md={4} lg={3}>
                       <Typography variant="h5">
-                        {"Gastos: $" +
+                        {'Gastos: $' +
                           numeral(machine?.expenses).format(
                             `${machine?.expenses}0,0.00`
                           )}
@@ -677,9 +787,9 @@ function MachineInfoTab({ role, machine, statusList }) {
                     <Grid item xs={12} md={4} lg={3}>
                       <Typography
                         variant="h5"
-                        color={machine?.earnings > 0.0 ? "success" : "error"}
+                        color={machine?.earnings > 0.0 ? 'success' : 'error'}
                       >
-                        {"Generado: $" +
+                        {'Generado: $' +
                           numeral(machine?.earnings).format(
                             `${machine?.earnings}0,0.00`
                           )}
@@ -688,7 +798,7 @@ function MachineInfoTab({ role, machine, statusList }) {
                   </Grid>
                 </Grid>
               ) : (
-                <Skeleton variant="text" width={"100%"} animation="wave" />
+                <Skeleton variant="text" width={'100%'} animation="wave" />
               )}
             </Grid>
           </CardContent>
