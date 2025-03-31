@@ -257,4 +257,11 @@ const useDeviceType = () => {
   return { isMobile, isDesktop: !isMobile };
 };
 
+export const isMobile = () => {
+  if (typeof window === 'undefined' || typeof window.navigator === 'undefined')
+    return false;
+  return /iphone|ipad|ipod|android|blackberry|windows phone/g.test(navigator.userAgent.toLowerCase()); 
+}
+
+
 export default useDeviceType;

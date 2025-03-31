@@ -1,4 +1,4 @@
-import { capitalizeFirstLetter, formatTZDate } from '../../../lib/client/utils';
+import { capitalizeFirstLetter, formatTZDate, isMobile } from '../../../lib/client/utils';
 import {
   Grid,
   Typography,
@@ -128,6 +128,7 @@ const getIdOperation = (type: string) => (
 );
 
 function MachineInfoTab({ role, machine, statusList }) {
+  const disableEdit = role !== 'ADMIN' && !isMobile();
   const { enqueueSnackbar } = useSnackbar();
   const { warehousesList, warehousesError } =
     useGetAllWarehousesOverview(getFetcher);
@@ -255,7 +256,7 @@ function MachineInfoTab({ role, machine, statusList }) {
                 Datos generales
               </Typography>
             </Box>
-            {!isEditing.info && ['ADMIN', 'AUX', 'OPE'].includes(role) && (
+            {!isEditing.info && ['ADMIN', 'AUX', 'OPE'].includes(role) &&!disableEdit && (
               <Button
                 variant="text"
                 startIcon={<EditTwoToneIcon />}
@@ -630,6 +631,7 @@ function MachineInfoTab({ role, machine, statusList }) {
                             )}
                           <Grid item lg={12} m={1}>
                             <MuiFileInput
+                              inputProps={{ capture: 'camera' }}
                               required={!attached.evidence?.file}
                               placeholder={'No seleccionada'}
                               label={''}
