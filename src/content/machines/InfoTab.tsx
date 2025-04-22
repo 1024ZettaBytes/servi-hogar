@@ -128,7 +128,7 @@ const getIdOperation = (type: string) => (
 );
 
 function MachineInfoTab({ role, machine, statusList }) {
-  const disableEdit = role !== 'ADMIN' && !isMobile();
+  const disableEdit = role !== 'ADMIN' && (!isMobile() || machine?.status.id === MACHINE_STATUS_LIST.PERDIDA);
   const { enqueueSnackbar } = useSnackbar();
   const { warehousesList, warehousesError } =
     useGetAllWarehousesOverview(getFetcher);
