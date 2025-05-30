@@ -1,4 +1,8 @@
-import { capitalizeFirstLetter, formatTZDate, isMobile } from '../../../lib/client/utils';
+import {
+  capitalizeFirstLetter,
+  formatTZDate,
+  isMobile
+} from '../../../lib/client/utils';
 import {
   Grid,
   Typography,
@@ -88,7 +92,9 @@ const getStatusLabel = (
       return (
         <Label color="warning">
           <HourglassEmptyIcon fontSize="small" />
-          <b>{warehouse ? `Pendiente (${warehouse?.name})` : notAvailable}</b>
+          <b>
+            {warehouse ? `Mant. pendiente (${warehouse?.name})` : notAvailable}
+          </b>
         </Label>
       );
     case MACHINE_STATUS_LIST.LISTO:
@@ -128,7 +134,12 @@ const getIdOperation = (type: string) => (
 );
 
 function MachineInfoTab({ role, machine, statusList }) {
-  const disableEdit = role !== 'ADMIN' && (!isMobile() || machine?.status.id === MACHINE_STATUS_LIST.PERDIDA);
+  const disableEdit =
+    role !== 'ADMIN' &&
+    (!isMobile() ||
+      [MACHINE_STATUS_LIST.PERDIDA, MACHINE_STATUS_LIST.ESPE].includes(
+        machine?.status.id
+      ));
   const { enqueueSnackbar } = useSnackbar();
   const { warehousesList, warehousesError } =
     useGetAllWarehousesOverview(getFetcher);
@@ -150,6 +161,9 @@ function MachineInfoTab({ role, machine, statusList }) {
     machineToEdit.status?.id === MACHINE_STATUS_LIST.RENTADO;
   const isWarehouseStatus = machineToEdit.status?.typeWarehouse;
   const isVehicleStatus = machineToEdit.status?.id === MACHINE_STATUS_LIST.VEHI;
+  /*const showMantWarning =
+    originalStatus !== MACHINE_STATUS_LIST.ESPE &&
+    machineToEdit?.status?.id === MACHINE_STATUS_LIST.ESPE;*/
   const askForImage =
     originalStatus !== machineToEdit?.status?.id &&
     (originalStatus === MACHINE_STATUS_LIST.REC ||
@@ -256,18 +270,20 @@ function MachineInfoTab({ role, machine, statusList }) {
                 Datos generales
               </Typography>
             </Box>
-            {!isEditing.info && ['ADMIN', 'AUX', 'OPE'].includes(role) &&!disableEdit && (
-              <Button
-                variant="text"
-                startIcon={<EditTwoToneIcon />}
-                onClick={() => {
-                  setMachineToEdit({ ...machine, isSet: true });
-                  setIsEditing({ ...isEditing, info: true });
-                }}
-              >
-                Modificar
-              </Button>
-            )}
+            {!isEditing.info &&
+              ['ADMIN', 'AUX', 'OPE'].includes(role) &&
+              !disableEdit && (
+                <Button
+                  variant="text"
+                  startIcon={<EditTwoToneIcon />}
+                  onClick={() => {
+                    setMachineToEdit({ ...machine, isSet: true });
+                    setIsEditing({ ...isEditing, info: true });
+                  }}
+                >
+                  Modificar
+                </Button>
+              )}
           </Box>
           <Divider />
           <CardContent sx={{ p: 4 }}>
@@ -299,29 +315,35 @@ function MachineInfoTab({ role, machine, statusList }) {
                         />
                       )}
                     </Grid>
-                    {!isEditing.info && machine && machine?.evidencesUrls?.length > 0  && (
-                      <>
-                        <Grid
-                          item
-                          xs={6}
-                          sm={6}
-                          md={6}
-                          textAlign={{ sm: 'right' }}
-                        >
-                          <Box pr={2} pb={2}>
-                            Foto:
-                          </Box>
-                        </Grid>
-                        <Grid item xs={12} sm={6} md={6}>
-                          <Image
-                            src={machine.evidencesUrls[machine.evidencesUrls.length - 1]}
-                            alt="Ultima foto del equipo"
-                            width={300}
-                            height={400}
-                          />
-                        </Grid>
-                      </>
-                    )}
+                    {!isEditing.info &&
+                      machine &&
+                      machine?.evidencesUrls?.length > 0 && (
+                        <>
+                          <Grid
+                            item
+                            xs={6}
+                            sm={6}
+                            md={6}
+                            textAlign={{ sm: 'right' }}
+                          >
+                            <Box pr={2} pb={2}>
+                              Foto:
+                            </Box>
+                          </Grid>
+                          <Grid item xs={12} sm={6} md={6}>
+                            <Image
+                              src={
+                                machine.evidencesUrls[
+                                  machine.evidencesUrls.length - 1
+                                ]
+                              }
+                              alt="Ultima foto del equipo"
+                              width={300}
+                              height={400}
+                            />
+                          </Grid>
+                        </>
+                      )}
                     <Grid item xs={3} sm={6} md={6} textAlign={{ sm: 'right' }}>
                       <Box pr={2} pb={2}>
                         Marca:
@@ -421,10 +443,18 @@ function MachineInfoTab({ role, machine, statusList }) {
                                 ? statusList
                                     .filter((s) => {
                                       if (originalStatus === 'REC') {
+                                        if (role === 'ADMIN') {
+                                          return ![
+                                            'RENTADO',
+                                            'PERDIDO',
+                                            'VEHI'
+                                          ].includes(s.id);
+                                        }
                                         return ![
                                           'RENTADO',
                                           'PERDIDO',
-                                          'VEHI'
+                                          'VEHI',
+                                          'LISTO'
                                         ].includes(s.id);
                                       }
                                       return !['REC', 'RENTADO'].includes(s.id);
@@ -508,14 +538,26 @@ function MachineInfoTab({ role, machine, statusList }) {
                                         }
                                       >
                                         {warehousesList
-                                          ? warehousesList.map((warehouse) => (
-                                              <MenuItem
-                                                key={warehouse._id}
-                                                value={warehouse._id}
-                                              >
-                                                {warehouse.name}
-                                              </MenuItem>
-                                            ))
+                                          ? warehousesList
+                                              .filter((warehouse) =>
+                                                role !== 'ADMIN'
+                                                  ? !(
+                                                      warehouse.name.includes(
+                                                        'Chica'
+                                                      ) ||
+                                                      warehouse.name ===
+                                                        'Desconocida'
+                                                    )
+                                                  : true
+                                              )
+                                              .map((warehouse) => (
+                                                <MenuItem
+                                                  key={warehouse._id}
+                                                  value={warehouse._id}
+                                                >
+                                                  {warehouse.name}
+                                                </MenuItem>
+                                              ))
                                           : null}
                                       </Select>
                                     </FormControl>

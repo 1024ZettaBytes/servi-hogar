@@ -6,6 +6,8 @@ export interface IUser extends Document {
   role: Schema.Types.ObjectId;
   isActive: boolean;
   password: string;
+  startM: number;
+  endM: number;
 }
 
 const UserSchema = new Schema<IUser>({
@@ -29,6 +31,14 @@ const UserSchema = new Schema<IUser>({
   password: {
     type: String,
     required: true
+  },
+  startM: {
+    type: Number,
+    default: -1
+  },
+  endM: {
+    type: Number,
+    default: -1
   },
 });
 UserSchema.methods.encryptPassword = async (psw) => {

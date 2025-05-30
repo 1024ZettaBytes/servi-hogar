@@ -27,6 +27,8 @@ import ShoppingBagIcon from '@mui/icons-material/ShoppingBag';
 import GroupIcon from '@mui/icons-material/Group';
 import AssessmentIcon from '@mui/icons-material/Assessment';
 import HandshakeIcon from '@mui/icons-material/Handshake';
+import BuildIcon from '@mui/icons-material/Build';
+
 const MenuWrapper = styled(Box)(
   ({ theme }) => `
   .MuiList-root {
@@ -403,6 +405,39 @@ function SidebarMenu({ userRole }) {
             )}
           </>
         )}
+                {
+          ["ADMIN", "TEC"].includes(userRole) && 
+          <List
+          component="div"
+          subheader={
+            <ListSubheader component="div" disableSticky>
+              BODEGA
+            </ListSubheader>
+          }
+        >
+          <SubMenuWrapper>
+            <List component="div">
+              <ListItem component="div">
+                <NextLink href="/mantenimientos" passHref>
+                  <Button
+                    className={
+                      currentRoute.includes("/mantenimientos")
+                        ? "active"
+                        : ""
+                    }
+                    disableRipple
+                    component="a"
+                    onClick={closeSidebar}
+                    startIcon={<BuildIcon />}
+                  >
+                    Mantenimientos
+                  </Button>
+                </NextLink>
+              </ListItem>
+            </List>
+          </SubMenuWrapper>
+        </List>
+        }
         {/*<List
           component="div"
           subheader={

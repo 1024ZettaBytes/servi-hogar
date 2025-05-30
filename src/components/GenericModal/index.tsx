@@ -14,6 +14,7 @@ export default function AlertDialog({
   title,
   text,
   isLoading,
+  isWarning=true,
   requiredReason,
   onAccept,
   onCancel,
@@ -57,7 +58,7 @@ export default function AlertDialog({
           <LoadingButton
             disabled={requiredReason && reason.trim().length <= 0}
             loading={isLoading}
-            color="error"
+            color={isWarning ? "error" : "success"}
             variant="contained"
             onClick={requiredReason ? () => onAccept(reason) : onAccept}
           >
