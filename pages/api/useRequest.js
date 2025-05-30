@@ -298,3 +298,27 @@ export const useGetProductEntries = (fetcher) => {
     isLoadingEntries: isLoading
   };
 };
+
+export const useGetPendingMantainances = (fetcher) => {
+  const { data, error, isLoading } = useSWR(
+    ROUTES.ALL_PENDING_MANTAINANCES,
+    fetcher
+  );
+  return {
+    pendingMantData: data?.data,
+    pendingMantError: error,
+    isLoadingPendingMant: isLoading
+  };
+};
+
+export const useGetMantainances = (fetcher) => {
+  const { data, error, isLoading } = useSWR(
+    ROUTES.ALL_MANTAINANCES,
+    fetcher
+  );
+  return {
+    mantData: data?.data,
+    mantError: error,
+    isLoadingMant: isLoading
+  };
+};
