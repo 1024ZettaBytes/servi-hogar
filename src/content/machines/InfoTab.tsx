@@ -161,9 +161,9 @@ function MachineInfoTab({ role, machine, statusList }) {
     machineToEdit.status?.id === MACHINE_STATUS_LIST.RENTADO;
   const isWarehouseStatus = machineToEdit.status?.typeWarehouse;
   const isVehicleStatus = machineToEdit.status?.id === MACHINE_STATUS_LIST.VEHI;
-  const showMantWarning =
+  /*const showMantWarning =
     originalStatus !== MACHINE_STATUS_LIST.ESPE &&
-    machineToEdit?.status?.id === MACHINE_STATUS_LIST.ESPE;
+    machineToEdit?.status?.id === MACHINE_STATUS_LIST.ESPE;*/
   const askForImage =
     originalStatus !== machineToEdit?.status?.id &&
     (originalStatus === MACHINE_STATUS_LIST.REC ||

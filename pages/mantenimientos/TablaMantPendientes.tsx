@@ -27,7 +27,6 @@ import PendingActionsIcon from '@mui/icons-material/PendingActions';
 
 import GenericModal from '../../src/components/GenericModal';
 
-import styles from '../tables.module.css';
 
 export const getStatusLabel = (status) => {
   switch (status) {

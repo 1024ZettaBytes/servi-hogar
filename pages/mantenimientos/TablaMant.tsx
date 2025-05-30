@@ -15,7 +15,6 @@ import {
   CardHeader,
   Typography
 } from '@mui/material';
-import NextLink from 'next/link';
 import { formatTZDate } from 'lib/client/utils';
 
 interface TablaMantProps {
