@@ -299,6 +299,19 @@ export const useGetProductEntries = (fetcher) => {
   };
 };
 
+export const useGetUsedProducts = (fetcher) => {
+  const { data, error, isLoading } = useSWR(
+    ROUTES.ALL_PRODUCTS_USED,
+    fetcher
+  );
+  return {
+    usedList: data?.data,
+    usedError: error,
+    isLoadingUsed: isLoading
+  };
+};
+
+// Mantainances
 export const useGetPendingMantainances = (fetcher) => {
   const { data, error, isLoading } = useSWR(
     ROUTES.ALL_PENDING_MANTAINANCES,
@@ -321,4 +334,12 @@ export const useGetMantainances = (fetcher) => {
     mantError: error,
     isLoadingMant: isLoading
   };
+};
+
+export const useGetMantainenceById = (fetcher, id) => {
+  const { data, error, isLoading } = useSWR(
+    id ? ROUTES.MANTAINANCE_BY_ID_API.replace(':id', id) : null,
+    fetcher
+  );
+  return { mantData: data?.data, mantByIdError: error, isLoadingMant: isLoading };
 };
