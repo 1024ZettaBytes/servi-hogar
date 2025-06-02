@@ -131,7 +131,7 @@ export default function ByMantId({ session }) {
                           Aún no hay refacciones agregadas
                         </Typography>
                       ) : (
-                        <Grid item>
+                        <Grid item lg={10} xs={12}>
                           <SnacksTable
                             showSearch={false}
                             rows={mantData?.usedInventory}

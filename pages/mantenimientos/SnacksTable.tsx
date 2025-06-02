@@ -58,8 +58,29 @@ export default function SnacksTable({ showSearch, rows }) {
         }}
         title=""
       />
-      <TableContainer component={Paper} sx={{ marginBottom: '10px' }}>
-        <Table sx={{ minWidth: 650 }} aria-label="simple table">
+      <TableContainer
+        component={Paper}
+        sx={{
+          marginBottom: '10px',
+          width: '100%',
+          overflowX: 'auto', // Enable horizontal scrolling
+          '@media (max-width: 550px)': {
+            // Mobile breakpoint
+            maxWidth: '100vw'
+          }
+        }}
+      >
+        <Table
+          sx={{
+            // Adjust minimum width for different screen sizes
+            minWidth: {
+              xs: 300, // Mobile
+              sm: 450, // Tablet
+              md: 650 // Desktop (original size)
+            }
+          }}
+          aria-label="simple table"
+        >
           <TableHead>
             <TableRow>
               <TableCell>Código</TableCell>
@@ -104,19 +125,18 @@ export default function SnacksTable({ showSearch, rows }) {
         </Table>
       </TableContainer>
 
-      
-    <Box sx={{ alignItems: 'right', textAlign: 'right' }}>
-    <Typography fontWeight="bold" display="inline">
-        {'TOTAL:'}
-      </Typography>
-      <Typography
-        display="inline"
-        marginLeft={4}
-        marginRight={4}
-        fontWeight="bold"
-      >
-        {numeral(total).format('$0,0.00')}
-      </Typography>
+      <Box sx={{ alignItems: 'right', textAlign: 'right' }}>
+        <Typography fontWeight="bold" display="inline">
+          {'TOTAL:'}
+        </Typography>
+        <Typography
+          display="inline"
+          marginLeft={4}
+          marginRight={4}
+          fontWeight="bold"
+        >
+          {numeral(total).format('$0,0.00')}
+        </Typography>
       </Box>
     </>
   );
