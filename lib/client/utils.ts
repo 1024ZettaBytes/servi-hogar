@@ -151,7 +151,26 @@ export const dateDiffInWeeks = (initial: Date, end: Date): number => {
 export const dateDiffInYears = (initial: Date, end: Date): number => {
   return dayjs(initial).diff(end, 'year');
 };
+export const hasSundayBetween = (startDate: Date, endDate: Date): boolean => {
+  // Clone dates to avoid mutating original inputs
+  const start = new Date(startDate);
+  const end = new Date(endDate);
 
+  // Set both times to 12:00 PM
+  start.setHours(12, 0, 0, 0);
+  end.setHours(12, 0, 0, 0);
+
+  const current = new Date(start);
+
+  while (current <= end) {
+    if (current.getDay() === 0) { // 0 = Sunday
+      return true;
+    }
+    current.setDate(current.getDate() + 1);
+  }
+
+  return false;
+}
 export const printElement = async (
   document: Document,
   filename: string,

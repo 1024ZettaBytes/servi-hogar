@@ -1,36 +1,31 @@
-import Head from "next/head";
-import { getSession } from "next-auth/react";
-import { useState } from "react";
-import SidebarLayout from "@/layouts/SidebarLayout";
-import { validateServerSideSession } from "../../lib/auth";
-import PageHeader from "@/components/PageHeader";
-import PageTitleWrapper from "@/components/PageTitleWrapper";
-import {
-  Container,
-  Grid,
-  Tabs,
-  Tab,
-  Button,
-} from "@mui/material";
-import AddIcon from "@mui/icons-material/Add";
-import PlaylistAddOutlinedIcon from "@mui/icons-material/PlaylistAddOutlined";
-import Footer from "@/components/Footer";
-import { useSnackbar } from "notistack";
-import NextBreadcrumbs from "@/components/Shared/BreadCrums";
-import InventoryTable from "./InventoryTable";
-import AddProductModal from "@/components/AddProductModal";
-import InventoryEntriesTable from "./InventoryEntriesTable";
-import AddEntryModal from "@/components/AddEntryModal";
+import Head from 'next/head';
+import { getSession } from 'next-auth/react';
+import { useState } from 'react';
+import SidebarLayout from '@/layouts/SidebarLayout';
+import { validateServerSideSession } from '../../lib/auth';
+import PageHeader from '@/components/PageHeader';
+import PageTitleWrapper from '@/components/PageTitleWrapper';
+import { Container, Grid, Tabs, Tab, Button } from '@mui/material';
+import AddIcon from '@mui/icons-material/Add';
+import PlaylistAddOutlinedIcon from '@mui/icons-material/PlaylistAddOutlined';
+import Footer from '@/components/Footer';
+import { useSnackbar } from 'notistack';
+import NextBreadcrumbs from '@/components/Shared/BreadCrums';
+import InventoryTable from './InventoryTable';
+import AddProductModal from '@/components/AddProductModal';
+import InventoryEntriesTable from './InventoryEntriesTable';
+import AddEntryModal from '@/components/AddEntryModal';
+import InventoryIssuesTable from './InventoryIssuesTable';
 
 function Inventory() {
-  const paths = ["Inicio", "Inventario"];
+  const paths = ['Inicio', 'Inventario'];
   const { enqueueSnackbar } = useSnackbar();
   const tabs = [
-    { value: "inv", label: "Lista de Inventario" },
-    { value: "ent", label: "Entradas" },
-    { value: "iss", label: "Salidas" },
+    { value: 'inv', label: 'Lista de Inventario' },
+    { value: 'ent', label: 'Entradas' },
+    { value: 'iss', label: 'Salidas' }
   ];
-  const [currentTab, setCurrentTab] = useState("inv");
+  const [currentTab, setCurrentTab] = useState('inv');
 
   const handleTabsChange = (_event, value) => {
     setCurrentTab(value);
@@ -43,12 +38,12 @@ function Inventory() {
     setModalIsOpen(false);
     if (addedRecord && successMessage) {
       enqueueSnackbar(successMessage, {
-        variant: "success",
+        variant: 'success',
         anchorOrigin: {
-          vertical: "top",
-          horizontal: "center",
+          vertical: 'top',
+          horizontal: 'center'
         },
-        autoHideDuration: 1500,
+        autoHideDuration: 1500
       });
     }
   };
@@ -59,15 +54,12 @@ function Inventory() {
         <title>Inventario</title>
       </Head>
       <PageTitleWrapper>
-        <PageHeader
-          title={"Inventario"}
-          sutitle={""}
-        />
+        <PageHeader title={'Inventario'} sutitle={''} />
         <NextBreadcrumbs paths={paths} lastLoaded={true} />
       </PageTitleWrapper>
 
       <Container maxWidth="lg">
-      <Grid container>
+        <Grid container>
           <Grid item lg={12}>
             <Tabs
               onChange={handleTabsChange}
@@ -76,15 +68,14 @@ function Inventory() {
               scrollButtons="auto"
               textColor="primary"
               indicatorColor="primary"
-              
               centered
             >
               {tabs.map((tab) => (
-                <Tab key={tab.value} label={tab.label} value={tab.value}  />
+                <Tab key={tab.value} label={tab.label} value={tab.value} />
               ))}
             </Tabs>
           </Grid>
-          {currentTab === "inv" && (
+          {currentTab === 'inv' && (
             <>
               <Grid item textAlign="end" lg={12}>
                 <InventoryTable showSearch />
@@ -96,7 +87,7 @@ function Inventory() {
                   variant="contained"
                   sx={{ marginTop: 1 }}
                   onClick={() => {
-                    setModalType("PRODUCT");
+                    setModalType('PRODUCT');
                     setModalIsOpen(true);
                   }}
                 >
@@ -105,7 +96,7 @@ function Inventory() {
               </Grid>
             </>
           )}
-          {currentTab === "ent" && (
+          {currentTab === 'ent' && (
             <>
               <Grid item lg={12}>
                 <InventoryEntriesTable />
@@ -118,7 +109,7 @@ function Inventory() {
                   color="success"
                   sx={{ marginTop: 1 }}
                   onClick={() => {
-                    setModalType("ENTRY");
+                    setModalType('ENTRY');
                     setModalIsOpen(true);
                   }}
                 >
@@ -127,18 +118,17 @@ function Inventory() {
               </Grid>
             </>
           )}
-          {currentTab === "iss" && (
+          {currentTab === 'iss' && (
             <Grid item lg={12}>
-              {//<InventoryIssuesTable rows={issuesRows} showSearch />
-              }
+              <InventoryIssuesTable />
             </Grid>
           )}
         </Grid>
       </Container>
-      {modalIsOpen && modalType === "PRODUCT" && (
+      {modalIsOpen && modalType === 'PRODUCT' && (
         <AddProductModal open={modalIsOpen} handleOnClose={handleCloseModal} />
       )}
-      {modalIsOpen && modalType === "ENTRY" && (
+      {modalIsOpen && modalType === 'ENTRY' && (
         <AddEntryModal open={modalIsOpen} handleOnClose={handleCloseModal} />
       )}
       <Footer />

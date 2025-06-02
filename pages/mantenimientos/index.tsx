@@ -13,7 +13,8 @@ import TablaMant from "./TablaMant";
 import TablaMantPendientes from "./TablaMantPendientes";
 import { getFetcher, useGetMantainances, useGetPendingMantainances } from "pages/api/useRequest";
 
-function Mantenimientos() {
+function Mantenimientos({ session }) {
+  const { user } = session;
   const paths = ["Inicio", "Mantenimientos"];
   const { pendingMantData, pendingMantError } = useGetPendingMantainances(getFetcher);
   const { mantData, mantError } = useGetMantainances(getFetcher);
@@ -48,6 +49,7 @@ function Mantenimientos() {
               <Card>
                 <TablaMantPendientes
                   listData={pendingMantData}
+                  userRole={user?.role}
                 />
               </Card>
             )}

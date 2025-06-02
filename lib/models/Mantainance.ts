@@ -5,6 +5,7 @@ export interface IMantainance extends Document {
   machine: Schema.Types.ObjectId;
   usedInventory: [Schema.Types.ObjectId];
   status: string;
+  description: string;
   takenAt: Date;
   takenBy: Schema.Types.ObjectId;
   cancellationReason: string;
@@ -28,6 +29,7 @@ const MantainanceSchema = new Schema<IMantainance>({
     ref: 'used_inventory'
   },
   status: { type: String, default: 'PENDIENTE' },
+  description: { type: String, default: null },
   takenAt: { type: Date, required: true },
   takenBy: {
     type: Schema.Types.ObjectId,

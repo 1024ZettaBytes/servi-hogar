@@ -1,4 +1,3 @@
-import * as React from 'react';
 import { useState } from 'react';
 import Table from '@mui/material/Table';
 import TableBody from '@mui/material/TableBody';
@@ -12,6 +11,7 @@ import {
   Box,
   Card,
   CardHeader,
+  Chip,
   CircularProgress,
   Divider,
   Grid,
@@ -19,17 +19,39 @@ import {
   Typography,
   useTheme
 } from '@mui/material';
-import { getFetcher, useGetProductEntries } from '../api/useRequest';
+import WarningAmberIcon from '@mui/icons-material/WarningAmber';
+import NotificationImportantOutlinedIcon from '@mui/icons-material/NotificationImportantOutlined';
+import { getFetcher, useGetUsedProducts } from '../api/useRequest';
 import numeral from 'numeral';
-import { capitalizeFirstLetter, formatTZDate } from 'lib/client/utils';
+import { formatTZDate } from 'lib/client/utils';
 
-export default function InventoryEntriesTable() {
+export const getStockLabel = (stock, min) => {
+  if (stock <= min)
+    return (
+      <Chip
+        icon={<NotificationImportantOutlinedIcon fontSize="small" />}
+        label={stock}
+        color="error"
+        size="small"
+      ></Chip>
+    );
+  if (stock <= min + 3)
+    return (
+      <Chip
+        icon={<WarningAmberIcon fontSize="small" />}
+        label={stock}
+        color="warning"
+        size="small"
+      ></Chip>
+    );
+  return <Chip label={stock} color="success" size="small"></Chip>;
+};
+export default function InventoryIssuesTable() {
   const theme = useTheme();
 
   const [page, setPage] = useState(0);
   const [limit, setLimit] = useState(10);
-  const { entriesList, entriesError, isLoadingEntries } =
-    useGetProductEntries(getFetcher);
+  const { usedList, usedError, isLoadingUsed } = useGetUsedProducts(getFetcher);
   const applyPagination = (rowList, page, limit) => {
     return rowList.slice(page * limit, page * limit + limit);
   };
@@ -39,8 +61,7 @@ export default function InventoryEntriesTable() {
   const handleLimitChange = (event) => {
     setLimit(parseInt(event.target.value));
   };
-  const paginatedRows = applyPagination(entriesList || [], page, limit);
-
+  const paginatedRows = applyPagination(usedList || [], page, limit);
   return (
     <Card>
       <CardHeader
@@ -53,7 +74,7 @@ export default function InventoryEntriesTable() {
         title=""
       />
       <Divider />
-      {isLoadingEntries ? (
+      {isLoadingUsed ? (
         <Box
           sx={{
             display: 'flex',
@@ -62,10 +83,10 @@ export default function InventoryEntriesTable() {
         >
           <CircularProgress />
         </Box>
-      ) : entriesError ? (
+      ) : usedError ? (
         <Grid item>
           <br />
-          <Alert severity="error">{entriesError.message}</Alert>
+          <Alert severity="error">{usedError.message}</Alert>
         </Grid>
       ) : paginatedRows?.length === 0 ? (
         <Typography variant="h3" margin={2} color="#FD5B5B" textAlign="center">
@@ -77,10 +98,11 @@ export default function InventoryEntriesTable() {
             <Table sx={{ minWidth: 650 }} aria-label="simple table">
               <TableHead>
                 <TableRow>
-                  <TableCell>Código</TableCell>
+                  <TableCell align="left">Código</TableCell>
                   <TableCell align="center">Nombre</TableCell>
                   <TableCell align="center">Cantidad</TableCell>
-                  <TableCell align="center">Costo unitario</TableCell>
+                  <TableCell align="center">Gasto</TableCell>
+
                   <TableCell align="center">Fecha</TableCell>
                 </TableRow>
               </TableHead>
@@ -98,14 +120,18 @@ export default function InventoryEntriesTable() {
                     }}
                   >
                     <TableCell component="th" scope="row">
-                      <Typography fontStyle="oblique">{row.product?.code}</Typography>
+                      {row.inventoryProduct?.code}
                     </TableCell>
-                    <TableCell align="center">{row.product?.name}</TableCell>
-                    <TableCell align="center">+{row.qty}</TableCell>
-                    <TableCell align="center">${numeral(row.cost).format(`0,0.00`)}</TableCell>
-                    <TableCell align="center">{capitalizeFirstLetter(
-                          formatTZDate(new Date(row.date), "MMM DD YYYY")
-                        )}</TableCell>
+                    <TableCell align="center">
+                      {row.inventoryProduct?.name}
+                    </TableCell>
+                    <TableCell align="center">{row.qty}</TableCell>
+                    <TableCell align="center">
+                      {numeral(row.qty * row.price).format('$0,0.00')}
+                    </TableCell>
+                    <TableCell align="center">
+                      {formatTZDate(row?.date, 'DD MMM YYYY')}
+                    </TableCell>
                   </TableRow>
                 ))}
               </TableBody>

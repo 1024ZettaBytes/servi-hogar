@@ -11,11 +11,11 @@ import {
   TablePagination,
   TableRow,
   TableContainer,
-  useTheme,
   CardHeader,
   Typography
 } from '@mui/material';
 import { formatTZDate } from 'lib/client/utils';
+import { getStatusLabel } from './TablaMantPendientes';
 
 interface TablaMantProps {
   className?: string;
@@ -44,7 +44,6 @@ const TablaMant: FC<TablaMantProps> = ({ listData }) => {
 
   const paginatedMant = applyPagination(listData, page, limit);
 
-  const theme = useTheme();
   return (
     <>
       <Card>
@@ -55,7 +54,7 @@ const TablaMant: FC<TablaMantProps> = ({ listData }) => {
             justifyContent: 'space-between',
             flexWrap: 'wrap'
           }}
-          title="Completados"
+          title="Pasados"
         />
 
         <Divider />
@@ -64,25 +63,21 @@ const TablaMant: FC<TablaMantProps> = ({ listData }) => {
             <TableHead>
               <TableRow>
                 <TableCell align="center">Equipo</TableCell>
+                <TableCell align="center">Estado</TableCell>
                 <TableCell align="center">Fecha Inicio</TableCell>
                 <TableCell align="center">Fecha Fin</TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
               {paginatedMant.map((mant) => {
-                const canPickup = mant?.totalDays < 180;
                 return (
                   <TableRow
-                    sx={
-                      !canPickup
-                        ? { backgroundColor: theme.colors.success.lighter }
-                        : {}
-                    }
                     key={mant?._id}
                   >
                     <TableCell align="center">
                       <Typography fontWeight="bold">{mant?.machine?.machineNum}</Typography>
                     </TableCell>
+                    <TableCell align="center">{getStatusLabel(mant?.status)}</TableCell>
                     <TableCell align="center">
                       {formatTZDate(mant?.createdAt, 'DD MMM YYYY')}
                     </TableCell>

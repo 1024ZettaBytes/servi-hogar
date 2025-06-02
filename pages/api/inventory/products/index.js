@@ -23,7 +23,7 @@ async function getProductsAPI(req, res) {
 }
 
 async function handler(req, res) {
-  const validRole = await validateUserPermissions(req, res, ['ADMIN', 'AUX']);
+  const validRole = await validateUserPermissions(req, res, ['ADMIN', 'AUX', 'TEC']);
   if (validRole)
     switch (req.method) {
       case 'GET':
