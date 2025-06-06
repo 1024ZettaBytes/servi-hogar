@@ -1,6 +1,6 @@
-import { FC, ChangeEvent, useState } from "react";
-import * as str from "string";
-import PropTypes from "prop-types";
+import { FC, ChangeEvent, useState } from 'react';
+import * as str from 'string';
+import PropTypes from 'prop-types';
 import {
   Tooltip,
   Divider,
@@ -18,15 +18,17 @@ import {
   useTheme,
   CardHeader,
   TextField,
-  InputAdornment,
-} from "@mui/material";
+  InputAdornment
+} from '@mui/material';
 
-import { updateUser } from "../../lib/client/usersFetch";
-import { useSnackbar } from "notistack";
-import BlockIcon from "@mui/icons-material/Block";
-import CheckIcon from "@mui/icons-material/Check";
-import SearchIcon from "@mui/icons-material/Search";
-import GenericModal from "@/components/GenericModal";
+import { updateUser } from '../../lib/client/usersFetch';
+import { useSnackbar } from 'notistack';
+import BlockIcon from '@mui/icons-material/Block';
+import CheckIcon from '@mui/icons-material/Check';
+import SearchIcon from '@mui/icons-material/Search';
+import GenericModal from '@/components/GenericModal';
+import LocalLaundryServiceIcon from '@mui/icons-material/LocalLaundryService';
+import AssignMachineModal from '@/components/AssignMachineModal';
 
 interface TablaUsuariosProps {
   className?: string;
@@ -41,7 +43,7 @@ const compareStringsForFilter = (keyWord: string, field: string) => {
 };
 const applyFilters = (customerList: any[], filter: string): any[] => {
   return customerList.filter((customer) => {
-    if (!filter || filter === "") {
+    if (!filter || filter === '') {
       return true;
     }
     return (
@@ -52,13 +54,13 @@ const applyFilters = (customerList: any[], filter: string): any[] => {
           return false;
         }
         switch (key) {
-          case "role": {
+          case 'role': {
             const matchRole =
-              value["name"] && compareStringsForFilter(filter, value["name"]);
+              value['name'] && compareStringsForFilter(filter, value['name']);
             return matchRole;
           }
-          case "name":
-          case "id": {
+          case 'name':
+          case 'id': {
             return compareStringsForFilter(filter, value.toString());
           }
         }
@@ -78,11 +80,15 @@ const applyPagination = (
 const TablaUsuarios: FC<TablaUsuariosProps> = ({ userList }) => {
   const { enqueueSnackbar } = useSnackbar();
   const [updateModalIsOpen, setUpdateModalIsOpen] = useState(false);
+  const [assignModalIsOpen, setAssignModalIsOpen] = useState(false);
   const [isUpdating, setIsUpdating] = useState(false);
   const [userToUpdate, setUserToUpdate] = useState<any>(null);
   const [page, setPage] = useState<number>(0);
   const [limit, setLimit] = useState<number>(30);
-  const [filter, setFilter] = useState<string>("");
+  const [filter, setFilter] = useState<string>('');
+  const tecUsers = userList.filter(
+    (user) => user.role?.id === 'TEC' && user.isActive
+  );
   const handleSearchChange = (e: ChangeEvent<HTMLInputElement>): void => {
     const value = e.target.value;
     setFilter(value);
@@ -104,19 +110,33 @@ const TablaUsuarios: FC<TablaUsuariosProps> = ({ userList }) => {
     setUpdateModalIsOpen(false);
     setIsUpdating(false);
     enqueueSnackbar(result.msg, {
-      variant: !result.error ? "success" : "error",
+      variant: !result.error ? 'success' : 'error',
       anchorOrigin: {
-        vertical: "top",
-        horizontal: "center",
+        vertical: 'top',
+        horizontal: 'center'
       },
-      autoHideDuration: 2000,
+      autoHideDuration: 2000
     });
 
     if (!result.error) {
       setUserToUpdate(null);
     }
   };
+  const handleCloseAssign = (success, message) => {
+    setAssignModalIsOpen(false);
+    if (!success) {
+      return;
+    }
 
+    enqueueSnackbar(message, {
+      variant: 'success',
+      anchorOrigin: {
+        vertical: 'top',
+        horizontal: 'center'
+      },
+      autoHideDuration: 2000
+    });
+  };
   const filteredUsers = applyFilters(userList, filter);
   const paginatedUsers = applyPagination(filteredUsers, page, limit);
   const theme = useTheme();
@@ -136,17 +156,17 @@ const TablaUsuarios: FC<TablaUsuariosProps> = ({ userList }) => {
                     <InputAdornment position="start">
                       <SearchIcon />
                     </InputAdornment>
-                  ),
+                  )
                 }}
-                sx={{ marginTop: "20px" }}
+                sx={{ marginTop: '20px' }}
               />
             </Box>
           }
           sx={{
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "space-between",
-            flexWrap: "wrap",
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            flexWrap: 'wrap'
           }}
           title="Todos los Usuarios"
         />
@@ -198,11 +218,25 @@ const TablaUsuarios: FC<TablaUsuariosProps> = ({ userList }) => {
                     </TableCell>
 
                     <TableCell align="center">
+                      {user.role?.id === 'TEC' && (
+                        <Tooltip title={'Asignar Equipos'} arrow>
+                          <IconButton
+                            onClick={() => {
+                              setUserToUpdate(user);
+                              setAssignModalIsOpen(true);
+                            }}
+                            color="info"
+                            size="small"
+                          >
+                            <LocalLaundryServiceIcon fontSize="small" />
+                          </IconButton>
+                        </Tooltip>
+                      )}
                       <Tooltip
                         title={
                           user?.isActive
-                            ? "Desactivar Usuario"
-                            : "Activar usuario"
+                            ? 'Desactivar Usuario'
+                            : 'Activar usuario'
                         }
                         arrow
                       >
@@ -211,17 +245,17 @@ const TablaUsuarios: FC<TablaUsuariosProps> = ({ userList }) => {
                             setUserToUpdate({
                               _id: user?._id,
                               isActive: !user?.isActive,
-                              operation: "STATUS",
+                              operation: 'STATUS'
                             });
                             handleOnChangeStatus();
                           }}
                           sx={{
-                            "&:hover": {
-                              background: theme.colors.error.lighter,
+                            '&:hover': {
+                              background: theme.colors.error.lighter
                             },
                             color: user?.isActive
                               ? theme.palette.error.main
-                              : theme.colors.alpha.black,
+                              : theme.colors.alpha.black
                           }}
                           color="inherit"
                           size="small"
@@ -264,16 +298,24 @@ const TablaUsuarios: FC<TablaUsuariosProps> = ({ userList }) => {
           setIsUpdating(false);
         }}
       />
+      {assignModalIsOpen && (
+        <AssignMachineModal
+          open={assignModalIsOpen}
+          tecList={tecUsers}
+          selectedTec={userToUpdate}
+          handleOnClose={handleCloseAssign}
+        />
+      )}
     </>
   );
 };
 
 TablaUsuarios.propTypes = {
-  userList: PropTypes.array.isRequired,
+  userList: PropTypes.array.isRequired
 };
 
 TablaUsuarios.defaultProps = {
-  userList: [],
+  userList: []
 };
 
 export default TablaUsuarios;
