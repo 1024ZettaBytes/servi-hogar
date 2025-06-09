@@ -18,7 +18,8 @@ import {
 import { LoadingButton } from '@mui/lab';
 import { updateTecnician } from 'lib/client/usersFetch';
 const machineRanges = [
-  { id: '1 - 200', startM: 1, endM: 200 },
+  { id: '1 - 100', startM: 1, endM: 100 },
+  { id: '101 - 200', startM: 101, endM: 200 },
   { id: '201 - 400', startM: 201, endM: 400 },
   { id: '401 - 600', startM: 401, endM: 600 }
 ];
