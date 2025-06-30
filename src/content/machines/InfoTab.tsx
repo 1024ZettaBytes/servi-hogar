@@ -78,7 +78,7 @@ const getStatusLabel = (
       return (
         <Label color="secondary">
           <CurrencyExchangeIcon fontSize="small" />
-          <b>{rent ? `Rentado (Renta ${rent?.num})` : notAvailable}</b>
+          <b>{rent ? `Rentado: ${rent?.customer?.name}` : notAvailable}</b>
         </Label>
       );
     case MACHINE_STATUS_LIST.VEHI:
