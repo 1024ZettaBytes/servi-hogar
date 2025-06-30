@@ -1,30 +1,69 @@
-import Head from "next/head";
-import { getSession } from "next-auth/react";
-import SidebarLayout from "@/layouts/SidebarLayout";
-import { validateServerSideSession } from "../../lib/auth";
-import PageHeader from "@/components/PageHeader";
-import PageTitleWrapper from "@/components/PageTitleWrapper";
-import { Card, Container, Grid, Skeleton, Alert } from "@mui/material";
-import Footer from "@/components/Footer";
-import TablaRentasActuales from "./TablaRentasActuales";
-import TablaRentasPasadas from "./TablaRentasPasadas";
+import Head from 'next/head';
+import { getSession } from 'next-auth/react';
+import SidebarLayout from '@/layouts/SidebarLayout';
+import { validateServerSideSession } from '../../lib/auth';
+import PageHeader from '@/components/PageHeader';
+import PageTitleWrapper from '@/components/PageTitleWrapper';
+import {
+  Card,
+  Container,
+  Grid,
+  Skeleton,
+  Alert,
+  CardContent,
+  Typography,
+  styled,
+  Avatar
+} from '@mui/material';
+import Footer from '@/components/Footer';
+import TablaRentasActuales from './TablaRentasActuales';
+import TablaRentasPasadas from './TablaRentasPasadas';
+import AlarmOnIcon from '@mui/icons-material/AlarmOn';
+import NotificationImportantIcon from '@mui/icons-material/NotificationImportant';
+import { useGetRents, getFetcher } from '../api/useRequest';
 
-import { useGetRents, getFetcher } from "../api/useRequest";
-
-import NextBreadcrumbs from "@/components/Shared/BreadCrums";
+import NextBreadcrumbs from '@/components/Shared/BreadCrums';
 
 function Rentas({ session }) {
   const { user } = session;
-  const paths = ["Inicio", "Colocadas"];
-  const { rentsData, rentsError } = useGetRents("current", getFetcher);
-  const { pastRentsData, pastRentsError } = useGetRents("past", getFetcher);
+  const paths = ['Inicio', 'Colocadas'];
+  const { rentsData, rentsError } = useGetRents('current', getFetcher);
+  const { pastRentsData, pastRentsError } = useGetRents('past', getFetcher);
+  const getOnTimeAndExpired = () => {
+    let onTime = 0;
+    let expired = 0;
+    if (rentsData) {
+      rentsData.forEach((rent) => {
+        if (rent.remaining >= 0) {
+          onTime++;
+        } else {
+          expired++;
+        }
+      });
+    }
+    return [onTime, expired];
+  };
+  const AvatarWrapperSuccess = styled(Avatar)(
+    ({ theme }) => `
+        background-color: ${theme.colors.success.lighter};
+        color:  ${theme.colors.success.main};
+  `
+  );
+
+  const AvatarWrapperError = styled(Avatar)(
+    ({ theme }) => `
+        background-color: ${theme.colors.error.lighter};
+        color:  ${theme.colors.error.main};
+  `
+  );
+
   return (
     <>
       <Head>
         <title>Colocadas</title>
       </Head>
       <PageTitleWrapper>
-        <PageHeader title={"Colocadas"} sutitle={""} />
+        <PageHeader title={'Colocadas'} sutitle={''} />
         <NextBreadcrumbs paths={paths} lastLoaded={true} />
       </PageTitleWrapper>
       <Container maxWidth="lg">
@@ -41,17 +80,98 @@ function Rentas({ session }) {
             ) : !rentsData ? (
               <Skeleton
                 variant="rectangular"
-                width={"100%"}
+                width={'100%'}
                 height={500}
                 animation="wave"
               />
             ) : (
-              <Card>
-                <TablaRentasActuales
-                  userRole={user?.role}
-                  rentList={rentsData}
-                />
-              </Card>
+              <>
+                <Grid container spacing={2} sx={{ marginBottom: 2 }}>
+                  <Grid lg={6} />
+                  <Grid xs={12} sm={6} md={3} lg={3} item>
+                    <Card
+                      sx={{
+                        px: 1,
+                        height: '100px',
+                        overflowY: 'auto'
+                      }}
+                    >
+                      <CardContent>
+                        <Grid
+                          container
+                          alignItems="center"
+                          justifyItems="center"
+                          textAlign={{ lg: 'center' }}
+                        >
+                          <Grid item lg={2} md={2} xs={2}>
+                            <AvatarWrapperSuccess>
+                              <AlarmOnIcon />
+                            </AvatarWrapperSuccess>
+                          </Grid>
+                          <Grid item lg={3} md={2} xs={2}>
+                            <Typography variant="h3" gutterBottom noWrap>
+                              {getOnTimeAndExpired()[0]}
+                            </Typography>
+                          </Grid>
+                          <Grid item lg={7} md={8} xs={8}>
+                            <Typography
+                              variant="subtitle2"
+                              noWrap
+                              textAlign="left"
+                            >
+                              Al corriente
+                            </Typography>
+                          </Grid>
+                        </Grid>
+                      </CardContent>
+                    </Card>
+                  </Grid>
+                  <Grid xs={12} sm={6} md={3} lg={3} item>
+                    <Card
+                      sx={{
+                        px: 1,
+                        height: '100px',
+                        overflowY: 'auto'
+                      }}
+                    >
+                      <CardContent>
+                        <Grid
+                          container
+                          alignItems="center"
+                          justifyItems="center"
+                          textAlign={{ lg: 'center' }}
+                        >
+                          <Grid item lg={2} md={2} xs={2}>
+                            <AvatarWrapperError>
+                              <NotificationImportantIcon />
+                            </AvatarWrapperError>
+                          </Grid>
+                          <Grid item lg={3} md={2} xs={2}>
+                            <Typography variant="h3" gutterBottom noWrap>
+                              {getOnTimeAndExpired()[1]}
+                            </Typography>
+                          </Grid>
+                          <Grid item lg={7} md={8} xs={8}>
+                            <Typography
+                              variant="subtitle2"
+                              noWrap
+                              textAlign="left"
+                            >
+                              Vencidas
+                            </Typography>
+                          </Grid>
+                        </Grid>
+                      </CardContent>
+                    </Card>
+                  </Grid>
+                </Grid>
+                <Card>
+                  <TablaRentasActuales
+                    userRole={user?.role}
+                    rentList={rentsData}
+                  />
+                </Card>
+              </>
             )}
           </Grid>
         </Grid>
@@ -70,7 +190,7 @@ function Rentas({ session }) {
             ) : !pastRentsData ? (
               <Skeleton
                 variant="rectangular"
-                width={"100%"}
+                width={'100%'}
                 height={500}
                 animation="wave"
               />
