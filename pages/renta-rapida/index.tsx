@@ -73,6 +73,7 @@ const defaultData = () => {
 };
 function RentaRapida({ session }) {
   const userRole = session.user.role;
+  const isAdmin = userRole === "ADMIN";
   const paths = ["Inicio", "Renta Rápida"];
   const { enqueueSnackbar } = useSnackbar();
   const {
@@ -111,7 +112,7 @@ function RentaRapida({ session }) {
     },
   ];
   const checkEnabledButton = (selectedCustomer, rentPeriod) => {
-    if (activeStep === 0) return selectedCustomer;
+    if (activeStep === 0) return selectedCustomer && (isAdmin || selectedCustomer.balance >= 0);
     if (activeStep === 1)
       return selectedCustomer && rentPeriod.selectedWeeks > 0;
     if (activeStep === 2)
