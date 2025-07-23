@@ -148,8 +148,8 @@ export const useGetDeliveryById = (fetcher, id) => {
 };
 
 // Pickups
-export const useGetPendingPickups = (fetcher) => {
-  const { data, error } = useSWR(ROUTES.ALL_PENDING_PICKUPS_API, fetcher);
+export const useGetPendingPickups = (fetcher, detailed=true) => {
+  const { data, error } = useSWR(ROUTES.ALL_PENDING_PICKUPS_API + (detailed ? "?detailed=true" : ""), fetcher);
   return { pendingPickupsList: data?.data, pendingPickupsError: error };
 };
 export const useGetPickups = (fetcher, limit, page, searchTerm = null) => {
