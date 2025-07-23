@@ -41,6 +41,7 @@ import {
 } from 'pages/api/useRequest';
 import { MuiFileInput } from 'mui-file-input';
 import Image from 'next/image';
+import TablaRentasEquipo from './TablaRentasEquipos ';
 const getStatusDescription = (
   status: String,
   rent: any,
@@ -844,6 +845,39 @@ function MachineInfoTab({ role, machine, statusList }) {
               ) : (
                 <Skeleton variant="text" width={'100%'} animation="wave" />
               )}
+            </Grid>
+          </CardContent>
+        </Card>
+      </Grid>
+            <Grid item xs={12}>
+        <Card>
+          <Box
+            p={3}
+            display="flex"
+            alignItems="center"
+            justifyContent="space-between"
+          >
+            <Box>
+              <Typography variant="h4" gutterBottom>
+                Historial de rentas
+              </Typography>
+            </Box>
+          </Box>
+          <Divider />
+          <CardContent sx={{ p: 4 }}>
+            <Grid container>
+              <Grid item xs={12} md={12} lg={12}>
+                {machine?.rents ? (
+                  <TablaRentasEquipo rents={machine?.rents} />
+                ) : (
+                  <Skeleton
+                    variant="rectangular"
+                    width={'100%'}
+                    height={500}
+                    animation="wave"
+                  />
+                )}
+              </Grid>
             </Grid>
           </CardContent>
         </Card>

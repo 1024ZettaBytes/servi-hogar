@@ -41,7 +41,6 @@ function CustomerDetail({ session }) {
   const { citiesList } = useGetCities(getFetcher);
   const [currentTab, setCurrentTab] = useState<string>("info");
   const paths = ["Inicio", "Clientes", customer?.name];
-
   const tabs = [
     { value: "info", label: "Información general" },
     { value: "history", label: "Historial" },
@@ -99,7 +98,7 @@ function CustomerDetail({ session }) {
                     citiesList={citiesList}
                   />
                 )}
-                {currentTab === "history" && <HistoryTab movementsList={customer?.movements} />}
+                {currentTab === "history" && <HistoryTab movementsList={customer?.movements} rentsList={customer?.rents} />}
                 {
                   //currentTab === "security" && <SecurityTab />
                 }

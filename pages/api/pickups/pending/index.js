@@ -12,8 +12,10 @@ export const config = {
 
 async function getPendingPickupsAPI(req, res, userId) {
   try {
-    const rents = await getPendingPickupsData(userId);
-    res.status(200).json({ data: rents });
+    const { detailed } = req.query;
+    const isDetailed = detailed === "true" || detailed === true;
+    const pickups = await getPendingPickupsData(userId, isDetailed);
+    res.status(200).json({ data: pickups });
   } catch (e) {
     console.error(e);
     res.status(500).json({ errorMsg: e.message });

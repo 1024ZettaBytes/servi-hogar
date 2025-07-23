@@ -20,7 +20,8 @@ import TablaRentasActuales from './TablaRentasActuales';
 import TablaRentasPasadas from './TablaRentasPasadas';
 import AlarmOnIcon from '@mui/icons-material/AlarmOn';
 import NotificationImportantIcon from '@mui/icons-material/NotificationImportant';
-import { useGetRents, getFetcher } from '../api/useRequest';
+import LocalShippingIcon from '@mui/icons-material/LocalShipping';
+import { useGetRents, getFetcher, useGetPendingPickups } from '../api/useRequest';
 
 import NextBreadcrumbs from '@/components/Shared/BreadCrums';
 
@@ -29,6 +30,7 @@ function Rentas({ session }) {
   const paths = ['Inicio', 'Colocadas'];
   const { rentsData, rentsError } = useGetRents('current', getFetcher);
   const { pastRentsData, pastRentsError } = useGetRents('past', getFetcher);
+  const { pendingPickupsList: pickups } = useGetPendingPickups(getFetcher, false);
   const getOnTimeAndExpired = () => {
     let onTime = 0;
     let expired = 0;
@@ -54,6 +56,13 @@ function Rentas({ session }) {
     ({ theme }) => `
         background-color: ${theme.colors.error.lighter};
         color:  ${theme.colors.error.main};
+  `
+  );
+
+    const AvatarWrapperPickup = styled(Avatar)(
+    ({ theme }) => `
+        background-color: ${theme.colors.warning.lighter};
+        color:  ${theme.colors.warning.main};
   `
   );
 
@@ -87,7 +96,7 @@ function Rentas({ session }) {
             ) : (
               <>
                 <Grid container spacing={2} sx={{ marginBottom: 2 }}>
-                  <Grid lg={6} />
+                  <Grid lg={3} />
                   <Grid xs={12} sm={6} md={3} lg={3} item>
                     <Card
                       sx={{
@@ -158,6 +167,44 @@ function Rentas({ session }) {
                               textAlign="left"
                             >
                               Vencidas
+                            </Typography>
+                          </Grid>
+                        </Grid>
+                      </CardContent>
+                    </Card>
+                  </Grid>
+                                    <Grid xs={12} sm={6} md={3} lg={3} item>
+                    <Card
+                      sx={{
+                        px: 1,
+                        height: '100px',
+                        overflowY: 'auto'
+                      }}
+                    >
+                      <CardContent>
+                        <Grid
+                          container
+                          alignItems="center"
+                          justifyItems="center"
+                          textAlign={{ lg: 'center' }}
+                        >
+                          <Grid item lg={2} md={2} xs={2}>
+                            <AvatarWrapperPickup>
+                              <LocalShippingIcon />
+                            </AvatarWrapperPickup>
+                          </Grid>
+                          <Grid item lg={3} md={2} xs={2}>
+                            <Typography variant="h3" gutterBottom noWrap>
+                              {pickups?.count}
+                            </Typography>
+                          </Grid>
+                          <Grid item lg={7} md={8} xs={8}>
+                            <Typography
+                              variant="subtitle2"
+                              noWrap
+                              textAlign="left"
+                            >
+                              Rec. Pendientes
                             </Typography>
                           </Grid>
                         </Grid>
