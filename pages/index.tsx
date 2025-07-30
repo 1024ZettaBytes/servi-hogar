@@ -10,9 +10,6 @@ import {
   CardContent,
   Container,
   Grid,
-  List,
-  ListItem,
-  ListItemText,
   styled,
   Typography
 } from '@mui/material';
@@ -22,7 +19,7 @@ import NotificationImportantIcon from '@mui/icons-material/NotificationImportant
 
 function Home({ session }) {
   const { user } = session;
-  const { alertData, alertError, isLoadingAlert } =
+  const { alertData, alertError } =
     useGetMantainancesAlert(getFetcher);
   const AvatarWrapperError = styled(Avatar)(
     ({ theme }) => `
@@ -43,47 +40,50 @@ function Home({ session }) {
             showAvatar={true}
           />
         </PageTitleWrapper>
-        <Container maxWidth="lg">
-          <Grid container spacing={2} sx={{ marginBottom: 2 }}>
-            <Grid xs={12} sm={6} md={3} lg={4} item>
-              <Card
-                sx={{
-                  px: 1,
-                  height: 'auto',
-                }}
-              >
-                <CardContent>
-                  <Grid
-                    container
-                    alignItems="left"
-                    justifyItems="left"
-                    textAlign={{ lg: 'left' }}
-                    spacing={1}
-                  >
-                    <Grid item lg={2} md={2} xs={2}>
-                      <AvatarWrapperError>
-                        <NotificationImportantIcon />
-                      </AvatarWrapperError>
+        {alertData && !alertError && (
+          <Container maxWidth="lg">
+            <Grid container spacing={2} sx={{ marginBottom: 2 }}>
+              <Grid xs={12} sm={6} md={3} lg={4} item>
+                <Card
+                  sx={{
+                    px: 1,
+                    height: 'auto'
+                  }}
+                >
+                  <CardContent>
+                    <Grid
+                      container
+                      alignItems="left"
+                      justifyItems="left"
+                      textAlign={{ lg: 'left' }}
+                      spacing={1}
+                    >
+                      <Grid item lg={2} md={2} xs={2}>
+                        <AvatarWrapperError>
+                          <NotificationImportantIcon />
+                        </AvatarWrapperError>
+                      </Grid>
+                      <Grid item lg={10} md={12} xs={12}>
+                        <Typography variant="h3" gutterBottom noWrap>
+                          Atención
+                        </Typography>
+                      </Grid>
+                      <Grid item lg={12} md={8} xs={8}>
+                        <Typography variant="subtitle2" textAlign="left">
+                          Los siguientes equipos no han tenido mantenimiento en
+                          los ultimos 365 días
+                        </Typography>
+                      </Grid>
+                      <Grid item lg={12} md={12} xs={12}>
+                        {alertData?.map((machine) => machine.machineNum + ', ')}
+                      </Grid>
                     </Grid>
-                    <Grid item lg={10} md={12} xs={12}>
-                      <Typography variant="h3" gutterBottom noWrap>
-                        Atención
-                      </Typography>
-                    </Grid>
-                    <Grid item lg={12} md={8} xs={8}>
-                      <Typography variant="subtitle2"  textAlign="left">
-                        Los siguientes equipos no han tenido mantenimiento en los ultimos 365 días
-                      </Typography>
-                    </Grid>
-                    <Grid item lg={12} md={12} xs={12} >
-                      {alertData?.map((machine) => machine.machineNum + ', ')}
-                    </Grid>
-                  </Grid>
-                </CardContent>
-              </Card>
+                  </CardContent>
+                </Card>
+              </Grid>
             </Grid>
-          </Grid>
-        </Container>
+          </Container>
+        )}
       </>
       <Footer />
     </>
