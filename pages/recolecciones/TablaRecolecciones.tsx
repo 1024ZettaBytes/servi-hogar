@@ -29,6 +29,7 @@ import ImageSearchIcon from '@mui/icons-material/ImageSearch';
 import SearchIcon from '@mui/icons-material/Search';
 import ImagesModal from '@/components/ImagesModal';
 import { getFetcher, useGetPickups } from 'pages/api/useRequest';
+import ReportProblemIcon from '@mui/icons-material/ReportProblem';
 
 interface TablaRecoleccionesProps {
   userRole: string;
@@ -137,6 +138,7 @@ const TablaRecolecciones: FC<TablaRecoleccionesProps> = ({userRole}) => {
                   <TableCell align="center">Renta</TableCell>
                   <TableCell align="center">Cliente</TableCell>
                   <TableCell align="center">Solicitada</TableCell>
+                  <TableCell align="center">Motivo</TableCell>
                   <TableCell align="center">Recolectada</TableCell>
                   <TableCell align="center">Resultado</TableCell>
                   <TableCell align="center"># Equipo</TableCell>
@@ -183,6 +185,16 @@ const TablaRecolecciones: FC<TablaRecoleccionesProps> = ({userRole}) => {
                             formatTZDate(new Date(pickup?.date), 'MMM DD YYYY')
                           )}
                         </Typography>
+                      </TableCell>
+                      <TableCell align="center">
+                        {pickup?.reason ?
+                        <Tooltip
+                          title={pickup?.reason}
+                          arrow
+                        >
+                          <ReportProblemIcon fontSize="small" />
+                        </Tooltip> : '-'
+                      }
                       </TableCell>
                       <TableCell align="center">
                         <Typography

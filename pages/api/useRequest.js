@@ -336,6 +336,18 @@ export const useGetMantainances = (fetcher) => {
   };
 };
 
+export const useGetMantainancesAlert = (fetcher) => {
+  const { data, error, isLoading } = useSWR(
+    ROUTES.MANTAINANCES_ALERT_API,
+    fetcher
+  );
+  return {
+    alertData: data?.data,
+    alertError: error,
+    isLoadingAlert: isLoading
+  };
+};
+
 export const useGetMantainenceById = (fetcher, id) => {
   const { data, error, isLoading } = useSWR(
     id ? ROUTES.MANTAINANCE_BY_ID_API.replace(':id', id) : null,

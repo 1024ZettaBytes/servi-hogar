@@ -1,7 +1,7 @@
-import { FC, ChangeEvent, useState } from "react";
-import numeral from "numeral";
-import * as str from "string";
-import PropTypes from "prop-types";
+import { FC, ChangeEvent, useState } from 'react';
+import numeral from 'numeral';
+import * as str from 'string';
+import PropTypes from 'prop-types';
 import {
   Tooltip,
   Divider,
@@ -20,18 +20,19 @@ import {
   useTheme,
   CardHeader,
   TextField,
-  InputAdornment,
-} from "@mui/material";
-import { deleteMachines } from "../../lib/client/machinesFetch";
-import { useSnackbar } from "notistack";
-import VisibilityIcon from "@mui/icons-material/Visibility";
-import DeleteTwoToneIcon from "@mui/icons-material/DeleteTwoTone";
-import BulkTableActions from "../../src/components/BulkTableActions";
-import SearchIcon from "@mui/icons-material/Search";
-import NextLink from "next/link";
-import GenericModal from "@/components/GenericModal";
-import { capitalizeFirstLetter, formatTZDate } from "lib/client/utils";
-import { MACHINE_STATUS_LIST } from "../../lib/consts/OBJ_CONTS";
+  InputAdornment
+} from '@mui/material';
+import { deleteMachines } from '../../lib/client/machinesFetch';
+import { useSnackbar } from 'notistack';
+import VisibilityIcon from '@mui/icons-material/Visibility';
+import DeleteTwoToneIcon from '@mui/icons-material/DeleteTwoTone';
+import BulkTableActions from '../../src/components/BulkTableActions';
+import SearchIcon from '@mui/icons-material/Search';
+import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
+import NextLink from 'next/link';
+import GenericModal from '@/components/GenericModal';
+import { capitalizeFirstLetter, formatTZDate } from 'lib/client/utils';
+import { MACHINE_STATUS_LIST } from '../../lib/consts/OBJ_CONTS';
 interface TablaEquiposProps {
   userRole: string;
   className?: string;
@@ -43,15 +44,13 @@ const getStatusDescription = (
   vehicle: any,
   warehouse: any
 ) => {
-  const notAvailable = "Información no disponible";
+  const notAvailable = 'Información no disponible';
   switch (status) {
     case MACHINE_STATUS_LIST.RENTADO:
       return rent ? `Renta #${rent?.num}` : notAvailable;
     case MACHINE_STATUS_LIST.VEHI:
     case MACHINE_STATUS_LIST.REC:
-      return vehicle
-        ? `${vehicle?.operator.name}`
-        : notAvailable;
+      return vehicle ? `${vehicle?.operator.name}` : notAvailable;
     default:
       return warehouse ? warehouse?.name : notAvailable;
   }
@@ -65,7 +64,7 @@ const compareStringsForFilter = (keyWord: string, field: string) => {
 };
 const applyFilters = (machinesList: any[], filter: string): any[] => {
   return machinesList.filter((machine) => {
-    if (!filter || filter === "") {
+    if (!filter || filter === '') {
       return true;
     }
     return (
@@ -76,42 +75,46 @@ const applyFilters = (machinesList: any[], filter: string): any[] => {
           return false;
         }
         switch (key) {
-          case "status": {
+          case 'status': {
             const matchDescription =
-              value["description"] &&
-              compareStringsForFilter(filter, value["description"]);
+              value['description'] &&
+              compareStringsForFilter(filter, value['description']);
             return matchDescription;
           }
-          case "currentWarehouse": {
+          case 'currentWarehouse': {
             const matchWarehouse =
               value &&
-              value["name"] &&
-              compareStringsForFilter(filter, value["name"]);
+              value['name'] &&
+              compareStringsForFilter(filter, value['name']);
             return matchWarehouse;
           }
-          case "currentVehicle": {
+          case 'currentVehicle': {
             const vehicleDesc = value
-              ? "".concat(
-                  value["brand"] || "",
-                  " ",
-                  value["model"] || "",
-                  " ",
-                  value["color"] || "",
-                  " ",
-                  value["year"] || ""
+              ? ''.concat(
+                  value['brand'] || '',
+                  ' ',
+                  value['model'] || '',
+                  ' ',
+                  value['color'] || '',
+                  ' ',
+                  value['year'] || ''
                 )
-              : "";
+              : '';
             const matchVehicle =
               value && compareStringsForFilter(filter, vehicleDesc);
             return matchVehicle;
           }
-          case "machineNum":
-            {
-              return compareStringsForFilter(filter, parseInt(value+"")<1000 ? ('00' + value+"").slice(-3): value+"");
-            }
-          case "brand":
-          case "capacity":
-          case "totalChanges": {
+          case 'machineNum': {
+            return compareStringsForFilter(
+              filter,
+              parseInt(value + '') < 1000
+                ? ('00' + value + '').slice(-3)
+                : value + ''
+            );
+          }
+          case 'brand':
+          case 'capacity':
+          case 'totalChanges': {
             return compareStringsForFilter(filter, value.toString());
           }
         }
@@ -137,8 +140,8 @@ const TablaEquipos: FC<TablaEquiposProps> = ({ userRole, machinesList }) => {
   const selectedBulkActions = selectedMachines.length > 0;
   const [page, setPage] = useState<number>(0);
   const [limit, setLimit] = useState<number>(10);
-  const [filter, setFilter] = useState<string>("");
-  const userCanDelete = ["ADMIN", "AUX", "OPE"].includes(userRole);
+  const [filter, setFilter] = useState<string>('');
+  const userCanDelete = ['ADMIN', 'AUX', 'OPE'].includes(userRole);
   const machineCanBeDeleted = (machineIsActive, machineStatus) => {
     return (
       userCanDelete &&
@@ -196,12 +199,12 @@ const TablaEquipos: FC<TablaEquiposProps> = ({ userRole, machinesList }) => {
     setDeleteModalIsOpen(false);
     setIsDeleting(false);
     enqueueSnackbar(result.msg, {
-      variant: !result.error ? "success" : "error",
+      variant: !result.error ? 'success' : 'error',
       anchorOrigin: {
-        vertical: "top",
-        horizontal: "center",
+        vertical: 'top',
+        horizontal: 'center'
       },
-      autoHideDuration: 2000,
+      autoHideDuration: 2000
     });
 
     if (!result.error) {
@@ -247,16 +250,26 @@ const TablaEquipos: FC<TablaEquiposProps> = ({ userRole, machinesList }) => {
                         <SearchIcon />
                       </InputAdornment>
                     ),
+                    endAdornment: (
+                      <InputAdornment position="end">
+                        <Tooltip
+                          title="TIP: Escriba '0' o '00' al inicio para equipos menores a 100"
+                          arrow
+                        >
+                          <InfoOutlinedIcon fontSize="small" />
+                        </Tooltip>
+                      </InputAdornment>
+                    )
                   }}
-                  sx={{ marginTop: "20px" }}
+                  sx={{ marginTop: '20px' }}
                 />
               </Box>
             }
             sx={{
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "space-between",
-              flexWrap: "wrap",
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              flexWrap: 'wrap'
             }}
             title="Todos los Equipos"
           />
@@ -403,10 +416,10 @@ const TablaEquipos: FC<TablaEquiposProps> = ({ userRole, machinesList }) => {
                           ? capitalizeFirstLetter(
                               formatTZDate(
                                 new Date(machine?.lastRent?.startDate),
-                                "MMM DD YYYY"
+                                'MMM DD YYYY'
                               )
                             )
-                          : ""}
+                          : ''}
                       </Typography>
                     </TableCell>
                     <TableCell align="center">
@@ -431,7 +444,7 @@ const TablaEquipos: FC<TablaEquiposProps> = ({ userRole, machinesList }) => {
                         {capitalizeFirstLetter(
                           formatTZDate(
                             new Date(machine?.createdAt),
-                            "MMM DD YYYY"
+                            'MMM DD YYYY'
                           )
                         )}
                       </Typography>
@@ -441,10 +454,10 @@ const TablaEquipos: FC<TablaEquiposProps> = ({ userRole, machinesList }) => {
                         <Tooltip title="Detalle" arrow>
                           <IconButton
                             sx={{
-                              "&:hover": {
-                                background: theme.colors.primary.lighter,
+                              '&:hover': {
+                                background: theme.colors.primary.lighter
                               },
-                              color: theme.palette.primary.main,
+                              color: theme.palette.primary.main
                             }}
                             color="inherit"
                             size="small"
@@ -461,10 +474,10 @@ const TablaEquipos: FC<TablaEquiposProps> = ({ userRole, machinesList }) => {
                           <IconButton
                             onClick={() => handleOnDeleteClick([machine._id])}
                             sx={{
-                              "&:hover": {
-                                background: theme.colors.error.lighter,
+                              '&:hover': {
+                                background: theme.colors.error.lighter
                               },
-                              color: theme.palette.error.main,
+                              color: theme.palette.error.main
                             }}
                             color="inherit"
                             size="small"
@@ -498,11 +511,11 @@ const TablaEquipos: FC<TablaEquiposProps> = ({ userRole, machinesList }) => {
         title="Atención"
         requiredReason={false}
         text={
-          "¿Está seguro de eliminar a" +
+          '¿Está seguro de eliminar a' +
           (machinesToDelete.length === 1
-            ? "l equipo seleccionado"
-            : " los equipos seleccionados") +
-          "?"
+            ? 'l equipo seleccionado'
+            : ' los equipos seleccionados') +
+          '?'
         }
         isLoading={isDeleting}
         onAccept={handleOnConfirmDelete}
@@ -517,12 +530,12 @@ const TablaEquipos: FC<TablaEquiposProps> = ({ userRole, machinesList }) => {
 
 TablaEquipos.propTypes = {
   userRole: PropTypes.string.isRequired,
-  machinesList: PropTypes.array.isRequired,
+  machinesList: PropTypes.array.isRequired
 };
 
 TablaEquipos.defaultProps = {
-  userRole: "",
-  machinesList: [],
+  userRole: '',
+  machinesList: []
 };
 
 export default TablaEquipos;
