@@ -19,8 +19,7 @@ import NotificationImportantIcon from '@mui/icons-material/NotificationImportant
 
 function Home({ session }) {
   const { user } = session;
-  const { alertData, alertError } =
-    useGetMantainancesAlert(getFetcher);
+  const { alertData, alertError } = useGetMantainancesAlert(getFetcher);
   const AvatarWrapperError = styled(Avatar)(
     ({ theme }) => `
         background-color: ${theme.colors.error.lighter};
@@ -40,7 +39,7 @@ function Home({ session }) {
             showAvatar={true}
           />
         </PageTitleWrapper>
-        {alertData && !alertError && (
+        {alertData && !alertError && alertData.length > 0 && (
           <Container maxWidth="lg">
             <Grid container spacing={2} sx={{ marginBottom: 2 }}>
               <Grid xs={12} sm={6} md={3} lg={4} item>
