@@ -1,6 +1,6 @@
-import PropTypes from "prop-types";
-import { useState } from "react";
-import Dialog from "@mui/material/Dialog";
+import PropTypes from 'prop-types';
+import { useState } from 'react';
+import Dialog from '@mui/material/Dialog';
 import {
   Box,
   Button,
@@ -13,21 +13,22 @@ import {
   Container,
   Skeleton,
   Typography,
-} from "@mui/material";
-import { LoadingButton } from "@mui/lab";
-import { useGetRentById, getFetcher } from "../../../pages/api/useRequest";
-import { savePickup } from "../../../lib/client/pickupsFetch";
+  TextField
+} from '@mui/material';
+import { LoadingButton } from '@mui/lab';
+import { useGetRentById, getFetcher } from '../../../pages/api/useRequest';
+import { savePickup } from '../../../lib/client/pickupsFetch';
 import {
   capitalizeFirstLetter,
   convertDateToLocal,
   convertDateToTZ,
   dateDiffInDays,
   formatTZDate,
-  setDateToMid,
-} from "lib/client/utils";
-import { format } from "date-fns";
-import numeral from "numeral";
-import OperationTime from "pages/renta-rapida/OperationTime";
+  setDateToMid
+} from 'lib/client/utils';
+import { format } from 'date-fns';
+import numeral from 'numeral';
+import OperationTime from 'pages/renta-rapida/OperationTime';
 const defaultInitialDate = (today: Date) => {
   today.setHours(8, 0, 0);
   return today;
@@ -41,17 +42,18 @@ const defaultEndDate = (today: Date) => {
 function SchedulePickupModal(props) {
   const { rentId, handleOnClose, open } = props;
   const { rent, rentByIdError } = useGetRentById(getFetcher, rentId);
+  const [reason, setReason] = useState<string>("");
   const [pickupTime, setPickupTime] = useState<any>({
     date: setDateToMid(new Date()),
-    timeOption: "any",
+    timeOption: 'any',
     fromTime: defaultInitialDate(convertDateToLocal(new Date())),
-    endTime: defaultEndDate(convertDateToLocal(new Date())),
+    endTime: defaultEndDate(convertDateToLocal(new Date()))
   });
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
 
   const [hasErrorSubmitting, setHasErrorSubmitting] = useState<any>({
     error: false,
-    msg: "",
+    msg: ''
   });
   const [selectedDay, setSelectedDay] = useState<any>(null);
   const debt =
@@ -64,13 +66,13 @@ function SchedulePickupModal(props) {
     rent &&
     pickupTime.date &&
     dateDiffInDays(new Date(), new Date(pickupTime.date)) >= 0 &&
-    (pickupTime.timeOption === "any" ||
+    (pickupTime.timeOption === 'any' ||
       (pickupTime.fromTime &&
         pickupTime.endTime &&
         pickupTime.fromTime.getTime() <= pickupTime.endTime.getTime()));
 
   const handleOnSubmit = async () => {
-    setHasErrorSubmitting({ error: false, msg: "" });
+    setHasErrorSubmitting({ error: false, msg: '' });
     setIsSubmitting(true);
     const result = await savePickup({
       rentId,
@@ -80,6 +82,7 @@ function SchedulePickupModal(props) {
         fromTime: convertDateToTZ(pickupTime.fromTime),
         endTime: convertDateToTZ(pickupTime.endTime),
       },
+      reason
     });
     setIsSubmitting(false);
     if (!result.error) {
@@ -90,7 +93,7 @@ function SchedulePickupModal(props) {
   };
 
   const handleClose = () => {
-    setHasErrorSubmitting({ error: false, msg: "" });
+    setHasErrorSubmitting({ error: false, msg: '' });
     setIsSubmitting(false);
     handleOnClose(false);
   };
@@ -103,22 +106,22 @@ function SchedulePickupModal(props) {
           ...pickupTime,
           date: convertDateToTZ(pickupTime.date),
           fromTime: convertDateToTZ(pickupTime.fromTime),
-          endTime: convertDateToTZ(pickupTime.endTime),
+          endTime: convertDateToTZ(pickupTime.endTime)
         },
-        pickup,
+        pickup
       },
       successMessage
     );
   };
   if (rent && !selectedDay) {
-    const dayName = format(new Date(rent?.endDate), "eeee").toLowerCase();
+    const dayName = format(new Date(rent?.endDate), 'eeee').toLowerCase();
     setSelectedDay(dayName);
   }
 
   const onChangePickupTime = (id, value) => {
     if (
-      (id === "fromTime" || id === "endTime") &&
-      value.toString() === "Invalid Date"
+      (id === 'fromTime' || id === 'endTime') &&
+      value.toString() === 'Invalid Date'
     ) {
       value = null;
     }
@@ -126,20 +129,20 @@ function SchedulePickupModal(props) {
     setPickupTime({ ...pickupTime, [id]: value });
   };
   const getExpiration = () => {
-    if (!rent) return "";
+    if (!rent) return '';
     if (rent.remaining > 0) {
       return capitalizeFirstLetter(
-        formatTZDate(new Date(rent?.endDate), "dddd DD MMMM YYYY")
+        formatTZDate(new Date(rent?.endDate), 'dddd DD MMMM YYYY')
       );
     }
     if (rent.remaining === 0) {
-      return "HOY";
+      return 'HOY';
     }
     return `VENCIDA (${Math.abs(rent.remaining)} día(s))`;
   };
 
   return (
-    <Dialog open={open} fullWidth={true} maxWidth={"md"} scroll={"body"}>
+    <Dialog open={open} fullWidth={true} maxWidth={'md'} scroll={'body'}>
       <Card>
         <CardHeader title="Programar recolección" />
         <Divider />
@@ -159,7 +162,7 @@ function SchedulePickupModal(props) {
                   ) : !rent ? (
                     <Skeleton
                       variant="rectangular"
-                      width={"100%"}
+                      width={'100%'}
                       height={300}
                       animation="wave"
                     />
@@ -172,7 +175,7 @@ function SchedulePickupModal(props) {
                           sm={12}
                           lg={2}
                           mt={1}
-                          sx={{ textAlign: { lg: "center" } }}
+                          sx={{ textAlign: { lg: 'center' } }}
                         >
                           <Box>
                             <Typography gutterBottom variant="subtitle2">
@@ -189,7 +192,7 @@ function SchedulePickupModal(props) {
                           sm={12}
                           lg={4}
                           mt={1}
-                          sx={{ textAlign: "left" }}
+                          sx={{ textAlign: 'left' }}
                         >
                           <Box>
                             <Typography gutterBottom variant="subtitle2">
@@ -206,7 +209,7 @@ function SchedulePickupModal(props) {
                           sm={12}
                           lg={2}
                           mt={1}
-                          sx={{ textAlign: "center" }}
+                          sx={{ textAlign: 'center' }}
                         >
                           <Box>
                             <Typography gutterBottom variant="subtitle2">
@@ -223,7 +226,7 @@ function SchedulePickupModal(props) {
                           sm={12}
                           lg={4}
                           mt={1}
-                          sx={{ textAlign: { lg: "center" } }}
+                          sx={{ textAlign: { lg: 'center' } }}
                         >
                           <Box>
                             <Typography gutterBottom variant="subtitle2">
@@ -241,7 +244,7 @@ function SchedulePickupModal(props) {
                           sm={12}
                           lg={2}
                           mt={1}
-                          sx={{ textAlign: { lg: "center" } }}
+                          sx={{ textAlign: { lg: 'center' } }}
                         >
                           <Box>
                             <Typography gutterBottom variant="subtitle2">
@@ -262,7 +265,7 @@ function SchedulePickupModal(props) {
                           sm={12}
                           lg={4}
                           mt={1}
-                          sx={{ textAlign: { lg: "center" } }}
+                          sx={{ textAlign: { lg: 'center' } }}
                         >
                           <Box>
                             <Typography gutterBottom variant="subtitle2">
@@ -282,6 +285,21 @@ function SchedulePickupModal(props) {
                           fromTime={pickupTime.fromTime}
                           endTime={pickupTime.endTime}
                           onChangeTime={onChangePickupTime}
+                        />
+                      </Grid>
+                      <Grid item lg={6}>
+                        <TextField
+                          sx={{ marginY: 2 }}
+                          autoComplete="off"
+                          required
+                          label={'Motivo de recolección'}
+                          multiline
+                          rows={3}
+                          value={reason}
+                          onChange={(event) => {
+                            setReason(event.target.value);
+                          }}
+                          fullWidth={true}
                         />
                       </Grid>
                       {rent?.remaining < 0 && (
@@ -304,7 +322,7 @@ function SchedulePickupModal(props) {
                 <Grid item lg={12}>
                   <Grid
                     container
-                    alignItems={"right"}
+                    alignItems={'right'}
                     direction="row"
                     justifyContent="right"
                     spacing={2}
@@ -344,7 +362,7 @@ function SchedulePickupModal(props) {
 SchedulePickupModal.propTypes = {
   handleOnClose: PropTypes.func.isRequired,
   open: PropTypes.bool.isRequired,
-  rentId: PropTypes.string.isRequired,
+  rentId: PropTypes.string.isRequired
 };
 
 export default SchedulePickupModal;

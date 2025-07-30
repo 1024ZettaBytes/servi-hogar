@@ -21,7 +21,11 @@ import TablaRentasPasadas from './TablaRentasPasadas';
 import AlarmOnIcon from '@mui/icons-material/AlarmOn';
 import NotificationImportantIcon from '@mui/icons-material/NotificationImportant';
 import LocalShippingIcon from '@mui/icons-material/LocalShipping';
-import { useGetRents, getFetcher, useGetPendingPickups } from '../api/useRequest';
+import {
+  useGetRents,
+  getFetcher,
+  useGetPendingPickups
+} from '../api/useRequest';
 
 import NextBreadcrumbs from '@/components/Shared/BreadCrums';
 
@@ -30,7 +34,10 @@ function Rentas({ session }) {
   const paths = ['Inicio', 'Colocadas'];
   const { rentsData, rentsError } = useGetRents('current', getFetcher);
   const { pastRentsData, pastRentsError } = useGetRents('past', getFetcher);
-  const { pendingPickupsList: pickups } = useGetPendingPickups(getFetcher, false);
+  const { pendingPickupsList: pickups } = useGetPendingPickups(
+    getFetcher,
+    false
+  );
   const getOnTimeAndExpired = () => {
     let onTime = 0;
     let expired = 0;
@@ -59,7 +66,7 @@ function Rentas({ session }) {
   `
   );
 
-    const AvatarWrapperPickup = styled(Avatar)(
+  const AvatarWrapperPickup = styled(Avatar)(
     ({ theme }) => `
         background-color: ${theme.colors.warning.lighter};
         color:  ${theme.colors.warning.main};
@@ -173,7 +180,7 @@ function Rentas({ session }) {
                       </CardContent>
                     </Card>
                   </Grid>
-                                    <Grid xs={12} sm={6} md={3} lg={3} item>
+                  <Grid xs={12} sm={6} md={3} lg={3} item>
                     <Card
                       sx={{
                         px: 1,
