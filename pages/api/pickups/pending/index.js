@@ -1,7 +1,8 @@
 import { validateUserPermissions, getUserId } from "../../auth/authUtils";
 import {
   getPendingPickupsData,
-  markCompletePickupData
+  markCompletePickupData,
+  savePickupPromiseData
 } from "../../../../lib/data/Pickups";
 import formidable from "formidable";
 export const config = {

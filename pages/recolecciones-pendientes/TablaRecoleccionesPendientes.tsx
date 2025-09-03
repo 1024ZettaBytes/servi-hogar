@@ -21,10 +21,10 @@ import {
   InputAdornment
 } from '@mui/material';
 import NextLink from 'next/link';
-import { capitalizeFirstLetter, formatTZDate } from 'lib/client/utils';
+import { capitalizeFirstLetter, dateDiffInDays, formatTZDate } from 'lib/client/utils';
 import { format } from 'date-fns';
 import es from 'date-fns/locale/es';
-import { cancelPickup, markWasSentPickup } from '../../lib/client/pickupsFetch';
+import { cancelPickup, markWasSentPickup, savePickupPromise } from '../../lib/client/pickupsFetch';
 import { useSnackbar } from 'notistack';
 import Label from '@/components/Label';
 import WhatsAppIcon from '@mui/icons-material/WhatsApp';
@@ -36,14 +36,13 @@ import GenericModal from '@/components/GenericModal';
 import ModifyPickupModal from '../../src/components/ModifyPickupModal';
 import OperatorModal from '@/components/OperatorModal';
 import FormatModal from '@/components/FormatModal';
-import {
-  getFormatForPickup
-} from '../../lib/consts/OBJ_CONTS';
+import { getFormatForPickup } from '../../lib/consts/OBJ_CONTS';
 import { getFetcher, useGetPrices } from 'pages/api/useRequest';
 import ImageSearchIcon from '@mui/icons-material/ImageSearch';
 import ImagesModal from '@/components/ImagesModal';
 import LocationOnIcon from '@mui/icons-material/LocationOn';
 import PersonAddAlt1Icon from '@mui/icons-material/PersonAddAlt1';
+import CardMembershipIcon from '@mui/icons-material/CardMembership';
 import dayjs from 'dayjs';
 
 interface TablaRecoleccionesPendientesProps {
@@ -160,10 +159,12 @@ const TablaRecoleccionesPendientes: FC<TablaRecoleccionesPendientesProps> = ({
   const { enqueueSnackbar } = useSnackbar();
   const [modifyModalIsOpen, setModifyModalIsOpen] = useState(false);
   const [cancelModalIsOpen, setCancelModalIsOpen] = useState(false);
+  const [promiseModalIsOpen, setPromiseModalIsOpen] = useState(false);
   const [formatIsOpen, setFormatIsOpen] = useState(false);
   const [operatorIsOpen, setOperatorIsOpen] = useState(false);
   const [formatText, setFormatText] = useState<string>('');
   const [isDeleting, setIsDeleting] = useState(false);
+  const [isPromising, setIsPromising] = useState(false);
   const [pickupToEdit, setPickupToEdit] = useState<any>(null);
   const [idToCancel, setIdToCancel] = useState<string>(null);
   const [openImages, setOpenImages] = useState<boolean>(false);
@@ -207,6 +208,10 @@ const TablaRecoleccionesPendientes: FC<TablaRecoleccionesPendientesProps> = ({
     setPickupToEdit(pickup);
     setModifyModalIsOpen(true);
   };
+    const handleOnPromiseClick = (pickup: any) => {
+    setPickupToEdit(pickup);
+    setPromiseModalIsOpen(true);
+  };
   const handleOnOperatorClick = (change: any) => {
     setPickupToEdit(change);
     setOperatorIsOpen(true);
@@ -230,13 +235,29 @@ const TablaRecoleccionesPendientes: FC<TablaRecoleccionesPendientesProps> = ({
     });
   };
 
+  const handleOnConfirmPromise = async () => {
+    setIsPromising(true);
+    const result = await savePickupPromise(pickupToEdit?._id);
+    setPromiseModalIsOpen(false);
+    setIsPromising(false);
+    enqueueSnackbar(result.msg, {
+      variant: !result.error ? 'success' : 'error',
+      anchorOrigin: {
+        vertical: 'top',
+        horizontal: 'center'
+      },
+      autoHideDuration: 2000
+    });
+  };
+
   const filteredPickups = applyFilters(pickupList, filter);
   const paginatedPickups = applyPagination(filteredPickups, page, limit);
-  const changeOperatorIcon = (pickup: any) => {
+  const changeOperatorIcon = (pickup: any, disabled: boolean) => {
     if (!['ADMIN', 'AUX'].includes(userRole)) return '';
     return (
       <Tooltip title="Asignar/Cambiar" arrow>
         <IconButton
+        disabled={disabled}
           onClick={() => handleOnOperatorClick(pickup)}
           sx={{
             '&:hover': {
@@ -321,6 +342,7 @@ const TablaRecoleccionesPendientes: FC<TablaRecoleccionesPendientesProps> = ({
                   pickup.rent.remaining < 0
                     ? Math.abs(pickup.rent.remaining)
                     : 0;
+                const shouldDisableActions = userRole !== "ADMIN" && dateDiffInDays(new Date(pickup.date), new Date()) > 2;
                 return (
                   <TableRow hover key={pickup?._id}>
                     <TableCell align="center">
@@ -412,7 +434,7 @@ const TablaRecoleccionesPendientes: FC<TablaRecoleccionesPendientesProps> = ({
                         gutterBottom
                         noWrap
                       >
-                        {(debtDays > 0 ? debtDays : '-') + " días"}
+                        {(debtDays > 0 ? debtDays : '-') + ' días'}
                       </Typography>
                     </TableCell>
                     <TableCell align="center">
@@ -500,7 +522,7 @@ const TablaRecoleccionesPendientes: FC<TablaRecoleccionesPendientesProps> = ({
                         noWrap
                       >
                         {pickup?.operator ? pickup.operator.name : 'N/A'}
-                        {changeOperatorIcon(pickup)}
+                        {changeOperatorIcon(pickup, shouldDisableActions)}
                       </Typography>
                     </TableCell>
                     <TableCell align="center">
@@ -509,6 +531,7 @@ const TablaRecoleccionesPendientes: FC<TablaRecoleccionesPendientesProps> = ({
                       >
                         <Tooltip title="Marcar recolectada" arrow>
                           <IconButton
+                          
                             sx={{
                               '&:hover': {
                                 background: theme.colors.primary.lighter
@@ -517,7 +540,7 @@ const TablaRecoleccionesPendientes: FC<TablaRecoleccionesPendientesProps> = ({
                             }}
                             color="inherit"
                             size="small"
-                            disabled={!pickup.operator}
+                            disabled={!pickup.operator || shouldDisableActions}
                           >
                             <CheckIcon fontSize="medium" />
                           </IconButton>
@@ -534,11 +557,27 @@ const TablaRecoleccionesPendientes: FC<TablaRecoleccionesPendientesProps> = ({
                           }}
                           color="inherit"
                           size="small"
+                          disabled={shouldDisableActions}
                         >
                           <EditIcon fontSize="small" />
                         </IconButton>
                       </Tooltip>
-
+                      <Tooltip title={pickup.promise ?  `Promesa registrada el ${format(new Date(pickup.promise), 'dd/MM/yyyy HH:mm')}`: 'Registrar promesa de pago'} arrow>
+                        <IconButton
+                          sx={{
+                            '&:hover': {
+                              background: theme.colors.primary.lighter
+                            },
+                            color: !(pickup.promise) ? theme.colors.info.light : theme.colors.shadows.info
+                          }}
+                          onClick={() => !pickup.promise ? handleOnPromiseClick(pickup) : null}
+                          color="inherit"
+                          size="small"
+                          disabled={shouldDisableActions}
+                        >
+                          <CardMembershipIcon fontSize="medium" />
+                        </IconButton>
+                      </Tooltip>
                       {userCanDelete && (
                         <Tooltip title="Cancelar recolección" arrow>
                           <IconButton
@@ -551,6 +590,7 @@ const TablaRecoleccionesPendientes: FC<TablaRecoleccionesPendientesProps> = ({
                             }}
                             color="inherit"
                             size="small"
+                            disabled={shouldDisableActions}
                           >
                             <CancelIcon fontSize="small" />
                           </IconButton>
@@ -578,6 +618,7 @@ const TablaRecoleccionesPendientes: FC<TablaRecoleccionesPendientesProps> = ({
                           }}
                           color="inherit"
                           size="small"
+                          disabled={shouldDisableActions}
                         >
                           <WhatsAppIcon fontSize="small" />
                         </IconButton>
@@ -647,6 +688,21 @@ const TablaRecoleccionesPendientes: FC<TablaRecoleccionesPendientesProps> = ({
           onCancel={() => {
             setCancelModalIsOpen(false);
             setIsDeleting(false);
+          }}
+        />
+      )}
+      {promiseModalIsOpen && (
+        <GenericModal
+          open={promiseModalIsOpen}
+          title="Atención"
+          text={'Se registrará promesa de pago'}
+          isWarning={false}
+          requiredReason={false}
+          isLoading={isPromising}
+          onAccept={handleOnConfirmPromise}
+          onCancel={() => {
+            setPromiseModalIsOpen(false);
+            setIsPromising(false);
           }}
         />
       )}

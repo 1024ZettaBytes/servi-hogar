@@ -1,4 +1,4 @@
-import { capitalizeFirstLetter, formatTZDate } from "../../../lib/client/utils";
+import { capitalizeFirstLetter, formatTZDate } from '../../../lib/client/utils';
 import {
   Grid,
   Typography,
@@ -19,29 +19,30 @@ import {
   Tooltip,
   IconButton,
   useTheme,
-} from "@mui/material";
-import { useSnackbar } from "notistack";
-import { Skeleton } from "@mui/material";
-import EditTwoToneIcon from "@mui/icons-material/EditTwoTone";
-import LocationOnIcon from "@mui/icons-material/LocationOn";
-import AddIcon from "@mui/icons-material/Add";
-import ThumbUpIcon from "@mui/icons-material/ThumbUp";
-import CheckCircleIcon from "@mui/icons-material/CheckCircle";
-import RequestQuoteIcon from "@mui/icons-material/RequestQuote";
-import DangerousIcon from "@mui/icons-material/Dangerous";
-import Text from "@/components/Text";
-import Label from "@/components/Label";
-import ImageSearchIcon from "@mui/icons-material/ImageSearch";
-import { useState } from "react";
-import { updateCustomer } from "lib/client/customersFetch";
-import { LoadingButton } from "@mui/lab";
-import { HOW_FOUND_LIST } from "lib/consts/OBJ_CONTS";
-import numeral from "numeral";
-import ImagesModal from "@/components/ImagesModal";
+  InputAdornment
+} from '@mui/material';
+import { useSnackbar } from 'notistack';
+import { Skeleton } from '@mui/material';
+import EditTwoToneIcon from '@mui/icons-material/EditTwoTone';
+import LocationOnIcon from '@mui/icons-material/LocationOn';
+import AddIcon from '@mui/icons-material/Add';
+import ThumbUpIcon from '@mui/icons-material/ThumbUp';
+import CheckCircleIcon from '@mui/icons-material/CheckCircle';
+import RequestQuoteIcon from '@mui/icons-material/RequestQuote';
+import DangerousIcon from '@mui/icons-material/Dangerous';
+import Text from '@/components/Text';
+import Label from '@/components/Label';
+import ImageSearchIcon from '@mui/icons-material/ImageSearch';
+import { useState } from 'react';
+import { updateCustomer } from 'lib/client/customersFetch';
+import { LoadingButton } from '@mui/lab';
+import { HOW_FOUND_LIST } from 'lib/consts/OBJ_CONTS';
+import numeral from 'numeral';
+import ImagesModal from '@/components/ImagesModal';
 
 const getHowFoundLabel = (howFoundId: string, referrer?: string) => {
   let map = { ...HOW_FOUND_LIST };
-  if (howFoundId === "referred") map.referred = `Recomendado por ${referrer}`;
+  if (howFoundId === 'referred') map.referred = `Recomendado por ${referrer}`;
   return map[howFoundId];
 };
 const getLevelLabel = (customerLevelId: string, customerLevelName: string) => {
@@ -75,7 +76,7 @@ const getLevelLabel = (customerLevelId: string, customerLevelName: string) => {
         <DangerousIcon fontSize="small" />
         <b>{customerLevelName}</b>
       </Label>
-    ),
+    )
   };
   return map[customerLevelId];
 };
@@ -85,7 +86,7 @@ const getIdOperation = (type: string) => (
     name="type"
     variant="outlined"
     size="small"
-    sx={{ display: "none" }}
+    sx={{ display: 'none' }}
     value={type}
   />
 );
@@ -99,23 +100,23 @@ function CustomerInfoTab({
   customer,
   customerLevelList,
   customerList,
-  citiesList,
+  citiesList
 }) {
   const theme = useTheme();
   const { enqueueSnackbar } = useSnackbar();
   const [isEditing, setIsEditing] = useState<any>({
     info: false,
-    residence: false,
+    residence: false
   });
   const [openImages, setOpenImages] = useState<boolean>(false);
   const [customerToEdit, setCustomerToEdit] = useState<any>({ isSet: false });
   const [isUpdating, setIsUpdating] = useState<any>({
     info: false,
-    residence: false,
+    residence: false
   });
   const [hasErrorUpdating, setHasErrorUpdating] = useState<any>({
-    info: { error: false, msg: "" },
-    residence: { error: false, msg: "" },
+    info: { error: false, msg: '' },
+    residence: { error: false, msg: '' }
   });
   const handleReferredBy = (customerId) => {
     const referredBy = customerList.filter(
@@ -129,7 +130,7 @@ function CustomerInfoTab({
     const sector = {};
     setCustomerToEdit({
       ...customerToEdit,
-      currentResidence: { ...customerToEdit.currentResidence, city, sector },
+      currentResidence: { ...customerToEdit.currentResidence, city, sector }
     });
   }
 
@@ -137,7 +138,7 @@ function CustomerInfoTab({
     const sector = { _id: sectorId };
     setCustomerToEdit({
       ...customerToEdit,
-      currentResidence: { ...customerToEdit.currentResidence, sector },
+      currentResidence: { ...customerToEdit.currentResidence, sector }
     });
   }
   async function handleUpdateCustomer(event) {
@@ -145,35 +146,35 @@ function CustomerInfoTab({
     const type = event.target.type.value;
     setHasErrorUpdating({
       ...hasErrorUpdating,
-      [type]: { error: false, msg: "" },
+      [type]: { error: false, msg: '' }
     });
     setIsUpdating({ ...isUpdating, [type]: true });
     const result = await updateCustomer({
       ...customerToEdit,
-      [type]: true,
+      [type]: true
     });
     setIsUpdating({ ...isUpdating, [type]: false });
     if (!result.error) {
       setIsEditing({ ...isEditing, [type]: false });
       enqueueSnackbar(result.msg, {
-        variant: "success",
+        variant: 'success',
         anchorOrigin: {
-          vertical: "top",
-          horizontal: "center",
+          vertical: 'top',
+          horizontal: 'center'
         },
-        autoHideDuration: 1500,
+        autoHideDuration: 1500
       });
     } else {
       setHasErrorUpdating({
         ...hasErrorUpdating,
-        [type]: { error: true, msg: result.msg },
+        [type]: { error: true, msg: result.msg }
       });
     }
   }
   const getInfoTextField = (
     field: string,
     minLength: number,
-    maxLength: number,
+    maxLength: number
   ) => (
     <TextField
       fullWidth
@@ -188,7 +189,7 @@ function CustomerInfoTab({
       onChange={(e) => {
         setCustomerToEdit({
           ...customerToEdit,
-          [field]: e.target.value,
+          [field]: e.target.value
         });
       }}
     />
@@ -214,8 +215,8 @@ function CustomerInfoTab({
           ...customerToEdit,
           currentResidence: {
             ...customerToEdit.currentResidence,
-            [field]: e.target.value,
-          },
+            [field]: e.target.value
+          }
         });
       }}
     />
@@ -258,12 +259,12 @@ function CustomerInfoTab({
               <Box component="form" onSubmit={handleUpdateCustomer}>
                 <Grid
                   container
-                  direction={"row"}
+                  direction={'row'}
                   alignItems="left"
                   justifyItems="left"
                 >
                   <Grid container item spacing={0} xs={12} sm={6} md={6}>
-                    <Grid item xs={3} sm={6} md={6} textAlign={{ sm: "right" }}>
+                    <Grid item xs={3} sm={6} md={6} textAlign={{ sm: 'right' }}>
                       <Box pr={2} pb={2}>
                         Nombre:
                       </Box>
@@ -273,65 +274,65 @@ function CustomerInfoTab({
                         !isEditing.info ? (
                           <Text color="black">{customer?.name}</Text>
                         ) : (
-                          getInfoTextField("name", 1, 100)
+                          getInfoTextField('name', 1, 100)
                         )
                       ) : (
                         <Skeleton
                           variant="text"
-                          sx={{ fontSize: "1rem", width: "100px" }}
+                          sx={{ fontSize: '1rem', width: '100px' }}
                         />
                       )}
                     </Grid>
-                    <Grid item xs={3} sm={6} md={6} textAlign={{ sm: "right" }}>
+                    <Grid item xs={3} sm={6} md={6} textAlign={{ sm: 'right' }}>
                       <Box pr={2} pb={2}>
                         Celular:
                       </Box>
                     </Grid>
                     <Grid item xs={9} sm={6} md={6}>
-                      <Box sx={{ maxWidth: { xs: "auto", sm: 300 } }}>
+                      <Box sx={{ maxWidth: { xs: 'auto', sm: 300 } }}>
                         {customer ? (
                           !isEditing.info ? (
                             <Text color="black">{customer?.cell}</Text>
                           ) : (
-                            getInfoTextField("cell", 10, 10)
+                            getInfoTextField('cell', 10, 10)
                           )
                         ) : (
                           <Skeleton
                             variant="text"
-                            sx={{ fontSize: "1rem", width: "100px" }}
+                            sx={{ fontSize: '1rem', width: '100px' }}
                           />
                         )}
                       </Box>
                     </Grid>
-                    <Grid item xs={3} sm={6} md={6} textAlign={{ sm: "right" }}>
+                    <Grid item xs={3} sm={6} md={6} textAlign={{ sm: 'right' }}>
                       <Box pr={2} pb={2}>
                         Correo:
                       </Box>
                     </Grid>
                     <Grid item xs={9} sm={6} md={6}>
-                      <Box sx={{ maxWidth: { xs: "auto", sm: 300 } }}>
+                      <Box sx={{ maxWidth: { xs: 'auto', sm: 300 } }}>
                         {customer ? (
-                          !isEditing.info || role !== "ADMIN" ? (
+                          !isEditing.info || role !== 'ADMIN' ? (
                             <Text color="black">{customer?.email}</Text>
                           ) : (
-                            getInfoTextField("email", 0, 100)
+                            getInfoTextField('email', 0, 100)
                           )
                         ) : (
                           <Skeleton
                             variant="text"
-                            sx={{ fontSize: "1rem", width: "100px" }}
+                            sx={{ fontSize: '1rem', width: '100px' }}
                           />
                         )}
                       </Box>
                     </Grid>
-                    <Grid item xs={3} sm={6} md={6} textAlign={{ sm: "right" }}>
+                    <Grid item xs={3} sm={6} md={6} textAlign={{ sm: 'right' }}>
                       <Box pr={2} pb={2}>
                         Nivel:
                       </Box>
                     </Grid>
                     <Grid item xs={9} sm={6} md={6}>
                       {customer ? (
-                        !isEditing.info || role !== "ADMIN" ? (
+                        !isEditing.info || role !== 'ADMIN' ? (
                           getLevelLabel(
                             customer?.level?.id,
                             customer?.level?.name
@@ -345,11 +346,11 @@ function CustomerInfoTab({
                               name="level"
                               required
                               autoComplete="off"
-                              value={customerToEdit?.level._id || ""}
+                              value={customerToEdit?.level._id || ''}
                               onChange={(event) =>
                                 setCustomerToEdit({
                                   ...customerToEdit,
-                                  level: { _id: event.target.value },
+                                  level: { _id: event.target.value }
                                 })
                               }
                             >
@@ -363,25 +364,25 @@ function CustomerInfoTab({
                             </Select>
                           </FormControl>
                         ) : (
-                          getErrorMessage("Error al obtener los niveles")
+                          getErrorMessage('Error al obtener los niveles')
                         )
                       ) : (
                         <Skeleton
                           variant="text"
-                          sx={{ fontSize: "1rem", width: "100px" }}
+                          sx={{ fontSize: '1rem', width: '100px' }}
                         />
                       )}
                     </Grid>
-                    <Grid item xs={3} sm={6} md={6} textAlign={{ sm: "right" }}>
+                    <Grid item xs={4} sm={6} md={6} textAlign={{ sm: 'right' }}>
                       <Box pr={2} pb={2}>
                         Comentarios:
                       </Box>
                     </Grid>
-                    <Grid item xs={9} sm={6} md={6}>
-                      <Box sx={{ maxWidth: { xs: "auto", sm: 300 } }}>
+                    <Grid item xs={8} sm={6} md={6}>
+                      <Box sx={{ maxWidth: { xs: 'auto', sm: 300 } }}>
                         {customer ? (
-                          !isEditing.info || role !== "ADMIN" ? (
-                            <div style={{ fontStyle: "italic" }}>
+                          !isEditing.info || role !== 'ADMIN' ? (
+                            <div style={{ fontStyle: 'italic' }}>
                               <Text color="black">{customer?.comments}</Text>
                             </div>
                           ) : (
@@ -396,7 +397,7 @@ function CustomerInfoTab({
                               onChange={(e) => {
                                 setCustomerToEdit({
                                   ...customerToEdit,
-                                  comments: e.target.value,
+                                  comments: e.target.value
                                 });
                               }}
                             />
@@ -404,12 +405,54 @@ function CustomerInfoTab({
                         ) : (
                           <Skeleton
                             variant="text"
-                            sx={{ fontSize: "1rem", width: "100px" }}
+                            sx={{ fontSize: '1rem', width: '100px' }}
                           />
                         )}
                       </Box>
                     </Grid>
-                    <Grid item xs={3} sm={6} md={6} textAlign={{ sm: "right" }}>
+                    <Grid item xs={3} sm={6} md={6} mt={1} textAlign={{ sm: 'right' }}>
+                      <Box pr={2} pb={2}>
+                        Periodo de pago:
+                      </Box>
+                    </Grid>
+                    <Grid item xs={9} sm={6} md={6} mt={1}>
+                      <Box sx={{ maxWidth: { xs: 'auto', sm: 300 } }}>
+                        {customer ? (
+                          !isEditing.info || role !== 'ADMIN' ? (
+                            <Text color="black">{`${
+                              customer?.maxPayDays || 7
+                            } días`}</Text>
+                          ) : (
+                            <TextField
+                              id="maxPayDays"
+                              name="maxPayDays"
+                              size='small'
+                              type="number"
+                              InputProps={{
+                                endAdornment: <InputAdornment position="end">días</InputAdornment>,
+                                inputProps: {
+                                  min: 7,
+                                  max: 45
+                                }
+                              }}
+                              value={customerToEdit?.maxPayDays || 7}
+                              onChange={(e) => {
+                                setCustomerToEdit({
+                                  ...customerToEdit,
+                                  maxPayDays: e.target.value
+                                });
+                              }}
+                            />
+                          )
+                        ) : (
+                          <Skeleton
+                            variant="text"
+                            sx={{ fontSize: '1rem', width: '100px' }}
+                          />
+                        )}
+                      </Box>
+                    </Grid>
+                    <Grid item xs={3} sm={6} md={6} textAlign={{ sm: 'right' }}>
                       <Box pr={2} pb={2}>
                         Fuente:
                       </Box>
@@ -427,11 +470,11 @@ function CustomerInfoTab({
                           <RadioGroup
                             aria-labelledby="howFound-radiogroup-label"
                             name="howFound"
-                            defaultValue={customer?.howFound || ""}
+                            defaultValue={customer?.howFound || ''}
                             onChange={(e) =>
                               setCustomerToEdit({
                                 ...customerToEdit,
-                                howFound: e.target.value,
+                                howFound: e.target.value
                               })
                             }
                           >
@@ -448,18 +491,18 @@ function CustomerInfoTab({
                       ) : (
                         <Skeleton
                           variant="text"
-                          sx={{ fontSize: "1rem", width: "100px" }}
+                          sx={{ fontSize: '1rem', width: '100px' }}
                         />
                       )}
                     </Grid>
-                    {isEditing.info && customerToEdit?.howFound === "referred" && (
+                    {isEditing.info && customerToEdit?.howFound === 'referred' && (
                       <>
                         <Grid
                           item
                           xs={3}
                           sm={6}
                           md={6}
-                          textAlign={{ sm: "right" }}
+                          textAlign={{ sm: 'right' }}
                         >
                           <Box pr={2} pb={2}>
                             Recomendado por:
@@ -476,7 +519,7 @@ function CustomerInfoTab({
                                 .map((c) => {
                                   return {
                                     label: `${c.name}`,
-                                    id: c._id,
+                                    id: c._id
                                   };
                                 })}
                               onChange={(
@@ -490,7 +533,7 @@ function CustomerInfoTab({
                                 customerToEdit.referredBy
                                   ? {
                                       label: `${customerToEdit.referredBy.name}`,
-                                      id: customerToEdit.referredBy._id,
+                                      id: customerToEdit.referredBy._id
                                     }
                                   : null
                               }
@@ -503,7 +546,7 @@ function CustomerInfoTab({
                               )}
                             />
                           ) : (
-                            getErrorMessage("Error al obtener los clientes")
+                            getErrorMessage('Error al obtener los clientes')
                           )}
                         </Grid>
                       </>
@@ -515,7 +558,7 @@ function CustomerInfoTab({
                           xs={6}
                           sm={6}
                           md={6}
-                          textAlign={{ sm: "right" }}
+                          textAlign={{ sm: 'right' }}
                         >
                           <Box pr={2} pb={2}>
                             Fecha de ingreso:
@@ -527,14 +570,14 @@ function CustomerInfoTab({
                               {capitalizeFirstLetter(
                                 formatTZDate(
                                   new Date(customer?.createdAt),
-                                  "MMMM DD YYYY HH:mm:ss"
+                                  'MMMM DD YYYY HH:mm:ss'
                                 )
                               )}
                             </Text>
                           ) : (
                             <Skeleton
                               variant="text"
-                              sx={{ fontSize: "1rem", width: "100px" }}
+                              sx={{ fontSize: '1rem', width: '100px' }}
                             />
                           )}
                         </Grid>
@@ -545,7 +588,7 @@ function CustomerInfoTab({
                 {isEditing.info && (
                   <>
                     {hasErrorUpdating.info.error && (
-                      <Grid item xs={12} sm={12} md={12} textAlign={"center"}>
+                      <Grid item xs={12} sm={12} md={12} textAlign={'center'}>
                         <br />
                         <Alert severity="error">
                           {hasErrorUpdating.info.msg}
@@ -557,14 +600,14 @@ function CustomerInfoTab({
                       xs={0}
                       sm={0}
                       md={0}
-                      textAlign={{ sm: "right" }}
+                      textAlign={{ sm: 'right' }}
                     ></Grid>
                     <Grid
                       item
                       xs={12}
                       sm={12}
                       md={12}
-                      textAlign={"center"}
+                      textAlign={'center'}
                       marginTop={2}
                     >
                       <Button
@@ -574,7 +617,7 @@ function CustomerInfoTab({
                           setIsEditing({ ...isEditing, info: false });
                           setHasErrorUpdating({
                             ...hasErrorUpdating,
-                            info: false,
+                            info: false
                           });
                           setIsUpdating({ ...isUpdating, info: false });
                         }}
@@ -591,7 +634,7 @@ function CustomerInfoTab({
                       >
                         Guardar
                       </LoadingButton>
-                      {getIdOperation("info")}
+                      {getIdOperation('info')}
                     </Grid>
                   </>
                 )}
@@ -635,7 +678,7 @@ function CustomerInfoTab({
               <Box component="form" onSubmit={handleUpdateCustomer}>
                 <Grid
                   container
-                  direction={"row"}
+                  direction={'row'}
                   alignItems="center"
                   justifyItems="center"
                 >
@@ -647,7 +690,7 @@ function CustomerInfoTab({
                           xs={3}
                           sm={6}
                           md={6}
-                          textAlign={{ sm: "right" }}
+                          textAlign={{ sm: 'right' }}
                         >
                           <Box pr={2} pb={2}>
                             Fotos:
@@ -663,11 +706,10 @@ function CustomerInfoTab({
                                       setOpenImages(true);
                                     }}
                                     sx={{
-                                      "&:hover": {
-                                        background:
-                                          theme.colors.primary.lighter,
+                                      '&:hover': {
+                                        background: theme.colors.primary.lighter
                                       },
-                                      color: theme.palette.primary.main,
+                                      color: theme.palette.primary.main
                                     }}
                                     color="inherit"
                                     size="small"
@@ -676,13 +718,13 @@ function CustomerInfoTab({
                                   </IconButton>
                                 </Tooltip>
                               ) : (
-                                "N/A"
-                              )}{" "}
+                                'N/A'
+                              )}{' '}
                             </>
                           ) : (
                             <Skeleton
                               variant="text"
-                              sx={{ fontSize: "1rem", width: "100px" }}
+                              sx={{ fontSize: '1rem', width: '100px' }}
                             />
                           )}
                         </Grid>
@@ -690,7 +732,7 @@ function CustomerInfoTab({
                           <ImagesModal
                             open={openImages}
                             imagesObj={customer.residenceImages}
-                            title={"Fotos de renta"}
+                            title={'Fotos de renta'}
                             text=""
                             onClose={() => {
                               setOpenImages(false);
@@ -699,8 +741,8 @@ function CustomerInfoTab({
                           />
                         )}
                       </>
-                    )}{" "}
-                    <Grid item xs={3} sm={6} md={6} textAlign={{ sm: "right" }}>
+                    )}{' '}
+                    <Grid item xs={3} sm={6} md={6} textAlign={{ sm: 'right' }}>
                       <Box pr={2} pb={2}>
                         Calle y número:
                       </Box>
@@ -712,16 +754,16 @@ function CustomerInfoTab({
                             {customer?.currentResidence.street}
                           </Text>
                         ) : (
-                          getResidenceTextField("street", 1, 100)
+                          getResidenceTextField('street', 1, 100)
                         )
                       ) : (
                         <Skeleton
                           variant="text"
-                          sx={{ fontSize: "1rem", width: "100px" }}
+                          sx={{ fontSize: '1rem', width: '100px' }}
                         />
                       )}
                     </Grid>
-                    <Grid item xs={3} sm={6} md={6} textAlign={{ sm: "right" }}>
+                    <Grid item xs={3} sm={6} md={6} textAlign={{ sm: 'right' }}>
                       <Box pr={2} pb={2}>
                         Colonia:
                       </Box>
@@ -733,16 +775,16 @@ function CustomerInfoTab({
                             {customer?.currentResidence.suburb}
                           </Text>
                         ) : (
-                          getResidenceTextField("suburb", 1, 100)
+                          getResidenceTextField('suburb', 1, 100)
                         )
                       ) : (
                         <Skeleton
                           variant="text"
-                          sx={{ fontSize: "1rem", width: "100px" }}
+                          sx={{ fontSize: '1rem', width: '100px' }}
                         />
                       )}
                     </Grid>
-                    <Grid item xs={3} sm={6} md={6} textAlign={{ sm: "right" }}>
+                    <Grid item xs={3} sm={6} md={6} textAlign={{ sm: 'right' }}>
                       <Box pr={2} pb={2}>
                         Ciudad:
                       </Box>
@@ -754,7 +796,7 @@ function CustomerInfoTab({
                             {customer?.currentResidence?.city.name}
                           </Text>
                         ) : (
-                          <FormControl sx={{ width: "50%" }}>
+                          <FormControl sx={{ width: '50%' }}>
                             <Select
                               labelId="city-id"
                               id="city"
@@ -764,7 +806,7 @@ function CustomerInfoTab({
                               size="small"
                               value={
                                 customerToEdit?.currentResidence?.city?._id ||
-                                ""
+                                ''
                               }
                               onChange={(event) =>
                                 handleCitySelection(event.target.value)
@@ -783,11 +825,11 @@ function CustomerInfoTab({
                       ) : (
                         <Skeleton
                           variant="text"
-                          sx={{ fontSize: "1rem", width: "100px" }}
+                          sx={{ fontSize: '1rem', width: '100px' }}
                         />
                       )}
                     </Grid>
-                    <Grid item xs={3} sm={6} md={6} textAlign={{ sm: "right" }}>
+                    <Grid item xs={3} sm={6} md={6} textAlign={{ sm: 'right' }}>
                       <Box pr={2} pb={2}>
                         Sector:
                       </Box>
@@ -799,7 +841,7 @@ function CustomerInfoTab({
                             {customer?.currentResidence?.sector.name}
                           </Text>
                         ) : (
-                          <FormControl sx={{ width: "50%" }}>
+                          <FormControl sx={{ width: '50%' }}>
                             <Select
                               labelId="sector-id"
                               id="sector"
@@ -810,7 +852,7 @@ function CustomerInfoTab({
                               placeholder="Seleccione un valor"
                               value={
                                 customerToEdit?.currentResidence?.sector._id ||
-                                ""
+                                ''
                               }
                               disabled={
                                 !customerToEdit?.currentResidence.sector
@@ -838,13 +880,13 @@ function CustomerInfoTab({
                       ) : (
                         <Skeleton
                           variant="text"
-                          sx={{ fontSize: "1rem", width: "100px" }}
+                          sx={{ fontSize: '1rem', width: '100px' }}
                         />
                       )}
                     </Grid>
                   </Grid>
                   <Grid container item spacing={0} xs={12} sm={6} md={6}>
-                    <Grid item xs={3} sm={6} md={6} textAlign={{ sm: "right" }}>
+                    <Grid item xs={3} sm={6} md={6} textAlign={{ sm: 'right' }}>
                       <Box pr={2} pb={2}>
                         Domicilio Referencia:
                       </Box>
@@ -856,16 +898,16 @@ function CustomerInfoTab({
                             {customer?.currentResidence?.residenceRef}
                           </Text>
                         ) : (
-                          getResidenceTextField("residenceRef", 1, 250)
+                          getResidenceTextField('residenceRef', 1, 250)
                         )
                       ) : (
                         <Skeleton
                           variant="text"
-                          sx={{ fontSize: "1rem", width: "100px" }}
+                          sx={{ fontSize: '1rem', width: '100px' }}
                         />
                       )}
                     </Grid>
-                    <Grid item xs={3} sm={6} md={6} textAlign={{ sm: "right" }}>
+                    <Grid item xs={3} sm={6} md={6} textAlign={{ sm: 'right' }}>
                       <Box pr={2} pb={2}>
                         Nombre Referencia:
                       </Box>
@@ -877,16 +919,16 @@ function CustomerInfoTab({
                             {customer?.currentResidence?.nameRef}
                           </Text>
                         ) : (
-                          getResidenceTextField("nameRef", 1, 100)
+                          getResidenceTextField('nameRef', 1, 100)
                         )
                       ) : (
                         <Skeleton
                           variant="text"
-                          sx={{ fontSize: "1rem", width: "100px" }}
+                          sx={{ fontSize: '1rem', width: '100px' }}
                         />
                       )}
                     </Grid>
-                    <Grid item xs={3} sm={6} md={6} textAlign={{ sm: "right" }}>
+                    <Grid item xs={3} sm={6} md={6} textAlign={{ sm: 'right' }}>
                       <Box pr={2} pb={2}>
                         Telefono referencia:
                       </Box>
@@ -898,12 +940,12 @@ function CustomerInfoTab({
                             {customer?.currentResidence?.telRef}
                           </Text>
                         ) : (
-                          getResidenceTextField("telRef", 1, 100)
+                          getResidenceTextField('telRef', 1, 100)
                         )
                       ) : (
                         <Skeleton
                           variant="text"
-                          sx={{ fontSize: "1rem", width: "100px" }}
+                          sx={{ fontSize: '1rem', width: '100px' }}
                         />
                       )}
                     </Grid>
@@ -925,7 +967,7 @@ function CustomerInfoTab({
                             <Button
                               variant="outlined"
                               href={`${customer?.currentResidence?.maps}`}
-                              sx={{ width: "50%" }}
+                              sx={{ width: '50%' }}
                               target="_blank"
                               startIcon={<LocationOnIcon />}
                             >
@@ -935,7 +977,7 @@ function CustomerInfoTab({
                         ) : (
                           <Skeleton
                             variant="text"
-                            sx={{ fontSize: "1rem", width: "100px" }}
+                            sx={{ fontSize: '1rem', width: '100px' }}
                           />
                         )}
                       </Grid>
@@ -946,7 +988,7 @@ function CustomerInfoTab({
                           xs={3}
                           sm={6}
                           md={6}
-                          textAlign={{ sm: "right" }}
+                          textAlign={{ sm: 'right' }}
                         >
                           <Box pr={2} pb={2}>
                             Maps:
@@ -966,8 +1008,8 @@ function CustomerInfoTab({
                                 ...customerToEdit,
                                 currentResidence: {
                                   ...customerToEdit.currentResidence,
-                                  maps: e.target.value,
-                                },
+                                  maps: e.target.value
+                                }
                               });
                             }}
                           />
@@ -979,7 +1021,7 @@ function CustomerInfoTab({
                 {isEditing.residence && (
                   <>
                     {hasErrorUpdating.residence.error && (
-                      <Grid item xs={12} sm={12} md={12} textAlign={"center"}>
+                      <Grid item xs={12} sm={12} md={12} textAlign={'center'}>
                         <br />
                         <Alert severity="error">
                           {hasErrorUpdating.residence.msg}
@@ -991,14 +1033,14 @@ function CustomerInfoTab({
                       xs={0}
                       sm={6}
                       md={4}
-                      textAlign={{ sm: "right" }}
+                      textAlign={{ sm: 'right' }}
                     ></Grid>
                     <Grid
                       item
                       xs={12}
                       sm={12}
                       md={12}
-                      textAlign={"center"}
+                      textAlign={'center'}
                       marginTop={2}
                     >
                       <Button
@@ -1008,7 +1050,7 @@ function CustomerInfoTab({
                           setIsEditing({ ...isEditing, residence: false });
                           setHasErrorUpdating({
                             ...hasErrorUpdating,
-                            residence: false,
+                            residence: false
                           });
                           setIsUpdating({ ...isUpdating, residence: false });
                         }}
@@ -1025,7 +1067,7 @@ function CustomerInfoTab({
                       >
                         Guardar
                       </LoadingButton>
-                      {getIdOperation("residence")}
+                      {getIdOperation('residence')}
                     </Grid>
                   </>
                 )}
@@ -1055,7 +1097,7 @@ function CustomerInfoTab({
                 <Typography variant="subtitle2">
                   <Grid
                     container
-                    direction={"row"}
+                    direction={'row'}
                     alignItems="center"
                     justifyItems="center"
                   >
@@ -1065,7 +1107,7 @@ function CustomerInfoTab({
                         xs={6}
                         sm={6}
                         md={6}
-                        textAlign={{ sm: "right" }}
+                        textAlign={{ sm: 'right' }}
                       >
                         <Box pr={2} pb={2}>
                           Saldo del cliente:
@@ -1079,7 +1121,7 @@ function CustomerInfoTab({
                         ) : (
                           <Skeleton
                             variant="text"
-                            sx={{ fontSize: "1rem", width: "100px" }}
+                            sx={{ fontSize: '1rem', width: '100px' }}
                           />
                         )}
                       </Grid>
@@ -1088,7 +1130,7 @@ function CustomerInfoTab({
                         xs={6}
                         sm={6}
                         md={6}
-                        textAlign={{ sm: "right" }}
+                        textAlign={{ sm: 'right' }}
                       >
                         <Box pr={2} pb={2}>
                           Renta actual:
@@ -1101,17 +1143,17 @@ function CustomerInfoTab({
                               ? `${capitalizeFirstLetter(
                                   formatTZDate(
                                     new Date(customer.currentRent.startDate),
-                                    "MMM DD YYYY"
+                                    'MMM DD YYYY'
                                   )
                                 )} (${
                                   customer?.currentRent?.totalWeeks
                                 } semana(s))`
-                              : "N/A"}
+                              : 'N/A'}
                           </Text>
                         ) : (
                           <Skeleton
                             variant="text"
-                            sx={{ fontSize: "1rem", width: "100px" }}
+                            sx={{ fontSize: '1rem', width: '100px' }}
                           />
                         )}
                       </Grid>
@@ -1120,7 +1162,7 @@ function CustomerInfoTab({
                         xs={6}
                         sm={6}
                         md={6}
-                        textAlign={{ sm: "right" }}
+                        textAlign={{ sm: 'right' }}
                       >
                         <Box pr={2} pb={2}>
                           Mayor tiempo de renta:
@@ -1129,12 +1171,12 @@ function CustomerInfoTab({
                       <Grid item xs={6} sm={6} md={6}>
                         {customer ? (
                           <Text color="black">
-                            {customer?.longestWeeks + " semana(s)"}
+                            {customer?.longestWeeks + ' semana(s)'}
                           </Text>
                         ) : (
                           <Skeleton
                             variant="text"
-                            sx={{ fontSize: "1rem", width: "100px" }}
+                            sx={{ fontSize: '1rem', width: '100px' }}
                           />
                         )}
                       </Grid>
@@ -1143,7 +1185,7 @@ function CustomerInfoTab({
                         xs={6}
                         sm={6}
                         md={6}
-                        textAlign={{ sm: "right" }}
+                        textAlign={{ sm: 'right' }}
                       >
                         <Box pr={2} pb={2}>
                           Renta total:
@@ -1152,12 +1194,12 @@ function CustomerInfoTab({
                       <Grid item xs={6} sm={6} md={6}>
                         {customer ? (
                           <Text color="black">
-                            {customer?.totalRentWeeks + " semanas(s)"}
+                            {customer?.totalRentWeeks + ' semanas(s)'}
                           </Text>
                         ) : (
                           <Skeleton
                             variant="text"
-                            sx={{ fontSize: "1rem", width: "100px" }}
+                            sx={{ fontSize: '1rem', width: '100px' }}
                           />
                         )}
                       </Grid>
@@ -1166,7 +1208,7 @@ function CustomerInfoTab({
                         xs={6}
                         sm={6}
                         md={6}
-                        textAlign={{ sm: "right" }}
+                        textAlign={{ sm: 'right' }}
                       >
                         <Box pr={2} pb={2}>
                           Clientes recomendados:
@@ -1182,7 +1224,7 @@ function CustomerInfoTab({
                         ) : (
                           <Skeleton
                             variant="text"
-                            sx={{ fontSize: "1rem", width: "100px" }}
+                            sx={{ fontSize: '1rem', width: '100px' }}
                           />
                         )}
                       </Grid>
@@ -1191,7 +1233,7 @@ function CustomerInfoTab({
                         xs={6}
                         sm={6}
                         md={6}
-                        textAlign={{ sm: "right" }}
+                        textAlign={{ sm: 'right' }}
                       >
                         <Box pr={2} pb={2}>
                           Semanas gratis:
@@ -1203,7 +1245,7 @@ function CustomerInfoTab({
                         ) : (
                           <Skeleton
                             variant="text"
-                            sx={{ fontSize: "1rem", width: "100px" }}
+                            sx={{ fontSize: '1rem', width: '100px' }}
                           />
                         )}
                       </Grid>
