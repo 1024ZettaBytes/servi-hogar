@@ -18,11 +18,10 @@ import {
   useTheme,
   CardHeader,
   TextField,
-  InputAdornment,
-  Alert
+  InputAdornment
 } from '@mui/material';
 import NextLink from 'next/link';
-import { format } from 'date-fns';
+import { format, max } from 'date-fns';
 import es from 'date-fns/locale/es';
 import { useSnackbar } from 'notistack';
 import PlusOneIcon from '@mui/icons-material/PlusOne';
@@ -31,6 +30,7 @@ import LocalShippingIcon from '@mui/icons-material/LocalShipping';
 import SearchIcon from '@mui/icons-material/Search';
 import ChangeCircleIcon from '@mui/icons-material/ChangeCircle';
 import RedeemIcon from '@mui/icons-material/Redeem';
+import ReportProblemIcon from '@mui/icons-material/ReportProblem';
 import ExtendRentModal from '../../src/components/ExtendRentModal';
 import ChangePayDayModal from '@/components/ChangePayDayModal';
 import SchedulePickupModal from '@/components/SchedulePickupModal';
@@ -185,9 +185,6 @@ const TablaRentasActuales: FC<TablaRentasActualesProps> = ({
   const [page, setPage] = useState<number>(0);
   const [limit, setLimit] = useState<number>(30);
   const [filter, setFilter] = useState<string>('');
-  const shouldDisableActions  =
-    userRole !== 'ADMIN' && rentList.some((r) => r.remaining <= -11) && false;
-
   const handleCloseModal = (wasSuccess, successMessage = null) => {
     setExtendModalIsOpen(false);
     setPayDayModalIsOpen(false);
@@ -279,13 +276,6 @@ const TablaRentasActuales: FC<TablaRentasActualesProps> = ({
   const theme = useTheme();
   return (
     <>
-      {shouldDisableActions && (
-        <Alert severity="warning" sx={{ margin: 2, width: '50%' }}>
-          Uno o más clientes tienen rentas vencidas hace más de 10 días.
-          <br />
-          Contacta al administrador.
-        </Alert>
-      )}
       <Card>
         <CardHeader
           action={
@@ -330,7 +320,17 @@ const TablaRentasActuales: FC<TablaRentasActualesProps> = ({
               </TableRow>
             </TableHead>
             <TableBody>
-              {paginatedRents.map((rent) => {
+              {paginatedRents.map((rent, i) => {
+                const maxPayDays = rent.customer.maxPayDays || 7;
+                const DEFAULT_RED_DAYS = 15;
+
+                const shouldDisableActions =
+                  userRole !== 'ADMIN' &&
+                  rent.remaining < 0 &&
+                  rent.remaining < -DEFAULT_RED_DAYS &&
+                  (maxPayDays > DEFAULT_RED_DAYS
+                    ? maxPayDays + rent.remaining <= 0
+                    : true);
                 const canPickup = rent?.totalDays < 180 || userRole == 'ADMIN';
                 return (
                   <TableRow
@@ -415,114 +415,134 @@ const TablaRentasActuales: FC<TablaRentasActualesProps> = ({
                       )}
                     </TableCell>
                     <TableCell align="center">
-                      <Tooltip title="Extender Renta" arrow>
-                        <IconButton
-                          disabled={shouldDisableActions}
-                          onClick={() => handleOnExtendClick(rent?._id)}
-                          sx={{
-                            '&:hover': {
-                              background: theme.colors.primary.lighter
-                            },
-                            color: theme.colors.success.light
-                          }}
-                          color="inherit"
-                          size="small"
+                      {shouldDisableActions ? (
+                        <Tooltip
+                          title={`El cliente no puede tener más de ${
+                            maxPayDays > DEFAULT_RED_DAYS
+                              ? maxPayDays
+                              : DEFAULT_RED_DAYS
+                          } días en rojo. Contacte al Administrador.`}
+                          arrow
                         >
-                          <PlusOneIcon fontSize="medium" />
-                        </IconButton>
-                      </Tooltip>
-                      <Tooltip title="Cambio de equipo" arrow>
-                        <span>
-                          <IconButton
-                            disabled={shouldDisableActions}
-                            onClick={() => {
-                              handleOnChangeClick(rent?._id);
-                            }}
-                            sx={{
-                              '&:hover': {
-                                background: theme.colors.error.lighter
-                              },
-                              color: theme.palette.warning.light
-                            }}
-                            color="inherit"
-                            size="small"
-                          >
-                            <ChangeCircleIcon fontSize="small" />
+                          <IconButton>
+                            <ReportProblemIcon
+                              fontSize="medium"
+                              color="error"
+                            />
                           </IconButton>
-                        </span>
-                      </Tooltip>
-                      <Tooltip title="Cambiar día de pago" arrow>
-                        <IconButton
-                          disabled={
-                            shouldDisableActions ||
-                            ['EN_CAMBIO', 'EN_RECOLECCION'].includes(
-                              rent?.status?.id
-                            )
-                          }
-                          onClick={() => {
-                            handleOnDayChangeClick(rent?._id);
-                          }}
-                          sx={{
-                            '&:hover': {
-                              background: theme.colors.primary.lighter
-                            },
-                            color: theme.palette.primary.main
-                          }}
-                          color="inherit"
-                          size="small"
-                        >
-                          <CurrencyExchangeIcon fontSize="small" />
-                        </IconButton>
-                      </Tooltip>
-                      <Tooltip title="Retirar" arrow>
-                        <span>
-                          <IconButton
-                            disabled={
-                              shouldDisableActions ||
-                              rent.status.id !== 'RENTADO' ||
-                              !canPickup
-                            }
-                            onClick={() => {
-                              handleOnPickupClick(rent?._id);
-                            }}
-                            sx={{
-                              '&:hover': {
-                                background: theme.colors.error.lighter
-                              },
-                              color: theme.palette.error.main
-                            }}
-                            color="inherit"
-                            size="small"
-                          >
-                            <LocalShippingIcon fontSize="small" />
-                          </IconButton>
-                        </span>
-                      </Tooltip>
-                      <Tooltip title="Bonificar" arrow>
-                        <span>
-                          <IconButton
-                            disabled={
-                              shouldDisableActions ||
-                              ['EN_CAMBIO', 'EN_RECOLECCION'].includes(
-                                rent.status.id
-                              )
-                            }
-                            onClick={() => {
-                              handleOnBonusClick(rent);
-                            }}
-                            sx={{
-                              '&:hover': {
-                                background: theme.colors.gradients.blue4
-                              },
-                              color: theme.colors.gradients.blue1
-                            }}
-                            color="info"
-                            size="small"
-                          >
-                            <RedeemIcon fontSize="small" />
-                          </IconButton>
-                        </span>
-                      </Tooltip>
+                        </Tooltip>
+                      ) : (
+                        <>
+                          <Tooltip title="Extender Renta" arrow>
+                            <IconButton
+                              disabled={shouldDisableActions}
+                              onClick={() => handleOnExtendClick(rent?._id)}
+                              sx={{
+                                '&:hover': {
+                                  background: theme.colors.primary.lighter
+                                },
+                                color: theme.colors.success.light
+                              }}
+                              color="inherit"
+                              size="small"
+                            >
+                              <PlusOneIcon fontSize="medium" />
+                            </IconButton>
+                          </Tooltip>
+                          <Tooltip title="Cambio de equipo" arrow>
+                            <span>
+                              <IconButton
+                                disabled={shouldDisableActions}
+                                onClick={() => {
+                                  handleOnChangeClick(rent?._id);
+                                }}
+                                sx={{
+                                  '&:hover': {
+                                    background: theme.colors.error.lighter
+                                  },
+                                  color: theme.palette.warning.light
+                                }}
+                                color="inherit"
+                                size="small"
+                              >
+                                <ChangeCircleIcon fontSize="small" />
+                              </IconButton>
+                            </span>
+                          </Tooltip>
+                          <Tooltip title="Cambiar día de pago" arrow>
+                            <IconButton
+                              disabled={
+                                shouldDisableActions ||
+                                ['EN_CAMBIO', 'EN_RECOLECCION'].includes(
+                                  rent?.status?.id
+                                )
+                              }
+                              onClick={() => {
+                                handleOnDayChangeClick(rent?._id);
+                              }}
+                              sx={{
+                                '&:hover': {
+                                  background: theme.colors.primary.lighter
+                                },
+                                color: theme.palette.primary.main
+                              }}
+                              color="inherit"
+                              size="small"
+                            >
+                              <CurrencyExchangeIcon fontSize="small" />
+                            </IconButton>
+                          </Tooltip>
+                          <Tooltip title="Retirar" arrow>
+                            <span>
+                              <IconButton
+                                disabled={
+                                  shouldDisableActions ||
+                                  rent.status.id !== 'RENTADO' ||
+                                  !canPickup
+                                }
+                                onClick={() => {
+                                  handleOnPickupClick(rent?._id);
+                                }}
+                                sx={{
+                                  '&:hover': {
+                                    background: theme.colors.error.lighter
+                                  },
+                                  color: theme.palette.error.main
+                                }}
+                                color="inherit"
+                                size="small"
+                              >
+                                <LocalShippingIcon fontSize="small" />
+                              </IconButton>
+                            </span>
+                          </Tooltip>
+                          <Tooltip title="Bonificar" arrow>
+                            <span>
+                              <IconButton
+                                disabled={
+                                  shouldDisableActions ||
+                                  ['EN_CAMBIO', 'EN_RECOLECCION'].includes(
+                                    rent.status.id
+                                  )
+                                }
+                                onClick={() => {
+                                  handleOnBonusClick(rent);
+                                }}
+                                sx={{
+                                  '&:hover': {
+                                    background: theme.colors.gradients.blue4
+                                  },
+                                  color: theme.colors.gradients.blue1
+                                }}
+                                color="info"
+                                size="small"
+                              >
+                                <RedeemIcon fontSize="small" />
+                              </IconButton>
+                            </span>
+                          </Tooltip>
+                        </>
+                      )}
                     </TableCell>
                   </TableRow>
                 );

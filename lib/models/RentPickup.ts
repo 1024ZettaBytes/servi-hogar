@@ -15,6 +15,7 @@ export interface IRentPickup extends Document {
   endTime:Date,
   wasSent: boolean;
   cancellationReason: string;
+  promise: Date;
   reason: string;
   finishedAt: Date;
   operator: Schema.Types.ObjectId;
@@ -50,6 +51,7 @@ const RentPickupSchema = new Schema<IRentPickup>({
   endTime:{ type: Date, required: true },
   wasSent: { type: Boolean, required:false},
   reason: { type: String, default: '' },
+  promise: { type: Date, default: null },
   cancellationReason: { type: String, default: '' },
   finishedAt: { type: Date, default: null },
   operator: { type: Schema.Types.ObjectId, default:null, ref: 'users' },
