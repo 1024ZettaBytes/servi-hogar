@@ -44,7 +44,6 @@ import LocationOnIcon from '@mui/icons-material/LocationOn';
 import PersonAddAlt1Icon from '@mui/icons-material/PersonAddAlt1';
 import CardMembershipIcon from '@mui/icons-material/CardMembership';
 import dayjs from 'dayjs';
-import { set } from 'nprogress';
 
 interface TablaRecoleccionesPendientesProps {
   userRole: string;

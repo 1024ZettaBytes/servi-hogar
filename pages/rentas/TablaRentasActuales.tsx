@@ -21,7 +21,7 @@ import {
   InputAdornment
 } from '@mui/material';
 import NextLink from 'next/link';
-import { format, max } from 'date-fns';
+import { format } from 'date-fns';
 import es from 'date-fns/locale/es';
 import { useSnackbar } from 'notistack';
 import PlusOneIcon from '@mui/icons-material/PlusOne';
@@ -320,7 +320,7 @@ const TablaRentasActuales: FC<TablaRentasActualesProps> = ({
               </TableRow>
             </TableHead>
             <TableBody>
-              {paginatedRents.map((rent, i) => {
+              {paginatedRents.map((rent) => {
                 const maxPayDays = rent.customer.maxPayDays || 7;
                 const DEFAULT_RED_DAYS = 15;
 
