@@ -2,7 +2,7 @@ import {
   generateCurrentRentLogData
 } from "../../../lib/data/Rents";
 import { generateRecordData } from "../../../lib/data/Records";
-
+import { createPickupsForRents } from "../../../lib/data/Rents";
 async function generateRecordAPI(req, res) {
   try {
     console.log("/generateRecord called at: ", new Date().toString());
@@ -12,6 +12,8 @@ async function generateRecordAPI(req, res) {
     }
     else{
       await generateCurrentRentLogData();
+      await createPickupsForRents();
+
     }
     res.status(200).json({ data: { message: "OK" } });
   } catch (e) {
