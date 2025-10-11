@@ -28,6 +28,7 @@ import GroupIcon from '@mui/icons-material/Group';
 import AssessmentIcon from '@mui/icons-material/Assessment';
 import HandshakeIcon from '@mui/icons-material/Handshake';
 import BuildIcon from '@mui/icons-material/Build';
+import AttachMoneyIcon from '@mui/icons-material/AttachMoney';
 
 const MenuWrapper = styled(Box)(
   ({ theme }) => `
@@ -559,6 +560,21 @@ function SidebarMenu({ userRole }) {
                       startIcon={<LocalLaundryServiceIcon />}
                     >
                       Equipos
+                    </Button>
+                  </NextLink>
+                </ListItem>
+                <ListItem component="div">
+                  <NextLink href="/ventas" passHref>
+                    <Button
+                      className={
+                        currentRoute.includes('/ventas') ? 'active' : ''
+                      }
+                      disableRipple
+                      component="a"
+                      onClick={closeSidebar}
+                      startIcon={<AttachMoneyIcon />}
+                    >
+                      Ventas
                     </Button>
                   </NextLink>
                 </ListItem>
