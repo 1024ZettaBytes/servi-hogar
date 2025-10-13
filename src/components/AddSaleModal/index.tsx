@@ -76,7 +76,7 @@ function AddSaleModal(props) {
     const result = await saveSale({
       machineId: useExistingMachine ? selectedMachine?._id : null,
       serialNumber: useExistingMachine ? '' : serialNumber,
-      customerId: selectedCustomer?._id || null,
+      customerId: selectedCustomer?.id || null,
       saleDate: convertDateToTZ(saleDate),
       totalAmount: parseFloat(totalAmount),
       initialPayment: parseFloat(initialPayment),
