@@ -15,19 +15,23 @@ import {
   Chip,
 } from "@mui/material";
 import { LoadingButton } from "@mui/lab";
+import { DesktopDatePicker } from "@mui/x-date-pickers";
 import { registerPayment } from "../../../lib/client/salesFetch";
 import numeral from "numeral";
+import { convertDateToTZ } from "../../../lib/client/utils";
 
 function RegisterPaymentModal(props) {
   const { handleOnClose, open, sale } = props;
   const [isLoading, setIsLoading] = useState(false);
   const [hasError, setHasError] = useState({ error: false, msg: "" });
   const [paymentAmount, setPaymentAmount] = useState("");
+  const [paymentDate, setPaymentDate] = useState(new Date());
 
   // Reset state when modal opens with a new sale
   useEffect(() => {
     if (open && sale) {
       setPaymentAmount("");
+      setPaymentDate(new Date());
       setHasError({ error: false, msg: "" });
     }
   }, [open, sale]);
@@ -85,6 +89,7 @@ function RegisterPaymentModal(props) {
     const result = await registerPayment({
       saleId: sale._id,
       paymentAmount: amount,
+      paymentDate: convertDateToTZ(paymentDate),
     });
 
     setIsLoading(false);
@@ -99,6 +104,7 @@ function RegisterPaymentModal(props) {
     setHasError({ error: false, msg: "" });
     setIsLoading(false);
     setPaymentAmount("");
+    setPaymentDate(new Date());
     handleOnClose(false);
   };
 
@@ -209,6 +215,18 @@ function RegisterPaymentModal(props) {
                 <Divider />
               </Grid>
 
+              {/* Payment Date Input */}
+              <Grid item xs={12}>
+                <DesktopDatePicker
+                  label="Fecha de pago"
+                  inputFormat="dd/MM/yyyy"
+                  value={paymentDate}
+                  maxDate={new Date()}
+                  onChange={(newValue) => setPaymentDate(newValue)}
+                  renderInput={(params) => <TextField {...params} required fullWidth />}
+                />
+              </Grid>
+
               {/* Payment Amount Input */}
               <Grid item xs={12}>
                 <TextField
@@ -218,6 +236,7 @@ function RegisterPaymentModal(props) {
                   id="paymentAmount"
                   name="paymentAmount"
                   label="Monto del Pago ($)"
+                  fullWidth
                   value={paymentAmount}
                   onChange={(e) => setPaymentAmount(e.target.value)}
                   inputProps={{ 

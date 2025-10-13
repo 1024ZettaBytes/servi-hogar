@@ -1,6 +1,6 @@
-import PropTypes from "prop-types";
-import { useState } from "react";
-import Dialog from "@mui/material/Dialog";
+import PropTypes from 'prop-types';
+import { useState } from 'react';
+import Dialog from '@mui/material/Dialog';
 import {
   Box,
   Button,
@@ -14,30 +14,33 @@ import {
   Skeleton,
   FormControlLabel,
   Switch,
-  Autocomplete,
-} from "@mui/material";
-import { LoadingButton } from "@mui/lab";
+  Autocomplete
+} from '@mui/material';
+import { LoadingButton } from '@mui/lab';
+import { DesktopDatePicker } from '@mui/x-date-pickers';
 import {
   useGetAllMachines,
   getFetcher,
-  useGetAllCustomers,
-} from "../../../pages/api/useRequest";
-import { saveSale } from "../../../lib/client/salesFetch";
+  useGetAllCustomers
+} from '../../../pages/api/useRequest';
+import { saveSale } from '../../../lib/client/salesFetch';
+import { convertDateToTZ } from '../../../lib/client/utils';
 
 function AddSaleModal(props) {
   const { handleOnClose, open } = props;
   const { machinesData, machinesError } = useGetAllMachines(getFetcher);
   const { customerList, customerError } = useGetAllCustomers(getFetcher, false);
-  
+
   const [isLoading, setIsLoading] = useState(false);
-  const [hasError, setHasError] = useState({ error: false, msg: "" });
+  const [hasError, setHasError] = useState({ error: false, msg: '' });
   const [useExistingMachine, setUseExistingMachine] = useState(true);
   const [selectedMachine, setSelectedMachine] = useState(null);
   const [selectedCustomer, setSelectedCustomer] = useState(null);
-  const [serialNumber, setSerialNumber] = useState("");
-  const [totalAmount, setTotalAmount] = useState("");
-  const [initialPayment, setInitialPayment] = useState("");
-  const [totalWeeks, setTotalWeeks] = useState("");
+  const [serialNumber, setSerialNumber] = useState('');
+  const [saleDate, setSaleDate] = useState(new Date());
+  const [totalAmount, setTotalAmount] = useState('');
+  const [initialPayment, setInitialPayment] = useState('');
+  const [totalWeeks, setTotalWeeks] = useState('');
 
   // Get available machines (active ones that are not rented)
   const machinesList = machinesData?.machinesList || [];
@@ -45,34 +48,39 @@ function AddSaleModal(props) {
     (machine) => machine.active && machine.status?.id !== 'RENT'
   );
 
-  const weeklyPayment = totalWeeks && totalAmount && initialPayment
-    ? ((parseFloat(totalAmount) - parseFloat(initialPayment)) / parseFloat(totalWeeks)).toFixed(2)
-    : "0.00";
+  const weeklyPayment =
+    totalWeeks && totalAmount && initialPayment
+      ? (
+          (parseFloat(totalAmount) - parseFloat(initialPayment)) /
+          parseFloat(totalWeeks)
+        ).toFixed(2)
+      : '0.00';
 
   async function submitHandler(event) {
     event.preventDefault();
     setIsLoading(true);
-    setHasError({ error: false, msg: "" });
+    setHasError({ error: false, msg: '' });
 
     if (useExistingMachine && !selectedMachine) {
-      setHasError({ error: true, msg: "Debe seleccionar un equipo" });
+      setHasError({ error: true, msg: 'Debe seleccionar un equipo' });
       setIsLoading(false);
       return;
     }
 
     if (!useExistingMachine && !serialNumber.trim()) {
-      setHasError({ error: true, msg: "Debe ingresar un número de serie" });
+      setHasError({ error: true, msg: 'Debe ingresar un número de serie' });
       setIsLoading(false);
       return;
     }
 
     const result = await saveSale({
       machineId: useExistingMachine ? selectedMachine?._id : null,
-      serialNumber: useExistingMachine ? "" : serialNumber,
+      serialNumber: useExistingMachine ? '' : serialNumber,
       customerId: selectedCustomer?._id || null,
+      saleDate: convertDateToTZ(saleDate),
       totalAmount: parseFloat(totalAmount),
       initialPayment: parseFloat(initialPayment),
-      totalWeeks: parseInt(totalWeeks),
+      totalWeeks: parseInt(totalWeeks)
     });
 
     setIsLoading(false);
@@ -84,15 +92,16 @@ function AddSaleModal(props) {
   }
 
   const handleClose = () => {
-    setHasError({ error: false, msg: "" });
+    setHasError({ error: false, msg: '' });
     setIsLoading(false);
     setUseExistingMachine(true);
     setSelectedMachine(null);
     setSelectedCustomer(null);
-    setSerialNumber("");
-    setTotalAmount("");
-    setInitialPayment("");
-    setTotalWeeks("");
+    setSerialNumber('');
+    setSaleDate(new Date());
+    setTotalAmount('');
+    setInitialPayment('');
+    setTotalWeeks('');
     handleOnClose(false);
   };
 
@@ -105,7 +114,7 @@ function AddSaleModal(props) {
   };
 
   return (
-    <Dialog open={open} fullWidth={true} maxWidth="xs" scroll={"body"}>
+    <Dialog open={open} fullWidth={true} maxWidth="xs" scroll={'body'}>
       <Card>
         <CardHeader title="Registrar Nueva Venta" />
         <Divider />
@@ -126,7 +135,7 @@ function AddSaleModal(props) {
                       onChange={(e) => {
                         setUseExistingMachine(e.target.checked);
                         setSelectedMachine(null);
-                        setSerialNumber("");
+                        setSerialNumber('');
                       }}
                     />
                   }
@@ -141,7 +150,7 @@ function AddSaleModal(props) {
                   ) : !machinesList ? (
                     <Skeleton
                       variant="rectangular"
-                      width={"100%"}
+                      width={'100%'}
                       height={56}
                       animation="wave"
                     />
@@ -149,7 +158,9 @@ function AddSaleModal(props) {
                     <Autocomplete
                       options={availableMachines}
                       getOptionLabel={(option) =>
-                        `#${option.machineNum} - ${option.brand} ${option.capacity || ''}`
+                        `#${option.machineNum} - ${option.brand} ${
+                          option.capacity || ''
+                        }`
                       }
                       value={selectedMachine}
                       onChange={(_event, newValue) => {
@@ -186,26 +197,42 @@ function AddSaleModal(props) {
                 ) : !customerList ? (
                   <Skeleton
                     variant="rectangular"
-                    width={"100%"}
+                    width={'100%'}
                     height={56}
                     animation="wave"
                   />
                 ) : (
                   <Autocomplete
-                    options={customerList}
-                    getOptionLabel={(option) => option.name}
+                    disablePortal
+                    options={customerList.map((customer) => {
+                      return {
+                        label: `${customer.name} (${customer.cell})`,
+                        id: customer._id
+                      };
+                    })}
                     value={selectedCustomer}
                     onChange={(_event, newValue) => {
                       setSelectedCustomer(newValue);
                     }}
+                    isOptionEqualToValue={(option: any, value: any) =>
+                      option.id === value.id
+                    }
                     renderInput={(params) => (
-                      <TextField
-                        {...params}
-                        label="Cliente (opcional)"
-                      />
+                      <TextField {...params} label="Cliente (opcional)" />
                     )}
                   />
                 )}
+              </Grid>
+
+              <Grid item lg={12}>
+                <DesktopDatePicker
+                  label="Fecha de venta"
+                  inputFormat="dd/MM/yyyy"
+                  value={saleDate}
+                  maxDate={new Date()}
+                  onChange={(newValue) => setSaleDate(newValue)}
+                  renderInput={(params) => <TextField {...params} required />}
+                />
               </Grid>
 
               <Grid item lg={12}>
@@ -258,7 +285,13 @@ function AddSaleModal(props) {
                   <Alert severity="info">
                     Pago semanal: <strong>${weeklyPayment}</strong>
                     <br />
-                    Saldo restante: <strong>${(parseFloat(totalAmount) - parseFloat(initialPayment)).toFixed(2)}</strong>
+                    Saldo restante:{' '}
+                    <strong>
+                      $
+                      {(
+                        parseFloat(totalAmount) - parseFloat(initialPayment)
+                      ).toFixed(2)}
+                    </strong>
                   </Alert>
                 </Grid>
               )}
@@ -302,8 +335,7 @@ function AddSaleModal(props) {
 
 AddSaleModal.propTypes = {
   open: PropTypes.bool.isRequired,
-  handleOnClose: PropTypes.func.isRequired,
-  userId: PropTypes.string.isRequired,
+  handleOnClose: PropTypes.func.isRequired
 };
 
 export default AddSaleModal;
