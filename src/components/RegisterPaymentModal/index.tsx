@@ -43,10 +43,19 @@ function RegisterPaymentModal(props) {
     : sale.serialNumber || 'N/A';
   const customerName = sale.customer?.name || 'Sin cliente';
 
-  // Calculate how many weeks will be covered by the payment
+  // Calculate accumulated payment and weeks covered
+  const currentAccumulated = sale.accumulatedPayment || 0;
+  const totalAccumulated = paymentAmount 
+    ? currentAccumulated + parseFloat(paymentAmount)
+    : currentAccumulated;
+  
   const weeksCovered = paymentAmount && sale.weeklyPayment > 0
-    ? Math.floor(parseFloat(paymentAmount) / sale.weeklyPayment)
+    ? Math.floor(totalAccumulated / sale.weeklyPayment)
     : 0;
+  
+  const newAccumulatedPayment = paymentAmount
+    ? totalAccumulated % sale.weeklyPayment
+    : currentAccumulated;
 
   const newRemainingAmount = paymentAmount
     ? Math.max(0, sale.remainingAmount - parseFloat(paymentAmount))
@@ -60,7 +69,6 @@ function RegisterPaymentModal(props) {
     setHasError({ error: false, msg: "" });
 
     const amount = parseFloat(paymentAmount);
-    const minPayment = Math.min(sale.weeklyPayment, sale.remainingAmount);
 
     if (!amount || amount <= 0) {
       setHasError({ error: true, msg: "El monto debe ser mayor a 0" });
@@ -68,15 +76,7 @@ function RegisterPaymentModal(props) {
       return;
     }
 
-    if (amount < minPayment) {
-      setHasError({ 
-        error: true, 
-        msg: `El monto mínimo es $${numeral(minPayment).format('0,0.00')} (pago semanal)` 
-      });
-      setIsLoading(false);
-      return;
-    }
-
+ 
     if (amount > sale.remainingAmount) {
       setHasError({ 
         error: true, 
@@ -208,6 +208,16 @@ function RegisterPaymentModal(props) {
                       {sale.paidWeeks}/{sale.totalWeeks}
                     </Typography>
                   </Grid>
+                  {currentAccumulated > 0 && (
+                    <Grid item xs={12}>
+                      <Typography variant="caption" color="text.secondary">
+                        Pago acumulado (hacia próxima semana)
+                      </Typography>
+                      <Typography variant="body2" color="info.main">
+                        ${numeral(currentAccumulated).format('0,0.00')} / ${numeral(sale.weeklyPayment).format('0,0.00')}
+                      </Typography>
+                    </Grid>
+                  )}
                 </Grid>
               </Grid>
 
@@ -240,11 +250,11 @@ function RegisterPaymentModal(props) {
                   value={paymentAmount}
                   onChange={(e) => setPaymentAmount(e.target.value)}
                   inputProps={{ 
-                    min: sale.weeklyPayment, 
+                    min: 1, 
                     step: "any", 
                     max: sale.remainingAmount 
                   }}
-                  helperText={`Mínimo: $${numeral(Math.min(sale.weeklyPayment, sale.remainingAmount)).format('0,0.00')} | Máximo: $${numeral(sale.remainingAmount).format('0,0.00')}`}
+                  helperText={`Máximo: $${numeral(sale.remainingAmount).format('0,0.00')}`}
                 />
               </Grid>
 
@@ -253,12 +263,33 @@ function RegisterPaymentModal(props) {
                 <Grid item xs={12}>
                   <Alert severity="info">
                     <Typography variant="body2" gutterBottom>
-                      <strong>Este pago cubrirá:</strong>
+                      <strong>Resumen del pago:</strong>
+                    </Typography>
+                    {currentAccumulated > 0 && (
+                      <Typography variant="body2">
+                        • Pago acumulado anterior: ${numeral(currentAccumulated).format('0,0.00')}
+                      </Typography>
+                    )}
+                    <Typography variant="body2">
+                      • Pago actual: ${numeral(parseFloat(paymentAmount)).format('0,0.00')}
                     </Typography>
                     <Typography variant="body2">
-                      • {weeksCovered} semana{weeksCovered !== 1 ? 's' : ''}
+                      • Total acumulado: ${numeral(totalAccumulated).format('0,0.00')}
                     </Typography>
-                    <Typography variant="body2">
+                    <Typography variant="body2" sx={{ mt: 1 }}>
+                      <strong>• Semanas cubiertas con este pago: {weeksCovered}</strong>
+                    </Typography>
+                    {newAccumulatedPayment > 0 && weeksCovered > 0 && (
+                      <Typography variant="body2" color="info.main">
+                        • Nuevo pago acumulado: ${numeral(newAccumulatedPayment).format('0,0.00')} / ${numeral(sale.weeklyPayment).format('0,0.00')}
+                      </Typography>
+                    )}
+                    {weeksCovered === 0 && (
+                      <Typography variant="body2" color="warning.main">
+                        • Este pago no completa una semana aún. Falta: ${numeral(sale.weeklyPayment - totalAccumulated).format('0,0.00')}
+                      </Typography>
+                    )}
+                    <Typography variant="body2" sx={{ mt: 1 }}>
                       • Semanas totales pagadas: {newPaidWeeks}/{sale.totalWeeks}
                     </Typography>
                     <Typography variant="body2">
@@ -298,8 +329,7 @@ function RegisterPaymentModal(props) {
                     type="submit"
                     variant="contained"
                     disabled={
-                      !paymentAmount || 
-                      parseFloat(paymentAmount) < Math.min(sale.weeklyPayment, sale.remainingAmount)
+                      !paymentAmount
                     }
                   >
                     Registrar Pago

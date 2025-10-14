@@ -11,6 +11,7 @@ export interface ISale extends Document {
   weeklyPayment: number;
   totalWeeks: number;
   paidWeeks: number;
+  accumulatedPayment: number;
   isPaid: boolean;
   status: string;
   saleDate: Date;
@@ -41,6 +42,7 @@ const SaleSchema = new Schema<ISale>({
   weeklyPayment: { type: Number, required: true },
   totalWeeks: { type: Number, required: true },
   paidWeeks: { type: Number, default: 0 },
+  accumulatedPayment: { type: Number, default: 0 },
   isPaid: { type: Boolean, default: false },
   status: {
     type: String,
