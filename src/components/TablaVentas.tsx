@@ -283,6 +283,7 @@ const TablaVentas: FC<TablaSalesProps> = ({ salesList, onPaymentClick }) => {
                         
                         if (isOverdue) {
                           const daysOverdue = Math.abs(daysLeft);
+                          const missedPayments = Math.floor(daysOverdue / 7) + 1;
                           return (
                             <Tooltip title={`Vencido hace ${daysOverdue} día${daysOverdue !== 1 ? 's' : ''}`} arrow>
                               <Typography 
@@ -292,7 +293,7 @@ const TablaVentas: FC<TablaSalesProps> = ({ salesList, onPaymentClick }) => {
                                 noWrap
                                 sx={{ cursor: 'pointer' }}
                               >
-                                {daysOverdue} día{daysOverdue !== 1 ? 's' : ''} ⚠️
+                                {missedPayments} pago{missedPayments !== 1 ? 's' : ''} atrasado{missedPayments !== 1 ? 's' : ''} ⚠️
                               </Typography>
                             </Tooltip>
                           );
