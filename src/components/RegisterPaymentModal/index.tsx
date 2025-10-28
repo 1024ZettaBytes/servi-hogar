@@ -13,12 +13,18 @@ import {
   Alert,
   Typography,
   Chip,
+  CardMedia,
+  IconButton,
 } from "@mui/material";
 import { LoadingButton } from "@mui/lab";
 import { DesktopDatePicker } from "@mui/x-date-pickers";
+import PhotoCamera from "@mui/icons-material/PhotoCamera";
+import DeleteIcon from "@mui/icons-material/Delete";
 import { registerPayment } from "../../../lib/client/salesFetch";
 import numeral from "numeral";
 import { convertDateToTZ } from "../../../lib/client/utils";
+import Compressor from "compressorjs";
+import imageConversion from "image-conversion";
 
 function RegisterPaymentModal(props) {
   const { handleOnClose, open, sale } = props;
@@ -26,6 +32,8 @@ function RegisterPaymentModal(props) {
   const [hasError, setHasError] = useState({ error: false, msg: "" });
   const [paymentAmount, setPaymentAmount] = useState("");
   const [paymentDate, setPaymentDate] = useState(new Date());
+  const [paymentImage, setPaymentImage] = useState(null);
+  const [paymentImagePreview, setPaymentImagePreview] = useState(null);
 
   // Reset state when modal opens with a new sale
   useEffect(() => {
@@ -33,10 +41,57 @@ function RegisterPaymentModal(props) {
       setPaymentAmount("");
       setPaymentDate(new Date());
       setHasError({ error: false, msg: "" });
+      setPaymentImage(null);
+      setPaymentImagePreview(null);
     }
   }, [open, sale]);
 
   if (!sale) return null;
+
+  const handleImageUpload = async (event) => {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    try {
+      // Compress the image
+      const compressedFile = await new Promise<File | Blob>((resolve, reject) => {
+        new Compressor(file, {
+          quality: 0.6,
+          maxWidth: 1920,
+          maxHeight: 1920,
+          success: resolve,
+          error: reject,
+        });
+      });
+
+      // Convert to JPEG if needed
+      let finalFile: File | Blob = compressedFile;
+      if (compressedFile.type !== 'image/jpeg') {
+        const blob = await imageConversion.compressAccurately(compressedFile as Blob, {
+          size: 200,
+          accuracy: 0.9,
+          type: imageConversion.EImageType.JPEG,
+        });
+        finalFile = new File([blob], file.name.replace(/\.[^/.]+$/, '.jpg'), {
+          type: 'image/jpeg',
+        });
+      }
+
+      setPaymentImage(finalFile as File);
+      setPaymentImagePreview(URL.createObjectURL(finalFile));
+    } catch (error) {
+      console.error('Error processing image:', error);
+      setHasError({ error: true, msg: 'Error al procesar la imagen' });
+    }
+  };
+
+  const handleRemoveImage = () => {
+    if (paymentImagePreview) {
+      URL.revokeObjectURL(paymentImagePreview);
+    }
+    setPaymentImage(null);
+    setPaymentImagePreview(null);
+  };
 
   const machineInfo = sale.machine
     ? `#${sale.machine.machineNum} - ${sale.machine.brand}`
@@ -76,6 +131,11 @@ function RegisterPaymentModal(props) {
       return;
     }
 
+    if (!paymentImage) {
+      setHasError({ error: true, msg: "Debe adjuntar una foto del pago" });
+      setIsLoading(false);
+      return;
+    }
  
     if (amount > sale.remainingAmount) {
       setHasError({ 
@@ -86,11 +146,13 @@ function RegisterPaymentModal(props) {
       return;
     }
 
-    const result = await registerPayment({
-      saleId: sale._id,
-      paymentAmount: amount,
-      paymentDate: convertDateToTZ(paymentDate),
-    });
+    const formData = new FormData();
+    formData.append('saleId', sale._id);
+    formData.append('paymentAmount', amount.toString());
+    formData.append('paymentDate', convertDateToTZ(paymentDate).toISOString());
+    formData.append('paymentImage', paymentImage);
+
+    const result = await registerPayment(formData);
 
     setIsLoading(false);
     if (!result.error) {
@@ -105,6 +167,11 @@ function RegisterPaymentModal(props) {
     setIsLoading(false);
     setPaymentAmount("");
     setPaymentDate(new Date());
+    if (paymentImagePreview) {
+      URL.revokeObjectURL(paymentImagePreview);
+    }
+    setPaymentImage(null);
+    setPaymentImagePreview(null);
     handleOnClose(false);
   };
 
@@ -258,6 +325,48 @@ function RegisterPaymentModal(props) {
                 />
               </Grid>
 
+              {/* Payment Image Upload */}
+              <Grid item xs={12}>
+                <Typography variant="subtitle2" gutterBottom>
+                  Foto del comprobante de pago *
+                </Typography>
+                {!paymentImagePreview ? (
+                  <Button
+                    variant="outlined"
+                    component="label"
+                    fullWidth
+                    startIcon={<PhotoCamera />}
+                    sx={{ height: 56 }}
+                  >
+                    Seleccionar foto
+                    <input
+                      hidden
+                      accept="image/*"
+                      type="file"
+                      onChange={handleImageUpload}
+                    />
+                  </Button>
+                ) : (
+                  <Card>
+                    <CardMedia
+                      component="img"
+                      height="200"
+                      image={paymentImagePreview}
+                      alt="Comprobante de pago"
+                    />
+                    <Box sx={{ p: 1, display: 'flex', justifyContent: 'center' }}>
+                      <IconButton
+                        color="error"
+                        onClick={handleRemoveImage}
+                        size="small"
+                      >
+                        <DeleteIcon />
+                      </IconButton>
+                    </Box>
+                  </Card>
+                )}
+              </Grid>
+
               {/* Payment Calculation Preview */}
               {paymentAmount && parseFloat(paymentAmount) > 0 && (
                 <Grid item xs={12}>
@@ -329,7 +438,7 @@ function RegisterPaymentModal(props) {
                     type="submit"
                     variant="contained"
                     disabled={
-                      !paymentAmount
+                      !paymentAmount || !paymentImage
                     }
                   >
                     Registrar Pago

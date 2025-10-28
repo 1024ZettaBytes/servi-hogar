@@ -5,6 +5,7 @@ export interface ISalePayment extends Document {
   amount: number;
   paymentDate: Date;
   weeksCovered: number;
+  imageUrl: string;
   createdBy: Schema.Types.ObjectId;
   createdAt: Date;
 }
@@ -18,6 +19,7 @@ const SalePaymentSchema = new Schema<ISalePayment>({
   amount: { type: Number, required: true },
   paymentDate: { type: Date, required: true },
   weeksCovered: { type: Number, required: true },
+  imageUrl: { type: String, required: true },
   createdBy: { type: Schema.Types.ObjectId, required: true, ref: 'users' },
   createdAt: { type: Date, required: true }
 });

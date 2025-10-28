@@ -36,35 +36,61 @@ export default function ImagesModal({
   const [timestamp] = React.useState<string>(
     Date.now().toString()
   );
-  const [attached, setAttached] = React.useState<any>({
-    contract: { file: null, url: null },
-    front: { file: null, url: null },
-    board: { file: null, url: null },
-    tag: { file: null, url: null },
+  
+  // Initialize attached state dynamically based on imagesObj keys
+  const [attached, setAttached] = React.useState<any>(() => {
+    const initialState = {};
+    Object.keys(imagesObj || {}).forEach((key) => {
+      initialState[key] = { file: null, url: null };
+    });
+    return initialState;
   });
 
-  const [isEditting, setIsEditting] = React.useState<any>({
-    contract: false,
-    front: false,
-    board: false,
-    tag: false,
+  // Initialize isEditting state dynamically based on imagesObj keys
+  const [isEditting, setIsEditting] = React.useState<any>(() => {
+    const initialState = {};
+    Object.keys(imagesObj || {}).forEach((key) => {
+      initialState[key] = false;
+    });
+    return initialState;
   });
-  const [badFormat, setBadFormat] = React.useState<any>({
-    contract: false,
-    front: false,
-    board: false,
-    tag: false,
+  
+  // Initialize badFormat state dynamically based on imagesObj keys
+  const [badFormat, setBadFormat] = React.useState<any>(() => {
+    const initialState = {};
+    Object.keys(imagesObj || {}).forEach((key) => {
+      initialState[key] = false;
+    });
+    return initialState;
   });
+
+  // Reinitialize states when imagesObj changes
+  React.useEffect(() => {
+    const newAttached = {};
+    const newIsEditting = {};
+    const newBadFormat = {};
+    
+    Object.keys(imagesObj || {}).forEach((key) => {
+      newAttached[key] = { file: null, url: null };
+      newIsEditting[key] = false;
+      newBadFormat[key] = false;
+    });
+    
+    setAttached(newAttached);
+    setIsEditting(newIsEditting);
+    setBadFormat(newBadFormat);
+  }, [imagesObj]);
+
   const hasChanges = Object.values(isEditting).some((val) => val);
   const isValid = Object.keys(isEditting).every((key) =>
-    isEditting[key] ? attached[key].file : true
+    isEditting[key] ? attached[key]?.file : true
   );
   const onSubmitChanges = async () => {
     setIsSubmitting(true);
     let files = {};
     let data = {};
     Object.keys(attached).forEach((key) => {
-      if (attached[key].file !== null) {
+      if (attached[key]?.file !== null) {
         files[key] = { ...attached[key] };
         data[key] = { url: imagesObj[key] };
       }
@@ -117,7 +143,7 @@ export default function ImagesModal({
                       <Image
                         key={"img-" + key}
                         src={
-                          attached[key].url ||
+                          attached[key]?.url ||
                           imagesObj[key] + `?time=${timestamp}`
                         }
                         alt="alt"
@@ -170,7 +196,7 @@ export default function ImagesModal({
                        
                         <MuiFileInput
                           key={"file" + key}
-                          required={!attached[key].file}
+                          required={!attached[key]?.file}
                           placeholder={"No seleccionada"}
                           label={TITLES_MAP[key]}
                           value={attached[key]?.file}

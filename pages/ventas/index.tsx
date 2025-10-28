@@ -16,7 +16,13 @@ import Footer from "@/components/Footer";
 import AddSaleModal from "@/components/AddSaleModal";
 import RegisterPaymentModal from "@/components/RegisterPaymentModal";
 import TablaVentas from "@/components/TablaVentas";
+import TablaPendingSales from "@/components/TablaPendingSales";
+import TablaCompletedSalesByOperator from "@/components/TablaCompletedSalesByOperator";
+import AssignOperatorModal from "@/components/AssignOperatorModal";
+import CompleteSaleDeliveryModal from "@/components/CompleteSaleDeliveryModal";
+import FormatModal from "@/components/FormatModal";
 import { useSnackbar } from "notistack";
+import { getFormatForSale } from "../../lib/consts/OBJ_CONTS";
 import NextBreadcrumbs from "@/components/Shared/BreadCrums";
 import AddTwoTone from "@mui/icons-material/AddTwoTone";
 import useSWR from "swr";
@@ -27,21 +33,39 @@ const fetcher = (url) => fetch(url).then((res) => res.json());
 function Ventas({ session }) {
   const paths = ["Inicio", "Ventas"];
   const { enqueueSnackbar } = useSnackbar();
-  const { data: salesData, error: salesError, mutate } = useSWR(
+  
+  // Fetch completed sales
+  const { data: salesData, error: salesError, mutate: mutateSales } = useSWR(
     ROUTES.ALL_SALES_API,
     fetcher
   );
+  
+  // Fetch pending sales (for ADMIN/AUX) or operator data (for OPE)
+  const { data: pendingData, mutate: mutatePending } = useSWR(
+    ROUTES.ALL_PENDING_SALES_API,
+    fetcher
+  );
+  
   const [modalIsOpen, setModalIsOpen] = useState(false);
   const [paymentModalIsOpen, setPaymentModalIsOpen] = useState(false);
+  const [assignModalOpen, setAssignModalOpen] = useState(false);
+  const [completeModalOpen, setCompleteModalOpen] = useState(false);
   const [selectedSale, setSelectedSale] = useState(null);
+  const [formatIsOpen, setFormatIsOpen] = useState(false);
+  const [formatText, setFormatText] = useState('');
+  const [createdSale, setCreatedSale] = useState(null);
+  
+  const isOperator = session.user.role === 'OPE';
   const salesList = salesData?.data || null;
-  const completeData = !!salesList;
+  const pendingSalesList = isOperator ? pendingData?.data?.pending : pendingData?.data;
+  const completedSalesList = isOperator ? pendingData?.data?.completed : [];
+  const completeData = !!salesList && (isOperator ? !!(pendingSalesList && completedSalesList) : !!pendingSalesList);
 
   const handleClickOpen = () => {
     setModalIsOpen(true);
   };
 
-  const handleClose = (saved, successMessage = null) => {
+  const handleClose = (saved, successMessage = null, saleData = null) => {
     setModalIsOpen(false);
     if (saved && successMessage) {
       enqueueSnackbar(successMessage, {
@@ -52,7 +76,14 @@ function Ventas({ session }) {
         },
         autoHideDuration: 2000,
       });
-      mutate(); // Refresh the data
+      mutatePending(); // Refresh pending sales
+      
+      // Show format modal if sale data is provided
+      if (saleData) {
+        setCreatedSale(saleData);
+        setFormatText(getFormatForSale(saleData));
+        setFormatIsOpen(true);
+      }
     }
   };
 
@@ -73,26 +104,78 @@ function Ventas({ session }) {
         },
         autoHideDuration: 2000,
       });
-      mutate(); // Refresh the data
+      mutateSales(); // Refresh completed sales
     }
   };
 
-  const button = {
+  const handleAssignClick = (sale) => {
+    setSelectedSale(sale);
+    setAssignModalOpen(true);
+  };
+
+  const handleAssignClose = (saved, successMessage = null) => {
+    setAssignModalOpen(false);
+    setSelectedSale(null);
+    if (saved && successMessage) {
+      enqueueSnackbar(successMessage, {
+        variant: "success",
+        anchorOrigin: {
+          vertical: "top",
+          horizontal: "center",
+        },
+        autoHideDuration: 2000,
+      });
+      mutatePending(); // Refresh pending sales
+    }
+  };
+
+  const handleCompleteClick = (sale) => {
+    setSelectedSale(sale);
+    setCompleteModalOpen(true);
+  };
+
+  const handleCompleteClose = (saved, successMessage = null) => {
+    setCompleteModalOpen(false);
+    setSelectedSale(null);
+    if (saved && successMessage) {
+      enqueueSnackbar(successMessage, {
+        variant: "success",
+        anchorOrigin: {
+          vertical: "top",
+          horizontal: "center",
+        },
+        autoHideDuration: 2000,
+      });
+      mutatePending(); // Refresh pending sales
+      mutateSales(); // Refresh completed sales
+    }
+  };
+
+  const handleWhatsAppClick = (sale) => {
+    setSelectedSale(sale);
+    setFormatText(getFormatForSale(sale));
+    setFormatIsOpen(true);
+  };
+
+  const button = !isOperator ? {
     text: "Registrar venta",
     onClick: handleClickOpen,
     startIcon: <AddTwoTone />,
     variant: "contained"
-  };
+  } : null;
+
+  const pageTitle = isOperator ? "Entregas de Ventas" : "Ventas de Equipos";
+  const pageSubtitle = isOperator ? "Completa las entregas de ventas asignadas" : "";
 
   return (
     <>
       <Head>
-        <title>Ventas de Equipos</title>
+        <title>{pageTitle}</title>
       </Head>
       <PageTitleWrapper>
         <PageHeader
-          title={"Ventas de Equipos"}
-          sutitle={""}
+          title={pageTitle}
+          sutitle={pageSubtitle}
           button={!salesError && completeData ? button : null}
         />
         <NextBreadcrumbs paths={paths} lastLoaded={true} />
@@ -118,14 +201,68 @@ function Ventas({ session }) {
                 animation="wave"
               />
             ) : (
-              <Card>
-                <TablaVentas
-                  userRole={session.user.role}
-                  salesList={salesList}
-                  onUpdate={mutate}
-                  onPaymentClick={handlePaymentClick}
-                />
-              </Card>
+              <>
+                {/* For Operators: Show Pending and Completed deliveries */}
+                {isOperator ? (
+                  <>
+                    {/* Pending Sales Table */}
+                    {pendingSalesList && (
+                      <Grid item xs={12}>
+                        <Card>
+                          <TablaPendingSales
+                            userRole={session.user.role}
+                            salesList={pendingSalesList}
+                            onUpdate={mutatePending}
+                            onAssignClick={handleAssignClick}
+                            onCompleteClick={handleCompleteClick}
+                            onWhatsAppClick={handleWhatsAppClick}
+                          />
+                        </Card>
+                      </Grid>
+                    )}
+                    
+                    {/* Completed Deliveries Table */}
+                    {completedSalesList && completedSalesList.length > 0 && (
+                      <Grid item xs={12} sx={{ mt: 4 }}>
+                        <TablaCompletedSalesByOperator
+                          salesList={completedSalesList}
+                        />
+                      </Grid>
+                    )}
+                  </>
+                ) : (
+                  /* For ADMIN/AUX: Show Pending and Completed sales */
+                  <>
+                    {/* Pending Sales Table */}
+                    {pendingSalesList && (
+                      <Grid item xs={12}>
+                        <Card>
+                          <TablaPendingSales
+                            userRole={session.user.role}
+                            salesList={pendingSalesList}
+                            onUpdate={mutatePending}
+                            onAssignClick={handleAssignClick}
+                            onCompleteClick={handleCompleteClick}
+                            onWhatsAppClick={handleWhatsAppClick}
+                          />
+                        </Card>
+                      </Grid>
+                    )}
+                    
+                    {/* Completed Sales Table */}
+                    <Grid item xs={12} sx={{ mt: 4 }}>
+                      <Card>
+                        <TablaVentas
+                          userRole={session.user.role}
+                          salesList={salesList}
+                          onUpdate={mutateSales}
+                          onPaymentClick={handlePaymentClick}
+                        />
+                      </Card>
+                    </Grid>
+                  </>
+                )}
+              </>
             )}
           </Grid>
         </Grid>
@@ -144,6 +281,39 @@ function Ventas({ session }) {
           handleOnClose={handlePaymentClose}
         />
       ) : null}
+
+      {assignModalOpen && selectedSale ? (
+        <AssignOperatorModal
+          open={assignModalOpen}
+          sale={selectedSale}
+          handleOnClose={handleAssignClose}
+        />
+      ) : null}
+
+      {completeModalOpen && selectedSale ? (
+        <CompleteSaleDeliveryModal
+          open={completeModalOpen}
+          sale={selectedSale}
+          handleOnClose={handleCompleteClose}
+        />
+      ) : null}
+
+      {formatIsOpen && (
+        <FormatModal
+          open={formatIsOpen}
+          selectedId={createdSale?._id}
+          title="Formato de Venta"
+          text="ENVIADO"
+          textColor="green"
+          formatText={formatText}
+          onAccept={() => {
+            setFormatIsOpen(false);
+            setFormatText('');
+            setCreatedSale(null);
+          }}
+          onSubmitAction={async () => ({ error: false, msg: 'Marcado como enviado' })}
+        />
+      )}
       
       <Footer />
     </>

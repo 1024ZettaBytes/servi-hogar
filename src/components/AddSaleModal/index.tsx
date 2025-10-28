@@ -17,14 +17,12 @@ import {
   Autocomplete
 } from '@mui/material';
 import { LoadingButton } from '@mui/lab';
-import { DesktopDatePicker } from '@mui/x-date-pickers';
 import {
   useGetAllMachines,
   getFetcher,
   useGetAllCustomers
 } from '../../../pages/api/useRequest';
 import { saveSale } from '../../../lib/client/salesFetch';
-import { convertDateToTZ } from '../../../lib/client/utils';
 
 function AddSaleModal(props) {
   const { handleOnClose, open } = props;
@@ -37,7 +35,6 @@ function AddSaleModal(props) {
   const [selectedMachine, setSelectedMachine] = useState(null);
   const [selectedCustomer, setSelectedCustomer] = useState(null);
   const [serialNumber, setSerialNumber] = useState('');
-  const [saleDate, setSaleDate] = useState(new Date());
   const [totalAmount, setTotalAmount] = useState('');
   const [initialPayment, setInitialPayment] = useState('');
   const [totalWeeks, setTotalWeeks] = useState('');
@@ -77,7 +74,7 @@ function AddSaleModal(props) {
       machineId: useExistingMachine ? selectedMachine?._id : null,
       serialNumber: useExistingMachine ? '' : serialNumber,
       customerId: selectedCustomer?.id || null,
-      saleDate: convertDateToTZ(saleDate),
+      saleDate: new Date(), // Will be updated when delivered
       totalAmount: parseFloat(totalAmount),
       initialPayment: parseFloat(initialPayment),
       totalWeeks: parseInt(totalWeeks)
@@ -85,7 +82,7 @@ function AddSaleModal(props) {
 
     setIsLoading(false);
     if (!result.error) {
-      handleSavedSale(result.msg);
+      handleSavedSale(result.msg, result.data);
     } else {
       handleErrorOnSave(result.msg);
     }
@@ -98,15 +95,14 @@ function AddSaleModal(props) {
     setSelectedMachine(null);
     setSelectedCustomer(null);
     setSerialNumber('');
-    setSaleDate(new Date());
     setTotalAmount('');
     setInitialPayment('');
     setTotalWeeks('');
     handleOnClose(false);
   };
 
-  const handleSavedSale = (successMessage) => {
-    handleOnClose(true, successMessage);
+  const handleSavedSale = (successMessage, saleData) => {
+    handleOnClose(true, successMessage, saleData);
   };
 
   const handleErrorOnSave = (msg) => {
@@ -222,17 +218,6 @@ function AddSaleModal(props) {
                     )}
                   />
                 )}
-              </Grid>
-
-              <Grid item lg={12}>
-                <DesktopDatePicker
-                  label="Fecha de venta"
-                  inputFormat="dd/MM/yyyy"
-                  value={saleDate}
-                  maxDate={new Date()}
-                  onChange={(newValue) => setSaleDate(newValue)}
-                  renderInput={(params) => <TextField {...params} required />}
-                />
               </Grid>
 
               <Grid item lg={12}>

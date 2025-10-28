@@ -11,22 +11,22 @@ module.exports = withTM({
       {
         protocol: 'https',
         hostname: 'storage.googleapis.com',
-        pathname: '/servi-bucket/*',
+        pathname: '/servi-bucket/**',
       },
       {
         protocol: 'https',
         hostname: 'storage.googleapis.com',
-        pathname: '/servi-bucket-test/*',
+        pathname: '/servi-bucket-test/**',
       },
       {
         protocol: 'https',
         hostname: 'storage.googleapis.com',
-        pathname: '/servi-bucket-hermosillo/*',
+        pathname: '/servi-bucket-hermosillo/**',
       },
       {
         protocol: 'https',
         hostname: 'storage.googleapis.com',
-        pathname: '/servi-bucket-tepic/*',
+        pathname: '/servi-bucket-tepic/**',
       },
     ],
   },

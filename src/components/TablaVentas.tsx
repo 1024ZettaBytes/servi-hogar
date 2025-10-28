@@ -24,9 +24,11 @@ import {
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import SearchIcon from '@mui/icons-material/Search';
 import PaymentIcon from '@mui/icons-material/Payment';
+import ImageSearchIcon from '@mui/icons-material/ImageSearch';
 import { formatTZDate } from 'lib/client/utils';
 import * as str from 'string';
 import { useRouter } from 'next/router';
+import ImagesModal from '@/components/ImagesModal';
 
 interface TablaSalesProps {
   userRole: string;
@@ -145,6 +147,13 @@ const TablaVentas: FC<TablaSalesProps> = ({ salesList, onPaymentClick }) => {
   const [page, setPage] = useState<number>(0);
   const [limit, setLimit] = useState<number>(10);
   const [filter, setFilter] = useState<string>('');
+  const [openImages, setOpenImages] = useState<boolean>(false);
+  const [selectedImages, setSelectedImages] = useState<any>(null);
+
+  const handleOnCloseImages = () => {
+    setOpenImages(false);
+    setSelectedImages(null);
+  };
 
   const handleSearchChange = (e: ChangeEvent<HTMLInputElement>): void => {
     const value = e.target.value;
@@ -163,6 +172,7 @@ const TablaVentas: FC<TablaSalesProps> = ({ salesList, onPaymentClick }) => {
   const paginatedSales = applyPagination(filteredSales, page, limit);
 
   return (
+    <>
     <Card>
       <CardHeader
         action={
@@ -201,6 +211,7 @@ const TablaVentas: FC<TablaSalesProps> = ({ salesList, onPaymentClick }) => {
               <TableCell align="center">Estado</TableCell>
               <TableCell align="center">Próximo Pago</TableCell>
               <TableCell align="center">Fecha</TableCell>
+              <TableCell align="center">Fotos</TableCell>
               <TableCell align="center">Acciones</TableCell>
             </TableRow>
           </TableHead>
@@ -338,6 +349,34 @@ const TablaVentas: FC<TablaSalesProps> = ({ salesList, onPaymentClick }) => {
                     </Typography>
                   </TableCell>
                   <TableCell align="center">
+                    {sale.delivery?.imagesUrl ? (
+                      <Tooltip title="Ver fotos" arrow>
+                        <IconButton
+                          onClick={() => {
+                            // Filter out the _id field from imagesUrl
+                            const { _id, ...images } = sale.delivery.imagesUrl;
+                            setSelectedImages(images);
+                            setOpenImages(true);
+                          }}
+                          sx={{
+                            '&:hover': {
+                              background: theme.colors.primary.lighter
+                            },
+                            color: theme.palette.primary.main
+                          }}
+                          color="inherit"
+                          size="small"
+                        >
+                          <ImageSearchIcon fontSize="small" />
+                        </IconButton>
+                      </Tooltip>
+                    ) : (
+                      <Typography variant="body2" color="text.secondary">
+                        N/A
+                      </Typography>
+                    )}
+                  </TableCell>
+                  <TableCell align="center">
                     <Box sx={{ display: 'flex', gap: 1, justifyContent: 'center' }}>
                       {sale.status === 'ACTIVA' && (
                         <Tooltip title="Registrar pago" arrow>
@@ -391,6 +430,16 @@ const TablaVentas: FC<TablaSalesProps> = ({ salesList, onPaymentClick }) => {
         />
       </Box>
     </Card>
+    {openImages && selectedImages && (
+      <ImagesModal
+        open={openImages}
+        imagesObj={selectedImages}
+        title="Fotos de la entrega"
+        text=""
+        onClose={handleOnCloseImages}
+      />
+    )}
+    </>
   );
 };
 

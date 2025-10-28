@@ -520,7 +520,7 @@ function SidebarMenu({ userRole }) {
             </List>
           </SubMenuWrapper>
                   </List>*/}
-        {['ADMIN', 'AUX', 'SUB'].includes(userRole) ? (
+        {['ADMIN', 'AUX', 'SUB', 'OPE'].includes(userRole) ? (
           <List
             component="div"
             subheader={
@@ -563,11 +563,13 @@ function SidebarMenu({ userRole }) {
                     </Button>
                   </NextLink>
                 </ListItem>
+              </>}
+              {['ADMIN', 'AUX', 'OPE'].includes(userRole) && (
                 <ListItem component="div">
                   <NextLink href="/ventas" passHref>
                     <Button
                       className={
-                        currentRoute.includes('/ventas') ? 'active' : ''
+                        currentRoute === '/ventas' ? 'active' : ''
                       }
                       disableRipple
                       component="a"
@@ -578,7 +580,8 @@ function SidebarMenu({ userRole }) {
                     </Button>
                   </NextLink>
                 </ListItem>
-
+              )}
+              {['ADMIN', 'AUX'].includes(userRole) && (
                 <ListItem component="div">
                   <NextLink href="/clientes" passHref>
                     <Button
@@ -594,7 +597,8 @@ function SidebarMenu({ userRole }) {
                     </Button>
                   </NextLink>
                 </ListItem>
-                </>}
+                
+                )}
                 {userRole === 'ADMIN' && (
                   <ListItem component="div">
                     <NextLink href="/socios" passHref>
@@ -610,7 +614,7 @@ function SidebarMenu({ userRole }) {
                     </NextLink>
                   </ListItem>
                 )}
-                {['ADMIN', 'AUX'].includes(userRole) && (
+                {['ADMIN', 'AUX'].includes(userRole) && (<>
                   <ListItem component="div">
                     <NextLink href="/inventario" passHref>
                       <Button
@@ -626,7 +630,7 @@ function SidebarMenu({ userRole }) {
                       </Button>
                     </NextLink>
                   </ListItem>
-                )}
+                
                 <ListItem component="div">
                   <NextLink href={userRole === "SUB" ? "/reportes/semanal" :"/reportes"} passHref>
                     <Button
@@ -641,7 +645,7 @@ function SidebarMenu({ userRole }) {
                       Reportes
                     </Button>
                   </NextLink>
-                </ListItem>
+                </ListItem></>)}
                 {userRole === 'ADMIN' && (
                   <ListItem component="div">
                     <NextLink href="/usuarios" passHref>
