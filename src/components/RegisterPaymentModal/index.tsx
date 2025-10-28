@@ -49,40 +49,52 @@ function RegisterPaymentModal(props) {
   if (!sale) return null;
 
   const handleImageUpload = async (event) => {
-    const file = event.target.files[0];
-    if (!file) return;
-
-    try {
-      // Compress the image
-      const compressedFile = await new Promise<File | Blob>((resolve, reject) => {
-        new Compressor(file, {
-          quality: 0.6,
-          maxWidth: 1920,
-          maxHeight: 1920,
-          success: resolve,
-          error: reject,
-        });
-      });
-
-      // Convert to JPEG if needed
-      let finalFile: File | Blob = compressedFile;
-      if (compressedFile.type !== 'image/jpeg') {
-        const blob = await imageConversion.compressAccurately(compressedFile as Blob, {
-          size: 200,
-          accuracy: 0.9,
-          type: imageConversion.EImageType.JPEG,
-        });
-        finalFile = new File([blob], file.name.replace(/\.[^/.]+$/, '.jpg'), {
-          type: 'image/jpeg',
-        });
-      }
-
-      setPaymentImage(finalFile as File);
-      setPaymentImagePreview(URL.createObjectURL(finalFile));
-    } catch (error) {
-      console.error('Error processing image:', error);
-      setHasError({ error: true, msg: 'Error al procesar la imagen' });
+    const imageFile = event.target.files[0];
+    
+    if (
+      imageFile &&
+      (!imageFile.type.includes('image/') || imageFile.type.includes('/heic'))
+    ) {
+      setHasError({ error: true, msg: 'Formato de imagen no válido' });
+      return;
     }
+
+    if (!imageFile) {
+      setPaymentImage(null);
+      setPaymentImagePreview(null);
+      return;
+    }
+
+    let compressedFile;
+    let url;
+    try {
+      compressedFile = new File(
+        [await imageConversion.compress(imageFile, 0.2)],
+        imageFile.name
+      );
+    } catch (error) {
+      compressedFile = new File(
+        [
+          await new Promise((resolve, reject) => {
+            new Compressor(imageFile, {
+              quality: 0.6,
+              success: resolve,
+              error: reject
+            });
+          })
+        ],
+        imageFile.name
+      );
+    }
+    try {
+      url = URL.createObjectURL(compressedFile);
+    } catch (error) {
+      console.error(error);
+      url = URL.createObjectURL(imageFile);
+    }
+    
+    setPaymentImage(compressedFile);
+    setPaymentImagePreview(url);
   };
 
   const handleRemoveImage = () => {
