@@ -20,7 +20,6 @@ function AddSalesMachineModal(props) {
 
   const [isLoading, setIsLoading] = useState(false);
   const [hasError, setHasError] = useState({ error: false, msg: '' });
-  const [machineNum, setMachineNum] = useState('');
   const [brand, setBrand] = useState('');
   const [capacity, setCapacity] = useState('');
   const [cost, setCost] = useState('');
@@ -31,7 +30,7 @@ function AddSalesMachineModal(props) {
     setIsLoading(true);
     setHasError({ error: false, msg: '' });
 
-    if (!machineNum || !brand || !cost) {
+    if (!brand || !cost) {
       setHasError({ 
         error: true, 
         msg: 'Por favor complete todos los campos requeridos' 
@@ -41,7 +40,6 @@ function AddSalesMachineModal(props) {
     }
 
     const result = await saveSalesMachine({
-      machineNum: parseInt(machineNum),
       brand,
       capacity,
       cost: parseFloat(cost),
@@ -59,7 +57,6 @@ function AddSalesMachineModal(props) {
   const handleClose = () => {
     setHasError({ error: false, msg: '' });
     setIsLoading(false);
-    setMachineNum('');
     setBrand('');
     setCapacity('');
     setCost('');
@@ -78,7 +75,10 @@ function AddSalesMachineModal(props) {
   return (
     <Dialog open={open} fullWidth={true} maxWidth="xs" scroll={'body'}>
       <Card>
-        <CardHeader title="Agregar Equipo de Venta" />
+        <CardHeader 
+          title="Agregar Equipo de Venta" 
+          subheader="El número de equipo se asignará automáticamente"
+        />
         <Divider />
         <CardContent>
           <Box component="form" onSubmit={submitHandler}>
@@ -89,21 +89,6 @@ function AddSalesMachineModal(props) {
               spacing={2}
               maxWidth="xs"
             >
-              <Grid item lg={12}>
-                <TextField
-                  type="number"
-                  autoComplete="off"
-                  required
-                  id="machineNum"
-                  name="machineNum"
-                  label="Número de Equipo"
-                  fullWidth={true}
-                  value={machineNum}
-                  onChange={(e) => setMachineNum(e.target.value)}
-                  inputProps={{ min: 1, step: 1 }}
-                />
-              </Grid>
-
               <Grid item lg={12}>
                 <TextField
                   autoComplete="off"
