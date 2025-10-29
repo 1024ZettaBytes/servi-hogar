@@ -1,6 +1,7 @@
 import Head from "next/head";
 import { getSession } from "next-auth/react";
 import { useRouter } from "next/router";
+import { useState } from "react";
 import SidebarLayout from "@/layouts/SidebarLayout";
 import { validateServerSideSession } from "../../lib/auth";
 import PageHeader from "@/components/PageHeader";
@@ -24,23 +25,37 @@ import {
   TableRow,
   Paper,
   Button,
+  IconButton,
 } from "@mui/material";
 import Footer from "@/components/Footer";
 import useSWR from "swr";
 import numeral from "numeral";
 import { formatTZDate } from "../../lib/client/utils";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
+import ImageSearchIcon from "@mui/icons-material/ImageSearch";
 import NextLink from "next/link";
+import ImagesModal from "@/components/ImagesModal";
 
 function SaleDetail() {
   const router = useRouter();
   const { saleId } = router.query;
+  const [openImages, setOpenImages] = useState(false);
+  const [selectedImages, setSelectedImages] = useState({});
 
   const fetcher = (url) => fetch(url).then((res) => res.json());
   const { data: saleData, error: saleError } = useSWR(
     saleId ? `/api/sales/${saleId}` : null,
     fetcher
   );
+
+  const handleOnCloseImages = () => {
+    setOpenImages(false);
+  };
+
+  const handleViewImage = (imageUrl) => {
+    setSelectedImages({ payment: imageUrl });
+    setOpenImages(true);
+  };
 
   const sale = saleData?.data;
   const paths = ["Inicio", "Ventas", sale ? `Folio #${sale.saleNum}` : "Detalle"];
@@ -284,6 +299,7 @@ function SaleDetail() {
                               <TableCell align="right"><strong>Monto</strong></TableCell>
                               <TableCell align="center"><strong>Semanas cubiertas</strong></TableCell>
                               <TableCell><strong>Registrado por</strong></TableCell>
+                              <TableCell align="center"><strong>Fotos</strong></TableCell>
                             </TableRow>
                           </TableHead>
                           <TableBody>
@@ -297,9 +313,20 @@ function SaleDetail() {
                                 </TableCell>
                                 <TableCell align="center">{payment.weeksCovered}</TableCell>
                                 <TableCell>{payment.createdBy?.name || 'N/A'}</TableCell>
+                                <TableCell align="center">
+                                  {payment.imageUrl && (
+                                    <IconButton
+                                      size="small"
+                                      color="primary"
+                                      onClick={() => handleViewImage(payment.imageUrl)}
+                                    >
+                                      <ImageSearchIcon />
+                                    </IconButton>
+                                  )}
+                                </TableCell>
                               </TableRow>
                             ))}
-                                                        {/* Initial Payment */}
+                            {/* Initial Payment */}
                             {sale.initialPayment > 0 && (
                               <TableRow>
                                 <TableCell>-</TableCell>
@@ -313,6 +340,7 @@ function SaleDetail() {
                                   <Chip label="Pago inicial" size="small" color="success" />
                                 </TableCell>
                                 <TableCell>{sale.createdBy?.name || 'N/A'}</TableCell>
+                                <TableCell align="center">-</TableCell>
                               </TableRow>
                             )}
                           </TableBody>
@@ -327,6 +355,13 @@ function SaleDetail() {
         </Grid>
       </Container>
       <Footer />
+      <ImagesModal
+        open={openImages}
+        onClose={handleOnCloseImages}
+        title="Comprobante de Pago"
+        text="Imagen del comprobante de pago"
+        imagesObj={selectedImages}
+      />
     </>
   );
 }

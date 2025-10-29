@@ -1,12 +1,23 @@
-import { getSalesData } from '../../../lib/data/Sales';
-import { validateUserPermissions } from '../auth/authUtils';
+import { getSalesData, getCompletedSalesForOperator } from '../../../lib/data/Sales';
+import { validateUserPermissions, getUserId, getUserRole } from '../auth/authUtils';
 
 async function handler(req, res) {
-  const validRole = await validateUserPermissions(req, res, ['ADMIN', 'AUX']);
+  const validRole = await validateUserPermissions(req, res, ['ADMIN', 'AUX', 'OPE']);
+  const userId = await getUserId(req);
+  const userRole = await getUserRole(req);
   
   if (validRole && req.method === 'GET') {
     try {
-      const allSales = await getSalesData();
+      let allSales = [];
+      
+      if (userRole === 'OPE') {
+        // Operators see only their completed deliveries
+        allSales = await getCompletedSalesForOperator(userId);
+      } else {
+        // ADMIN/AUX see all completed sales
+        allSales = await getSalesData();
+      }
+      
       res.status(200).json({ data: allSales });
     } catch (e) {
       console.error(e);
