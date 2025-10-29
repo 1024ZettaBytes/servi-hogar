@@ -1,5 +1,5 @@
 import PropTypes from 'prop-types';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Dialog from '@mui/material/Dialog';
 import {
   Box,
@@ -18,15 +18,14 @@ import {
 } from '@mui/material';
 import { LoadingButton } from '@mui/lab';
 import {
-  useGetAllMachines,
   getFetcher,
   useGetAllCustomers
 } from '../../../pages/api/useRequest';
 import { saveSale } from '../../../lib/client/salesFetch';
+import { getAllSalesMachines } from '../../../lib/client/salesMachinesFetch';
 
 function AddSaleModal(props) {
   const { handleOnClose, open } = props;
-  const { machinesData, machinesError } = useGetAllMachines(getFetcher);
   const { customerList, customerError } = useGetAllCustomers(getFetcher, false);
 
   const [isLoading, setIsLoading] = useState(false);
@@ -38,11 +37,30 @@ function AddSaleModal(props) {
   const [totalAmount, setTotalAmount] = useState('');
   const [initialPayment, setInitialPayment] = useState('');
   const [totalWeeks, setTotalWeeks] = useState('');
+  const [salesMachines, setSalesMachines] = useState([]);
+  const [salesMachinesError, setSalesMachinesError] = useState(null);
+  const [salesMachinesLoading, setSalesMachinesLoading] = useState(true);
 
-  // Get available machines (active ones that are not rented)
-  const machinesList = machinesData?.machinesList || [];
-  const availableMachines = machinesList.filter(
-    (machine) => machine.active && machine.status?.id !== 'RENT'
+  // Fetch sales machines on mount
+  useEffect(() => {
+    async function fetchSalesMachines() {
+      setSalesMachinesLoading(true);
+      const result = await getAllSalesMachines(false);
+      if (!result.error) {
+        setSalesMachines(result.salesMachinesList || []);
+      } else {
+        setSalesMachinesError(result.msg);
+      }
+      setSalesMachinesLoading(false);
+    }
+    if (open) {
+      fetchSalesMachines();
+    }
+  }, [open]);
+
+  // Get available sales machines (active ones that are not sold)
+  const availableMachines = salesMachines.filter(
+    (machine) => machine.active && !machine.isSold
   );
 
   const weeklyPayment =
@@ -141,9 +159,9 @@ function AddSaleModal(props) {
 
               {useExistingMachine ? (
                 <Grid item lg={12}>
-                  {machinesError ? (
-                    <Alert severity="error">{machinesError?.message}</Alert>
-                  ) : !machinesList ? (
+                  {salesMachinesError ? (
+                    <Alert severity="error">{salesMachinesError}</Alert>
+                  ) : salesMachinesLoading ? (
                     <Skeleton
                       variant="rectangular"
                       width={'100%'}
@@ -165,7 +183,7 @@ function AddSaleModal(props) {
                       renderInput={(params) => (
                         <TextField
                           {...params}
-                          label="Seleccionar Equipo"
+                          label="Seleccionar Equipo de Venta"
                           required
                         />
                       )}

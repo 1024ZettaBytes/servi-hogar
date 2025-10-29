@@ -27,7 +27,7 @@ const SaleSchema = new Schema<ISale>({
   saleNum: { type: Number, required: true, unique: true },
   machine: {
     type: Schema.Types.ObjectId,
-    ref: 'machines',
+    ref: 'sales_machines',
     default: null
   },
   serialNumber: { type: String, default: '' },

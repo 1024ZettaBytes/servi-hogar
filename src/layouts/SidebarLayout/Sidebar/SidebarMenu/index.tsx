@@ -265,13 +265,64 @@ function SidebarMenu({ userRole }) {
           </List>
         )}
 
+        {['ADMIN', 'AUX', 'OPE'].includes(userRole) && (
+          <>
+            <List
+              component="div"
+              subheader={
+                <ListSubheader component="div" disableSticky>
+                  VENTAS
+                </ListSubheader>
+              }
+            >
+              <SubMenuWrapper>
+                <List component="div">
+                  <ListItem component="div">
+                    <NextLink href="/ventas" passHref>
+                      <Button
+                        className={
+                          currentRoute === '/ventas' ? 'active' : ''
+                        }
+                        disableRipple
+                        component="a"
+                        onClick={closeSidebar}
+                        startIcon={<AttachMoneyIcon />}
+                      >
+                        Lista de Ventas
+                      </Button>
+                    </NextLink>
+                  </ListItem>
+                  {['ADMIN', 'AUX'].includes(userRole) && (
+                    <ListItem component="div">
+                      <NextLink href="/equipos-venta" passHref>
+                        <Button
+                          className={
+                            currentRoute.includes('/equipos-venta')
+                              ? 'active'
+                              : ''
+                          }
+                          disableRipple
+                          component="a"
+                          onClick={closeSidebar}
+                          startIcon={<ShoppingBagIcon />}
+                        >
+                          Equipos de Venta
+                        </Button>
+                      </NextLink>
+                    </ListItem>
+                  )}
+                </List>
+              </SubMenuWrapper>
+            </List>
+          </>
+        )}
         {['ADMIN', 'AUX', 'OPE', 'SUB'].includes(userRole) && (
           <>
             <List
               component="div"
               subheader={
                 <ListSubheader component="div" disableSticky>
-                  ENTREGAS
+                  ENTREGAS (RENTAS)
                 </ListSubheader>
               }
             >
@@ -550,6 +601,7 @@ function SidebarMenu({ userRole }) {
                     <Button
                       className={
                         currentRoute.includes('/equipos') &&
+                        !currentRoute.includes('/equipos-venta') &&
                         !currentRoute.includes('/reportes')
                           ? 'active'
                           : ''
@@ -559,28 +611,11 @@ function SidebarMenu({ userRole }) {
                       onClick={closeSidebar}
                       startIcon={<LocalLaundryServiceIcon />}
                     >
-                      Equipos
+                      Equipos (Rentas)
                     </Button>
                   </NextLink>
                 </ListItem>
               </>}
-              {['ADMIN', 'AUX', 'OPE'].includes(userRole) && (
-                <ListItem component="div">
-                  <NextLink href="/ventas" passHref>
-                    <Button
-                      className={
-                        currentRoute === '/ventas' ? 'active' : ''
-                      }
-                      disableRipple
-                      component="a"
-                      onClick={closeSidebar}
-                      startIcon={<AttachMoneyIcon />}
-                    >
-                      Ventas
-                    </Button>
-                  </NextLink>
-                </ListItem>
-              )}
               {['ADMIN', 'AUX'].includes(userRole) && (
                 <ListItem component="div">
                   <NextLink href="/clientes" passHref>
