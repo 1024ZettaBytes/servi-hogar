@@ -14,6 +14,11 @@ import {
   CardMedia,
   CardActions,
   Container,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogContentText,
+  DialogActions,
   FormControl,
   FormControlLabel,
   FormLabel,
@@ -94,6 +99,12 @@ function CompletarVenta() {
   const [hasErrorSubmitting, setHasErrorSubmitting] = useState<any>({
     error: false,
     msg: ''
+  });
+  const [errorDialogOpen, setErrorDialogOpen] = useState<boolean>(false);
+  const [errorDetails, setErrorDetails] = useState<any>({
+    message: '',
+    details: '',
+    fileInfo: ''
   });
   const [activeStep, setActiveStep] = useState(0);
   
@@ -298,6 +309,25 @@ function CompletarVenta() {
     setHasErrorSubmitting({ error: false, msg: '' });
     setIsSubmitting(true);
 
+    // Collect file information for error reporting
+    const files = {
+      ine: attached.ine.file,
+      frontal: attached.frontal.file,
+      label: attached.label.file,
+      board: attached.board.file
+    };
+    
+    let totalSize = 0;
+    const fileSizeInfo = [];
+    for (const [key, file] of Object.entries(files)) {
+      if (file) {
+        const sizeInKB = (file.size / 1024).toFixed(2);
+        fileSizeInfo.push(`${key}: ${sizeInKB} KB`);
+        totalSize += file.size;
+      }
+    }
+    const totalSizeMB = (totalSize / 1024 / 1024).toFixed(2);
+
     const formData = new FormData();
     formData.append('saleId', id as string);
     formData.append('deliveryDate', setDateToMid(new Date(deliveryDate)).toISOString());
@@ -318,6 +348,35 @@ function CompletarVenta() {
     if (!result.error) {
       handleNext(event);
     } else {
+      // Collect device/browser information for debugging
+      const deviceInfo = [
+        `User Agent: ${navigator.userAgent}`,
+        `Platform: ${navigator.platform}`,
+        `Connection: ${(navigator as any).connection?.effectiveType || 'unknown'}`,
+        `Online: ${navigator.onLine}`,
+        `Memory: ${(performance as any).memory ? `${((performance as any).memory.usedJSHeapSize / 1024 / 1024).toFixed(2)} MB` : 'N/A'}`
+      ];
+
+      // Show detailed error in alert dialog
+      const errorInfo = {
+        message: result.msg || 'Error desconocido',
+        details: `Sale ID: ${id}\nFecha: ${new Date().toLocaleString('es-MX')}\n\n📱 INFORMACIÓN DEL DISPOSITIVO:\n${deviceInfo.join('\n')}\n\n📦 ARCHIVOS:\nTamaño total: ${totalSizeMB} MB\n${fileSizeInfo.join('\n')}`,
+        fileInfo: `Total: ${totalSizeMB} MB (${fileSizeInfo.length} archivos)`
+      };
+      
+      // Also add technical details if available
+      if (result.errorCode) {
+        errorInfo.details += `\n\n⚠️ Código de error: ${result.errorCode}`;
+      }
+      if (result.errorType) {
+        errorInfo.details += `\nTipo: ${result.errorType}`;
+      }
+      if (result.debug) {
+        errorInfo.details += `\n\n🔧 DEBUG:\n${result.debug}`;
+      }
+      
+      setErrorDetails(errorInfo);
+      setErrorDialogOpen(true);
       setHasErrorSubmitting({ error: true, msg: result.msg });
     }
   };
@@ -1105,6 +1164,39 @@ function CompletarVenta() {
           </Grid>
         </Grid>
       </Container>
+
+      {/* Error Details Dialog */}
+      <Dialog
+        open={errorDialogOpen}
+        onClose={() => setErrorDialogOpen(false)}
+        maxWidth="sm"
+        fullWidth
+      >
+        <DialogTitle>Error al completar la entrega</DialogTitle>
+        <DialogContent>
+          <DialogContentText component="div">
+            <Box sx={{ mb: 2 }}>
+              <strong>{errorDetails.message}</strong>
+            </Box>
+            {errorDetails.details && (
+              <Box sx={{ mb: 2, whiteSpace: 'pre-wrap', fontSize: '0.875rem' }}>
+                {errorDetails.details}
+              </Box>
+            )}
+            {errorDetails.fileInfo && (
+              <Box sx={{ fontSize: '0.875rem', color: 'text.secondary' }}>
+                {errorDetails.fileInfo}
+              </Box>
+            )}
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setErrorDialogOpen(false)} autoFocus>
+            Cerrar
+          </Button>
+        </DialogActions>
+      </Dialog>
+
       <Footer />
     </>
   );
