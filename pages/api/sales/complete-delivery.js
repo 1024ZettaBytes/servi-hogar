@@ -42,8 +42,9 @@ async function handler(req, res) {
       const ineImage = Array.isArray(files.ineImage) ? files.ineImage[0] : files.ineImage;
       const frontalImage = Array.isArray(files.frontalImage) ? files.frontalImage[0] : files.frontalImage;
       const labelImage = Array.isArray(files.labelImage) ? files.labelImage[0] : files.labelImage;
+      const boardImage = Array.isArray(files.boardImage) ? files.boardImage[0] : files.boardImage;
 
-      if (!ineImage || !frontalImage || !labelImage) {
+      if (!ineImage || !frontalImage || !labelImage || !boardImage) {
         return res.status(400).json({ errorMsg: 'Faltan imágenes requeridas' });
       }
 
@@ -57,6 +58,8 @@ async function handler(req, res) {
         frontalImageName: frontalImage.originalFilename,
         labelImagePath: labelImage.filepath,
         labelImageName: labelImage.originalFilename,
+        boardImagePath: boardImage.filepath,
+        boardImageName: boardImage.originalFilename,
         customerData
       });
       

@@ -13,6 +13,7 @@ export interface ISaleDelivery extends Document {
     ine: string;
     frontal: string;
     label: string;
+    board: string;
   };
   customerDataUpdated: boolean;
   updatedCustomerData: object;
@@ -56,7 +57,8 @@ const SaleDeliverySchema = new Schema<ISaleDelivery>({
     type: {
       ine: { type: String, default: '' },
       frontal: { type: String, default: '' },
-      label: { type: String, default: '' }
+      label: { type: String, default: '' },
+      board: { type: String, default: '' }
     },
     default: null
   },

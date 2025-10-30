@@ -35,7 +35,6 @@ interface TablaPendingSalesProps {
   salesList: any[];
   onUpdate: () => void;
   onAssignClick: (sale: any) => void;
-  onCompleteClick?: (sale: any) => void;
   onWhatsAppClick?: (sale: any) => void;
 }
 
@@ -105,7 +104,6 @@ const TablaPendingSales: FC<TablaPendingSalesProps> = ({
   userRole, 
   salesList, 
   onAssignClick,
-  onCompleteClick,
   onWhatsAppClick 
 }) => {
   const theme = useTheme();
@@ -317,7 +315,7 @@ const TablaPendingSales: FC<TablaPendingSalesProps> = ({
                           </IconButton>
                         </Tooltip>
                       )}
-                      {isOperator && onCompleteClick && (
+                      {isOperator && (
                         <NextLink href={`/ventas-pendientes/${sale._id}`} passHref>
                           <Tooltip title="Completar entrega" arrow>
                             <IconButton
@@ -362,7 +360,6 @@ TablaPendingSales.propTypes = {
   salesList: PropTypes.array.isRequired,
   userRole: PropTypes.string.isRequired,
   onAssignClick: PropTypes.func.isRequired,
-  onCompleteClick: PropTypes.func
 };
 
 export default TablaPendingSales;
