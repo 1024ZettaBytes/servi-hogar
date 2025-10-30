@@ -19,7 +19,6 @@ import TablaVentas from "@/components/TablaVentas";
 import TablaPendingSales from "@/components/TablaPendingSales";
 import TablaCompletedSalesByOperator from "@/components/TablaCompletedSalesByOperator";
 import AssignOperatorModal from "@/components/AssignOperatorModal";
-import CompleteSaleDeliveryModal from "@/components/CompleteSaleDeliveryModal";
 import FormatModal from "@/components/FormatModal";
 import { useSnackbar } from "notistack";
 import { getFormatForSale } from "../../lib/consts/OBJ_CONTS";
@@ -49,7 +48,6 @@ function Ventas({ session }) {
   const [modalIsOpen, setModalIsOpen] = useState(false);
   const [paymentModalIsOpen, setPaymentModalIsOpen] = useState(false);
   const [assignModalOpen, setAssignModalOpen] = useState(false);
-  const [completeModalOpen, setCompleteModalOpen] = useState(false);
   const [selectedSale, setSelectedSale] = useState(null);
   const [formatIsOpen, setFormatIsOpen] = useState(false);
   const [formatText, setFormatText] = useState('');
@@ -129,28 +127,6 @@ function Ventas({ session }) {
     }
   };
 
-  const handleCompleteClick = (sale) => {
-    setSelectedSale(sale);
-    setCompleteModalOpen(true);
-  };
-
-  const handleCompleteClose = (saved, successMessage = null) => {
-    setCompleteModalOpen(false);
-    setSelectedSale(null);
-    if (saved && successMessage) {
-      enqueueSnackbar(successMessage, {
-        variant: "success",
-        anchorOrigin: {
-          vertical: "top",
-          horizontal: "center",
-        },
-        autoHideDuration: 2000,
-      });
-      mutatePending(); // Refresh pending sales
-      mutateSales(); // Refresh completed sales
-    }
-  };
-
   const handleWhatsAppClick = (sale) => {
     setSelectedSale(sale);
     setFormatText(getFormatForSale(sale));
@@ -214,7 +190,6 @@ function Ventas({ session }) {
                             salesList={pendingSalesList}
                             onUpdate={mutatePending}
                             onAssignClick={handleAssignClick}
-                            onCompleteClick={handleCompleteClick}
                             onWhatsAppClick={handleWhatsAppClick}
                           />
                         </Card>
@@ -242,7 +217,6 @@ function Ventas({ session }) {
                             salesList={pendingSalesList}
                             onUpdate={mutatePending}
                             onAssignClick={handleAssignClick}
-                            onCompleteClick={handleCompleteClick}
                             onWhatsAppClick={handleWhatsAppClick}
                           />
                         </Card>
@@ -287,14 +261,6 @@ function Ventas({ session }) {
           open={assignModalOpen}
           sale={selectedSale}
           handleOnClose={handleAssignClose}
-        />
-      ) : null}
-
-      {completeModalOpen && selectedSale ? (
-        <CompleteSaleDeliveryModal
-          open={completeModalOpen}
-          sale={selectedSale}
-          handleOnClose={handleCompleteClose}
         />
       ) : null}
 

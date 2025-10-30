@@ -86,7 +86,8 @@ function CompletarVenta() {
   const [attached, setAttached] = useState<any>({
     ine: { file: null, url: null },
     frontal: { file: null, url: null },
-    label: { file: null, url: null }
+    label: { file: null, url: null },
+    board: { file: null, url: null }
   });
 
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
@@ -285,7 +286,8 @@ function CompletarVenta() {
         deliveryDate.toString() !== 'Invalid Date' &&
         attached.ine.file &&
         attached.frontal.file &&
-        attached.label.file
+        attached.label.file &&
+        attached.board.file
       );
   };
 
@@ -302,6 +304,7 @@ function CompletarVenta() {
     formData.append('ineImage', attached.ine.file);
     formData.append('frontalImage', attached.frontal.file);
     formData.append('labelImage', attached.label.file);
+    formData.append('boardImage', attached.board.file);
     
     // Always send customer data with the isOk flags
     const customerDataToSend = {
@@ -905,7 +908,7 @@ function CompletarVenta() {
                               <Grid item xs={12} md={4} m={1}>
                                 <Box>
                                   <Typography variant="body2" fontWeight="medium" gutterBottom>
-                                    Frente *
+                                    Frente Casa *
                                   </Typography>
                                   {attached.frontal?.url ? (
                                     <Card>
@@ -913,7 +916,7 @@ function CompletarVenta() {
                                         component="img"
                                         height="150"
                                         image={attached.frontal.url}
-                                        alt="Frente"
+                                        alt="Frente Casa"
                                       />
                                       <CardActions sx={{ justifyContent: 'center' }}>
                                         <IconButton
@@ -949,7 +952,55 @@ function CompletarVenta() {
                                   )}
                                 </Box>
                               </Grid>
-
+                              {/* Board Image */}
+                              <Grid item xs={12} md={4} m={1}>
+                                <Box>
+                                  <Typography variant="body2" fontWeight="medium" gutterBottom>
+                                    Tablero *
+                                  </Typography>
+                                  {attached.board?.url ? (
+                                    <Card>
+                                      <CardMedia
+                                        component="img"
+                                        height="150"
+                                        image={attached.board.url}
+                                        alt="Tablero"
+                                      />
+                                      <CardActions sx={{ justifyContent: 'center' }}>
+                                        <IconButton
+                                          size="small"
+                                          color="error"
+                                          onClick={() => handleRemoveImage('board')}
+                                        >
+                                          <DeleteIcon />
+                                        </IconButton>
+                                      </CardActions>
+                                    </Card>
+                                  ) : (
+                                    <Button
+                                      variant="outlined"
+                                      component="label"
+                                      fullWidth
+                                      startIcon={<PhotoCamera />}
+                                      sx={{ height: 150 }}
+                                    >
+                                      Subir Foto
+                                      <input
+                                        type="file"
+                                        hidden
+                                        accept="image/*"
+                                        onChange={(e) => handleImageUpload(e, 'board')}
+                                      />
+                                    </Button>
+                                  )}
+                                  {attached.board?.error && (
+                                    <Typography color="error" variant="caption" display="block" sx={{ mt: 1 }}>
+                                      Seleccione un archivo válido (*.jpg, *.jpeg, *.png).
+                                    </Typography>
+                                  )}
+                                </Box>
+                              </Grid>
+                              
                               {/* Label Image */}
                               <Grid item xs={12} md={4} m={1}>
                                 <Box>
@@ -998,7 +1049,8 @@ function CompletarVenta() {
                                   )}
                                 </Box>
                               </Grid>
-                              
+
+
                               {hasErrorSubmitting.error && (
                                 <Grid item lg={6} m={1}>
                                   <Alert severity="error">
