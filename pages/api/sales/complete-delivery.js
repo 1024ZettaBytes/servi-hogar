@@ -21,24 +21,28 @@ async function handler(req, res) {
     console.log('Content-Length:', req.headers['content-length']);
     
     try {
-      // Parse the multipart form data
-      const form = formidable({ 
-        multiples: true,
-        maxFileSize: 50 * 1024 * 1024, // 50MB
-        maxTotalFileSize: 200 * 1024 * 1024 // 200MB total
-      });
+      // Parse the multipart form data using the same approach as rent delivery
+      const form = new formidable.IncomingForm();
+      form.multiples = true;
+      form.maxFileSize = 50 * 1024 * 1024; // 50MB per file
+      form.maxTotalFileSize = 200 * 1024 * 1024; // 200MB total
       
       console.log('Starting formidable parse...');
-      const [fields, files] = await new Promise((resolve, reject) => {
-        form.parse(req, (err, fields, files) => {
+      const { fields, files } = await new Promise(function (resolve, reject) {
+        form.parse(req, function (err, fields, files) {
           if (err) {
             console.error('Formidable parse error:', err);
             console.error('Error code:', err.code);
             console.error('Error message:', err.message);
-            reject(err);
+            reject(
+              new Error(
+                "Ocurrió un error interno, por favor contacte al administrador."
+              )
+            );
+            return;
           }
           console.log('Formidable parse successful');
-          resolve([fields, files]);
+          resolve({ fields, files });
         });
       });
 
@@ -96,7 +100,6 @@ async function handler(req, res) {
         (labelImage?.size || 0) + 
         (boardImage?.size || 0)
       ) / 1024 / 1024, 'MB');
-
       const result = await completeSaleDelivery({ 
         saleId,
         deliveryDate,
