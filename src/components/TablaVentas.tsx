@@ -81,7 +81,9 @@ const applyFilters = (salesList: any[], filter: string): any[] => {
           }
           case 'customer': {
             const customerName = value && value['name'];
-            return customerName && compareStringsForFilter(filter, customerName);
+            return (
+              customerName && compareStringsForFilter(filter, customerName)
+            );
           }
         }
       }).length > 0
@@ -129,15 +131,15 @@ const isPaymentOverdue = (nextPaymentDate: Date | null, status: string) => {
 
 const getDaysUntilPayment = (nextPaymentDate: Date | null) => {
   if (!nextPaymentDate) return null;
-  
+
   const today = new Date();
   today.setHours(0, 0, 0, 0);
   const paymentDate = new Date(nextPaymentDate);
   paymentDate.setHours(0, 0, 0, 0);
-  
+
   const diffTime = paymentDate.getTime() - today.getTime();
   const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-  
+
   return diffDays;
 };
 
@@ -173,272 +175,301 @@ const TablaVentas: FC<TablaSalesProps> = ({ salesList, onPaymentClick }) => {
 
   return (
     <>
-    <Card>
-      <CardHeader
-        action={
-          <Box width={200}>
-            <TextField
-              size="small"
-              fullWidth
-              onChange={handleSearchChange}
-              InputProps={{
-                startAdornment: (
-                  <InputAdornment position="start">
-                    <SearchIcon />
-                  </InputAdornment>
-                )
-              }}
-              placeholder="Buscar venta..."
-              variant="outlined"
-            />
-          </Box>
-        }
-        title="Ventas de Equipos"
-      />
-      <Divider />
-      <TableContainer>
-        <Table>
-          <TableHead>
-            <TableRow>
-              <TableCell>Folio</TableCell>
-              <TableCell>Equipo/Serie</TableCell>
-              <TableCell>Cliente</TableCell>
-              <TableCell align="right">Total</TableCell>
-              <TableCell align="right">Pago Inicial</TableCell>
-              <TableCell align="right">Saldo</TableCell>
-              <TableCell align="center">Semanas</TableCell>
-              <TableCell align="right">Pago Semanal</TableCell>
-              <TableCell align="center">Estado</TableCell>
-              <TableCell align="center">Próximo Pago</TableCell>
-              <TableCell align="center">Fecha</TableCell>
-              <TableCell align="center">Fotos</TableCell>
-              <TableCell align="center">Acciones</TableCell>
-            </TableRow>
-          </TableHead>
-          <TableBody>
-            {paginatedSales.map((sale) => {
-              const machineInfo = sale.machine
-                ? `#${sale.machine.machineNum} - ${sale.machine.brand}`
-                : sale.serialNumber || 'N/A';
-              const customerName = sale.customer?.name || 'N/A';
+      <Card>
+        <CardHeader
+          action={
+            <Box width={200}>
+              <TextField
+                size="small"
+                fullWidth
+                onChange={handleSearchChange}
+                InputProps={{
+                  startAdornment: (
+                    <InputAdornment position="start">
+                      <SearchIcon />
+                    </InputAdornment>
+                  )
+                }}
+                placeholder="Buscar venta..."
+                variant="outlined"
+              />
+            </Box>
+          }
+          title="Ventas de Equipos"
+        />
+        <Divider />
+        <TableContainer>
+          <Table>
+            <TableHead>
+              <TableRow>
+                <TableCell>Folio</TableCell>
+                <TableCell>Equipo/Serie</TableCell>
+                <TableCell>Cliente</TableCell>
+                <TableCell align="right">Total</TableCell>
+                <TableCell align="right">Pago Inicial</TableCell>
+                <TableCell align="right">Saldo</TableCell>
+                <TableCell align="center">Semanas</TableCell>
+                <TableCell align="right">Pago Semanal</TableCell>
+                <TableCell align="center">Estado</TableCell>
+                <TableCell align="center">Próximo Pago</TableCell>
+                <TableCell align="center">Fecha</TableCell>
+                <TableCell align="center">Fotos</TableCell>
+                <TableCell align="center">Acciones</TableCell>
+              </TableRow>
+            </TableHead>
+            <TableBody>
+              {paginatedSales.map((sale) => {
+                const machineInfo = sale.machine
+                  ? `#${sale.machine.machineNum} - ${sale.machine.brand}`
+                  : sale.serialNumber || 'N/A';
+                const customerName = sale.customer?.name || 'N/A';
 
-              return (
-                <TableRow hover key={sale._id}>
-                  <TableCell>
-                    <Typography
-                      variant="body1"
-                      fontWeight="bold"
-                      color="text.primary"
-                      gutterBottom
-                      noWrap
-                    >
-                      {sale.saleNum}
-                    </Typography>
-                  </TableCell>
-                  <TableCell>
-                    <Typography
-                      variant="body1"
-                      color="text.primary"
-                      gutterBottom
-                      noWrap
-                    >
-                      {machineInfo}
-                    </Typography>
-                  </TableCell>
-                  <TableCell>
-                    <Typography
-                      variant="body1"
-                      color="text.primary"
-                      gutterBottom
-                      noWrap
-                    >
-                      {customerName}
-                    </Typography>
-                  </TableCell>
-                  <TableCell align="right">
-                    <Typography variant="body2" color="text.secondary">
-                      ${numeral(sale.totalAmount).format('0,0.00')}
-                    </Typography>
-                  </TableCell>
-                  <TableCell align="right">
-                    <Typography variant="body2" color="text.secondary">
-                      ${numeral(sale.initialPayment).format('0,0.00')}
-                    </Typography>
-                  </TableCell>
-                  <TableCell align="right">
-                    <Typography
-                      variant="body2"
-                      color={sale.remainingAmount > 0 ? 'warning.main' : 'success.main'}
-                    >
-                      ${numeral(sale.remainingAmount).format('0,0.00')}
-                    </Typography>
-                  </TableCell>
-                  <TableCell align="center">
-                    <Typography variant="body2">
-                      {sale.paidWeeks}/{sale.totalWeeks}
-                    </Typography>
-                  </TableCell>
-                  <TableCell align="right">
-                    <Typography variant="body2" color="text.secondary">
-                      ${numeral(sale.weeklyPayment).format('0,0.00')}
-                    </Typography>
-                  </TableCell>
-                  <TableCell align="center">
-                    {getStatusLabel(sale.status)}
-                  </TableCell>
-                  <TableCell align="center">
-                    {sale.nextPaymentDate ? (
-                      (() => {
-                        const daysLeft = getDaysUntilPayment(sale.nextPaymentDate);
-                        const isOverdue = isPaymentOverdue(sale.nextPaymentDate, sale.status);
-                        
-                        if (isOverdue) {
-                          const daysOverdue = Math.abs(daysLeft);
-                          const missedPayments = Math.floor(daysOverdue / 7) + 1;
-                          return (
-                            <Tooltip title={`Vencido hace ${daysOverdue} día${daysOverdue !== 1 ? 's' : ''}`} arrow>
-                              <Typography 
-                                variant="body2" 
-                                color="error.main"
-                                fontWeight="bold"
-                                noWrap
-                                sx={{ cursor: 'pointer' }}
-                              >
-                                {missedPayments} pago{missedPayments !== 1 ? 's' : ''} atrasado{missedPayments !== 1 ? 's' : ''} ⚠️
-                              </Typography>
-                            </Tooltip>
-                          );
-                        } else if (daysLeft === 0) {
-                          return (
-                            <Tooltip title="Pago vence hoy" arrow>
-                              <Typography 
-                                variant="body2" 
-                                color="warning.main"
-                                fontWeight="bold"
-                                noWrap
-                                sx={{ cursor: 'pointer' }}
-                              >
-                                Hoy
-                              </Typography>
-                            </Tooltip>
-                          );
-                        } else {
-                          return (
-                            <Tooltip title={`Vence en ${daysLeft} día${daysLeft !== 1 ? 's' : ''}`} arrow>
-                              <Typography 
-                                variant="body2" 
-                                color="text.secondary"
-                                noWrap
-                                sx={{ cursor: 'pointer' }}
-                              >
-                                {daysLeft} día{daysLeft !== 1 ? 's' : ''}
-                              </Typography>
-                            </Tooltip>
-                          );
-                        }
-                      })()
-                    ) : (
-                      <Typography variant="body2" color="text.disabled">
-                        -
+                return (
+                  <TableRow hover key={sale._id}>
+                    <TableCell>
+                      <Typography
+                        variant="body1"
+                        fontWeight="bold"
+                        color="text.primary"
+                        gutterBottom
+                        noWrap
+                      >
+                        {sale.saleNum}
                       </Typography>
-                    )}
-                  </TableCell>
-                  <TableCell align="center">
-                    <Typography variant="body2" color="text.secondary" noWrap>
-                      {formatTZDate(new Date(sale.saleDate), 'DD/MM/YYYY')}
-                    </Typography>
-                  </TableCell>
-                  <TableCell align="center">
-                    {sale.delivery?.imagesUrl ? (
-                      <Tooltip title="Ver fotos" arrow>
-                        <IconButton
-                          onClick={() => {
-                            // Filter out the _id field from imagesUrl
-                            const { _id, ...images } = sale.delivery.imagesUrl;
-                            setSelectedImages(images);
-                            setOpenImages(true);
-                          }}
-                          sx={{
-                            '&:hover': {
-                              background: theme.colors.primary.lighter
-                            },
-                            color: theme.palette.primary.main
-                          }}
-                          color="inherit"
-                          size="small"
-                        >
-                          <ImageSearchIcon fontSize="small" />
-                        </IconButton>
-                      </Tooltip>
-                    ) : (
+                    </TableCell>
+                    <TableCell>
+                      <Typography
+                        variant="body1"
+                        color="text.primary"
+                        gutterBottom
+                        noWrap
+                      >
+                        {machineInfo}
+                      </Typography>
+                    </TableCell>
+                    <TableCell>
+                      <Typography
+                        variant="body1"
+                        color="text.primary"
+                        gutterBottom
+                        noWrap
+                      >
+                        {customerName}
+                      </Typography>
+                    </TableCell>
+                    <TableCell align="right">
                       <Typography variant="body2" color="text.secondary">
-                        N/A
+                        ${numeral(sale.totalAmount).format('0,0.00')}
                       </Typography>
-                    )}
-                  </TableCell>
-                  <TableCell align="center">
-                    <Box sx={{ display: 'flex', gap: 1, justifyContent: 'center' }}>
-                      {sale.status === 'ACTIVA' && (
-                        <Tooltip title="Registrar pago" arrow>
+                    </TableCell>
+                    <TableCell align="right">
+                      <Typography variant="body2" color="text.secondary">
+                        ${numeral(sale.initialPayment).format('0,0.00')}
+                      </Typography>
+                    </TableCell>
+                    <TableCell align="right">
+                      <Typography
+                        variant="body2"
+                        color={
+                          sale.remainingAmount > 0
+                            ? 'warning.main'
+                            : 'success.main'
+                        }
+                      >
+                        ${numeral(sale.remainingAmount).format('0,0.00')}
+                      </Typography>
+                    </TableCell>
+                    <TableCell align="center">
+                      <Typography variant="body2">
+                        {sale.paidWeeks}/{sale.totalWeeks}
+                      </Typography>
+                    </TableCell>
+                    <TableCell align="right">
+                      <Typography variant="body2" color="text.secondary">
+                        ${numeral(sale.weeklyPayment).format('0,0.00')}
+                      </Typography>
+                    </TableCell>
+                    <TableCell align="center">
+                      {getStatusLabel(sale.status)}
+                    </TableCell>
+                    <TableCell align="center">
+                      {sale.nextPaymentDate ? (
+                        (() => {
+                          const daysLeft = getDaysUntilPayment(
+                            sale.nextPaymentDate
+                          );
+                          const isOverdue = isPaymentOverdue(
+                            sale.nextPaymentDate,
+                            sale.status
+                          );
+
+                          if (isOverdue) {
+                            const daysOverdue = Math.abs(daysLeft);
+                            const missedPayments =
+                              Math.floor(daysOverdue / 7) + 1;
+                            return (
+                              <Tooltip
+                                title={`Vencido hace ${daysOverdue} día${
+                                  daysOverdue !== 1 ? 's' : ''
+                                }`}
+                                arrow
+                              >
+                                <Typography
+                                  variant="body2"
+                                  color="error.main"
+                                  fontWeight="bold"
+                                  noWrap
+                                  sx={{ cursor: 'pointer' }}
+                                >
+                                  {missedPayments} pago
+                                  {missedPayments !== 1 ? 's' : ''} atrasado
+                                  {missedPayments !== 1 ? 's' : ''} ⚠️
+                                </Typography>
+                              </Tooltip>
+                            );
+                          } else if (daysLeft === 0) {
+                            return (
+                              <Tooltip title="Pago vence hoy" arrow>
+                                <Typography
+                                  variant="body2"
+                                  color="warning.main"
+                                  fontWeight="bold"
+                                  noWrap
+                                  sx={{ cursor: 'pointer' }}
+                                >
+                                  Hoy
+                                </Typography>
+                              </Tooltip>
+                            );
+                          } else {
+                            return (
+                              <Tooltip
+                                title={`Vence en ${daysLeft} día${
+                                  daysLeft !== 1 ? 's' : ''
+                                }`}
+                                arrow
+                              >
+                                <Typography
+                                  variant="body2"
+                                  color="text.secondary"
+                                  noWrap
+                                  sx={{ cursor: 'pointer' }}
+                                >
+                                  {daysLeft} día{daysLeft !== 1 ? 's' : ''}
+                                </Typography>
+                              </Tooltip>
+                            );
+                          }
+                        })()
+                      ) : (
+                        <Typography variant="body2" color="text.disabled">
+                          -
+                        </Typography>
+                      )}
+                    </TableCell>
+                    <TableCell align="center">
+                      <Typography variant="body2" color="text.secondary" noWrap>
+                        {formatTZDate(new Date(sale.saleDate), 'DD/MM/YYYY')}
+                      </Typography>
+                    </TableCell>
+                    <TableCell align="center">
+                      {sale.delivery?.imagesUrl ? (
+                        <Tooltip title="Ver fotos" arrow>
                           <IconButton
+                            onClick={() => {
+                              // Filter out the _id field from imagesUrl
+                              const { _id, ...images } =
+                                sale.delivery.imagesUrl;
+                              setSelectedImages(images);
+                              setOpenImages(true);
+                            }}
                             sx={{
                               '&:hover': {
-                                background: theme.colors.success.lighter
+                                background: theme.colors.primary.lighter
                               },
-                              color: theme.palette.success.main
+                              color: theme.palette.primary.main
                             }}
                             color="inherit"
                             size="small"
-                            onClick={() => onPaymentClick(sale)}
                           >
-                            <PaymentIcon fontSize="small" />
+                            <ImageSearchIcon fontSize="small" />
                           </IconButton>
                         </Tooltip>
+                      ) : (
+                        <Typography variant="body2" color="text.secondary">
+                          N/A
+                        </Typography>
                       )}
-                      <Tooltip title="Ver detalles" arrow>
-                        <IconButton
-                          sx={{
-                            '&:hover': {
-                              background: theme.colors.primary.lighter
-                            },
-                            color: theme.palette.primary.main
-                          }}
-                          color="inherit"
-                          size="small"
-                          onClick={() => router.push(`/ventas/${sale._id}`)}
-                        >
-                          <VisibilityIcon fontSize="small" />
-                        </IconButton>
-                      </Tooltip>
-                    </Box>
-                  </TableCell>
-                </TableRow>
-              );
-            })}
-          </TableBody>
-        </Table>
-      </TableContainer>
-      <Box p={2}>
-        <TablePagination
-          component="div"
-          count={filteredSales.length}
-          onPageChange={handlePageChange}
-          onRowsPerPageChange={handleLimitChange}
-          page={page}
-          rowsPerPage={limit}
-          rowsPerPageOptions={[5, 10, 25, 30]}
+                    </TableCell>
+                    <TableCell align="center">
+                      <Box
+                        sx={{
+                          display: 'flex',
+                          gap: 1,
+                          justifyContent: 'center'
+                        }}
+                      >
+                        {sale.status === 'ACTIVA' && (
+                          <Tooltip title="Registrar pago" arrow>
+                            <IconButton
+                              sx={{
+                                '&:hover': {
+                                  background: theme.colors.success.lighter
+                                },
+                                color: theme.palette.success.main
+                              }}
+                              color="inherit"
+                              size="small"
+                              onClick={() => onPaymentClick(sale)}
+                            >
+                              <PaymentIcon fontSize="small" />
+                            </IconButton>
+                          </Tooltip>
+                        )}
+                        <Tooltip title="Ver detalles" arrow>
+                          <IconButton
+                            sx={{
+                              '&:hover': {
+                                background: theme.colors.primary.lighter
+                              },
+                              color: theme.palette.primary.main
+                            }}
+                            color="inherit"
+                            size="small"
+                            onClick={() => router.push(`/ventas/${sale._id}`)}
+                          >
+                            <VisibilityIcon fontSize="small" />
+                          </IconButton>
+                        </Tooltip>
+                      </Box>
+                    </TableCell>
+                  </TableRow>
+                );
+              })}
+            </TableBody>
+          </Table>
+        </TableContainer>
+        <Box p={2}>
+          <TablePagination
+            component="div"
+            count={filteredSales.length}
+            onPageChange={handlePageChange}
+            onRowsPerPageChange={handleLimitChange}
+            page={page}
+            rowsPerPage={limit}
+            rowsPerPageOptions={[5, 10, 25, 30]}
+          />
+        </Box>
+      </Card>
+      {openImages && selectedImages && (
+        <ImagesModal
+          open={openImages}
+          imagesObj={selectedImages}
+          title="Fotos de la entrega"
+          text=""
+          onClose={handleOnCloseImages}
         />
-      </Box>
-    </Card>
-    {openImages && selectedImages && (
-      <ImagesModal
-        open={openImages}
-        imagesObj={selectedImages}
-        title="Fotos de la entrega"
-        text=""
-        onClose={handleOnCloseImages}
-      />
-    )}
+      )}
     </>
   );
 };
