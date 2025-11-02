@@ -282,5 +282,66 @@ export const isMobile = () => {
   return /iphone|ipad|ipod|android|blackberry|windows phone/g.test(navigator.userAgent.toLowerCase()); 
 }
 
+/**
+ * Compresses an image file and returns a compressed version with a preview URL
+ * @param imageFile - The image file to compress
+ * @param options - Compression options
+ * @returns Object with compressed file and preview URL, or null if validation fails
+ */
+export const compressImage = async (
+  imageFile: File,
+  options: {
+    primaryQuality?: number;
+    fallbackQuality?: number;
+  } = {}
+): Promise<{ file: File; url: string } | null> => {
+  const { primaryQuality = 0.2, fallbackQuality = 0.6 } = options;
+
+  // Validate file type
+  const isValidImage = imageFile.type.includes('image/') && !imageFile.type.includes('/heic');
+  if (!isValidImage) {
+    console.error('Invalid image type:', imageFile.type);
+    return null;
+  }
+
+  // Dynamic imports to avoid SSR issues
+  const imageConversion = await import('image-conversion');
+  const Compressor = (await import('compressorjs')).default;
+
+  // Compress image with fallback chain
+  let compressedFile = imageFile;
+  try {
+    // Try primary compression (imageConversion)
+    const compressed = await imageConversion.compress(imageFile, primaryQuality);
+    compressedFile = new File([compressed as BlobPart], imageFile.name, {
+      type: imageFile.type,
+      lastModified: Date.now()
+    });
+  } catch (error) {
+    console.warn('Primary compression failed, trying Compressor.js:', error);
+    try {
+      // Fallback to Compressor.js
+      const compressed = await new Promise<Blob>((resolve, reject) => {
+        new Compressor(imageFile, {
+          quality: fallbackQuality,
+          success: resolve,
+          error: reject
+        });
+      });
+      compressedFile = new File([compressed], imageFile.name, {
+        type: imageFile.type,
+        lastModified: Date.now()
+      });
+    } catch (error2) {
+      console.warn('Compression failed, using original file:', error2);
+      // Use original file as final fallback
+    }
+  }
+
+  // Create preview URL
+  const url = URL.createObjectURL(compressedFile);
+  
+  return { file: compressedFile, url };
+};
 
 export default useDeviceType;

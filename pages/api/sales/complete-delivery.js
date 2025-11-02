@@ -46,32 +46,34 @@ async function handler(req, res) {
         });
       });
 
-      const saleId = Array.isArray(fields.saleId) ? fields.saleId[0] : fields.saleId;
-      const deliveryDate = Array.isArray(fields.deliveryDate) ? fields.deliveryDate[0] : fields.deliveryDate;
-      const customerDataStr = Array.isArray(fields.customerData) ? fields.customerData[0] : fields.customerData;
+      // Parse the body field which contains all the sale data as JSON
+      const bodyStr = Array.isArray(fields.body) ? fields.body[0] : fields.body;
       
-      console.log('Parsed fields:');
-      console.log('- Sale ID:', saleId);
-      console.log('- Delivery Date:', deliveryDate);
-      console.log('- Customer Data provided:', !!customerDataStr);
+      console.log('Body field provided:', !!bodyStr);
       
-      // Parse customer data if provided
-      let customerData = null;
-      if (customerDataStr) {
+      let saleData = null;
+      if (bodyStr) {
         try {
-          customerData = JSON.parse(customerDataStr);
-          console.log('Customer data parsed successfully');
+          saleData = JSON.parse(bodyStr);
+          console.log('Sale data parsed successfully');
+          console.log('- Sale ID:', saleData.saleId);
+          console.log('- Delivery Date:', saleData.deliveryDate);
+          console.log('- Customer Data provided:', !!saleData.customerData);
         } catch (e) {
-          console.error('Error parsing customer data:', e);
+          console.error('Error parsing body data:', e);
+          return res.status(400).json({ errorMsg: 'Datos de venta inválidos' });
         }
+      } else {
+        console.error('No body field in request');
+        return res.status(400).json({ errorMsg: 'Faltan datos de venta' });
       }
       
-      // Get uploaded images
+      // Get uploaded images - now using generic field names
       console.log('Files received:', Object.keys(files));
-      const ineImage = Array.isArray(files.ineImage) ? files.ineImage[0] : files.ineImage;
-      const frontalImage = Array.isArray(files.frontalImage) ? files.frontalImage[0] : files.frontalImage;
-      const labelImage = Array.isArray(files.labelImage) ? files.labelImage[0] : files.labelImage;
-      const boardImage = Array.isArray(files.boardImage) ? files.boardImage[0] : files.boardImage;
+      const ineImage = Array.isArray(files.ine) ? files.ine[0] : files.ine;
+      const frontalImage = Array.isArray(files.frontal) ? files.frontal[0] : files.frontal;
+      const labelImage = Array.isArray(files.label) ? files.label[0] : files.label;
+      const boardImage = Array.isArray(files.board) ? files.board[0] : files.board;
       
       // Log file sizes
       if (ineImage) console.log('INE image size:', (ineImage.size / 1024).toFixed(2), 'KB');
@@ -101,8 +103,8 @@ async function handler(req, res) {
         (boardImage?.size || 0)
       ) / 1024 / 1024, 'MB');
       const result = await completeSaleDelivery({ 
-        saleId,
-        deliveryDate,
+        saleId: saleData.saleId,
+        deliveryDate: saleData.deliveryDate,
         deliveredBy: userId,
         ineImagePath: ineImage.filepath,
         ineImageName: ineImage.originalFilename,
@@ -112,7 +114,7 @@ async function handler(req, res) {
         labelImageName: labelImage.originalFilename,
         boardImagePath: boardImage.filepath,
         boardImageName: boardImage.originalFilename,
-        customerData
+        customerData: saleData.customerData
       });
       
       console.log('✅ Sale delivery completed successfully');

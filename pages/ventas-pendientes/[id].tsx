@@ -40,8 +40,6 @@ import StepContent from '@mui/material/StepContent';
 import StepLabel from '@mui/material/StepLabel';
 import Stepper from '@mui/material/Stepper';
 import { DesktopDatePicker } from '@mui/x-date-pickers';
-import Compressor from 'compressorjs';
-import * as imageConversion from 'image-conversion';
 import { completeSaleDelivery } from 'lib/client/salesFetch';
 import { getSession } from 'next-auth/react';
 import Head from 'next/head';
@@ -50,6 +48,7 @@ import { useRouter } from 'next/router';
 import { useState } from 'react';
 import { validateServerSideSession } from '../../lib/auth';
 import {
+  compressImage,
   convertDateToLocal,
   replaceCoordinatesOnUrl,
   setDateToInitial,
@@ -142,64 +141,31 @@ function CompletarVenta() {
   }
 
   async function handleImageSelection(imageFile, key) {
-    if (
-      imageFile &&
-      (!imageFile.type.includes('image/') || imageFile.type.includes('/heic'))
-    ) {
-      setAttached({
-        ...attached,
-        [key]: {
-          ...attached[key],
-          error: true
-        }
-      });
-      return;
-    }
+    // Handle file removal
     if (!imageFile) {
       setAttached({
         ...attached,
-        [key]: {
-          file: null,
-          url: null,
-          error: false
-        }
+        [key]: { file: null, url: null, error: false }
       });
       return;
     }
-    let compressedFile;
-    let url;
-    try {
-      compressedFile = new File(
-        [await imageConversion.compress(imageFile, 0.2)],
-        imageFile.name
-      );
-    } catch (error) {
-      compressedFile = new File(
-        [
-          await new Promise((resolve, reject) => {
-            new Compressor(imageFile, {
-              quality: 0.6,
-              success: resolve,
-              error: reject
-            });
-          })
-        ],
-        imageFile.name
-      );
+
+    // Compress image using helper function
+    const result = await compressImage(imageFile);
+    
+    if (!result) {
+      // Validation failed (invalid image type)
+      setAttached({
+        ...attached,
+        [key]: { ...attached[key], error: true }
+      });
+      return;
     }
-    try {
-      url = URL.createObjectURL(compressedFile);
-    } catch (error) {
-      console.error(error);
-      url = URL.createObjectURL(imageFile);
-    }
+
+    // Set compressed file and preview URL
     setAttached({
       ...attached,
-      [key]: {
-        file: compressedFile,
-        url,
-        error: false
-      }
+      [key]: { file: result.file, url: result.url, error: false }
     });
   }
 
@@ -328,22 +294,18 @@ function CompletarVenta() {
     }
     const totalSizeMB = (totalSize / 1024 / 1024).toFixed(2);
 
-    const formData = new FormData();
-    formData.append('saleId', id as string);
-    formData.append('deliveryDate', setDateToMid(new Date(deliveryDate)).toISOString());
-    formData.append('ineImage', attached.ine.file);
-    formData.append('frontalImage', attached.frontal.file);
-    formData.append('labelImage', attached.label.file);
-    formData.append('boardImage', attached.board.file);
-    
-    // Always send customer data with the isOk flags
-    const customerDataToSend = {
-      ...customerToEdit,
-      isOk
+    // Prepare sale data (like rent delivery does)
+    const saleData = {
+      saleId: id as string,
+      deliveryDate: setDateToMid(new Date(deliveryDate)).toISOString(),
+      customerData: {
+        ...customerToEdit,
+        isOk
+      }
     };
-    formData.append('customerData', JSON.stringify(customerDataToSend));
 
-    const result = await completeSaleDelivery(formData);
+    // Pass attachments and data separately (like rent delivery)
+    const result = await completeSaleDelivery(attached, saleData);
     setIsSubmitting(false);
     if (!result.error) {
       handleNext(event);

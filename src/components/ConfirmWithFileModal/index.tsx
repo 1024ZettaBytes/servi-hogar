@@ -10,6 +10,7 @@ import { Alert, Grid, Typography } from "@mui/material";
 import { useState } from "react";
 import Image from "next/image";
 import { MuiFileInput } from "mui-file-input";
+import { compressImage } from "lib/client/utils";
 
 export default function ConfirmWithFileModal({
   open,
@@ -57,9 +58,16 @@ export default function ConfirmWithFileModal({
                 placeholder={"No seleccionada"}
                 label={"Foto de comprobante"}
                 value={attached.voucher?.file}
-                onChange={(file) => {
+                onChange={async (file) => {
+                  if (!file) {
+                    setAttached({
+                      ...attached,
+                      voucher: { file: null, url: null, error: false },
+                    });
+                    return;
+                  }
+                  
                   if (
-                    file &&
                     !file.type.includes("image/") &&
                     !file.type.includes("/pdf")
                   ) {
@@ -78,11 +86,31 @@ export default function ConfirmWithFileModal({
                     });
                     return;
                   }
-                  const url = file ? URL.createObjectURL(file) : null;
-                  setAttached({
-                    ...attached,
-                    voucher: { file, url, error: false },
-                  });
+                  
+                  // Skip compression for PDF files
+                  if (file.type.includes("/pdf")) {
+                    const url = URL.createObjectURL(file);
+                    setAttached({
+                      ...attached,
+                      voucher: { file, url, error: false },
+                    });
+                  } else {
+                    // Use compression helper for images
+                    const result = await compressImage(file);
+                    if (result) {
+                      setAttached({
+                        ...attached,
+                        voucher: { file: result.file, url: result.url, error: false },
+                      });
+                    } else {
+                      // Fallback to original file
+                      const url = URL.createObjectURL(file);
+                      setAttached({
+                        ...attached,
+                        voucher: { file, url, error: false },
+                      });
+                    }
+                  }
                   setBadFormat({
                     ...badFormat,
                     voucher: false,

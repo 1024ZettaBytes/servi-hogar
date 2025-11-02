@@ -45,7 +45,8 @@ import {
   convertDateToTZ,
   dateDiffInDays,
   setDateToInitial,
-  setDateToMid
+  setDateToMid,
+  compressImage
 } from 'lib/client/utils';
 
 function RecoleccionPendiente() {
@@ -368,9 +369,16 @@ function RecoleccionPendiente() {
                                     placeholder={'No seleccionada'}
                                     label={'Foto de casa'}
                                     value={attached.tag?.file}
-                                    onChange={(file) => {
+                                    onChange={async (file) => {
+                                      if (!file) {
+                                        setAttached({
+                                          ...attached,
+                                          tag: { file: null, url: null, error: false }
+                                        });
+                                        return;
+                                      }
+                                      
                                       if (
-                                        file &&
                                         !file.type.includes('image/') &&
                                         !file.type.includes('/pdf')
                                       ) {
@@ -387,12 +395,34 @@ function RecoleccionPendiente() {
                                         });
                                         return;
                                       }
-                                      const url = file
-                                        ? URL.createObjectURL(file)
-                                        : null;
-                                      setAttached({
-                                        ...attached,
-                                        tag: { file, url, error: false }
+                                      
+                                      // Skip compression for PDF files
+                                      if (file.type.includes('/pdf')) {
+                                        const url = URL.createObjectURL(file);
+                                        setAttached({
+                                          ...attached,
+                                          tag: { file, url, error: false }
+                                        });
+                                      } else {
+                                        // Use compression helper for images
+                                        const result = await compressImage(file);
+                                        if (result) {
+                                          setAttached({
+                                            ...attached,
+                                            tag: { file: result.file, url: result.url, error: false }
+                                          });
+                                        } else {
+                                          // Fallback to original file
+                                          const url = URL.createObjectURL(file);
+                                          setAttached({
+                                            ...attached,
+                                            tag: { file, url, error: false }
+                                          });
+                                        }
+                                      }
+                                      setBadFormat({
+                                        ...badFormat,
+                                        tag: false
                                       });
                                     }}
                                   />

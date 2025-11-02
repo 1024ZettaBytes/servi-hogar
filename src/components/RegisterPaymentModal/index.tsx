@@ -22,9 +22,7 @@ import PhotoCamera from "@mui/icons-material/PhotoCamera";
 import DeleteIcon from "@mui/icons-material/Delete";
 import { registerPayment } from "../../../lib/client/salesFetch";
 import numeral from "numeral";
-import { convertDateToTZ } from "../../../lib/client/utils";
-import Compressor from "compressorjs";
-import imageConversion from "image-conversion";
+import { convertDateToTZ, compressImage } from "../../../lib/client/utils";
 
 function RegisterPaymentModal(props) {
   const { handleOnClose, open, sale } = props;
@@ -65,36 +63,16 @@ function RegisterPaymentModal(props) {
       return;
     }
 
-    let compressedFile;
-    let url;
-    try {
-      compressedFile = new File(
-        [await imageConversion.compress(imageFile, 0.2)],
-        imageFile.name
-      );
-    } catch (error) {
-      compressedFile = new File(
-        [
-          await new Promise((resolve, reject) => {
-            new Compressor(imageFile, {
-              quality: 0.6,
-              success: resolve,
-              error: reject
-            });
-          })
-        ],
-        imageFile.name
-      );
+    // Use the reusable compression helper
+    const result = await compressImage(imageFile);
+    if (result) {
+      setPaymentImage(result.file);
+      setPaymentImagePreview(result.url);
+    } else {
+      // Fallback to original file if compression fails validation
+      setPaymentImage(imageFile);
+      setPaymentImagePreview(URL.createObjectURL(imageFile));
     }
-    try {
-      url = URL.createObjectURL(compressedFile);
-    } catch (error) {
-      console.error(error);
-      url = URL.createObjectURL(imageFile);
-    }
-    
-    setPaymentImage(compressedFile);
-    setPaymentImagePreview(url);
   };
 
   const handleRemoveImage = () => {
