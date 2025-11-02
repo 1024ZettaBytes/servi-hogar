@@ -42,6 +42,7 @@ const TablaCompletedSalesByOperator: FC<TablaCompletedSalesByOperatorProps> = ({
   const [selectedImages, setSelectedImages] = useState<any>(null);
 
   const handleOnCloseImages = () => {
+    console.log(selectedImages.test.a);
     setOpenImages(false);
     setSelectedImages(null);
   };
