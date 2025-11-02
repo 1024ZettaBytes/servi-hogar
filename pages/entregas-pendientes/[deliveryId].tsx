@@ -33,8 +33,6 @@ import StepContent from '@mui/material/StepContent';
 import StepLabel from '@mui/material/StepLabel';
 import Stepper from '@mui/material/Stepper';
 import { DesktopDatePicker } from '@mui/x-date-pickers';
-import Compressor from 'compressorjs';
-import * as imageConversion from 'image-conversion';
 import { completeDelivery } from 'lib/client/deliveriesFetch';
 import { MuiFileInput } from 'mui-file-input';
 import { getSession } from 'next-auth/react';
@@ -45,6 +43,7 @@ import { useRouter } from 'next/router';
 import { useState } from 'react';
 import { validateServerSideSession } from '../../lib/auth';
 import {
+  compressImage,
   convertDateToLocal,
   replaceCoordinatesOnUrl,
   setDateToInitial,
@@ -136,69 +135,32 @@ function RentaRapida() {
     });
   }
   async function handleImageSelection(imageFile, key) {
-    if (
-      imageFile &&
-      (!imageFile.type.includes('image/') || imageFile.type.includes('/heic'))
-    ) {
-      setBadFormat({
-        ...badFormat,
-        [key]: true
-      });
-
-      setAttached({
-        ...attached,
-        [key]: {
-          ...attached[key],
-          error: true
-        }
-      });
-      return;
-    }
+    // Handle file removal
     if (!imageFile) {
       setAttached({
         ...attached,
-        [key]: {
-          file: null,
-          url: null,
-          error: false
-        }
+        [key]: { file: null, url: null, error: false }
       });
       return;
     }
-    let compressedFile;
-    let url;
-    try {
-      compressedFile = new File(
-        [await imageConversion.compress(imageFile, 0.2)],
-        imageFile.name
-      );
-    } catch (error) {
-      compressedFile = new File(
-        [
-          await new Promise((resolve, reject) => {
-            new Compressor(imageFile, {
-              quality: 0.6,
-              success: resolve,
-              error: reject
-            });
-          })
-        ],
-        imageFile.name
-      );
+
+    // Compress image using helper function
+    const result = await compressImage(imageFile);
+    
+    if (!result) {
+      // Validation failed (invalid image type)
+      setBadFormat({ ...badFormat, [key]: true });
+      setAttached({
+        ...attached,
+        [key]: { ...attached[key], error: true }
+      });
+      return;
     }
-    try {
-      url = URL.createObjectURL(compressedFile);
-    } catch (error) {
-      console.error(error);
-      url = URL.createObjectURL(imageFile);
-    }
+
+    // Set compressed file and preview URL
     setAttached({
       ...attached,
-      [key]: {
-        file: compressedFile,
-        url,
-        error: false
-      }
+      [key]: { file: result.file, url: result.url, error: false }
     });
   }
 
@@ -854,23 +816,34 @@ function RentaRapida() {
                                   }}
                                 />
                               </Grid>
-                              {(delivery?.rent?.imagesUrl || (attached.contract?.url &&
-                                !attached.contract.file.name.includes(
-                                  'pdf'
-                                ))) && (
-                                  <Grid item lg={12} m={1}>
-                                    <Image
-                                      src={attached.contract.url || delivery?.rent?.imagesUrl?.contract}
-                                      alt="Picture of the author"
-                                      width={300}
-                                      height={400}
-                                    />
-                                  </Grid>
-                                )}
+                              {(delivery?.rent?.imagesUrl ||
+                                (attached.contract?.url &&
+                                  !attached.contract.file.name.includes(
+                                    'pdf'
+                                  ))) && (
+                                <Grid item lg={12} m={1}>
+                                  <Image
+                                    src={
+                                      attached.contract.url ||
+                                      delivery?.rent?.imagesUrl?.contract
+                                    }
+                                    alt="Picture of the author"
+                                    width={300}
+                                    height={400}
+                                  />
+                                </Grid>
+                              )}
                               <Grid item lg={4} m={1}>
                                 <MuiFileInput
-                                  required={!delivery?.rent?.imagesUrl?.contract && !attached.contract.file}
-                                  placeholder={delivery?.rent?.imagesUrl?.contract ? 'Usar anterior' :'No seleccionada'}
+                                  required={
+                                    !delivery?.rent?.imagesUrl?.contract &&
+                                    !attached.contract.file
+                                  }
+                                  placeholder={
+                                    delivery?.rent?.imagesUrl?.contract
+                                      ? 'Usar anterior'
+                                      : 'No seleccionada'
+                                  }
                                   label={'Foto de INE'}
                                   value={attached.contract?.file}
                                   onChange={(file) => {
@@ -887,21 +860,34 @@ function RentaRapida() {
                                   </Typography>
                                 </Grid>
                               )}
-                              {(delivery?.rent?.imagesUrl || (attached.front?.url &&
-                                !attached.front.file.name.includes('pdf'))) && (
-                                  <Grid item lg={12} m={1}>
-                                    <Image
-                                      src={attached.front.url || delivery?.rent?.imagesUrl?.front}
-                                      alt="Picture of the author"
-                                      width={300}
-                                      height={400}
-                                    />
-                                  </Grid>
-                                )}
+                              {(delivery?.rent?.imagesUrl ||
+                                (attached.front?.url &&
+                                  !attached.front.file.name.includes(
+                                    'pdf'
+                                  ))) && (
+                                <Grid item lg={12} m={1}>
+                                  <Image
+                                    src={
+                                      attached.front.url ||
+                                      delivery?.rent?.imagesUrl?.front
+                                    }
+                                    alt="Picture of the author"
+                                    width={300}
+                                    height={400}
+                                  />
+                                </Grid>
+                              )}
                               <Grid item lg={4} m={1}>
                                 <MuiFileInput
-                                  required={!delivery?.rent?.imagesUrl?.contract && !attached.front.file}
-                                  placeholder={delivery?.rent?.imagesUrl?.contract ? 'Usar anterior' : 'No seleccionada'}
+                                  required={
+                                    !delivery?.rent?.imagesUrl?.contract &&
+                                    !attached.front.file
+                                  }
+                                  placeholder={
+                                    delivery?.rent?.imagesUrl?.contract
+                                      ? 'Usar anterior'
+                                      : 'No seleccionada'
+                                  }
                                   label={'Foto de frente casa'}
                                   value={attached.front?.file}
                                   onChange={(file) => {

@@ -47,7 +47,7 @@ import { useRouter } from "next/router";
 import React from "react";
 import { MuiFileInput } from "mui-file-input";
 import { DesktopDatePicker } from "@mui/x-date-pickers";
-import { convertDateToLocal, convertDateToTZ, setDateToEnd, setDateToInitial, setDateToMid } from "lib/client/utils";
+import { convertDateToLocal, convertDateToTZ, setDateToEnd, setDateToInitial, setDateToMid, compressImage } from "lib/client/utils";
 
 function CambioPendiente() {
   const router = useRouter();
@@ -333,9 +333,16 @@ function CambioPendiente() {
                                         placeholder={"No seleccionada"}
                                         label={"Foto de etiqueta"}
                                         value={attached.tag?.file}
-                                        onChange={(file) => {
+                                        onChange={async (file) => {
+                                          if (!file) {
+                                            setAttached({
+                                              ...attached,
+                                              tag: { file: null, url: null, error: false },
+                                            });
+                                            return;
+                                          }
+                                          
                                           if (
-                                            file &&
                                             !file.type.includes("image/") &&
                                             !file.type.includes("/pdf")
                                           ) {
@@ -352,12 +359,34 @@ function CambioPendiente() {
                                             });
                                             return;
                                           }
-                                          const url = file
-                                            ? URL.createObjectURL(file)
-                                            : null;
-                                          setAttached({
-                                            ...attached,
-                                            tag: { file, url, error: false },
+                                          
+                                          // Skip compression for PDF files
+                                          if (file.type.includes("/pdf")) {
+                                            const url = URL.createObjectURL(file);
+                                            setAttached({
+                                              ...attached,
+                                              tag: { file, url, error: false },
+                                            });
+                                          } else {
+                                            // Use compression helper for images
+                                            const result = await compressImage(file);
+                                            if (result) {
+                                              setAttached({
+                                                ...attached,
+                                                tag: { file: result.file, url: result.url, error: false },
+                                              });
+                                            } else {
+                                              // Fallback to original file
+                                              const url = URL.createObjectURL(file);
+                                              setAttached({
+                                                ...attached,
+                                                tag: { file, url, error: false },
+                                              });
+                                            }
+                                          }
+                                          setBadFormat({
+                                            ...badFormat,
+                                            tag: false,
                                           });
                                         }}
                                       />

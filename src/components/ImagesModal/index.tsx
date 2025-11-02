@@ -17,6 +17,7 @@ import { TITLES_MAP } from "../../../lib/consts/OBJ_CONTS";
 import { MuiFileInput } from "mui-file-input";
 import { LoadingButton } from "@mui/lab";
 import { Alert} from "@mui/material";
+import { compressImage } from "lib/client/utils";
 
 export default function ImagesModal({
   open,
@@ -200,9 +201,16 @@ export default function ImagesModal({
                           placeholder={"No seleccionada"}
                           label={TITLES_MAP[key]}
                           value={attached[key]?.file}
-                          onChange={(file) => {
+                          onChange={async (file) => {
+                            if (!file) {
+                              setAttached({
+                                ...attached,
+                                [key]: { file: null, url: null, error: false },
+                              });
+                              return;
+                            }
+                            
                             if (
-                              file &&
                               !file.type.includes("image/") &&
                               !file.type.includes("/pdf")
                             ) {
@@ -219,10 +227,34 @@ export default function ImagesModal({
                               });
                               return;
                             }
-                            const url = file ? URL.createObjectURL(file) : null;
-                            setAttached({
-                              ...attached,
-                              [key]: { file, url, error: false },
+                            
+                            // Skip compression for PDF files
+                            if (file.type.includes("/pdf")) {
+                              const url = URL.createObjectURL(file);
+                              setAttached({
+                                ...attached,
+                                [key]: { file, url, error: false },
+                              });
+                            } else {
+                              // Use compression helper for images
+                              const result = await compressImage(file);
+                              if (result) {
+                                setAttached({
+                                  ...attached,
+                                  [key]: { file: result.file, url: result.url, error: false },
+                                });
+                              } else {
+                                // Fallback to original file
+                                const url = URL.createObjectURL(file);
+                                setAttached({
+                                  ...attached,
+                                  [key]: { file, url, error: false },
+                                });
+                              }
+                            }
+                            setBadFormat({
+                              ...badFormat,
+                              [key]: false,
                             });
                           }}
                         />

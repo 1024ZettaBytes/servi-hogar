@@ -1,7 +1,8 @@
 import {
   capitalizeFirstLetter,
   formatTZDate,
-  isMobile
+  isMobile,
+  compressImage
 } from '../../../lib/client/utils';
 import {
   Grid,
@@ -679,9 +680,16 @@ function MachineInfoTab({ role, machine, statusList }) {
                               placeholder={'No seleccionada'}
                               label={''}
                               value={attached.evidence?.file}
-                              onChange={(file) => {
+                              onChange={async (file) => {
+                                if (!file) {
+                                  setAttached({
+                                    ...attached,
+                                    evidence: { file: null, url: null, error: false }
+                                  });
+                                  return;
+                                }
+                                
                                 if (
-                                  file &&
                                   !file.type.includes('image/') &&
                                   !file.type.includes('/pdf')
                                 ) {
@@ -698,12 +706,34 @@ function MachineInfoTab({ role, machine, statusList }) {
                                   });
                                   return;
                                 }
-                                const url = file
-                                  ? URL.createObjectURL(file)
-                                  : null;
-                                setAttached({
-                                  ...attached,
-                                  evidence: { file, url, error: false }
+                                
+                                // Skip compression for PDF files
+                                if (file.type.includes('/pdf')) {
+                                  const url = URL.createObjectURL(file);
+                                  setAttached({
+                                    ...attached,
+                                    evidence: { file, url, error: false }
+                                  });
+                                } else {
+                                  // Use compression helper for images
+                                  const result = await compressImage(file);
+                                  if (result) {
+                                    setAttached({
+                                      ...attached,
+                                      evidence: { file: result.file, url: result.url, error: false }
+                                    });
+                                  } else {
+                                    // Fallback to original file
+                                    const url = URL.createObjectURL(file);
+                                    setAttached({
+                                      ...attached,
+                                      evidence: { file, url, error: false }
+                                    });
+                                  }
+                                }
+                                setBadFormat({
+                                  ...badFormat,
+                                  evidence: false
                                 });
                               }}
                             />
