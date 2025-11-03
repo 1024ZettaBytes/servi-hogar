@@ -20,11 +20,21 @@ import { LoadingButton } from "@mui/lab";
 function LoginForm() {
   const [hasError, setHasError] = useState({ error: false, msg: "" });
   const [isLoading, setIsLoading] = useState(false);
+  const isMountedRef = React.useRef(true);
   let userInputRef = React.useRef<HTMLInputElement>(null);
   let passwordInputRef = React.useRef<HTMLInputElement>(null);
 
+  React.useEffect(() => {
+    isMountedRef.current = true;
+    return () => {
+      isMountedRef.current = false;
+    };
+  }, []);
+
   async function submitHandler(event) {
     event.preventDefault();
+    if (!isMountedRef.current) return;
+    
     setIsLoading(true);
     setHasError({ error: false, msg: "" });
 
@@ -38,10 +48,13 @@ function LoginForm() {
       password: enteredPassword,
     });
 
+    if (!isMountedRef.current) return;
+
     if (!result.error) {
       // set some auth state
       const url = (router.query?.returnUrl || "/").toString();
-      router.replace(url);
+      // Use window.location to avoid race condition with auth page redirect
+      window.location.href = url;
     } else {
       setIsLoading(false);
       setHasError({ error: true, msg: result.error });
@@ -59,6 +72,7 @@ function LoginForm() {
             <img
               className={classes.loginLogo}
               src="/static/images/servi_hogar.png"
+              alt="Servi Hogar Logo"
             />
           </Grid>
           <Grid item xs={2} lg={4}></Grid>
@@ -82,7 +96,7 @@ function LoginForm() {
                   }}
                   onSubmit={submitHandler}
                 >
-                  {hasError.error ? (
+                  {hasError.error && (
                     <Typography
                       variant="h5"
                       component="h5"
@@ -91,7 +105,7 @@ function LoginForm() {
                     >
                       {hasError.msg}
                     </Typography>
-                  ) : null}
+                  )}
                   <div>
                     <TextField
                       required
@@ -110,7 +124,6 @@ function LoginForm() {
                     />
                   </div>
                   <Grid container className={classes.buttonContainer}>
-                    <Grid item xs={0}></Grid>
                     <Grid item xs={12}>
                       <LoadingButton
                         type="submit"
@@ -121,7 +134,6 @@ function LoginForm() {
                         INICIAR SESION
                       </LoadingButton>
                     </Grid>
-                    <Grid item xs={0}></Grid>
                   </Grid>
                 </Box>
               </CardContent>
