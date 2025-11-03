@@ -69,16 +69,31 @@ class ErrorBoundary extends Component<Props, State> {
               ¡Ups! Algo salió mal
             </Typography>
             <Typography variant="body1" color="text.secondary" sx={{ mb: 3 }}>
-              Ha ocurrido un error inesperado. Por favor, intenta recargar la página.
+              Ha ocurrido un error inesperado. Por favor, toma captura de pantalla y envíala al soporte.
             </Typography>
             
-            {process.env.NODE_ENV === 'development' && this.state.error && (
+            {this.state.error && (
               <Alert severity="error" sx={{ mb: 3, textAlign: 'left', width: '100%' }}>
                 <Typography variant="subtitle2" gutterBottom>
-                  Error: {this.state.error.toString()}
+                  🔴 ERROR DETECTADO - Por favor toma captura
                 </Typography>
-                {this.state.errorInfo && (
+                <Typography variant="body2" sx={{ mt: 1 }}>
+                  <strong>Mensaje:</strong> {this.state.error.toString()}
+                </Typography>
+                <Typography variant="body2" sx={{ mt: 1 }}>
+                  <strong>Fecha:</strong> {new Date().toLocaleString('es-MX')}
+                </Typography>
+                <Typography variant="body2" sx={{ mt: 1 }}>
+                  <strong>Página:</strong> {window.location.href}
+                </Typography>
+                <Typography variant="body2" sx={{ mt: 1 }}>
+                  <strong>Navegador:</strong> {navigator.userAgent.substring(0, 80)}...
+                </Typography>
+                {process.env.NODE_ENV === 'development' && this.state.errorInfo && (
                   <Box sx={{ mt: 2, maxHeight: 300, overflow: 'auto' }}>
+                    <Typography variant="caption" display="block" gutterBottom>
+                      <strong>Stack Trace (Solo desarrollo):</strong>
+                    </Typography>
                     <pre style={{ fontSize: '0.75rem' }}>
                       {this.state.errorInfo.componentStack}
                     </pre>
