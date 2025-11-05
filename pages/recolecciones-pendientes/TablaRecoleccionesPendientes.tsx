@@ -254,10 +254,15 @@ const TablaRecoleccionesPendientes: FC<TablaRecoleccionesPendientesProps> = ({
   const paginatedPickups = applyPagination(filteredPickups, page, limit);
   const changeOperatorIcon = (pickup: any, disabled: boolean) => {
     if (!['ADMIN', 'AUX'].includes(userRole)) return '';
+    
+    // AUX can only assign if no operator is assigned yet
+    // ADMIN can always change operator
+    const canModifyOperator = userRole === 'ADMIN' || (userRole === 'AUX' && !pickup.operator);
+    
     return (
       <Tooltip title="Asignar/Cambiar" arrow>
         <IconButton
-        disabled={disabled}
+        disabled={disabled || !canModifyOperator}
           onClick={() => handleOnOperatorClick(pickup)}
           sx={{
             '&:hover': {
@@ -342,7 +347,7 @@ const TablaRecoleccionesPendientes: FC<TablaRecoleccionesPendientesProps> = ({
                   pickup.rent.remaining < 0
                     ? Math.abs(pickup.rent.remaining)
                     : 0;
-                const shouldDisableActions = userRole !== "ADMIN" && dateDiffInDays(new Date(pickup.date), new Date()) > 2;
+                const shouldDisableActions = userRole !== "ADMIN" && dateDiffInDays(new Date(pickup.updatedAt), new Date()) > 2;
                 return (
                   <TableRow hover key={pickup?._id}>
                     <TableCell align="center">
