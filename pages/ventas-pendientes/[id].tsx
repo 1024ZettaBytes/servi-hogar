@@ -46,7 +46,6 @@ import {
   compressImage,
   convertDateToLocal,
   replaceCoordinatesOnUrl,
-  setDateToInitial,
   setDateToMid,
   validateMapsUrl
 } from '../../lib/client/utils';
