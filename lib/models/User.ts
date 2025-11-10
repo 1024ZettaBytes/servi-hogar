@@ -5,6 +5,7 @@ export interface IUser extends Document {
   name: string;
   role: Schema.Types.ObjectId;
   isActive: boolean;
+  isBlocked: boolean;
   password: string;
   startM: number;
   endM: number;
@@ -27,6 +28,10 @@ const UserSchema = new Schema<IUser>({
   isActive: {
     type: Boolean,
     default: true
+  },
+  isBlocked: {
+    type: Boolean,
+    default: false
   },
   password: {
     type: String,

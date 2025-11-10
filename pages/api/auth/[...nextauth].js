@@ -22,10 +22,18 @@ export default NextAuth({
         return session;
       }
       if (userOnDb?.role?.id === tokenUser?.role) {
-        session.user=tokenUser;
+        session.user = {
+          ...tokenUser,
+          isBlocked: userOnDb.isBlocked
+        };
       }
       else{
-        session.user = { id: userOnDb?._id, name:userOnDb?.name, role: userOnDb?.role?.id}
+        session.user = { 
+          id: userOnDb?._id, 
+          name: userOnDb?.name, 
+          role: userOnDb?.role?.id,
+          isBlocked: userOnDb.isBlocked
+        }
       }
       return session;
     },

@@ -35,7 +35,7 @@ import Stepper from '@mui/material/Stepper';
 import { DesktopDatePicker } from '@mui/x-date-pickers';
 import { completeDelivery } from 'lib/client/deliveriesFetch';
 import { MuiFileInput } from 'mui-file-input';
-import { getSession } from 'next-auth/react';
+import { getSession, useSession } from 'next-auth/react';
 import Head from 'next/head';
 import Image from 'next/image';
 import NextLink from 'next/link';
@@ -57,8 +57,9 @@ import {
   useGetDeliveryById,
   useGetMachinesForRent
 } from '../api/useRequest';
-function RentaRapida() {
+function RentaRapida({ session }) {
   const router = useRouter();
+  const { data: sessionData, update: updateSession } = useSession();
   const { deliveryId } = router.query;
   const { delivery, deliveryByIdError } = useGetDeliveryById(
     getFetcher,
@@ -88,6 +89,10 @@ function RentaRapida() {
     board: { file: null, url: null },
     tag: { file: null, url: null }
   });
+  
+  // Use session from hook for real-time updates
+  const currentUser = sessionData?.user || session?.user;
+  const isBlocked = currentUser?.isBlocked === true;
 
   const [badFormat, setBadFormat] = useState<any>({
     contract: false,
@@ -277,6 +282,8 @@ function RentaRapida() {
     });
     setIsSubmitting(false);
     if (!result.error) {
+      // Update session to get latest user data (including isBlocked status)
+      await updateSession();
       handleNext(event);
     } else {
       setHasErrorSubmitting({ error: true, msg: result.msg });
@@ -304,6 +311,7 @@ function RentaRapida() {
   if (payment < 0 && delivery?.rent) {
     setPayment(delivery?.rent?.initialPay);
   }
+  
   return (
     <>
       <Head>
@@ -325,6 +333,17 @@ function RentaRapida() {
           spacing={4}
         >
           <Grid item xs={12}>
+            {isBlocked && (
+              <Alert severity="error" sx={{ mb: 2 }}>
+                <Typography variant="h4" gutterBottom>
+                  Usuario Bloqueado
+                </Typography>
+                <Typography>
+                  Tu cuenta ha sido bloqueada por exceder el tiempo permitido entre vueltas (más de 35 minutos). 
+                  Por favor contacta al administrador para resolver esta situación.
+                </Typography>
+              </Alert>
+            )}
             {generalError ? (
               <Alert severity="error">
                 {deliveryByIdError?.message ||
@@ -1029,7 +1048,7 @@ function RentaRapida() {
                               )}
                               <LoadingButton
                                 loading={isSubmitting}
-                                disabled={!nextButtonEnabled}
+                                disabled={!nextButtonEnabled || isBlocked}
                                 variant="contained"
                                 type="submit"
                                 sx={{ mt: 1, mr: 1 }}

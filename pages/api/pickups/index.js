@@ -8,8 +8,8 @@ import { validateUserPermissions, getUserId } from "../auth/authUtils";
 
 async function getPickupsAPI(req, res) {
   try {
-    const { page, limit, searchTerm } = req.query;
-    const rents = await getPastPickupsData(page, limit, searchTerm);
+    const { page, limit, searchTerm, date } = req.query;
+    const rents = await getPastPickupsData(page, limit, searchTerm, date);
     res.status(200).json({ data: rents });
   } catch (e) {
     console.error(e);

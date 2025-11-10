@@ -29,6 +29,7 @@ import AssessmentIcon from '@mui/icons-material/Assessment';
 import HandshakeIcon from '@mui/icons-material/Handshake';
 import BuildIcon from '@mui/icons-material/Build';
 import AttachMoneyIcon from '@mui/icons-material/AttachMoney';
+import AssignmentIcon from '@mui/icons-material/Assignment';
 
 const MenuWrapper = styled(Box)(
   ({ theme }) => `
@@ -316,7 +317,42 @@ function SidebarMenu({ userRole }) {
             </List>
           </>
         )}
-        {['ADMIN', 'AUX', 'OPE', 'SUB'].includes(userRole) && (
+
+        {['OPE'].includes(userRole) && (
+          <>
+            <List
+              component="div"
+              subheader={
+                <ListSubheader component="div" disableSticky>
+                  OPERADOR
+                </ListSubheader>
+              }
+            >
+              <SubMenuWrapper>
+                <List component="div">
+                  <ListItem component="div">
+                    <NextLink href="/vueltas-operador" passHref>
+                      <Button
+                        className={
+                          currentRoute.includes('/vueltas-operador')
+                            ? 'active'
+                            : ''
+                        }
+                        disableRipple
+                        component="a"
+                        onClick={closeSidebar}
+                        startIcon={<AssignmentIcon />}
+                      >
+                        Vueltas del Operador
+                      </Button>
+                    </NextLink>
+                  </ListItem>
+                </List>
+              </SubMenuWrapper>
+            </List>
+          </>
+        )}
+        {['ADMIN', 'AUX', 'SUB'].includes(userRole) && (
           <>
             <List
               component="div"
@@ -345,7 +381,7 @@ function SidebarMenu({ userRole }) {
                       </Button>
                     </NextLink>
                   </ListItem>
-                  {['ADMIN', 'AUX', 'OPE'].includes(userRole) && (
+                  {['ADMIN', 'AUX'].includes(userRole) && (
                     <ListItem component="div">
                       <NextLink href="/entregas" passHref>
                         <Button
@@ -369,46 +405,78 @@ function SidebarMenu({ userRole }) {
               component="div"
               subheader={
                 <ListSubheader component="div" disableSticky>
-                  CAMBIOS
+                  OPERADOR
                 </ListSubheader>
               }
             >
               <SubMenuWrapper>
                 <List component="div">
                   <ListItem component="div">
-                    <NextLink href="/cambios-pendientes" passHref>
+                    <NextLink href="/vueltas-operador" passHref>
                       <Button
                         className={
-                          currentRoute.includes('/cambios-pendientes')
+                          currentRoute.includes('/vueltas-operador')
                             ? 'active'
                             : ''
                         }
                         disableRipple
                         component="a"
                         onClick={closeSidebar}
-                        startIcon={<PendingActionsIcon />}
+                        startIcon={<AssignmentIcon />}
                       >
-                        Cambios pendientes
-                      </Button>
-                    </NextLink>
-                  </ListItem>
-                  <ListItem component="div">
-                    <NextLink href="/cambios" passHref>
-                      <Button
-                        className={currentRoute === '/cambios' ? 'active' : ''}
-                        disableRipple
-                        component="a"
-                        onClick={closeSidebar}
-                        startIcon={<ChangeCircleIcon />}
-                      >
-                        Lista de cambios
+                        Vueltas del Operador
                       </Button>
                     </NextLink>
                   </ListItem>
                 </List>
               </SubMenuWrapper>
             </List>
-            {['ADMIN', 'AUX', 'OPE'].includes(userRole) && (
+            {['ADMIN', 'AUX', 'SUB'].includes(userRole) && (
+              <List
+                component="div"
+                subheader={
+                  <ListSubheader component="div" disableSticky>
+                    CAMBIOS
+                  </ListSubheader>
+                }
+              >
+                <SubMenuWrapper>
+                  <List component="div">
+                    <ListItem component="div">
+                      <NextLink href="/cambios-pendientes" passHref>
+                        <Button
+                          className={
+                            currentRoute.includes('/cambios-pendientes')
+                              ? 'active'
+                              : ''
+                          }
+                          disableRipple
+                          component="a"
+                          onClick={closeSidebar}
+                          startIcon={<PendingActionsIcon />}
+                        >
+                          Cambios pendientes
+                        </Button>
+                      </NextLink>
+                    </ListItem>
+                    <ListItem component="div">
+                      <NextLink href="/cambios" passHref>
+                        <Button
+                          className={currentRoute === '/cambios' ? 'active' : ''}
+                          disableRipple
+                          component="a"
+                          onClick={closeSidebar}
+                          startIcon={<ChangeCircleIcon />}
+                        >
+                          Lista de cambios
+                        </Button>
+                      </NextLink>
+                    </ListItem>
+                  </List>
+                </SubMenuWrapper>
+              </List>
+            )}
+            {['ADMIN', 'AUX'].includes(userRole) && (
               <List
                 component="div"
                 subheader={
@@ -571,7 +639,7 @@ function SidebarMenu({ userRole }) {
             </List>
           </SubMenuWrapper>
                   </List>*/}
-        {['ADMIN', 'AUX', 'SUB', 'OPE'].includes(userRole) ? (
+        {['ADMIN', 'AUX', 'SUB'].includes(userRole) ? (
           <List
             component="div"
             subheader={
