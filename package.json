@@ -63,16 +63,15 @@
     "typescript": "4.8.4"
   },
   "scripts": {
-    "dev": "next",
-    "build": "next build",
-    "start": "next start",
+    "dev": "TZ=America/Mazatlan next",
+    "build": "TZ=America/Mazatlan next build",
+    "start": "TZ=America/Mazatlan next start",
     "export": "next export",
     "lint": "next lint",
     "lint-fix": "next lint --fix",
     "format": "prettier --write \"./**/*.{ts,tsx,js,jsx,json}\" --config ./.prettierrc"
   },
   "devDependencies": {
-    "@next/swc-win32-x64-msvc": "^16.0.0",
     "eslint": "8.25.0",
     "eslint-config-next": "12.3.1",
     "eslint-config-prettier": "8.5.0",
