@@ -401,36 +401,6 @@ function SidebarMenu({ userRole }) {
                 </List>
               </SubMenuWrapper>
             </List>
-            <List
-              component="div"
-              subheader={
-                <ListSubheader component="div" disableSticky>
-                  OPERADOR
-                </ListSubheader>
-              }
-            >
-              <SubMenuWrapper>
-                <List component="div">
-                  <ListItem component="div">
-                    <NextLink href="/vueltas-operador" passHref>
-                      <Button
-                        className={
-                          currentRoute.includes('/vueltas-operador')
-                            ? 'active'
-                            : ''
-                        }
-                        disableRipple
-                        component="a"
-                        onClick={closeSidebar}
-                        startIcon={<AssignmentIcon />}
-                      >
-                        Vueltas del Operador
-                      </Button>
-                    </NextLink>
-                  </ListItem>
-                </List>
-              </SubMenuWrapper>
-            </List>
             {['ADMIN', 'AUX', 'SUB'].includes(userRole) && (
               <List
                 component="div"
