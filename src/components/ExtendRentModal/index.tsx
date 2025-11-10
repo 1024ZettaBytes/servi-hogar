@@ -13,6 +13,8 @@ import {
   Container,
   Skeleton,
   Typography,
+  FormControlLabel,
+  Checkbox,
 } from "@mui/material";
 import AddPaymentModal from "../AddPaymentModal";
 import RentPeriodExtend from "./RentPeriodExtend";
@@ -35,6 +37,7 @@ function ExtendRentModal(props) {
     selectedWeeks: 1,
     useFreeWeeks: true,
   });
+  const [chargeLateFee, setChargeLateFee] = useState<boolean>(true);
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
 
   const [hasErrorSubmitting, setHasErrorSubmitting] = useState<any>({
@@ -74,7 +77,7 @@ function ExtendRentModal(props) {
     
     const newWeeksCost = weeksToPay * rent.customer?.level?.weekPrice;
 
-    totalDue = newWeeksCost + lateFeeAmount;
+    totalDue = newWeeksCost + (chargeLateFee ? lateFeeAmount : 0);
   }
 
   const onChangePeriod = (id, value) => {
@@ -107,7 +110,7 @@ function ExtendRentModal(props) {
     const result = await extendRent({
       rentId,
       rentPeriod,
-      lateFee: lateFeeAmount,
+      lateFee: chargeLateFee ? lateFeeAmount : 0,
     });
     setIsSubmitting(false);
     if (!result.error) {
@@ -286,9 +289,29 @@ function ExtendRentModal(props) {
                             freeWeeks={rent.customer?.freeWeeks}
                             weekPrice={rent.customer?.level?.weekPrice}
                             onChangePeriod={onChangePeriod}
-                            lateFee={lateFeeAmount}
+                            lateFee={chargeLateFee ? lateFeeAmount : 0}
                           />
                         </Grid>
+                        {lateFeeAmount > 0 && (
+                          <Grid item lg={12} mb={2}>
+                            <Alert severity="warning">
+                              <Typography variant="body2" gutterBottom>
+                                La renta está vencida por {daysLate} {daysLate === 1 ? 'día' : 'días'}. 
+                                {chargeLateFee && ` Cargo por retraso: $${lateFeeAmount.toFixed(2)}`}
+                              </Typography>
+                              <FormControlLabel
+                                control={
+                                  <Checkbox
+                                    checked={chargeLateFee}
+                                    onChange={(e) => setChargeLateFee(e.target.checked)}
+                                    color="primary"
+                                  />
+                                }
+                                label="Cobrar cargo por retraso"
+                              />
+                            </Alert>
+                          </Grid>
+                        )}
                         {!customerHasBalance &&
                           (Math.abs(rent.customer?.balance) !== getToPay() ||
                             rent.customer.balance > 0) && (
@@ -386,7 +409,7 @@ function ExtendRentModal(props) {
               customerId={rent.customer?._id}
               reason={"RENT_EXT"}
               amount={getToPay()}
-              lateFee={lateFeeAmount}
+              lateFee={chargeLateFee ? lateFeeAmount : 0}
             />
           )}
         </CardContent>
