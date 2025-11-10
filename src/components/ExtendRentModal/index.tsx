@@ -43,27 +43,53 @@ function ExtendRentModal(props) {
   });
   const [paymentModalIsOpen, setPaymentModalIsOpen] = useState<boolean>(false);
 
+  let lateFeeAmount = 0;
+  let daysLate = 0;
+  const LATE_FEE_PER_DAY = 10;
+
+  if (rent) {
+    const today = new Date();
+    const originalEndDate = new Date(rent.endDate);
+
+    today.setHours(0, 0, 0, 0);
+    originalEndDate.setHours(0, 0, 0, 0);
+
+    if (today > originalEndDate) {
+    const diffTime = today.getTime() - originalEndDate.getTime();
+      daysLate = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+    
+      const { selectedWeeks } = rentPeriod;
+      const extensionCoveredDays = selectedWeeks * 7;
+      const chargeableLateDays = Math.min(daysLate, extensionCoveredDays);
+      
+      lateFeeAmount = chargeableLateDays * LATE_FEE_PER_DAY;
+    }
+  }
+
+  let totalDue = 0;
+  if (rent) {
+    const weeksToPay =
+      rentPeriod.selectedWeeks -
+      (rentPeriod.useFreeWeeks ? rent.customer.freeWeeks : 0);
+    
+    const newWeeksCost = weeksToPay * rent.customer?.level?.weekPrice;
+
+    totalDue = newWeeksCost + lateFeeAmount;
+  }
+
   const onChangePeriod = (id, value) => {
     setRentPeriod({ ...rentPeriod, [id]: value });
   };
   const checkCustomerBalance = () => {
-    return rent
-      ? rent.customer?.balance >=
-          (rentPeriod.selectedWeeks -
-            (rentPeriod.useFreeWeeks ? rent.customer.freeWeeks : 0)) *
-            rent.customer?.level?.weekPrice
-      : 0;
+    return rent ? rent.customer?.balance >= totalDue : 0; 
   };
 
   const customerHasBalance = checkCustomerBalance();
 
   const getToPay = (): number => {
-    return (
-      (rentPeriod.selectedWeeks -
-        (rentPeriod.useFreeWeeks ? rent.customer.freeWeeks : 0)) *
-        rent.customer?.level?.weekPrice -
-      rent.customer?.balance
-    );
+    if (!rent) return 0;
+    const amountNeeded = totalDue - rent.customer?.balance;
+    return amountNeeded > 0 ? amountNeeded : 0;
   };
   const checkEnabledButton = () => {
     return (
@@ -81,6 +107,7 @@ function ExtendRentModal(props) {
     const result = await extendRent({
       rentId,
       rentPeriod,
+      lateFee: lateFeeAmount,
     });
     setIsSubmitting(false);
     if (!result.error) {
@@ -259,6 +286,7 @@ function ExtendRentModal(props) {
                             freeWeeks={rent.customer?.freeWeeks}
                             weekPrice={rent.customer?.level?.weekPrice}
                             onChangePeriod={onChangePeriod}
+                            lateFee={lateFeeAmount}
                           />
                         </Grid>
                         {!customerHasBalance &&
@@ -358,6 +386,7 @@ function ExtendRentModal(props) {
               customerId={rent.customer?._id}
               reason={"RENT_EXT"}
               amount={getToPay()}
+              lateFee={lateFeeAmount}
             />
           )}
         </CardContent>

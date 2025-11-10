@@ -44,7 +44,7 @@ import numeral from 'numeral';
 import { DesktopDatePicker } from '@mui/x-date-pickers';
 import { convertDateToTZ, dateDiffInDays, compressImage } from 'lib/client/utils';
 function AddPaymentModal(props) {
-  const { customerId, handleOnClose, open, reason, amount } = props;
+  const { customerId, handleOnClose, open, reason, amount, lateFee } = props;
   const { customerList, customerError } = useGetAllCustomers(getFetcher, false);
   const [selectedCustomer, setSelectedCustomer] = useState<any>(null);
   const [selectedReason, setSelectedReason] = useState<any>(null);
@@ -97,7 +97,8 @@ function AddPaymentModal(props) {
       account,
       paymentDate: convertDateToTZ(paymentDate),
       amount: selectedAmount,
-      folio: selectedFolio
+      folio: selectedFolio,
+      lateFee: lateFee || 0,
     });
     setIsSubmitting(false);
     if (!result.error) {
@@ -620,7 +621,8 @@ AddPaymentModal.propTypes = {
   open: PropTypes.bool.isRequired,
   customerId: PropTypes.string,
   reason: PropTypes.string,
-  amount: PropTypes.number
+  amount: PropTypes.number,
+  lateFee: PropTypes.number,
 };
 
 export default AddPaymentModal;

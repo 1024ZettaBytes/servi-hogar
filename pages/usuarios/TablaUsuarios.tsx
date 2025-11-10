@@ -18,13 +18,15 @@ import {
   useTheme,
   CardHeader,
   TextField,
-  InputAdornment
+  InputAdornment,
+  Chip
 } from '@mui/material';
 
-import { updateUser } from '../../lib/client/usersFetch';
+import { updateUser, unlockUser } from '../../lib/client/usersFetch';
 import { useSnackbar } from 'notistack';
 import BlockIcon from '@mui/icons-material/Block';
 import CheckIcon from '@mui/icons-material/Check';
+import LockOpenIcon from '@mui/icons-material/LockOpen';
 import SearchIcon from '@mui/icons-material/Search';
 import GenericModal from '@/components/GenericModal';
 import LocalLaundryServiceIcon from '@mui/icons-material/LocalLaundryService';
@@ -80,9 +82,12 @@ const applyPagination = (
 const TablaUsuarios: FC<TablaUsuariosProps> = ({ userList }) => {
   const { enqueueSnackbar } = useSnackbar();
   const [updateModalIsOpen, setUpdateModalIsOpen] = useState(false);
+  const [unlockModalIsOpen, setUnlockModalIsOpen] = useState(false);
   const [assignModalIsOpen, setAssignModalIsOpen] = useState(false);
   const [isUpdating, setIsUpdating] = useState(false);
+  const [isUnlocking, setIsUnlocking] = useState(false);
   const [userToUpdate, setUserToUpdate] = useState<any>(null);
+  const [userToUnlock, setUserToUnlock] = useState<any>(null);
   const [page, setPage] = useState<number>(0);
   const [limit, setLimit] = useState<number>(30);
   const [filter, setFilter] = useState<string>('');
@@ -104,6 +109,11 @@ const TablaUsuarios: FC<TablaUsuariosProps> = ({ userList }) => {
   const handleOnChangeStatus = (): void => {
     setUpdateModalIsOpen(true);
   };
+  
+  const handleOnUnlock = (): void => {
+    setUnlockModalIsOpen(true);
+  };
+  
   const handleOnConfirmUpdate = async () => {
     setIsUpdating(true);
     const result = await updateUser(userToUpdate);
@@ -122,6 +132,26 @@ const TablaUsuarios: FC<TablaUsuariosProps> = ({ userList }) => {
       setUserToUpdate(null);
     }
   };
+  
+  const handleOnConfirmUnlock = async (reason: string) => {
+    setIsUnlocking(true);
+    const result = await unlockUser(userToUnlock._id, reason);
+    setUnlockModalIsOpen(false);
+    setIsUnlocking(false);
+    enqueueSnackbar(result.msg, {
+      variant: !result.error ? 'success' : 'error',
+      anchorOrigin: {
+        vertical: 'top',
+        horizontal: 'center'
+      },
+      autoHideDuration: 2000
+    });
+
+    if (!result.error) {
+      setUserToUnlock(null);
+    }
+  };
+  
   const handleCloseAssign = (success, message) => {
     setAssignModalIsOpen(false);
     if (!success) {
@@ -178,7 +208,8 @@ const TablaUsuarios: FC<TablaUsuariosProps> = ({ userList }) => {
                 <TableCell align="center">Usuario</TableCell>
                 <TableCell align="center">Rol</TableCell>
                 <TableCell align="center">ID</TableCell>
-                <TableCell align="center"></TableCell>
+                <TableCell align="center">Estado</TableCell>
+                <TableCell align="center">Acciones</TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
@@ -218,6 +249,30 @@ const TablaUsuarios: FC<TablaUsuariosProps> = ({ userList }) => {
                     </TableCell>
 
                     <TableCell align="center">
+                      {!user?.isActive ? (
+                        <Chip
+                          label="INACTIVO"
+                          color="default"
+                          size="small"
+                          sx={{ fontWeight: 'bold', backgroundColor: '#bdbdbd' }}
+                        />
+                      ) : user?.isBlocked ? (
+                        <Chip
+                          label="BLOQUEADO"
+                          color="error"
+                          size="small"
+                          sx={{ fontWeight: 'bold' }}
+                        />
+                      ) : (
+                        <Chip
+                          label="ACTIVO"
+                          color="success"
+                          size="small"
+                        />
+                      )}
+                    </TableCell>
+
+                    <TableCell align="center">
                       {user.role?.id === 'TEC' && (
                         <Tooltip title={'Asignar Equipos'} arrow>
                           <IconButton
@@ -229,6 +284,26 @@ const TablaUsuarios: FC<TablaUsuariosProps> = ({ userList }) => {
                             size="small"
                           >
                             <LocalLaundryServiceIcon fontSize="small" />
+                          </IconButton>
+                        </Tooltip>
+                      )}
+                      {user?.isBlocked && user?.isActive && (
+                        <Tooltip title="Desbloquear Usuario" arrow>
+                          <IconButton
+                            onClick={() => {
+                              setUserToUnlock(user);
+                              handleOnUnlock();
+                            }}
+                            sx={{
+                              '&:hover': {
+                                background: theme.colors.success.lighter
+                              },
+                              color: theme.palette.success.main
+                            }}
+                            color="inherit"
+                            size="small"
+                          >
+                            <LockOpenIcon fontSize="small" />
                           </IconButton>
                         </Tooltip>
                       )}
@@ -298,6 +373,21 @@ const TablaUsuarios: FC<TablaUsuariosProps> = ({ userList }) => {
           setIsUpdating(false);
         }}
       />
+      {unlockModalIsOpen && (
+      <GenericModal
+        open={unlockModalIsOpen}
+        title="Desbloquear Usuario"
+        requiredReason={true}
+        text={`¿Está seguro que desea desbloquear al usuario ${userToUnlock?.name}? El usuario podrá volver a completar vueltas. Por favor indique la razón del desbloqueo.`}
+        isLoading={isUnlocking}
+        onAccept={handleOnConfirmUnlock}
+        onCancel={() => {
+          setUnlockModalIsOpen(false);
+          setIsUnlocking(false);
+          setUserToUnlock(null);
+        }}
+      />
+      )}
       {assignModalIsOpen && (
         <AssignMachineModal
           open={assignModalIsOpen}

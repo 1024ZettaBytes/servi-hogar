@@ -125,6 +125,7 @@ const TablaPagos: FC<TablaPagosProps> = () => {
                 <TableCell align="center">Folio</TableCell>
                 <TableCell align="center">Comprobante</TableCell>
                 <TableCell align="center">Importe</TableCell>
+                <TableCell align='center'>Recargo</TableCell>
                 <TableCell align="center">Usuario</TableCell>
               </TableRow>
             </TableHead>
@@ -239,6 +240,13 @@ const TablaPagos: FC<TablaPagosProps> = () => {
                       <Typography variant="body2" color="green" noWrap>
                         {numeral(payment?.amount).format(
                           `$${payment.amount}0,0.00`
+                        )}
+                      </Typography>
+                    </TableCell>
+                    <TableCell align="center">
+                      <Typography variant="body2" sx={{ color: 'warning.dark' }} noWrap>
+                        {numeral(payment?.lateFee).format(
+                          `$${payment.lateFee}0,0.00`
                         )}
                       </Typography>
                     </TableCell>
