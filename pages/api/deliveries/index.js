@@ -1,4 +1,4 @@
-import { validateUserPermissions, getUserId } from "../auth/authUtils";
+import { validateUserPermissions, getUserId, getUserRole } from "../auth/authUtils";
 import {
   getPastDeliveriesData,
   updateDeliveryTimeData,
@@ -9,7 +9,13 @@ import {
 async function getDeliveriesAPI(req, res) {
   try {
     const {page, limit, searchTerm, date} = req.query;
-    const rents = await getPastDeliveriesData(page, limit, searchTerm, date);
+    const userId = await getUserId(req);
+    const userRole = await getUserRole(req);
+    
+    // Only filter by operator if user is OPE
+    const operatorFilter = userRole === 'OPE' ? userId : null;
+    
+    const rents = await getPastDeliveriesData(page, limit, searchTerm, date, operatorFilter);
     res.status(200).json({ data: rents });
   } catch (e) {
     console.error(e);
