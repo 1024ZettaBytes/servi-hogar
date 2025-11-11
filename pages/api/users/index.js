@@ -1,8 +1,9 @@
-import { validateUserPermissions } from '../auth/authUtils';
+import { getUserId, validateUserPermissions } from '../auth/authUtils';
 import {
   getUsersData,
   changeUserStatus,
-  saveUserData
+  saveUserData,
+  unlockUser
 } from '../../../lib/data/Users';
 async function getUsersAPI(req, res) {
   try {
@@ -40,6 +41,24 @@ async function saveUserAPI(req, res) {
     res.status(500).json({ errorMsg: e.message });
   }
 }
+
+async function unlockUserAPI(req, res) {
+  try {
+    const { _id, reason } = req.body;
+    const unlockedBy = await getUserId(req);
+    
+    if (!unlockedBy) {
+      return res.status(401).json({ errorMsg: 'Usuario no autenticado.' });
+    }
+    
+    await unlockUser({ _id, reason, unlockedBy });
+    res.status(200).json({ msg: '¡Usuario desbloqueado con éxito!' });
+  } catch (e) {
+    console.error(e);
+    res.status(500).json({ errorMsg: e.message });
+  }
+}
+
 async function handler(req, res) {
   const validRole = await validateUserPermissions(req, res, ['ADMIN']);
   if (validRole)
@@ -52,6 +71,9 @@ async function handler(req, res) {
         break;
       case 'PUT':
         await updateUserAPI(req, res);
+        break;
+      case 'PATCH':
+        await unlockUserAPI(req, res);
         break;
       case 'DELETE':
         await deleteCustomersAPI(req, res, userId, validRole);

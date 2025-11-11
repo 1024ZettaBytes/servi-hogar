@@ -12,6 +12,7 @@ export interface IPayment extends Document {
   voucherUrl: string;
   date: Date;
   lastUpdatedBy: Schema.Types.ObjectId;
+  lateFee?: number;
 }
 
 const PaymentSchema = new Schema<IPayment>({
@@ -29,6 +30,7 @@ const PaymentSchema = new Schema<IPayment>({
   folio: { type:String, default:null },
   voucherUrl: { type: String, default:null },
   date: { type: Date, required: true },
+  lateFee: { type: Number, default: 0 },
   lastUpdatedBy: { type: Schema.Types.ObjectId, required: true, ref: 'users' }
 });
 

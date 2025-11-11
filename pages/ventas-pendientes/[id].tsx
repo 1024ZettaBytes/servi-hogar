@@ -46,7 +46,6 @@ import {
   compressImage,
   convertDateToLocal,
   replaceCoordinatesOnUrl,
-  setDateToInitial,
   setDateToMid,
   validateMapsUrl
 } from '../../lib/client/utils';
@@ -797,9 +796,6 @@ function CompletarVenta() {
                                     deliveryDate ||
                                     convertDateToLocal(new Date())
                                   }
-                                  minDate={setDateToInitial(
-                                    convertDateToLocal(new Date())
-                                  )}
                                   maxDate={new Date()}
                                   onChange={(newValue) => {
                                     setDeliveryDate(newValue);

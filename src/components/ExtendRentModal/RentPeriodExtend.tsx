@@ -15,6 +15,7 @@ import {
     selectedWeeks: number;
     useFreeWeeks: boolean;
     weekPrice: number;
+    lateFee: number;
     freeWeeks?: any;
     onChangePeriod: Function;
   }
@@ -25,12 +26,15 @@ import {
     weekPrice,
     selectedWeeks,
     useFreeWeeks,
+    lateFee
   }) => {
     const totalPrice = () => {
       const weeksToPay =
       !useFreeWeeks ? (selectedWeeks) : (
         freeWeeks > selectedWeeks ? 0 : selectedWeeks - freeWeeks);
-      return weeksToPay * weekPrice;
+      const weeksCost = weeksToPay * weekPrice;
+
+      return weeksCost + lateFee;
     };
     return (
       <>
@@ -66,6 +70,12 @@ import {
           <Grid item lg={3}>
             <Typography color="text.secondary" sx={{ pb: 1 }}>
               Precio por semana: {numeral(weekPrice).format(`$${weekPrice}0,0.00`)}
+            </Typography>
+          </Grid>
+          <Grid item md={12} lg={12}></Grid>
+          <Grid item lg={3}>
+            <Typography color="text.secondary" sx={{ pb: 1 }}>
+              Recargos por retraso: {numeral(lateFee).format(`$${lateFee}0,0.00`)}
             </Typography>
           </Grid>
           <Grid item md={12} lg={12}></Grid>

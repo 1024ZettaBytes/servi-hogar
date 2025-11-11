@@ -1,5 +1,5 @@
 import Head from 'next/head';
-import { getSession } from 'next-auth/react';
+import { getSession, useSession } from 'next-auth/react';
 import { useState } from 'react';
 import SidebarLayout from '@/layouts/SidebarLayout';
 import { validateServerSideSession } from '../../lib/auth';
@@ -49,10 +49,11 @@ import {
   compressImage
 } from 'lib/client/utils';
 
-function RecoleccionPendiente() {
+function RecoleccionPendiente({ session }) {
   const router = useRouter();
   const { pickupId } = router.query;
   const { pickup, pickupByIdError } = useGetPickupById(getFetcher, pickupId);
+  const { data: sessionData, update: updateSession } = useSession();
   const [pickupDate, setPickupDate] = useState<any>(new Date());
   const [whitDebt, setWhitDebt] = useState<number>(null);
   const [payDone, setPayDone] = useState<boolean>(false);
@@ -66,6 +67,10 @@ function RecoleccionPendiente() {
   });
   const paths = ['Inicio', 'Recolecciones pendientes', `${pickup?.rent?.num}`];
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
+  
+  // Use client-side session data if available, otherwise fall back to server-side session
+  const currentUser = sessionData?.user || session?.user;
+  const isBlocked = currentUser?.isBlocked === true;
 
   const [hasErrorSubmitting, setHasErrorSubmitting] = useState<any>({
     error: false,
@@ -126,6 +131,8 @@ function RecoleccionPendiente() {
     });
     setIsSubmitting(false);
     if (!result.error) {
+      // Update session to get latest user data (including isBlocked status)
+      await updateSession();
       handleNext(event);
     } else {
       setHasErrorSubmitting({ error: true, msg: result.msg });
@@ -162,6 +169,17 @@ function RecoleccionPendiente() {
           spacing={4}
         >
           <Grid item xs={12}>
+            {isBlocked && (
+              <Alert severity="error" sx={{ mb: 2 }}>
+                <Typography variant="h4" gutterBottom>
+                  Usuario Bloqueado
+                </Typography>
+                <Typography>
+                  Tu cuenta ha sido bloqueada por exceder el tiempo permitido entre vueltas (más de 35 minutos). 
+                  Por favor contacta al administrador para resolver esta situación.
+                </Typography>
+              </Alert>
+            )}
             {generalError ? (
               <Alert severity="error">{pickupByIdError?.message}</Alert>
             ) : !completeData ? (
@@ -447,9 +465,8 @@ function RecoleccionPendiente() {
                             )}
                             <Box sx={{ mb: 2 }}>
                               <div>
-                                {index > 0 && (
+                                {index !== 0 && (
                                   <Button
-                                    disabled={isSubmitting}
                                     onClick={handleBack}
                                     sx={{ mt: 1, mr: 1 }}
                                   >
@@ -459,7 +476,7 @@ function RecoleccionPendiente() {
                                 <LoadingButton
                                   type="submit"
                                   loading={isSubmitting}
-                                  disabled={!nextButtonEnabled}
+                                  disabled={!nextButtonEnabled || isBlocked}
                                   variant="contained"
                                   sx={{ mt: 1, mr: 1 }}
                                 >

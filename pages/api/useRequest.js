@@ -132,11 +132,12 @@ export const useGetPendingDeliveries = (fetcher) => {
   const { data, error } = useSWR(ROUTES.ALL_PENDING_DELIVERIES_API, fetcher);
   return { pendingDeliveriesList: data?.data, pendingDeliveriesError: error };
 };
-export const useGetDeliveries = (fetcher, limit, page, searchTerm = null) => {
-  const { data, error } = useSWR(
-    getPaginatedUrl(ROUTES.ALL_DELIVERIES_API, limit, page, searchTerm),
-    fetcher
-  );
+export const useGetDeliveries = (fetcher, limit, page, searchTerm = null, date = null) => {
+  let url = getPaginatedUrl(ROUTES.ALL_DELIVERIES_API, limit, page, searchTerm);
+  if (date) {
+    url += `&date=${formatTZDate(date, 'YYYY-MM-DD')}`;
+  }
+  const { data, error } = useSWR(url, fetcher);
   return { deliveriesList: data?.data, deliveriesError: error };
 };
 export const useGetDeliveryById = (fetcher, id) => {
@@ -152,11 +153,12 @@ export const useGetPendingPickups = (fetcher, detailed=true) => {
   const { data, error } = useSWR(ROUTES.ALL_PENDING_PICKUPS_API + (detailed ? "?detailed=true" : ""), fetcher);
   return { pendingPickupsList: data?.data, pendingPickupsError: error };
 };
-export const useGetPickups = (fetcher, limit, page, searchTerm = null) => {
-  const { data, error } = useSWR(
-    getPaginatedUrl(ROUTES.ALL_PICKUP_API, limit, page, searchTerm),
-    fetcher
-  );
+export const useGetPickups = (fetcher, limit, page, searchTerm = null, date = null) => {
+  let url = getPaginatedUrl(ROUTES.ALL_PICKUP_API, limit, page, searchTerm);
+  if (date) {
+    url += `&date=${date}`;
+  }
+  const { data, error } = useSWR(url, fetcher);
   return { pickups: data?.data, pickupsError: error };
 };
 export const useGetPickupById = (fetcher, id) => {
@@ -173,11 +175,12 @@ export const useGetPendingChanges = (fetcher) => {
   return { pendingChangesList: data?.data, pendingChangesError: error };
 };
 
-export const useGetChanges = (fetcher, limit, page, searchTerm = null) => {
-  const { data, error } = useSWR(
-    getPaginatedUrl(ROUTES.ALL_CHANGES_API, limit, page, searchTerm),
-    fetcher
-  );
+export const useGetChanges = (fetcher, limit, page, searchTerm = null, date = null) => {
+  let url = getPaginatedUrl(ROUTES.ALL_CHANGES_API, limit, page, searchTerm);
+  if (date) {
+    url += `&date=${date}`;
+  }
+  const { data, error } = useSWR(url, fetcher);
   return { changes: data?.data, changesError: error };
 };
 export const useGetChangeById = (fetcher, id) => {
@@ -234,6 +237,12 @@ export const useGetOperators = (fetcher) => {
 export const useGetUsers = (fetcher) => {
   const { data, error } = useSWR(ROUTES.ALL_USERS, fetcher);
   return { userList: data?.data, userError: error };
+};
+
+// User Unlocks
+export const useGetUserUnlocks = (fetcher) => {
+  const { data, error } = useSWR(ROUTES.ALL_USER_UNLOCKS, fetcher);
+  return { unlocksList: data?.data, unlocksError: error };
 };
 
 // Roles

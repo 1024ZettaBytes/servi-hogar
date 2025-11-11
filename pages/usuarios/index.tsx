@@ -8,9 +8,11 @@ import PageTitleWrapper from "@/components/PageTitleWrapper";
 import { Card, Container, Grid, Skeleton, Alert } from "@mui/material";
 import Footer from "@/components/Footer";
 import TablaUsuarios from "./TablaUsuarios";
+import TablaDesbloqueos from "./TablaDesbloqueos";
 import {
   useGetUsers,
   useGetRoles,
+  useGetUserUnlocks,
   getFetcher,
 } from "../api/useRequest";
 import { useSnackbar } from "notistack";
@@ -24,9 +26,10 @@ function Usuarios({}) {
   const { enqueueSnackbar } = useSnackbar();
   const { userList, userError } = useGetUsers(getFetcher);
   const { rolesList, rolesError } = useGetRoles(getFetcher);
+  const { unlocksList, unlocksError } = useGetUserUnlocks(getFetcher);
   const [addModalIsOpen, setAddModalIsOpen] = useState(false);
-  const generalError = userError || rolesError;
-  const completeData = userList && rolesList;
+  const generalError = userError || rolesError || unlocksError;
+  const completeData = userList && rolesList && unlocksList;
 
   const handleClickOpen = () => {
     setAddModalIsOpen(true);
@@ -70,7 +73,7 @@ function Usuarios({}) {
           <Grid item xs={12}>
             {generalError ? (
               <Alert severity="error">
-                {userError?.message || rolesError?.message}
+                {userError?.message || rolesError?.message || unlocksError?.message}
               </Alert>
             ) : !completeData ? (
               <Skeleton
@@ -83,6 +86,22 @@ function Usuarios({}) {
               <Card>
                 <TablaUsuarios
                   userList={userList}
+                />
+              </Card>
+            )}
+          </Grid>
+          <Grid item xs={12}>
+            {generalError ? null : !completeData ? (
+              <Skeleton
+                variant="rectangular"
+                width={"100%"}
+                height={500}
+                animation="wave"
+              />
+            ) : (
+              <Card>
+                <TablaDesbloqueos
+                  unlocksList={unlocksList}
                 />
               </Card>
             )}

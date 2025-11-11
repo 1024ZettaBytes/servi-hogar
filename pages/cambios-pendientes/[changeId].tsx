@@ -1,5 +1,5 @@
 import Head from "next/head";
-import { getSession } from "next-auth/react";
+import { getSession, useSession } from "next-auth/react";
 import { useState } from "react";
 import SidebarLayout from "@/layouts/SidebarLayout";
 import { validateServerSideSession } from "../../lib/auth";
@@ -49,16 +49,21 @@ import { MuiFileInput } from "mui-file-input";
 import { DesktopDatePicker } from "@mui/x-date-pickers";
 import { convertDateToLocal, convertDateToTZ, setDateToEnd, setDateToInitial, setDateToMid, compressImage } from "lib/client/utils";
 
-function CambioPendiente() {
+function CambioPendiente({ session }) {
   const router = useRouter();
   const { changeId } = router.query;
   const { change, changeByIdError } = useGetChangeById(getFetcher, changeId);
   const { machinesData, machinesError } = useGetMachinesForRent(getFetcher);
+  const { data: sessionData, update: updateSession } = useSession();
   const [changeDate, setChangeDate] = useState<any>(new Date());
   const [changedAccesories, setChangedAccesories] = useState<any>({});
   const [attached, setAttached] = useState<any>({
     tag: { file: null, url: null },
   });
+  
+  // Use client-side session data if available, otherwise fall back to server-side session
+  const currentUser = sessionData?.user || session?.user;
+  const isBlocked = currentUser?.isBlocked === true;
   
   const [badFormat, setBadFormat] = useState<any>({
     tag: false,
@@ -105,6 +110,8 @@ function CambioPendiente() {
     });
     setIsSubmitting(false);
     if (!result.error) {
+      // Update session to get latest user data (including isBlocked status)
+      await updateSession();
       handleNext(event);
     } else {
       setHasErrorSubmitting({ error: true, msg: result.msg });
@@ -141,6 +148,17 @@ function CambioPendiente() {
           spacing={4}
         >
           <Grid item xs={12}>
+            {isBlocked && (
+              <Alert severity="error" sx={{ mb: 2 }}>
+                <Typography variant="h4" gutterBottom>
+                  Usuario Bloqueado
+                </Typography>
+                <Typography>
+                  Tu cuenta ha sido bloqueada por exceder el tiempo permitido entre vueltas (más de 35 minutos). 
+                  Por favor contacta al administrador para resolver esta situación.
+                </Typography>
+              </Alert>
+            )}
             {generalError ? (
               <Alert severity="error">
                 {changeByIdError?.message || machinesError?.message}
@@ -429,7 +447,7 @@ function CambioPendiente() {
                               <LoadingButton
                                 type="submit"
                                 loading={isSubmitting}
-                                disabled={!nextButtonEnabled}
+                                disabled={!nextButtonEnabled || isBlocked}
                                 variant="contained"
                                 sx={{ mt: 1, mr: 1 }}
                               >

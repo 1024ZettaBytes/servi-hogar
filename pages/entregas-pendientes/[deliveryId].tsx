@@ -35,12 +35,12 @@ import Stepper from '@mui/material/Stepper';
 import { DesktopDatePicker } from '@mui/x-date-pickers';
 import { completeDelivery } from 'lib/client/deliveriesFetch';
 import { MuiFileInput } from 'mui-file-input';
-import { getSession } from 'next-auth/react';
+import { getSession, useSession } from 'next-auth/react';
 import Head from 'next/head';
 import Image from 'next/image';
 import NextLink from 'next/link';
 import { useRouter } from 'next/router';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { validateServerSideSession } from '../../lib/auth';
 import {
   compressImage,
@@ -57,8 +57,9 @@ import {
   useGetDeliveryById,
   useGetMachinesForRent
 } from '../api/useRequest';
-function RentaRapida() {
+function RentaRapida({ session }) {
   const router = useRouter();
+  const { data: sessionData, update: updateSession } = useSession();
   const { deliveryId } = router.query;
   const { delivery, deliveryByIdError } = useGetDeliveryById(
     getFetcher,
@@ -88,6 +89,10 @@ function RentaRapida() {
     board: { file: null, url: null },
     tag: { file: null, url: null }
   });
+  
+  // Use session from hook for real-time updates
+  const currentUser = sessionData?.user || session?.user;
+  const isBlocked = currentUser?.isBlocked === true;
 
   const [badFormat, setBadFormat] = useState<any>({
     contract: false,
@@ -137,6 +142,10 @@ function RentaRapida() {
   async function handleImageSelection(imageFile, key) {
     // Handle file removal
     if (!imageFile) {
+      // Clean up blob URL if it exists
+      if (attached[key]?.url && attached[key]?.url.startsWith('blob:')) {
+        URL.revokeObjectURL(attached[key].url);
+      }
       setAttached({
         ...attached,
         [key]: { file: null, url: null, error: false }
@@ -155,6 +164,11 @@ function RentaRapida() {
         [key]: { ...attached[key], error: true }
       });
       return;
+    }
+
+    // Clean up previous blob URL if it exists
+    if (attached[key]?.url && attached[key]?.url.startsWith('blob:')) {
+      URL.revokeObjectURL(attached[key].url);
     }
 
     // Set compressed file and preview URL
@@ -224,6 +238,18 @@ function RentaRapida() {
       }}
     />
   );
+
+  // Cleanup blob URLs on component unmount
+  useEffect(() => {
+    return () => {
+      Object.keys(attached).forEach((key) => {
+        if (attached[key]?.url && attached[key]?.url.startsWith('blob:')) {
+          URL.revokeObjectURL(attached[key].url);
+        }
+      });
+    };
+  }, []);
+
   const checkEnabledButton = () => {
     if (activeStep === 0)
       return (
@@ -256,6 +282,8 @@ function RentaRapida() {
     });
     setIsSubmitting(false);
     if (!result.error) {
+      // Update session to get latest user data (including isBlocked status)
+      await updateSession();
       handleNext(event);
     } else {
       setHasErrorSubmitting({ error: true, msg: result.msg });
@@ -283,6 +311,7 @@ function RentaRapida() {
   if (payment < 0 && delivery?.rent) {
     setPayment(delivery?.rent?.initialPay);
   }
+  
   return (
     <>
       <Head>
@@ -304,6 +333,17 @@ function RentaRapida() {
           spacing={4}
         >
           <Grid item xs={12}>
+            {isBlocked && (
+              <Alert severity="error" sx={{ mb: 2 }}>
+                <Typography variant="h4" gutterBottom>
+                  Usuario Bloqueado
+                </Typography>
+                <Typography>
+                  Tu cuenta ha sido bloqueada por exceder el tiempo permitido entre vueltas (más de 35 minutos). 
+                  Por favor contacta al administrador para resolver esta situación.
+                </Typography>
+              </Alert>
+            )}
             {generalError ? (
               <Alert severity="error">
                 {deliveryByIdError?.message ||
@@ -667,25 +707,35 @@ function RentaRapida() {
                                       startIcon={<MyLocationIcon />}
                                       variant="contained"
                                       onClick={() => {
-                                        setIsGettingLocation(true);
                                         if ('geolocation' in navigator) {
+                                          setIsGettingLocation(true);
                                           // Retrieve latitude & longitude coordinates from `navigator.geolocation` Web API
                                           navigator.geolocation.getCurrentPosition(
                                             ({ coords }) => {
                                               const { latitude, longitude } =
                                                 coords;
-                                              setCustomerToEdit({
-                                                ...customerToEdit,
+                                              const newMaps = replaceCoordinatesOnUrl(
+                                                { latitude, longitude }
+                                              );
+                                              
+                                              // Batch state updates together
+                                              setCustomerToEdit((prev) => ({
+                                                ...prev,
                                                 currentResidence: {
-                                                  ...customerToEdit.currentResidence,
-                                                  maps: replaceCoordinatesOnUrl(
-                                                    { latitude, longitude }
-                                                  )
+                                                  ...prev.currentResidence,
+                                                  maps: newMaps
                                                 }
-                                              });
+                                              }));
+                                              setIsGettingLocation(false);
+                                            },
+                                            (error) => {
+                                              // Handle errors
+                                              console.error('Error getting location:', error);
                                               setIsGettingLocation(false);
                                             }
                                           );
+                                        } else {
+                                          setIsGettingLocation(false);
                                         }
                                       }}
                                     >
@@ -816,23 +866,26 @@ function RentaRapida() {
                                   }}
                                 />
                               </Grid>
-                              {(delivery?.rent?.imagesUrl ||
-                                (attached.contract?.url &&
-                                  !attached.contract.file.name.includes(
-                                    'pdf'
-                                  ))) && (
-                                <Grid item lg={12} m={1}>
-                                  <Image
-                                    src={
-                                      attached.contract.url ||
-                                      delivery?.rent?.imagesUrl?.contract
-                                    }
-                                    alt="Picture of the author"
-                                    width={300}
-                                    height={400}
-                                  />
-                                </Grid>
-                              )}
+                              {(() => {
+                                const hasExistingImage = delivery?.rent?.imagesUrl?.contract;
+                                const hasNewImage = attached.contract?.url && attached.contract?.file;
+                                const isPdf = hasNewImage && attached.contract.file?.name?.toLowerCase().includes('pdf');
+                                
+                                if ((hasExistingImage || hasNewImage) && !isPdf) {
+                                  return (
+                                    <Grid item lg={12} m={1}>
+                                      <Image
+                                        src={attached.contract?.url || hasExistingImage}
+                                        alt="Foto de INE"
+                                        width={300}
+                                        height={400}
+                                        key={attached.contract?.url || 'existing-contract'}
+                                      />
+                                    </Grid>
+                                  );
+                                }
+                                return null;
+                              })()}
                               <Grid item lg={4} m={1}>
                                 <MuiFileInput
                                   required={
@@ -860,23 +913,26 @@ function RentaRapida() {
                                   </Typography>
                                 </Grid>
                               )}
-                              {(delivery?.rent?.imagesUrl ||
-                                (attached.front?.url &&
-                                  !attached.front.file.name.includes(
-                                    'pdf'
-                                  ))) && (
-                                <Grid item lg={12} m={1}>
-                                  <Image
-                                    src={
-                                      attached.front.url ||
-                                      delivery?.rent?.imagesUrl?.front
-                                    }
-                                    alt="Picture of the author"
-                                    width={300}
-                                    height={400}
-                                  />
-                                </Grid>
-                              )}
+                              {(() => {
+                                const hasExistingImage = delivery?.rent?.imagesUrl?.front;
+                                const hasNewImage = attached.front?.url && attached.front?.file;
+                                const isPdf = hasNewImage && attached.front.file?.name?.toLowerCase().includes('pdf');
+                                
+                                if ((hasExistingImage || hasNewImage) && !isPdf) {
+                                  return (
+                                    <Grid item lg={12} m={1}>
+                                      <Image
+                                        src={attached.front?.url || hasExistingImage}
+                                        alt="Foto de frente casa"
+                                        width={300}
+                                        height={400}
+                                        key={attached.front?.url || 'existing-front'}
+                                      />
+                                    </Grid>
+                                  );
+                                }
+                                return null;
+                              })()}
                               <Grid item lg={4} m={1}>
                                 <MuiFileInput
                                   required={
@@ -905,13 +961,15 @@ function RentaRapida() {
                                 </Grid>
                               )}
                               {attached.board?.url &&
+                                attached.board?.file?.name &&
                                 !attached.board.file.name.includes('pdf') && (
                                   <Grid item lg={12} m={1}>
                                     <Image
                                       src={attached.board.url}
-                                      alt="Picture of the author"
+                                      alt="Foto de tablero"
                                       width={300}
                                       height={400}
+                                      key={attached.board.url}
                                     />
                                   </Grid>
                                 )}
@@ -936,13 +994,15 @@ function RentaRapida() {
                                 </Grid>
                               )}
                               {attached.tag?.url &&
+                                attached.tag?.file?.name &&
                                 !attached.tag.file.name.includes('pdf') && (
                                   <Grid item lg={12} m={1}>
                                     <Image
                                       src={attached.tag.url}
-                                      alt="Picture of the author"
+                                      alt="Foto de etiqueta"
                                       width={300}
                                       height={400}
+                                      key={attached.tag.url}
                                     />
                                   </Grid>
                                 )}
@@ -988,7 +1048,7 @@ function RentaRapida() {
                               )}
                               <LoadingButton
                                 loading={isSubmitting}
-                                disabled={!nextButtonEnabled}
+                                disabled={!nextButtonEnabled || isBlocked}
                                 variant="contained"
                                 type="submit"
                                 sx={{ mt: 1, mr: 1 }}
