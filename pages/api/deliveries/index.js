@@ -32,8 +32,11 @@ async function updateDeliveryTimeAPI(req, res, userId) {
   }
 }
 
-async function cancelDeliveryAPI(req, res, userId) {
+async function cancelDeliveryAPI(req, res, userId, userRole) {
   try {
+    if (userRole !== 'ADMIN') {
+      return res.status(403).json({ errorMsg: "Solo los administradores pueden cancelar entregas." });
+    }
     await cancelDeliveryData({ ...req.body, lastUpdatedBy: userId });
     res.status(200).json({ msg: "Entrega cancelada" });
   } catch (e) {
@@ -45,6 +48,8 @@ async function cancelDeliveryAPI(req, res, userId) {
 async function handler(req, res) {
   const validRole = await validateUserPermissions(req, res, ["ADMIN", "AUX", "OPE"]);
   const userId = await getUserId(req);
+  const userRole = await getUserRole(req);
+  
   if (validRole)
     switch (req.method) {
       case "GET":
@@ -56,7 +61,7 @@ async function handler(req, res) {
         await updateDeliveryTimeAPI(req, res, userId);
         break;
       case "DELETE":
-        await cancelDeliveryAPI(req, res, userId);
+        await cancelDeliveryAPI(req, res, userId, userRole);
         break;
     }
 }
