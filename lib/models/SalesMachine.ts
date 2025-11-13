@@ -3,7 +3,6 @@ import mongoose, { Model, model, Schema } from 'mongoose';
 export interface ISalesMachine extends Document {
   machineNum: number;
   brand: string;
-  capacity: string;
   cost: number;
   serialNumber: string;
   imageUrl: String;
@@ -12,6 +11,7 @@ export interface ISalesMachine extends Document {
   lastUpdatedBy: Schema.Types.ObjectId;
   evidencesUrls: [String];
   photosUrls: [String];
+  isFromRent: boolean;
   active: boolean;
   isSold: boolean;
   status: string;
@@ -20,7 +20,6 @@ export interface ISalesMachine extends Document {
 const SalesMachineSchema = new Schema<ISalesMachine>({
   machineNum: { type: Number, required: true },
   brand: { type: String, required: true },
-  capacity: { type: String },
   cost: { type: Number, required: true },
   serialNumber: { type: String, default: '' },
   createdAt: { type: Date, required: true },
@@ -28,6 +27,7 @@ const SalesMachineSchema = new Schema<ISalesMachine>({
   lastUpdatedBy: { type: Schema.Types.ObjectId, required: true, ref: 'users' },
   evidencesUrls: { type: [String], default: [] },
   photosUrls: { type: [String], default: [] },
+  isFromRent: { type: 'boolean', default: false },
   active: { type: 'boolean', default: true },
   isSold: { type: 'boolean', default: false },
   status: {

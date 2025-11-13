@@ -32,9 +32,9 @@ export default async function handler(req, res) {
 
       const result = await saveSalesMachineData({ 
         brand: fields.brand,
-        capacity: fields.capacity,
         cost: fields.cost,
         serialNumber: fields.serialNumber,
+        isFromRent: fields.isFromRent === 'true',
         files,
         lastUpdatedBy: userId 
       });

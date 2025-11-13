@@ -10,7 +10,9 @@ import {
   Divider,
   Grid,
   TextField,
-  Alert
+  Alert,
+  FormControlLabel,
+  Checkbox
 } from '@mui/material';
 import { LoadingButton } from '@mui/lab';
 import { saveSalesMachine } from '../../../lib/client/salesMachinesFetch';
@@ -22,11 +24,11 @@ function AddSalesMachineModal(props) {
   const [isLoading, setIsLoading] = useState(false);
   const [hasError, setHasError] = useState({ error: false, msg: '' });
   const [brand, setBrand] = useState('');
-  const [capacity, setCapacity] = useState('');
   const [cost, setCost] = useState('');
   const [serialNumber, setSerialNumber] = useState('');
   const [photo1, setPhoto1] = useState(null);
   const [photo2, setPhoto2] = useState(null);
+  const [isFromRent, setIsFromRent] = useState(false);
 
   async function submitHandler(event) {
     event.preventDefault();
@@ -44,9 +46,9 @@ function AddSalesMachineModal(props) {
 
     const formData = new FormData();
     formData.append('brand', brand);
-    formData.append('capacity', capacity);
     formData.append('cost', cost);
     formData.append('serialNumber', serialNumber);
+    formData.append('isFromRent', isFromRent.toString());
     formData.append('photo1', photo1);
     formData.append('photo2', photo2);
 
@@ -64,11 +66,11 @@ function AddSalesMachineModal(props) {
     setHasError({ error: false, msg: '' });
     setIsLoading(false);
     setBrand('');
-    setCapacity('');
     setCost('');
     setSerialNumber('');
     setPhoto1(null);
     setPhoto2(null);
+    setIsFromRent(false);
     handleOnClose(false);
   };
 
@@ -112,18 +114,6 @@ function AddSalesMachineModal(props) {
 
               <Grid item lg={12}>
                 <TextField
-                  autoComplete="off"
-                  id="capacity"
-                  name="capacity"
-                  label="Capacidad"
-                  fullWidth={true}
-                  value={capacity}
-                  onChange={(e) => setCapacity(e.target.value)}
-                />
-              </Grid>
-
-              <Grid item lg={12}>
-                <TextField
                   type="number"
                   autoComplete="off"
                   required
@@ -146,6 +136,19 @@ function AddSalesMachineModal(props) {
                   fullWidth={true}
                   value={serialNumber}
                   onChange={(e) => setSerialNumber(e.target.value)}
+                />
+              </Grid>
+
+              <Grid item lg={12}>
+                <FormControlLabel
+                  control={
+                    <Checkbox
+                      checked={isFromRent}
+                      onChange={(e) => setIsFromRent(e.target.checked)}
+                      name="isFromRent"
+                    />
+                  }
+                  label="¿Proviene de rentas?"
                 />
               </Grid>
 
