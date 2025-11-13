@@ -11,6 +11,7 @@ export interface ISalesMachine extends Document {
   updatedAt: Date;
   lastUpdatedBy: Schema.Types.ObjectId;
   evidencesUrls: [String];
+  photosUrls: [String];
   active: boolean;
   isSold: boolean;
   status: string;
@@ -26,6 +27,7 @@ const SalesMachineSchema = new Schema<ISalesMachine>({
   updatedAt: { type: Date, required: true },
   lastUpdatedBy: { type: Schema.Types.ObjectId, required: true, ref: 'users' },
   evidencesUrls: { type: [String], default: [] },
+  photosUrls: { type: [String], default: [] },
   active: { type: 'boolean', default: true },
   isSold: { type: 'boolean', default: false },
   status: {

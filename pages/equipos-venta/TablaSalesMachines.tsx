@@ -15,12 +15,15 @@ import {
   TableContainer,
   Typography,
   CardHeader,
-  Chip
+  Chip,
+  Avatar,
+  AvatarGroup
 } from '@mui/material';
 import DeleteTwoToneIcon from '@mui/icons-material/DeleteTwoTone';
 import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
 import HourglassEmptyIcon from '@mui/icons-material/HourglassEmpty';
 import SellIcon from '@mui/icons-material/Sell';
+import ImageIcon from '@mui/icons-material/Image';
 import { useSnackbar } from 'notistack';
 import { deleteSalesMachines } from '../../lib/client/salesMachinesFetch';
 
@@ -136,6 +139,7 @@ const TablaSalesMachines: FC<TablaSalesMachinesProps> = ({
               <TableCell>Capacidad</TableCell>
               <TableCell>Costo</TableCell>
               <TableCell>Número de Serie</TableCell>
+              <TableCell>Fotos</TableCell>
               <TableCell>Estado</TableCell>
               <TableCell align="right">Acciones</TableCell>
             </TableRow>
@@ -194,6 +198,31 @@ const TablaSalesMachines: FC<TablaSalesMachinesProps> = ({
                     >
                       {machine.serialNumber || 'N/A'}
                     </Typography>
+                  </TableCell>
+                  <TableCell>
+                    {machine.photosUrls && machine.photosUrls.length > 0 ? (
+                      <AvatarGroup max={2}>
+                        {machine.photosUrls.map((url, index) => (
+                          <Tooltip key={index} title={`Foto ${index + 1}`} arrow>
+                            <Avatar
+                              alt={`Foto ${index + 1}`}
+                              src={url}
+                              sx={{ 
+                                width: 40, 
+                                height: 40,
+                                cursor: 'pointer',
+                                '&:hover': {
+                                  opacity: 0.8
+                                }
+                              }}
+                              onClick={() => window.open(url, '_blank')}
+                            />
+                          </Tooltip>
+                        ))}
+                      </AvatarGroup>
+                    ) : (
+                      "-"
+                    )}
                   </TableCell>
                   <TableCell>
                     {getStatusChip(machine.status)}

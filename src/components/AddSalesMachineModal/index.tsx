@@ -14,6 +14,7 @@ import {
 } from '@mui/material';
 import { LoadingButton } from '@mui/lab';
 import { saveSalesMachine } from '../../../lib/client/salesMachinesFetch';
+import { compressImage } from '../../../lib/client/utils';
 
 function AddSalesMachineModal(props) {
   const { handleOnClose, open } = props;
@@ -24,27 +25,32 @@ function AddSalesMachineModal(props) {
   const [capacity, setCapacity] = useState('');
   const [cost, setCost] = useState('');
   const [serialNumber, setSerialNumber] = useState('');
+  const [photo1, setPhoto1] = useState(null);
+  const [photo2, setPhoto2] = useState(null);
 
   async function submitHandler(event) {
     event.preventDefault();
     setIsLoading(true);
     setHasError({ error: false, msg: '' });
 
-    if (!brand || !cost) {
+    if (!brand || !cost || !photo1 || !photo2) {
       setHasError({ 
         error: true, 
-        msg: 'Por favor complete todos los campos requeridos' 
+        msg: 'Por favor complete todos los campos requeridos y suba ambas fotos' 
       });
       setIsLoading(false);
       return;
     }
 
-    const result = await saveSalesMachine({
-      brand,
-      capacity,
-      cost: parseFloat(cost),
-      serialNumber
-    });
+    const formData = new FormData();
+    formData.append('brand', brand);
+    formData.append('capacity', capacity);
+    formData.append('cost', cost);
+    formData.append('serialNumber', serialNumber);
+    formData.append('photo1', photo1);
+    formData.append('photo2', photo2);
+
+    const result = await saveSalesMachine(formData);
 
     setIsLoading(false);
     if (!result.error) {
@@ -61,6 +67,8 @@ function AddSalesMachineModal(props) {
     setCapacity('');
     setCost('');
     setSerialNumber('');
+    setPhoto1(null);
+    setPhoto2(null);
     handleOnClose(false);
   };
 
@@ -139,6 +147,54 @@ function AddSalesMachineModal(props) {
                   value={serialNumber}
                   onChange={(e) => setSerialNumber(e.target.value)}
                 />
+              </Grid>
+
+              <Grid item lg={12}>
+                <Button
+                  variant="outlined"
+                  component="label"
+                  fullWidth
+                  color={photo1 ? "success" : "primary"}
+                >
+                  {photo1 ? `Foto 1: ${photo1.name}` : 'Seleccionar Foto 1 *'}
+                  <input
+                    type="file"
+                    hidden
+                    accept="image/*"
+                    onChange={async (e) => {
+                      if (e.target.files && e.target.files[0]) {
+                        const result = await compressImage(e.target.files[0]);
+                        if (result) {
+                          setPhoto1(result.file);
+                        }
+                      }
+                    }}
+                  />
+                </Button>
+              </Grid>
+
+              <Grid item lg={12}>
+                <Button
+                  variant="outlined"
+                  component="label"
+                  fullWidth
+                  color={photo2 ? "success" : "primary"}
+                >
+                  {photo2 ? `Foto 2: ${photo2.name}` : 'Seleccionar Foto 2 *'}
+                  <input
+                    type="file"
+                    hidden
+                    accept="image/*"
+                    onChange={async (e) => {
+                      if (e.target.files && e.target.files[0]) {
+                        const result = await compressImage(e.target.files[0]);
+                        if (result) {
+                          setPhoto2(result.file);
+                        }
+                      }
+                    }}
+                  />
+                </Button>
               </Grid>
 
               {hasError.error && (

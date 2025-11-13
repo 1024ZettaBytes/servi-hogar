@@ -1,5 +1,5 @@
 import PropTypes from "prop-types";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Dialog from "@mui/material/Dialog";
 import {
   Box,
@@ -15,6 +15,7 @@ import {
   Typography,
   FormControlLabel,
   Checkbox,
+  TextField,
 } from "@mui/material";
 import AddPaymentModal from "../AddPaymentModal";
 import RentPeriodExtend from "./RentPeriodExtend";
@@ -38,6 +39,7 @@ function ExtendRentModal(props) {
     useFreeWeeks: true,
   });
   const [chargeLateFee, setChargeLateFee] = useState<boolean>(true);
+  const [lateFeeDays, setLateFeeDays] = useState<number>(0);
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
 
   const [hasErrorSubmitting, setHasErrorSubmitting] = useState<any>({
@@ -45,6 +47,22 @@ function ExtendRentModal(props) {
     msg: "",
   });
   const [paymentModalIsOpen, setPaymentModalIsOpen] = useState<boolean>(false);
+
+  // Initialize lateFeeDays when rent data loads
+  useEffect(() => {
+    if (rent && lateFeeDays === 0) {
+      const today = new Date();
+      const originalEndDate = new Date(rent.endDate);
+      today.setHours(0, 0, 0, 0);
+      originalEndDate.setHours(0, 0, 0, 0);
+
+      if (today > originalEndDate) {
+        const diffTime = today.getTime() - originalEndDate.getTime();
+        const daysLate = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+        setLateFeeDays(daysLate);
+      }
+    }
+  }, [rent, lateFeeDays]);
 
   let lateFeeAmount = 0;
   let daysLate = 0;
@@ -58,14 +76,17 @@ function ExtendRentModal(props) {
     originalEndDate.setHours(0, 0, 0, 0);
 
     if (today > originalEndDate) {
-    const diffTime = today.getTime() - originalEndDate.getTime();
+      const diffTime = today.getTime() - originalEndDate.getTime();
       daysLate = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
     
       const { selectedWeeks } = rentPeriod;
       const extensionCoveredDays = selectedWeeks * 7;
-      const chargeableLateDays = Math.min(daysLate, extensionCoveredDays);
+      const maxChargeableDays = Math.min(daysLate, extensionCoveredDays);
       
-      lateFeeAmount = chargeableLateDays * LATE_FEE_PER_DAY;
+      // Use the user-selected days, but cap at the maximum
+      const daysToCharge = Math.min(lateFeeDays, maxChargeableDays);
+      
+      lateFeeAmount = daysToCharge * LATE_FEE_PER_DAY;
     }
   }
 
@@ -292,12 +313,11 @@ function ExtendRentModal(props) {
                             lateFee={chargeLateFee ? lateFeeAmount : 0}
                           />
                         </Grid>
-                        {lateFeeAmount > 0 && (
+                        {daysLate > 0 && (
                           <Grid item lg={12} mb={2}>
                             <Alert severity="warning">
                               <Typography variant="body2" gutterBottom>
                                 La renta está vencida por {daysLate} {daysLate === 1 ? 'día' : 'días'}. 
-                                {chargeLateFee && ` Cargo por retraso: $${lateFeeAmount.toFixed(2)}`}
                               </Typography>
                               <FormControlLabel
                                 control={
@@ -309,6 +329,26 @@ function ExtendRentModal(props) {
                                 }
                                 label="Cobrar cargo por retraso"
                               />
+                              {chargeLateFee && (
+                                <Box sx={{ mt: 2 }}>
+                                  <TextField
+                                    fullWidth
+                                    type="number"
+                                    label="Días a cobrar"
+                                    value={lateFeeDays}
+                                    onChange={(e) => {
+                                      const value = parseInt(e.target.value) || 0;
+                                      const maxDays = Math.min(daysLate, rentPeriod.selectedWeeks * 7);
+                                      setLateFeeDays(Math.min(Math.max(0, value), maxDays));
+                                    }}
+                                    inputProps={{
+                                      min: 0,
+                                      max: Math.min(daysLate, rentPeriod.selectedWeeks * 7)
+                                    }}
+                                    helperText={`Máximo: ${Math.min(daysLate, rentPeriod.selectedWeeks * 7)} días. Cargo: $${lateFeeAmount.toFixed(2)} ($${LATE_FEE_PER_DAY} por día)`}
+                                  />
+                                </Box>
+                              )}
                             </Alert>
                           </Grid>
                         )}
