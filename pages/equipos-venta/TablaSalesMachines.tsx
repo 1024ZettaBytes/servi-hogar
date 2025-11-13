@@ -15,7 +15,9 @@ import {
   TableContainer,
   Typography,
   CardHeader,
-  Chip
+  Chip,
+  Avatar,
+  AvatarGroup
 } from '@mui/material';
 import DeleteTwoToneIcon from '@mui/icons-material/DeleteTwoTone';
 import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
@@ -133,9 +135,10 @@ const TablaSalesMachines: FC<TablaSalesMachinesProps> = ({
             <TableRow>
               <TableCell>Número</TableCell>
               <TableCell>Marca</TableCell>
-              <TableCell>Capacidad</TableCell>
               <TableCell>Costo</TableCell>
               <TableCell>Número de Serie</TableCell>
+              <TableCell>Fotos</TableCell>
+              <TableCell>Origen</TableCell>
               <TableCell>Estado</TableCell>
               <TableCell align="right">Acciones</TableCell>
             </TableRow>
@@ -168,16 +171,6 @@ const TablaSalesMachines: FC<TablaSalesMachinesProps> = ({
                   <TableCell>
                     <Typography
                       variant="body1"
-                      color="text.secondary"
-                      gutterBottom
-                      noWrap
-                    >
-                      {machine.capacity || 'N/A'}
-                    </Typography>
-                  </TableCell>
-                  <TableCell>
-                    <Typography
-                      variant="body1"
                       color="text.primary"
                       gutterBottom
                       noWrap
@@ -194,6 +187,48 @@ const TablaSalesMachines: FC<TablaSalesMachinesProps> = ({
                     >
                       {machine.serialNumber || 'N/A'}
                     </Typography>
+                  </TableCell>
+                  <TableCell>
+                    {machine.photosUrls && machine.photosUrls.length > 0 ? (
+                      <AvatarGroup max={2}>
+                        {machine.photosUrls.map((url, index) => (
+                          <Tooltip key={index} title={`Foto ${index + 1}`} arrow>
+                            <Avatar
+                              alt={`Foto ${index + 1}`}
+                              src={url}
+                              sx={{ 
+                                width: 40, 
+                                height: 40,
+                                cursor: 'pointer',
+                                '&:hover': {
+                                  opacity: 0.8
+                                }
+                              }}
+                              onClick={() => window.open(url, '_blank')}
+                            />
+                          </Tooltip>
+                        ))}
+                      </AvatarGroup>
+                    ) : (
+                      "-"
+                    )}
+                  </TableCell>
+                  <TableCell>
+                    {machine.isFromRent ? (
+                      <Chip
+                        label="Rentas"
+                        color="info"
+                        size="small"
+                        sx={{ fontWeight: 'bold' }}
+                      />
+                    ) : (
+                      <Chip
+                        label="Nuevo"
+                        color="default"
+                        size="small"
+                        variant="outlined"
+                      />
+                    )}
                   </TableCell>
                   <TableCell>
                     {getStatusChip(machine.status)}
