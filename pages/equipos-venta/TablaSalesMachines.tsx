@@ -23,7 +23,6 @@ import DeleteTwoToneIcon from '@mui/icons-material/DeleteTwoTone';
 import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
 import HourglassEmptyIcon from '@mui/icons-material/HourglassEmpty';
 import SellIcon from '@mui/icons-material/Sell';
-import ImageIcon from '@mui/icons-material/Image';
 import { useSnackbar } from 'notistack';
 import { deleteSalesMachines } from '../../lib/client/salesMachinesFetch';
 
