@@ -47,7 +47,7 @@ const getActionTypeLabel = (type: string): JSX.Element => {
   return <Chip label={text} color={color} />;
 };
 
-const TablaAccionesSinAsignar: FC<TablaAccionesSinAsignarProps> = ({ actionsList }) => {
+const TablaAccionesSinAsignar: FC<TablaAccionesSinAsignarProps> = ({ actionsList = [] }) => {
   const { enqueueSnackbar } = useSnackbar();
   const [page, setPage] = useState<number>(0);
   const [limit, setLimit] = useState<number>(5);

@@ -43,7 +43,12 @@ interface ResumenPendientesProps {
   overdueSales: any[];
 }
 
-function ResumenPendientes({ unassigned, overdue, overdueRents, overdueSales }: ResumenPendientesProps) {
+function ResumenPendientes({ 
+  unassigned = [], 
+  overdue = [], 
+  overdueRents = [], 
+  overdueSales = [] 
+}: ResumenPendientesProps) {
   const unassignedByType = {
     entregas: unassigned.filter(a => a.type === 'ENTREGA').length,
     cambios: unassigned.filter(a => a.type === 'CAMBIO').length,
