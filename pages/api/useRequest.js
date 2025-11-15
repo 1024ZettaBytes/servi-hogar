@@ -245,6 +245,16 @@ export const useGetUserUnlocks = (fetcher) => {
   return { unlocksList: data?.data, unlocksError: error };
 };
 
+// Pending Actions
+export const useGetPendingActions = (fetcher) => {
+  const { data, error, mutate } = useSWR(ROUTES.ALL_PENDING_ACTIONS, fetcher);
+  return { 
+    pendingActions: data?.data, 
+    pendingActionsError: error,
+    mutatePendingActions: mutate
+  };
+};
+
 // Roles
 export const useGetRoles = (fetcher) => {
   const { data, error } = useSWR(ROUTES.ALL_ROLES, fetcher);
