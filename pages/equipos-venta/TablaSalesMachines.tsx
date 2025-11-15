@@ -17,14 +17,17 @@ import {
   CardHeader,
   Chip,
   Avatar,
-  AvatarGroup
+  AvatarGroup,
+  useTheme
 } from '@mui/material';
 import DeleteTwoToneIcon from '@mui/icons-material/DeleteTwoTone';
 import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
 import HourglassEmptyIcon from '@mui/icons-material/HourglassEmpty';
 import SellIcon from '@mui/icons-material/Sell';
+import VisibilityIcon from '@mui/icons-material/Visibility';
 import { useSnackbar } from 'notistack';
 import { deleteSalesMachines } from '../../lib/client/salesMachinesFetch';
+import NextLink from 'next/link';
 
 interface TablaSalesMachinesProps {
   userRole: string;
@@ -83,6 +86,7 @@ const TablaSalesMachines: FC<TablaSalesMachinesProps> = ({
   onUpdate
 }) => {
   const { enqueueSnackbar } = useSnackbar();
+  const theme = useTheme();
   const [page, setPage] = useState<number>(0);
   const [limit, setLimit] = useState<number>(10);
 
@@ -234,6 +238,22 @@ const TablaSalesMachines: FC<TablaSalesMachinesProps> = ({
                     {getStatusChip(machine.status)}
                   </TableCell>
                   <TableCell align="right">
+                    <NextLink href={`/equipos-venta/${machine._id}`} passHref>
+                      <Tooltip title="Ver Detalle" arrow>
+                        <IconButton
+                          sx={{
+                            '&:hover': {
+                              background: theme.colors.primary.lighter
+                            },
+                            color: theme.palette.primary.main
+                          }}
+                          color="inherit"
+                          size="small"
+                        >
+                          <VisibilityIcon fontSize="small" />
+                        </IconButton>
+                      </Tooltip>
+                    </NextLink>
                     {!machine.isSold && machine.status === 'DISPONIBLE' && userRole === 'ADMIN' && (
                       <Tooltip title="Eliminar" arrow>
                         <IconButton

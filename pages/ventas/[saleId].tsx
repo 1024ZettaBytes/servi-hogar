@@ -160,11 +160,23 @@ function SaleDetail() {
                           />
                         </Box>
                       </Grid>
-                      <Grid item xs={12}>
+                      <Grid item xs={6}>
                         <Typography variant="caption" color="text.secondary">
                           Equipo
                         </Typography>
                         <Typography variant="body1">{machineInfo}</Typography>
+                      </Grid>
+                      <Grid item xs={6}>
+                        <Typography variant="caption" color="text.secondary">
+                          Garantía
+                        </Typography>
+                        <Typography variant="body2">
+                          {sale.machine?.warranty ? (
+                            formatTZDate(new Date(sale.machine.warranty), 'DD/MM/YYYY')
+                          ) : (
+                            'N/A'
+                          )}
+                        </Typography>
                       </Grid>
                       <Grid item xs={12}>
                         <Typography variant="caption" color="text.secondary">
