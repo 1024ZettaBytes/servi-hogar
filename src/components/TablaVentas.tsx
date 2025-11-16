@@ -214,6 +214,7 @@ const TablaVentas: FC<TablaSalesProps> = ({ salesList, onPaymentClick }) => {
                 <TableCell align="center">Próximo Pago</TableCell>
                 <TableCell align="center">Fecha</TableCell>
                 <TableCell align="center">Fotos</TableCell>
+                <TableCell align="center">Garantía</TableCell>
                 <TableCell align="center">Acciones</TableCell>
               </TableRow>
             </TableHead>
@@ -400,6 +401,15 @@ const TablaVentas: FC<TablaSalesProps> = ({ salesList, onPaymentClick }) => {
                           N/A
                         </Typography>
                       )}
+                    </TableCell>
+                    <TableCell align="center">
+                      <Typography variant="body2" color="text.secondary" noWrap>
+                        {sale.machine?.warranty ? (
+                          formatTZDate(new Date(sale.machine.warranty), 'DD/MM/YYYY')
+                        ) : (
+                          'N/A'
+                        )}
+                      </Typography>
                     </TableCell>
                     <TableCell align="center">
                       <Box

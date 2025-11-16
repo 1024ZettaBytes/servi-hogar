@@ -16,7 +16,9 @@ import {
 } from '@mui/material';
 import { LoadingButton } from '@mui/lab';
 import { saveSalesMachine } from '../../../lib/client/salesMachinesFetch';
-import { compressImage } from '../../../lib/client/utils';
+import { compressImage, setDateToInitial, convertDateToLocal} from '../../../lib/client/utils';
+import { DesktopDatePicker } from '@mui/x-date-pickers';
+
 
 function AddSalesMachineModal(props) {
   const { handleOnClose, open } = props;
@@ -29,6 +31,7 @@ function AddSalesMachineModal(props) {
   const [photo1, setPhoto1] = useState(null);
   const [photo2, setPhoto2] = useState(null);
   const [isFromRent, setIsFromRent] = useState(false);
+  const [warrantyDate, setWarrantyDate] = useState<Date>(null); 
 
   async function submitHandler(event) {
     event.preventDefault();
@@ -49,6 +52,11 @@ function AddSalesMachineModal(props) {
     formData.append('cost', cost);
     formData.append('serialNumber', serialNumber);
     formData.append('isFromRent', isFromRent.toString());
+    if (warrantyDate) {
+      formData.append('warrantyDate', warrantyDate.toISOString());
+    } else {
+      formData.append('warrantyDate', ''); 
+    }
     formData.append('photo1', photo1);
     formData.append('photo2', photo2);
 
@@ -71,6 +79,7 @@ function AddSalesMachineModal(props) {
     setPhoto1(null);
     setPhoto2(null);
     setIsFromRent(false);
+    setWarrantyDate(null);
     handleOnClose(false);
   };
 
@@ -136,6 +145,21 @@ function AddSalesMachineModal(props) {
                   fullWidth={true}
                   value={serialNumber}
                   onChange={(e) => setSerialNumber(e.target.value)}
+                />
+              </Grid>
+
+              <Grid item lg={12}>
+                <DesktopDatePicker
+                  label="Fecha de Garantía"
+                  inputFormat="dd/MM/yyyy"
+                  value={warrantyDate}
+                  minDate={setDateToInitial(convertDateToLocal(new Date()))}
+                  onChange={(newValue) => {
+                    setWarrantyDate(newValue);
+                  }}
+                  renderInput={(params) => (
+                    <TextField {...params} required fullWidth/>
+                  )}
                 />
               </Grid>
 

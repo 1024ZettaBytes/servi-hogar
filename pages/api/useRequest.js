@@ -97,6 +97,16 @@ export const useGetMachineById = (fetcher, id) => {
   );
   return { machine: data?.data, machineByIdError: error };
 };
+
+//Sales Machines
+export const useGetSalesMachineById = (fetcher, id) => {
+  const { data, error } = useSWR(
+    id ? ROUTES.SALE_MACHINE_BY_ID_API.replace(':id', id) : null,
+    fetcher
+  );
+  return { saleMachine: data?.data, saleMachineByIdError: error };
+};
+
 // Warehouses
 export const useGetAllWarehousesOverview = (fetcher) => {
   const { data, error } = useSWR(ROUTES.ALL_WAREHOUSES_OVERVIEW_API, fetcher);

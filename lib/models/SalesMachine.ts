@@ -5,6 +5,7 @@ export interface ISalesMachine extends Document {
   brand: string;
   cost: number;
   serialNumber: string;
+  warranty: Date;
   imageUrl: String;
   createdAt: Date;
   updatedAt: Date;
@@ -22,6 +23,7 @@ const SalesMachineSchema = new Schema<ISalesMachine>({
   brand: { type: String, required: true },
   cost: { type: Number, required: true },
   serialNumber: { type: String, default: '' },
+  warranty: { type: Date, required: true },
   createdAt: { type: Date, required: true },
   updatedAt: { type: Date, required: true },
   lastUpdatedBy: { type: Schema.Types.ObjectId, required: true, ref: 'users' },

@@ -34,6 +34,7 @@ export default async function handler(req, res) {
         brand: fields.brand,
         cost: fields.cost,
         serialNumber: fields.serialNumber,
+        warranty: new Date(fields.warrantyDate),
         isFromRent: fields.isFromRent === 'true',
         files,
         lastUpdatedBy: userId 
