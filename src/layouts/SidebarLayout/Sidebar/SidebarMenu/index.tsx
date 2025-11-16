@@ -217,6 +217,36 @@ function SidebarMenu({ userRole }) {
             </List>
           </SubMenuWrapper>
         </List>
+                {userRole === 'AUX' && (
+          <List
+            component="div"
+            subheader={
+              <ListSubheader component="div" disableSticky>
+                GESTIÓN
+              </ListSubheader>
+            }
+          >
+            <SubMenuWrapper>
+              <List component="div">
+                <ListItem component="div">
+                  <NextLink href="/pendientes" passHref>
+                    <Button
+                      className={
+                        currentRoute === '/pendientes' ? 'active' : ''
+                      }
+                      disableRipple
+                      component="a"
+                      onClick={closeSidebar}
+                      startIcon={<PendingActionsIcon />}
+                    >
+                      Pendientes
+                    </Button>
+                  </NextLink>
+                </ListItem>
+              </List>
+            </SubMenuWrapper>
+          </List>
+        )}
         {['ADMIN', 'AUX'].includes(userRole) && (
           <List
             component="div"
