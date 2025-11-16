@@ -63,9 +63,9 @@
     "typescript": "4.8.4"
   },
   "scripts": {
-    "dev": "TZ=America/Mazatlan next",
-    "build": "TZ=America/Mazatlan next build",
-    "start": "TZ=America/Mazatlan next start",
+    "dev": "next",
+    "build": "next build",
+    "start": "next start",
     "export": "next export",
     "lint": "next lint",
     "lint-fix": "next lint --fix",
