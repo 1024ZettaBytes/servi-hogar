@@ -17,7 +17,6 @@ import {
   CardHeader,
   Chip
 } from '@mui/material';
-import NotificationsActiveIcon from '@mui/icons-material/NotificationsActive';
 import SwapHorizIcon from '@mui/icons-material/SwapHoriz';
 import { capitalizeFirstLetter, formatTZDate } from 'lib/client/utils';
 import OperatorModal from '@/components/OperatorModal';
