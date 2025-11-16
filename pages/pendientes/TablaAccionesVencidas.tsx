@@ -218,21 +218,6 @@ const TablaAccionesVencidas: FC<TablaAccionesVencidasProps> = ({ actionsList = [
                         <SwapHorizIcon fontSize="small" />
                       </IconButton>
                     </Tooltip>
-                    <Tooltip title="Notificar" arrow>
-                      <IconButton
-                        sx={{
-                          '&:hover': {
-                            background: 'error.main',
-                            color: 'error.contrastText'
-                          },
-                          color: 'error.main'
-                        }}
-                        color="inherit"
-                        size="small"
-                      >
-                        <NotificationsActiveIcon fontSize="small" />
-                      </IconButton>
-                    </Tooltip>
                   </TableCell>
                 </TableRow>
               );

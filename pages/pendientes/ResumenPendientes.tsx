@@ -80,10 +80,10 @@ function ResumenPendientes({
                 <Grid item lg={3} md={3} xs={3}>
                   <AvatarWrapperWarning><AssignmentLateIcon /></AvatarWrapperWarning>
                 </Grid>
-                <Grid item lg={3} md={3} xs={3}>
+                <Grid item lg={8} md={3} xs={3}>
                   <Typography variant="h2" gutterBottom noWrap>{totalUnassigned}</Typography>
                 </Grid>
-                <Grid item lg={6} md={6} xs={6}>
+                <Grid item lg={12} md={6} xs={6}>
                   <Typography variant="h4" noWrap textAlign="left">Sin Asignar</Typography>
                 </Grid>
                 <Grid item xs={12} sx={{ mt: 2 }}>
@@ -112,10 +112,10 @@ function ResumenPendientes({
                 <Grid item lg={3} md={3} xs={3}>
                   <AvatarWrapperError><AssignmentIndIcon /></AvatarWrapperError>
                 </Grid>
-                <Grid item lg={3} md={3} xs={3}>
+                <Grid item lg={9} md={3} xs={3}>
                   <Typography variant="h2" gutterBottom noWrap>{totalOverdue}</Typography>
                 </Grid>
-                <Grid item lg={6} md={6} xs={6}>
+                <Grid item lg={12} md={6} xs={6}>
                   <Typography variant="h4" noWrap textAlign="left">Vencidas (+3 días)</Typography>
                 </Grid>
                 <Grid item xs={12} sx={{ mt: 2 }}>
@@ -144,10 +144,10 @@ function ResumenPendientes({
                 <Grid item lg={3} md={3} xs={3}>
                   <AvatarWrapperError><MoneyOffIcon /></AvatarWrapperError>
                 </Grid>
-                <Grid item lg={3} md={3} xs={3}>
+                <Grid item lg={9} md={3} xs={3}>
                   <Typography variant="h2" gutterBottom noWrap>{totalOverdueRents}</Typography>
                 </Grid>
-                <Grid item lg={6} md={6} xs={6}>
+                <Grid item lg={12} md={6} xs={6}>
                   <Typography variant="h4" noWrap textAlign="left">Rentas Vencidas</Typography>
                 </Grid>
                 <Grid item xs={12} sx={{ mt: 2 }}>
@@ -165,10 +165,10 @@ function ResumenPendientes({
                 <Grid item lg={3} md={3} xs={3}>
                   <AvatarWrapperError><PointOfSaleIcon /></AvatarWrapperError>
                 </Grid>
-                <Grid item lg={3} md={3} xs={3}>
+                <Grid item lg={9} md={3} xs={3}>
                   <Typography variant="h2" gutterBottom noWrap>{totalOverdueSales}</Typography>
                 </Grid>
-                <Grid item lg={6} md={6} xs={6}>
+                <Grid item lg={12} md={6} xs={6}>
                   <Typography variant="h4" noWrap textAlign="left">Ventas Vencidas</Typography>
                 </Grid>
                 <Grid item xs={12} sx={{ mt: 2 }}>
