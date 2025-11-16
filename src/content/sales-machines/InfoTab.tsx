@@ -7,7 +7,6 @@ import {
   Divider,
   Chip
 } from '@mui/material';
-import { useSnackbar } from 'notistack';
 import { Skeleton } from '@mui/material';
 import Text from '@/components/Text';
 import numeral from 'numeral';
@@ -80,8 +79,7 @@ const DetailRow = ({ label, value, isLoading, isChip = false }) => (
   </>
 );
 
-function SalesMachineInfoTab({ role, salesMachine }) {
-  const { enqueueSnackbar } = useSnackbar();
+function SalesMachineInfoTab({ salesMachine }) {
   const isLoading = !salesMachine;
 
   return (

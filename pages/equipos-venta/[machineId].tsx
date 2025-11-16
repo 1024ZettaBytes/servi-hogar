@@ -24,8 +24,7 @@ const TabsWrapper = styled(Tabs)(
 `
 );
 
-function SalesMachineDetail({ session }) {
-  const userRole = session.user.role;
+function SalesMachineDetail() {
   const router = useRouter();
   const { machineId } = router.query;
   const { saleMachine, saleMachineByIdError } = useGetSalesMachineById(
@@ -87,7 +86,6 @@ function SalesMachineDetail({ session }) {
               <Grid item xs={12}>
                 {currentTab === "info" && (
                   <SalesMachineInfoTab
-                    role={userRole}
                     salesMachine={saleMachine}
                   />
                 )}
