@@ -23,7 +23,7 @@ const SalesMachineSchema = new Schema<ISalesMachine>({
   brand: { type: String, required: true },
   cost: { type: Number, required: true },
   serialNumber: { type: String, default: '' },
-  warranty: { type: Date, required: true },
+  warranty: { type: Date, default: null },
   createdAt: { type: Date, required: true },
   updatedAt: { type: Date, required: true },
   lastUpdatedBy: { type: Schema.Types.ObjectId, required: true, ref: 'users' },
