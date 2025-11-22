@@ -22,6 +22,7 @@ import {
   Chip
 } from '@mui/material';
 import VisibilityIcon from '@mui/icons-material/Visibility';
+import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
 import SearchIcon from '@mui/icons-material/Search';
 import PaymentIcon from '@mui/icons-material/Payment';
 import ImageSearchIcon from '@mui/icons-material/ImageSearch';
@@ -288,8 +289,25 @@ const TablaVentas: FC<TablaSalesProps> = ({ salesList, onPaymentClick }) => {
                         ${numeral(sale.weeklyPayment).format('0,0.00')}
                       </Typography>
                     </TableCell>
-                    <TableCell align="center">
-                      {getStatusLabel(sale.status)}
+                    <TableCell align="center"
+                      sx={{
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "center",
+                          gap: 0.5 
+                        }}
+                      >
+                        {getStatusLabel(sale.status)}
+                        {sale.status === "CANCELADA" && (
+                        <Tooltip
+                          title={sale.delivery?.cancellationReason || "SIN RAZÓN"}
+                          arrow
+                        >
+                          <InfoOutlinedIcon 
+                            fontSize="small" 
+                          />
+                        </Tooltip>
+                      )}
                     </TableCell>
                     <TableCell align="center">
                       {sale.nextPaymentDate ? (

@@ -5,7 +5,7 @@ async function handler(req, res) {
   const validRole = await validateUserPermissions(req, res, ['ADMIN']);
   const userId = await getUserId(req);
   
-  if (validRole && req.method === 'POST') {
+  if (validRole && req.method === 'DELETE') {
     try {
       const result = await cancelSaleData({ ...req.body, lastUpdatedBy: userId });
       res.status(200).json({ msg: 'Venta cancelada con éxito!', data: result });
