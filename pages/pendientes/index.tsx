@@ -13,11 +13,15 @@ import TablaRentasActuales from "../rentas/TablaRentasActuales";
 import TablaVentas from "../../src/components/TablaVentas";
 import RegisterPaymentModal from "@/components/RegisterPaymentModal";
 import ResumenPendientes from "./ResumenPendientes";
+import DailyTotalCard from "@/components/DailyTotalCard";
 import { useSnackbar } from "notistack";
 import {
   useGetPendingActions,
+  useGetDailyPaymentsTotal,
   getFetcher,
+  refreshData,
 } from "../api/useRequest";
+import { ROUTES } from "../../lib/consts/API_URL_CONST";
 
 import NextBreadcrumbs from "@/components/Shared/BreadCrums";
 
@@ -27,6 +31,7 @@ function Pendientes({}) {
   const paths = ["Inicio", "Pendientes"];
   const { enqueueSnackbar } = useSnackbar();
   const { pendingActions, pendingActionsError, mutatePendingActions } = useGetPendingActions(getFetcher);
+  const { dailyTotal, dailyTotalError } = useGetDailyPaymentsTotal(getFetcher);
   
   const [paymentModalIsOpen, setPaymentModalIsOpen] = useState(false);
   const [selectedSale, setSelectedSale] = useState(null);
@@ -49,6 +54,7 @@ function Pendientes({}) {
         autoHideDuration: 2000,
       });
       mutatePendingActions(); // Refresh pending actions including overdue sales
+        refreshData(ROUTES.DAILY_PAYMENTS_TOTAL_API);
     }
   };
 
@@ -72,6 +78,14 @@ function Pendientes({}) {
           alignItems="stretch"
           spacing={4}
         >
+            <Grid item xs={12}>
+              <DailyTotalCard
+                dailyTotal={dailyTotal}
+                isLoading={!dailyTotal && !dailyTotalError}
+                error={dailyTotalError}
+              />
+            </Grid>
+
           {/* Summary Section */}
           <Grid item xs={12}>
             {pendingActionsError ? (

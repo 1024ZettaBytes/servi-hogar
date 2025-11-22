@@ -1,5 +1,6 @@
 import { registerSalePayment } from '../../../lib/data/Sales';
-import { validateUserPermissions, getUserId } from '../auth/authUtils';
+import { validateUserPermissions, getUserId, getUserRole } from '../auth/authUtils';
+import { recordAuxActionAndCheckBlocking } from '../../../lib/data/Users';
 import formidable from 'formidable';
 
 export const config = {
@@ -11,6 +12,7 @@ export const config = {
 async function handler(req, res) {
   const validRole = await validateUserPermissions(req, res, ['ADMIN', 'AUX']);
   const userId = await getUserId(req);
+  const userRole = await getUserRole(req);
   
   if (validRole && req.method === 'POST') {
     try {
@@ -43,7 +45,13 @@ async function handler(req, res) {
         lastUpdatedBy: userId
       });
       
-      res.status(200).json({ msg: 'Pago registrado con éxito!', data: result });
+      // If AUX user, record action and check blocking
+      let wasBlocked = false;
+      if (userRole === 'AUX') {
+        wasBlocked = await recordAuxActionAndCheckBlocking(userId);
+      }
+      
+      res.status(200).json({ msg: 'Pago registrado con éxito!', data: result, wasBlocked });
     } catch (e) {
       console.error(e);
       res.status(500).json({ errorMsg: e.message });

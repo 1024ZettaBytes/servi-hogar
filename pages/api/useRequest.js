@@ -210,6 +210,11 @@ export const useGetPayments = (fetcher, limit, page, searchTerm = null) => {
   return { payments: data?.data, paymentsError: error };
 };
 
+export const useGetDailyPaymentsTotal = (fetcher) => {
+  const { data, error } = useSWR(ROUTES.DAILY_PAYMENTS_TOTAL_API, fetcher);
+  return { dailyTotal: data, dailyTotalError: error };
+};
+
 // Reports
 export const useGetReport = (
   fetcher,

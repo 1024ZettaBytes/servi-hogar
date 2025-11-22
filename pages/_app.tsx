@@ -1,6 +1,7 @@
 import type { ReactElement, ReactNode } from 'react';
 import { useEffect, useRef } from 'react';
-import { SessionProvider } from 'next-auth/react';
+import { SessionProvider, useSession } from 'next-auth/react';
+import { useUserBlocked } from 'src/contexts/UserBlockedContext';
 import type { NextPage } from 'next';
 import type { AppProps } from 'next/app';
 import Head from 'next/head';
@@ -12,11 +13,13 @@ import CssBaseline from '@mui/material/CssBaseline';
 import { CacheProvider, EmotionCache } from '@emotion/react';
 import createEmotionCache from 'src/createEmotionCache';
 import { SidebarProvider } from 'src/contexts/SidebarContext';
+import { UserBlockedProvider } from 'src/contexts/UserBlockedContext';
 import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { SnackbarProvider, useSnackbar } from 'notistack';
 import ErrorBoundary from '@/components/ErrorBoundary';
 import setupAxiosInterceptors from '../lib/client/axiosConfig';
+import UserBlockedModal from '@/components/UserBlockedModal';
 
 // Setup axios interceptors once
 setupAxiosInterceptors();
@@ -32,9 +35,18 @@ interface TokyoAppProps extends AppProps {
   Component: NextPageWithLayout;
 }
 
-// Component that uses snackbar for global error handling
+// Component that integrates global modal and error handling
 function GlobalErrorHandler({ children }: { children: ReactNode }) {
   const { enqueueSnackbar } = useSnackbar();
+  const { data: session } = useSession();
+  const { showBlockedModal, isBlockedModalOpen } = useUserBlocked();
+
+  // Check if user becomes blocked
+  useEffect(() => {
+    if (session?.user?.isBlocked === true) {
+      showBlockedModal();
+    }
+  }, [session?.user?.isBlocked, showBlockedModal]);
   
   // Use refs to persist values across renders and event handlers
   const isShowingErrorRef = useRef(false);
@@ -172,7 +184,12 @@ ${errorInfo.stack.substring(0, 200)}
     };
   }, [enqueueSnackbar]);
 
-  return <>{children}</>;
+  return (
+    <>
+      {children}
+      <UserBlockedModal open={isBlockedModalOpen} />
+    </>
+  );
 }
 
 function TokyoApp(props: TokyoAppProps) {
@@ -194,18 +211,20 @@ function TokyoApp(props: TokyoAppProps) {
           />
         </Head>
         <SnackbarProvider maxSnack={3}>
-          <GlobalErrorHandler>
-            <SidebarProvider>
-              <ThemeProvider>
-                <LocalizationProvider dateAdapter={AdapterDateFns}>
-                  <ErrorBoundary>
-                    <CssBaseline />
-                    {getLayout(<Component {...pageProps} />)}
-                  </ErrorBoundary>
-                </LocalizationProvider>
-              </ThemeProvider>
-            </SidebarProvider>
-          </GlobalErrorHandler>
+          <UserBlockedProvider>
+            <GlobalErrorHandler>
+              <SidebarProvider>
+                <ThemeProvider>
+                  <LocalizationProvider dateAdapter={AdapterDateFns}>
+                    <ErrorBoundary>
+                      <CssBaseline />
+                      {getLayout(<Component {...pageProps} />)}
+                    </ErrorBoundary>
+                  </LocalizationProvider>
+                </ThemeProvider>
+              </SidebarProvider>
+            </GlobalErrorHandler>
+          </UserBlockedProvider>
         </SnackbarProvider>
       </CacheProvider>
     </SessionProvider>
