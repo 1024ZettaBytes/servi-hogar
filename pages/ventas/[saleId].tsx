@@ -26,11 +26,13 @@ import {
   Paper,
   Button,
   IconButton,
+  Tooltip
 } from "@mui/material";
 import Footer from "@/components/Footer";
 import useSWR from "swr";
 import numeral from "numeral";
 import { formatTZDate } from "../../lib/client/utils";
+import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import ImageSearchIcon from "@mui/icons-material/ImageSearch";
 import NextLink from "next/link";
@@ -152,12 +154,24 @@ function SaleDetail() {
                         <Typography variant="caption" color="text.secondary">
                           Estado
                         </Typography>
-                        <Box mt={0.5}>
+                        <Box mt={0.5} display="flex" alignItems="center" gap={0.5}>
                           <Chip
                             label={getStatusLabel(sale.status)}
                             color={getStatusColor(sale.status)}
                             size="small"
                           />
+                          {sale.status === 'CANCELADA' && (
+                            <Tooltip 
+                              title={sale.delivery?.cancellationReason || "SIN RAZÓN"} 
+                              arrow
+                            >
+                              <InfoOutlinedIcon 
+                                fontSize="small" 
+                                color="action" 
+                                sx={{ cursor: 'default' }} 
+                              />
+                            </Tooltip>
+                          )}
                         </Box>
                       </Grid>
                       <Grid item xs={6}>

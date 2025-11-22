@@ -23,11 +23,15 @@ import {
   Chip
 } from '@mui/material';
 import SearchIcon from '@mui/icons-material/Search';
+import GenericModal from '@/components/GenericModal';
+import { useSnackbar } from 'notistack';
+import CancelIcon from '@mui/icons-material/Cancel';
 import AssignmentIndIcon from '@mui/icons-material/AssignmentInd';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import WhatsAppIcon from '@mui/icons-material/WhatsApp';
 import { formatTZDate } from 'lib/client/utils';
 import * as str from 'string';
+import { cancelSale } from '../../lib/client/salesFetch'; 
 
 interface TablaPendingSalesProps {
   userRole: string;
@@ -107,12 +111,16 @@ const TablaPendingSales: FC<TablaPendingSalesProps> = ({
   onWhatsAppClick 
 }) => {
   const theme = useTheme();
+  const { enqueueSnackbar } = useSnackbar(); 
   const [page, setPage] = useState<number>(0);
   const [limit, setLimit] = useState<number>(10);
   const [filter, setFilter] = useState<string>('');
-
+  const [cancelModalIsOpen, setCancelModalIsOpen] = useState(false);
+  const [isCancelling, setIsCancelling] = useState(false);
+  const [saleIdToCancel, setSaleIdToCancel] = useState<string>(null);
   const canAssignOperators = userRole === 'ADMIN' || userRole === 'AUX';
   const isOperator = userRole === 'OPE';
+  const canCancel = userRole === 'ADMIN';
 
   const handleSearchChange = (e: ChangeEvent<HTMLInputElement>): void => {
     const value = e.target.value;
@@ -126,6 +134,37 @@ const TablaPendingSales: FC<TablaPendingSalesProps> = ({
   const handleLimitChange = (event: ChangeEvent<HTMLInputElement>): void => {
     setLimit(parseInt(event.target.value));
   };
+
+  const handleOnCancelSaleClick = (saleId: string) => {
+    setSaleIdToCancel(saleId);
+    setCancelModalIsOpen(true);
+  };
+
+  const handleCloseCancelModal = () => {
+    setCancelModalIsOpen(false);
+    setSaleIdToCancel(null); 
+    setIsCancelling(false);
+  };
+  const handleOnConfirmCancelSale = async (reason) => {
+    setIsCancelling(true);    
+    const result = await cancelSale(saleIdToCancel, reason); 
+    
+    setCancelModalIsOpen(false);
+    setIsCancelling(false);
+    enqueueSnackbar(result.msg, {
+      variant: !result.error ? 'success' : 'error',
+      anchorOrigin: { 
+        vertical: "top", 
+        horizontal: "center" 
+      },
+      autoHideDuration: 2000,
+    });
+    
+    // if (!result.error) {
+    //   onUpdate(); 
+    // }
+  };
+  
 
   const filteredSales = applyFilters(salesList, filter);
   const paginatedSales = applyPagination(filteredSales, page, limit);
@@ -333,6 +372,23 @@ const TablaPendingSales: FC<TablaPendingSalesProps> = ({
                           </Tooltip>
                         </NextLink>
                       )}
+                      {canCancel && sale.status !== 'CANCELADA' && (
+                        <Tooltip title="Cancelar Venta" arrow>
+                          <IconButton
+                            onClick={() => handleOnCancelSaleClick(sale._id)} 
+                            sx={{
+                              '&:hover': { 
+                                background: theme.colors.error.lighter 
+                              },
+                              color: theme.palette.error.main
+                            }}
+                            color="inherit"
+                            size="small"
+                          >
+                            <CancelIcon fontSize="small" />
+                          </IconButton>
+                        </Tooltip>
+                      )}
                     </Box>
                   </TableCell>
                 </TableRow>
@@ -352,6 +408,17 @@ const TablaPendingSales: FC<TablaPendingSalesProps> = ({
           rowsPerPageOptions={[5, 10, 25, 30]}
         />
       </Box>
+      {cancelModalIsOpen && (
+        <GenericModal 
+          open={cancelModalIsOpen}
+          title={"Atención"} 
+          text={'¿Está seguro de cancelar la venta seleccionada?'}
+          isLoading={isCancelling}
+          requiredReason 
+          onAccept={handleOnConfirmCancelSale}
+          onCancel={handleCloseCancelModal}
+        />
+    )}
     </Card>
   );
 };
