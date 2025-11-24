@@ -16,6 +16,8 @@ export interface ISalesMachine extends Document {
   active: boolean;
   isSold: boolean;
   status: string;
+  currentWarehouse: Schema.Types.ObjectId;
+  currentVehicle: Schema.Types.ObjectId;
 }
 
 const SalesMachineSchema = new Schema<ISalesMachine>({
@@ -36,6 +38,16 @@ const SalesMachineSchema = new Schema<ISalesMachine>({
     type: String,
     enum: ['DISPONIBLE', 'PENDIENTE', 'VENDIDO'],
     default: 'DISPONIBLE'
+  },
+  currentWarehouse: {
+    type: Schema.Types.ObjectId,
+    default: null,
+    ref: 'warehouses'
+  },
+  currentVehicle: {
+    type: Schema.Types.ObjectId,
+    default: null,
+    ref: 'vehicles'
   }
 });
 
