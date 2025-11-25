@@ -29,9 +29,10 @@ interface DailyTotalCardProps {
   };
   isLoading: boolean;
   error: any;
+  userRole?: string;
 }
 
-export default function DailyTotalCard({ dailyTotal, isLoading, error }: DailyTotalCardProps) {
+export default function DailyTotalCard({ dailyTotal, isLoading, error, userRole }: DailyTotalCardProps) {
   const theme = useTheme();
 
   if (error) {
@@ -55,7 +56,7 @@ export default function DailyTotalCard({ dailyTotal, isLoading, error }: DailyTo
       </Card>
     );
   }
-
+console.log('User Role in DailyTotalCard:', userRole);
   return (
     <Card
       sx={{
@@ -98,34 +99,36 @@ export default function DailyTotalCard({ dailyTotal, isLoading, error }: DailyTo
             </Box>
           </Box>
 
-          {/* Main Total */}
-          <Box
-            sx={{
-              background: alpha(theme.colors.success.main, 0.15),
-              borderRadius: 2,
-              p: 3,
-              mb: 2,
-              textAlign: 'center',
-              border: `1px solid ${alpha(theme.colors.success.main, 0.3)}`
-            }}
-          >
-            <Typography variant="h6" color="text.secondary" gutterBottom>
-              Total General
-            </Typography>
-            <Box display="flex" alignItems="center" justifyContent="center" gap={1}>
-              <TrendingUpIcon sx={{ fontSize: 40, color: theme.colors.success.main }} />
-              <Typography
-                variant="h1"
-                sx={{
-                  fontWeight: 'bold',
-                  color: theme.colors.success.main,
-                  textShadow: `0 2px 4px ${alpha(theme.colors.success.main, 0.3)}`
-                }}
-              >
-                ${numeral(dailyTotal.total).format('0,0.00')}
+          {/* Main Total - Hide for AUX users only */}
+          {userRole !== 'AUX' && (
+            <Box
+              sx={{
+                background: alpha(theme.colors.success.main, 0.15),
+                borderRadius: 2,
+                p: 3,
+                mb: 2,
+                textAlign: 'center',
+                border: `1px solid ${alpha(theme.colors.success.main, 0.3)}`
+              }}
+            >
+              <Typography variant="h6" color="text.secondary" gutterBottom>
+                Total General
               </Typography>
+              <Box display="flex" alignItems="center" justifyContent="center" gap={1}>
+                <TrendingUpIcon sx={{ fontSize: 40, color: theme.colors.success.main }} />
+                <Typography
+                  variant="h1"
+                  sx={{
+                    fontWeight: 'bold',
+                    color: theme.colors.success.main,
+                    textShadow: `0 2px 4px ${alpha(theme.colors.success.main, 0.3)}`
+                  }}
+                >
+                  ${numeral(dailyTotal.total).format('0,0.00')}
+                </Typography>
+              </Box>
             </Box>
-          </Box>
+          )}
 
           {/* Breakdown */}
           <Grid container spacing={2}>
@@ -151,10 +154,12 @@ export default function DailyTotalCard({ dailyTotal, isLoading, error }: DailyTo
                     Pagos de Rentas
                   </Typography>
                 </Box>
-                <Typography variant="h3" fontWeight="bold" color={theme.colors.info.main}>
-                  ${numeral(dailyTotal.rentPayments.total).format('0,0.00')}
-                </Typography>
-                <Typography variant="caption" color="text.secondary">
+                {userRole !== 'AUX' && (
+                  <Typography variant="h3" fontWeight="bold" color={theme.colors.info.main}>
+                    ${numeral(dailyTotal.rentPayments.total).format('0,0.00')}
+                  </Typography>
+                )}
+                <Typography variant={userRole !== 'AUX' ? 'caption' : 'h3'} color={userRole !== 'AUX' ? 'text.secondary' : theme.colors.info.main} fontWeight={userRole !== 'AUX' ? 'normal' : 'bold'}>
                   {dailyTotal.rentPayments.count} {dailyTotal.rentPayments.count === 1 ? 'pago' : 'pagos'}
                 </Typography>
               </Box>
@@ -182,10 +187,12 @@ export default function DailyTotalCard({ dailyTotal, isLoading, error }: DailyTo
                     Pagos de Ventas
                   </Typography>
                 </Box>
-                <Typography variant="h3" fontWeight="bold" color={theme.colors.warning.main}>
-                  ${numeral(dailyTotal.salePayments.total).format('0,0.00')}
-                </Typography>
-                <Typography variant="caption" color="text.secondary">
+                {userRole !== 'AUX' && (
+                  <Typography variant="h3" fontWeight="bold" color={theme.colors.warning.main}>
+                    ${numeral(dailyTotal.salePayments.total).format('0,0.00')}
+                  </Typography>
+                )}
+                <Typography variant={userRole !== 'AUX' ? 'caption' : 'h3'} color={userRole !== 'AUX' ? 'text.secondary' : theme.colors.warning.main} fontWeight={userRole !== 'AUX' ? 'normal' : 'bold'}>
                   {dailyTotal.salePayments.count} {dailyTotal.salePayments.count === 1 ? 'pago' : 'pagos'}
                 </Typography>
               </Box>

@@ -217,7 +217,7 @@ function SidebarMenu({ userRole }) {
             </List>
           </SubMenuWrapper>
         </List>
-                {userRole === 'AUX' && (
+                {['AUX', "ADMIN"].includes(userRole) && (
           <List
             component="div"
             subheader={
@@ -348,7 +348,7 @@ function SidebarMenu({ userRole }) {
           </>
         )}
 
-        {['OPE'].includes(userRole) && (
+        {['OPE', 'ADMIN'].includes(userRole) && (
           <>
             <List
               component="div"

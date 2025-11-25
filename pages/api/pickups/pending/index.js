@@ -11,11 +11,11 @@ export const config = {
   },
 };
 
-async function getPendingPickupsAPI(req, res, userId) {
+async function getPendingPickupsAPI(req, res, userId, userRole) {
   try {
     const { detailed } = req.query;
     const isDetailed = detailed === "true" || detailed === true;
-    const pickups = await getPendingPickupsData(userId, isDetailed);
+    const pickups = await getPendingPickupsData(userId, isDetailed, userRole);
     res.status(200).json({ data: pickups });
   } catch (e) {
     console.error(e);
@@ -54,7 +54,7 @@ async function handler(req, res) {
   if (validRole)
     switch (req.method) {
       case "GET":
-        await getPendingPickupsAPI(req, res, userId);
+        await getPendingPickupsAPI(req, res, userId, validRole);
         break;
       case "POST":
         await completePickupAPI(req, res, userId);

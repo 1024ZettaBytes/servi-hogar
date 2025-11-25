@@ -1,5 +1,5 @@
 import Head from "next/head";
-import { getSession, useSession } from "next-auth/react";
+import { getSession } from "next-auth/react";
 import { useState } from "react";
 import SidebarLayout from "@/layouts/SidebarLayout";
 import { validateServerSideSession } from "../../lib/auth";
@@ -25,9 +25,9 @@ import { ROUTES } from "../../lib/consts/API_URL_CONST";
 
 import NextBreadcrumbs from "@/components/Shared/BreadCrums";
 
-function Pendientes({}) {
-  const { data: session } = useSession();
-  const userRole = (session?.user as any)?.role?.id;
+function Pendientes({ session }) {
+  const { user } = session;
+  const userRole = user?.role;
   const paths = ["Inicio", "Pendientes"];
   const { enqueueSnackbar } = useSnackbar();
   const { pendingActions, pendingActionsError, mutatePendingActions } = useGetPendingActions(getFetcher);
@@ -83,6 +83,7 @@ function Pendientes({}) {
                 dailyTotal={dailyTotal}
                 isLoading={!dailyTotal && !dailyTotalError}
                 error={dailyTotalError}
+                userRole={userRole}
               />
             </Grid>
 
@@ -122,6 +123,7 @@ function Pendientes({}) {
               <Card>
                 <TablaAccionesSinAsignar
                   actionsList={pendingActions.unassigned}
+                  userRole={userRole}
                 />
               </Card>
             )}
@@ -140,6 +142,7 @@ function Pendientes({}) {
               <Card>
                 <TablaAccionesVencidas
                   actionsList={pendingActions.overdue}
+                  userRole={userRole}
                 />
               </Card>
             )}

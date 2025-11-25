@@ -4,7 +4,7 @@ import { Payment } from '../../../lib/models/Payment';
 import { SalePayment } from '../../../lib/models/SalePayment';
 import { setDateToEnd, setDateToInitial } from '../../../lib/client/utils';
 
-async function getDailyTotalAPI(req, res, userId) {
+async function getDailyTotalAPI(req, res, userId, userRole) {
   try {
     await connectToDatabase();
     
@@ -13,17 +13,26 @@ async function getDailyTotalAPI(req, res, userId) {
     
     const endOfDay = setDateToEnd(new Date());
     
-    // Get rent payments (Payment model) created by this user today
-    const rentPayments = await Payment.find({
-      lastUpdatedBy: userId,
+    // Build query - if user is AUX, filter by user; if ADMIN, get all
+    const rentPaymentQuery = {
       date: { $gte: startOfDay, $lte: endOfDay }
-    }).select('amount lateFee').lean();
+    };
+    if (userRole === 'AUX') {
+      rentPaymentQuery.lastUpdatedBy = userId;
+    }
     
-    // Get sale payments (SalePayment model) created by this user today
-    const salePayments = await SalePayment.find({
-      createdBy: userId,
+    const salePaymentQuery = {
       createdAt: { $gte: startOfDay, $lte: endOfDay }
-    }).select('amount').lean();
+    };
+    if (userRole === 'AUX') {
+      salePaymentQuery.createdBy = userId;
+    }
+    
+    // Get rent payments (Payment model)
+    const rentPayments = await Payment.find(rentPaymentQuery).select('amount lateFee').lean();
+    
+    // Get sale payments (SalePayment model)
+    const salePayments = await SalePayment.find(salePaymentQuery).select('amount').lean();
     
     // Calculate totals
     const rentPaymentsTotal = rentPayments.reduce((sum, payment) => {
@@ -60,7 +69,7 @@ async function handler(req, res) {
   const userId = await getUserId(req);
   
   if (validRole && req.method === 'GET') {
-    await getDailyTotalAPI(req, res, userId);
+    await getDailyTotalAPI(req, res, userId, validRole);
   } else {
     res.status(405).json({ errorMsg: 'Método no permitido' });
   }
