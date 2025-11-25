@@ -24,6 +24,7 @@ import { useSnackbar } from 'notistack';
 
 interface TablaAccionesSinAsignarProps {
   actionsList: any[];
+  userRole?: string;
 }
 
 const getActionTypeLabel = (type: string): JSX.Element => {
@@ -47,7 +48,7 @@ const getActionTypeLabel = (type: string): JSX.Element => {
   return <Chip label={text} color={color} />;
 };
 
-const TablaAccionesSinAsignar: FC<TablaAccionesSinAsignarProps> = ({ actionsList = [] }) => {
+const TablaAccionesSinAsignar: FC<TablaAccionesSinAsignarProps> = ({ actionsList = [], userRole }) => {
   const { enqueueSnackbar } = useSnackbar();
   const [page, setPage] = useState<number>(0);
   const [limit, setLimit] = useState<number>(5);
@@ -172,21 +173,24 @@ const TablaAccionesSinAsignar: FC<TablaAccionesSinAsignarProps> = ({ actionsList
                     </Typography>
                   </TableCell>
                   <TableCell align="right">
-                    <Tooltip title="Asignar Operador" arrow>
-                      <IconButton
-                        sx={{
-                          '&:hover': {
-                            background: 'primary.main',
-                            color: 'primary.contrastText'
-                          },
-                          color: 'primary.main'
-                        }}
-                        color="inherit"
-                        size="small"
-                        onClick={() => handleAssignClick(action)}
-                      >
-                        <AssignmentIndIcon fontSize="small" />
-                      </IconButton>
+                    <Tooltip title={userRole === 'ADMIN' ? 'Solo lectura' : 'Asignar Operador'} arrow>
+                      <span>
+                        <IconButton
+                          sx={{
+                            '&:hover': {
+                              background: 'primary.main',
+                              color: 'primary.contrastText'
+                            },
+                            color: 'primary.main'
+                          }}
+                          color="inherit"
+                          size="small"
+                          onClick={() => handleAssignClick(action)}
+                          disabled={userRole === 'ADMIN'}
+                        >
+                          <AssignmentIndIcon fontSize="small" />
+                        </IconButton>
+                      </span>
                     </Tooltip>
                   </TableCell>
                 </TableRow>

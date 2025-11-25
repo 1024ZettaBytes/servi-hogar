@@ -35,6 +35,10 @@ function VueltasOperador({ session }) {
   const { data: sessionData } = useSession();
   const [selectedDate, setSelectedDate] = useState<Date>(new Date());
   
+  // Use client-side session data if available, otherwise fall back to server-side session
+  const currentUser = sessionData?.user || session?.user;
+  const userRole = (currentUser as any)?.role;
+  
   // Fetch pending tasks
   const { pendingDeliveriesList, pendingDeliveriesError } =
     useGetPendingDeliveries(getFetcher);
@@ -73,8 +77,6 @@ function VueltasOperador({ session }) {
     pendingDeliveriesList && pendingPickupsList && pendingChangesList &&
     deliveriesList && pickups && changes;
   
-  // Use client-side session data if available, otherwise fall back to server-side session
-  const currentUser = sessionData?.user || session?.user;
   const isBlocked = currentUser?.isBlocked === true;
 
   // Combine all tasks into a single array with type
@@ -271,7 +273,7 @@ function VueltasOperador({ session }) {
                     </Typography>
                   </Box>
                   <TablaVueltasOperador
-                    userRole={currentUser?.role}
+                    userRole={userRole}
                     tasksList={allPendingTasks}
                     showTimeBetween={false}
                     isBlocked={isBlocked}
@@ -286,7 +288,7 @@ function VueltasOperador({ session }) {
                     </Typography>
                   </Box>
                   <TablaVueltasOperador
-                    userRole={currentUser?.role}
+                    userRole={userRole}
                     tasksList={allCompletedTasks}
                     showTimeBetween={true}
                     isBlocked={isBlocked}

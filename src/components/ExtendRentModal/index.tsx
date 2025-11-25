@@ -30,8 +30,10 @@ import { capitalizeFirstLetter, addDaysToDate, formatTZDate } from "lib/client/u
 import numeral from "numeral";
 import { useSnackbar } from "notistack";
 import { ROUTES } from "lib/consts/API_URL_CONST";
+import { useCheckBlocking } from "src/hooks/useCheckBlocking";
 function ExtendRentModal(props) {
   const { enqueueSnackbar } = useSnackbar();
+  const { checkBlocking } = useCheckBlocking();
   const { rentId, handleOnClose, open } = props;
   const { rent, rentByIdError } = useGetRentById(getFetcher, rentId);
   const [rentPeriod, setRentPeriod] = useState({
@@ -135,6 +137,8 @@ function ExtendRentModal(props) {
     });
     setIsSubmitting(false);
     if (!result.error) {
+      // Check if user was blocked
+      await checkBlocking(result.wasBlocked);
       handleSavedCustomer(result.msg);
     } else {
       setHasErrorSubmitting({ error: true, msg: result.msg });

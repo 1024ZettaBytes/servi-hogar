@@ -143,6 +143,7 @@ const TablaSalesMachines: FC<TablaSalesMachinesProps> = ({
               <TableCell>Número de Serie</TableCell>
               <TableCell>Fotos</TableCell>
               <TableCell>Origen</TableCell>
+              <TableCell>Ubicación</TableCell>
               <TableCell>Estado</TableCell>
               <TableCell align="right">Acciones</TableCell>
             </TableRow>
@@ -233,6 +234,21 @@ const TablaSalesMachines: FC<TablaSalesMachinesProps> = ({
                         variant="outlined"
                       />
                     )}
+                  </TableCell>
+                  <TableCell>
+                    <Typography
+                      variant="body2"
+                      color={machine.isSold ? "error.main" : "text.secondary"}
+                      noWrap
+                      sx={{ fontWeight: machine.isSold ? 'bold' : 'normal' }}
+                    >
+                      {machine.isSold && machine.sale?.customer
+                        ? `Cliente: ${machine.sale.customer.name}`
+                        : machine.currentWarehouse?.name || 
+                          (machine.currentVehicle?.operator?.name 
+                            ? `Vehículo: ${machine.currentVehicle.operator.name}`
+                            : 'Sin asignar')}
+                    </Typography>
                   </TableCell>
                   <TableCell>
                     {getStatusChip(machine.status)}

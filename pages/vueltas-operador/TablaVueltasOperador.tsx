@@ -25,6 +25,7 @@ import MapIcon from '@mui/icons-material/Map';
 import PhotoLibraryIcon from '@mui/icons-material/PhotoLibrary';
 import CloseIcon from '@mui/icons-material/Close';
 import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
+import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
 import { formatTZDate } from 'lib/client/utils';
 import { useRouter } from 'next/router';
 
@@ -46,6 +47,7 @@ const applyPagination = (
 
 const TablaVueltasOperador: FC<TablaVueltasOperadorProps> = ({
   tasksList,
+  userRole,
   showTimeBetween,
   isBlocked = false
 }) => {
@@ -131,6 +133,7 @@ const TablaVueltasOperador: FC<TablaVueltasOperadorProps> = ({
               <TableCell>CLIENTE</TableCell>
               {!showTimeBetween && <TableCell>SECTOR</TableCell>}
               <TableCell>TELÉFONO</TableCell>
+              {userRole === 'ADMIN' && <TableCell>OPERADOR</TableCell>}
               <TableCell>HORA ASIGNACIÓN</TableCell>
               <TableCell align="center">FOTOS</TableCell>
               <TableCell align="center">UBICACIÓN</TableCell>
@@ -140,7 +143,7 @@ const TablaVueltasOperador: FC<TablaVueltasOperadorProps> = ({
                   <TableCell align="center">TIEMPO ENTRE VUELTAS</TableCell>
                 </>
               )}
-              {!showTimeBetween && <TableCell align="center">ACCIÓN</TableCell>}
+              {!showTimeBetween && userRole !== "ADMIN" && <TableCell align="center">ACCIÓN</TableCell>}
             </TableRow>
           </TableHead>
           <TableBody>
@@ -155,11 +158,22 @@ const TablaVueltasOperador: FC<TablaVueltasOperadorProps> = ({
               return (
                 <TableRow hover key={task._id}>
                   <TableCell>
-                    <Chip
-                      label={task.type}
-                      color={getTypeColor(task.type)}
-                      size="small"
-                    />
+                    <Box display="flex" alignItems="center" gap={1}>
+                      <Chip
+                        label={task.type}
+                        color={getTypeColor(task.type)}
+                        size="small"
+                      />
+                      {task.type === 'CAMBIO' && task.reason && (
+                        <Tooltip title={`Motivo: ${task.reason}`} arrow>
+                          <InfoOutlinedIcon 
+                            fontSize="small" 
+                            color="warning"
+                            sx={{ cursor: 'help' }}
+                          />
+                        </Tooltip>
+                      )}
+                    </Box>
                   </TableCell>
                   <TableCell>
                     <Typography
@@ -196,12 +210,26 @@ const TablaVueltasOperador: FC<TablaVueltasOperadorProps> = ({
                       {task.rent?.customer?.cell || 'N/A'}
                     </Typography>
                   </TableCell>
+                  {userRole === 'ADMIN' && (
+                    <TableCell>
+                      <Typography
+                        variant="body1"
+                        fontWeight="bold"
+                        color="text.primary"
+                        gutterBottom
+                        noWrap
+                      >
+                        {task.operator?.name || 'Sin asignar'}
+                      </Typography>
+                    </TableCell>
+                  )}
                   <TableCell>
                     <Typography
                       variant="body1"
                       fontWeight="bold"
                       color="text.primary"
                       gutterBottom
+                      align='center'
                       noWrap
                     >
                       {task.takenAt
@@ -290,7 +318,7 @@ const TablaVueltasOperador: FC<TablaVueltasOperadorProps> = ({
                       </TableCell>
                     </>
                   )}
-                  {!showTimeBetween && (
+                  {!showTimeBetween && userRole !== "ADMIN" && (
                     <TableCell align="center">
                       <Button
                         variant="contained"

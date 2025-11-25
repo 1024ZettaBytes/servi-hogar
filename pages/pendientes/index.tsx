@@ -1,5 +1,5 @@
 import Head from "next/head";
-import { getSession, useSession } from "next-auth/react";
+import { getSession } from "next-auth/react";
 import { useState } from "react";
 import SidebarLayout from "@/layouts/SidebarLayout";
 import { validateServerSideSession } from "../../lib/auth";
@@ -13,20 +13,25 @@ import TablaRentasActuales from "../rentas/TablaRentasActuales";
 import TablaVentas from "../../src/components/TablaVentas";
 import RegisterPaymentModal from "@/components/RegisterPaymentModal";
 import ResumenPendientes from "./ResumenPendientes";
+import DailyTotalCard from "@/components/DailyTotalCard";
 import { useSnackbar } from "notistack";
 import {
   useGetPendingActions,
+  useGetDailyPaymentsTotal,
   getFetcher,
+  refreshData,
 } from "../api/useRequest";
+import { ROUTES } from "../../lib/consts/API_URL_CONST";
 
 import NextBreadcrumbs from "@/components/Shared/BreadCrums";
 
-function Pendientes({}) {
-  const { data: session } = useSession();
-  const userRole = (session?.user as any)?.role?.id;
+function Pendientes({ session }) {
+  const { user } = session;
+  const userRole = user?.role;
   const paths = ["Inicio", "Pendientes"];
   const { enqueueSnackbar } = useSnackbar();
   const { pendingActions, pendingActionsError, mutatePendingActions } = useGetPendingActions(getFetcher);
+  const { dailyTotal, dailyTotalError } = useGetDailyPaymentsTotal(getFetcher);
   
   const [paymentModalIsOpen, setPaymentModalIsOpen] = useState(false);
   const [selectedSale, setSelectedSale] = useState(null);
@@ -49,6 +54,7 @@ function Pendientes({}) {
         autoHideDuration: 2000,
       });
       mutatePendingActions(); // Refresh pending actions including overdue sales
+        refreshData(ROUTES.DAILY_PAYMENTS_TOTAL_API);
     }
   };
 
@@ -72,6 +78,15 @@ function Pendientes({}) {
           alignItems="stretch"
           spacing={4}
         >
+            <Grid item xs={12}>
+              <DailyTotalCard
+                dailyTotal={dailyTotal}
+                isLoading={!dailyTotal && !dailyTotalError}
+                error={dailyTotalError}
+                userRole={userRole}
+              />
+            </Grid>
+
           {/* Summary Section */}
           <Grid item xs={12}>
             {pendingActionsError ? (
@@ -108,6 +123,7 @@ function Pendientes({}) {
               <Card>
                 <TablaAccionesSinAsignar
                   actionsList={pendingActions.unassigned}
+                  userRole={userRole}
                 />
               </Card>
             )}
@@ -126,6 +142,7 @@ function Pendientes({}) {
               <Card>
                 <TablaAccionesVencidas
                   actionsList={pendingActions.overdue}
+                  userRole={userRole}
                 />
               </Card>
             )}

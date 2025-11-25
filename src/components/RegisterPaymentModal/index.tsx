@@ -23,9 +23,11 @@ import DeleteIcon from "@mui/icons-material/Delete";
 import { registerPayment } from "../../../lib/client/salesFetch";
 import numeral from "numeral";
 import { convertDateToTZ, compressImage } from "../../../lib/client/utils";
+import { useCheckBlocking } from "src/hooks/useCheckBlocking";
 
 function RegisterPaymentModal(props) {
   const { handleOnClose, open, sale } = props;
+  const { checkBlocking } = useCheckBlocking();
   const [isLoading, setIsLoading] = useState(false);
   const [hasError, setHasError] = useState({ error: false, msg: "" });
   const [paymentAmount, setPaymentAmount] = useState("");
@@ -146,6 +148,8 @@ function RegisterPaymentModal(props) {
 
     setIsLoading(false);
     if (!result.error) {
+      // Check if user was blocked
+      await checkBlocking(result.wasBlocked);
       handleSavedPayment(result.msg);
     } else {
       handleErrorOnSave(result.msg);

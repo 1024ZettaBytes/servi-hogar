@@ -9,6 +9,7 @@ export interface IUser extends Document {
   password: string;
   startM: number;
   endM: number;
+  auxActionTimestamps?: Date[];
 }
 
 const UserSchema = new Schema<IUser>({
@@ -45,6 +46,10 @@ const UserSchema = new Schema<IUser>({
     type: Number,
     default: -1
   },
+  auxActionTimestamps: {
+    type: [Date],
+    default: []
+  }
 });
 UserSchema.methods.encryptPassword = async (psw) => {
   const salt = await genSalt(10);

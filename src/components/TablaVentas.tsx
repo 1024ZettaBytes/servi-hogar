@@ -26,7 +26,7 @@ import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
 import SearchIcon from '@mui/icons-material/Search';
 import PaymentIcon from '@mui/icons-material/Payment';
 import ImageSearchIcon from '@mui/icons-material/ImageSearch';
-import { formatTZDate } from 'lib/client/utils';
+import { formatTZDate, setDateToInitial } from 'lib/client/utils';
 import * as str from 'string';
 import { useRouter } from 'next/router';
 import ImagesModal from '@/components/ImagesModal';
@@ -123,8 +123,7 @@ const getStatusLabel = (status: string) => {
 
 const isPaymentOverdue = (nextPaymentDate: Date | null, status: string) => {
   if (!nextPaymentDate || status !== 'ACTIVA') return false;
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
+  const today = setDateToInitial(new Date());
   const paymentDate = new Date(nextPaymentDate);
   paymentDate.setHours(0, 0, 0, 0);
   return paymentDate < today;
@@ -133,8 +132,7 @@ const isPaymentOverdue = (nextPaymentDate: Date | null, status: string) => {
 const getDaysUntilPayment = (nextPaymentDate: Date | null) => {
   if (!nextPaymentDate) return null;
 
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
+  const today = setDateToInitial(new Date());
   const paymentDate = new Date(nextPaymentDate);
   paymentDate.setHours(0, 0, 0, 0);
 

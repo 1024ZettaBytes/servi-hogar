@@ -7,6 +7,7 @@ import DialogTitle from "@mui/material/DialogTitle";
 import { LoadingButton } from "@mui/lab";
 import { asignOperator } from "lib/client/operatorsFetch";
 import { useState } from "react";
+import { useCheckBlocking } from "src/hooks/useCheckBlocking";
 import {
   Alert,
   FormControl,
@@ -26,6 +27,7 @@ export default function AlertDialog({
   onCancel,
 }) {
   const { operatorsList, operatorsError } = useGetOperators(getFetcher);
+  const { checkBlocking } = useCheckBlocking();
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
   const [selectedOperator, setSelectedOperator] = useState(
     currentOperator || null
@@ -43,6 +45,8 @@ export default function AlertDialog({
     });
     setIsSubmitting(false);
     if (!result.error) {
+      // Check if user was blocked
+      await checkBlocking(result.wasBlocked);
       onAccept();
     } else {
       setHasErrorSubmitting({ error: true, msg: result.msg });

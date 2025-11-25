@@ -24,6 +24,7 @@ import { useSnackbar } from 'notistack';
 
 interface TablaAccionesVencidasProps {
   actionsList: any[];
+  userRole?: string;
 }
 
 const getActionTypeLabel = (type: string): JSX.Element => {
@@ -47,7 +48,7 @@ const getActionTypeLabel = (type: string): JSX.Element => {
   return <Chip label={text} color={color} />;
 };
 
-const TablaAccionesVencidas: FC<TablaAccionesVencidasProps> = ({ actionsList = [] }) => {
+const TablaAccionesVencidas: FC<TablaAccionesVencidasProps> = ({ actionsList = [], userRole }) => {
   const { enqueueSnackbar } = useSnackbar();
   const [page, setPage] = useState<number>(0);
   const [limit, setLimit] = useState<number>(5);
@@ -201,21 +202,24 @@ const TablaAccionesVencidas: FC<TablaAccionesVencidasProps> = ({ actionsList = [
                     )}
                   </TableCell>
                   <TableCell align="right">
-                    <Tooltip title="Reasignar Operador" arrow>
-                      <IconButton
-                        sx={{
-                          '&:hover': {
-                            background: 'warning.main',
-                            color: 'warning.contrastText'
-                          },
-                          color: 'warning.main'
-                        }}
-                        color="inherit"
-                        size="small"
-                        onClick={() => handleReassignClick(action)}
-                      >
-                        <SwapHorizIcon fontSize="small" />
-                      </IconButton>
+                    <Tooltip title={userRole === 'ADMIN' ? 'Solo lectura' : 'Reasignar Operador'} arrow>
+                      <span>
+                        <IconButton
+                          sx={{
+                            '&:hover': {
+                              background: 'warning.main',
+                              color: 'warning.contrastText'
+                            },
+                            color: 'warning.main'
+                          }}
+                          color="inherit"
+                          size="small"
+                          onClick={() => handleReassignClick(action)}
+                          disabled={userRole === 'ADMIN'}
+                        >
+                          <SwapHorizIcon fontSize="small" />
+                        </IconButton>
+                      </span>
                     </Tooltip>
                   </TableCell>
                 </TableRow>

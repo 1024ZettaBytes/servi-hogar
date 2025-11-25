@@ -10,9 +10,9 @@ export const config = {
   },
 };
 
-async function getPendingChangesAPI(req, res, userId) {
+async function getPendingChangesAPI(req, res, userId, userRole) {
   try {
-    const rents = await getPendingChangesData(userId);
+    const rents = await getPendingChangesData(userId, userRole);
     res.status(200).json({ data: rents });
   } catch (e) {
     console.error(e);
@@ -49,8 +49,8 @@ async function handler(req, res) {
   const userId = await getUserId(req);
     switch (req.method) {
       case "GET":
-        await validateUserPermissions(req, res, ["ADMIN", "AUX", "OPE", "SUB"]);
-        await getPendingChangesAPI(req, res, userId);
+        const validRole = await validateUserPermissions(req, res, ["ADMIN", "AUX", "OPE", "SUB"]);
+        await getPendingChangesAPI(req, res, userId, validRole);
         break;
       case "POST":
         await validateUserPermissions(req, res, ["ADMIN", "AUX", "OPE"]);
