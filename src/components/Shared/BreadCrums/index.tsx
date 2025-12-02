@@ -9,7 +9,7 @@ const getUrlPaths = (paths) => {
   for (let i = 1; i < paths.length; i++) {
     if (paths[i]) {
       pathsArray.push(
-        pathsArray[i - 1] + paths[i].replace(" ", "-")?.toLowerCase() + "/"
+        pathsArray[i - 1] + paths[i].replaceAll(" ", "-")?.toLowerCase() + "/"
       );
     }
   }

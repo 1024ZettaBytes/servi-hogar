@@ -26,10 +26,13 @@ import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
 import SearchIcon from '@mui/icons-material/Search';
 import PaymentIcon from '@mui/icons-material/Payment';
 import ImageSearchIcon from '@mui/icons-material/ImageSearch';
+import BuildCircleIcon from '@mui/icons-material/BuildCircle';
 import { formatTZDate, setDateToInitial } from 'lib/client/utils';
 import * as str from 'string';
 import { useRouter } from 'next/router';
 import ImagesModal from '@/components/ImagesModal';
+import ScheduleSalePickupModal from '@/components/ScheduleSalePickupModal';
+import { useSnackbar } from 'notistack';
 
 interface TablaSalesProps {
   userRole: string;
@@ -145,15 +148,38 @@ const getDaysUntilPayment = (nextPaymentDate: Date | null) => {
 const TablaVentas: FC<TablaSalesProps> = ({ salesList, onPaymentClick }) => {
   const theme = useTheme();
   const router = useRouter();
+  const { enqueueSnackbar } = useSnackbar();
   const [page, setPage] = useState<number>(0);
   const [limit, setLimit] = useState<number>(10);
   const [filter, setFilter] = useState<string>('');
   const [openImages, setOpenImages] = useState<boolean>(false);
   const [selectedImages, setSelectedImages] = useState<any>(null);
+  const [openPickupModal, setOpenPickupModal] = useState<boolean>(false);
+  const [selectedSaleForPickup, setSelectedSaleForPickup] = useState<any>(null);
 
   const handleOnCloseImages = () => {
     setOpenImages(false);
     setSelectedImages(null);
+  };
+
+  const handlePickupClick = (sale: any) => {
+    setSelectedSaleForPickup(sale);
+    setOpenPickupModal(true);
+  };
+
+  const handleClosePickupModal = (saved: boolean, successMessage?: string) => {
+    setOpenPickupModal(false);
+    setSelectedSaleForPickup(null);
+    if (saved && successMessage) {
+      enqueueSnackbar(successMessage, {
+        variant: 'success',
+        anchorOrigin: {
+          vertical: 'top',
+          horizontal: 'center'
+        },
+        autoHideDuration: 2000
+      });
+    }
   };
 
   const handleSearchChange = (e: ChangeEvent<HTMLInputElement>): void => {
@@ -452,6 +478,29 @@ const TablaVentas: FC<TablaSalesProps> = ({ salesList, onPaymentClick }) => {
                             </IconButton>
                           </Tooltip>
                         )}
+                        {sale.machine?.warranty && new Date(sale.machine.warranty) > new Date() && (
+                          <Tooltip 
+                            title={sale.hasWarrantyProcess ? 'Ya tiene un proceso de garantía activo' : 'Agendar recolección por garantía'} 
+                            arrow
+                          >
+                            <span>
+                              <IconButton
+                                sx={{
+                                  '&:hover': {
+                                    background: !sale.hasWarrantyProcess ? theme.colors.warning.lighter : 'transparent'
+                                  },
+                                  color: !sale.hasWarrantyProcess ? theme.palette.warning.main : theme.palette.action.disabled
+                                }}
+                                color="inherit"
+                                size="small"
+                                onClick={() => !sale.hasWarrantyProcess && handlePickupClick(sale)}
+                                disabled={sale.hasWarrantyProcess}
+                              >
+                                <BuildCircleIcon fontSize="small" />
+                              </IconButton>
+                            </span>
+                          </Tooltip>
+                        )}
                         <Tooltip title="Ver detalles" arrow>
                           <IconButton
                             sx={{
@@ -494,6 +543,13 @@ const TablaVentas: FC<TablaSalesProps> = ({ salesList, onPaymentClick }) => {
           title="Fotos de la entrega"
           text=""
           onClose={handleOnCloseImages}
+        />
+      )}
+      {openPickupModal && selectedSaleForPickup && (
+        <ScheduleSalePickupModal
+          open={openPickupModal}
+          handleOnClose={handleClosePickupModal}
+          preSelectedSale={selectedSaleForPickup}
         />
       )}
     </>

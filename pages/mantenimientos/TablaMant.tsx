@@ -12,7 +12,8 @@ import {
   TableRow,
   TableContainer,
   CardHeader,
-  Typography
+  Typography,
+  Chip
 } from '@mui/material';
 import { formatTZDate } from 'lib/client/utils';
 import { getStatusLabel } from './TablaMantPendientes';
@@ -70,12 +71,22 @@ const TablaMant: FC<TablaMantProps> = ({ listData }) => {
             </TableHead>
             <TableBody>
               {paginatedMant.map((mant) => {
+                const isSaleRepair = mant?.type === 'SALE';
+                
                 return (
                   <TableRow
                     key={mant?._id}
                   >
                     <TableCell align="center">
                       <Typography fontWeight="bold">{mant?.machine?.machineNum}</Typography>
+                      {isSaleRepair && (
+                        <Chip 
+                          label="Venta" 
+                          size="small" 
+                          color="info"
+                          sx={{ ml: 1, fontSize: '0.7rem' }}
+                        />
+                      )}
                     </TableCell>
                     <TableCell align="center">{getStatusLabel(mant?.status)}</TableCell>
                     <TableCell align="center">
