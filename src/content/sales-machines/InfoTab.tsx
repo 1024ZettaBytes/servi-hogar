@@ -11,7 +11,8 @@ import {
   Select,
   MenuItem,
   Alert,
-  TextField
+  TextField,
+  InputLabel
 } from '@mui/material';
 import { Skeleton } from '@mui/material';
 import Text from '@/components/Text';
@@ -21,6 +22,7 @@ import { capitalizeFirstLetter, formatTZDate } from 'lib/client/utils';
 import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
 import HourglassEmptyIcon from '@mui/icons-material/HourglassEmpty';
 import SellIcon from '@mui/icons-material/Sell';
+import BuildIcon from '@mui/icons-material/Build';
 import EditTwoToneIcon from '@mui/icons-material/EditTwoTone';
 import LocationOnIcon from '@mui/icons-material/LocationOn';
 import LocalShippingIcon from '@mui/icons-material/LocalShipping';
@@ -76,6 +78,26 @@ const getStatusChip = (status: string) => {
           sx={{ fontWeight: 'bold' }}
         />
       );
+    case 'RECOLECTADA':
+      return (
+        <Chip
+          icon={<HourglassEmptyIcon />}
+          label="Recolectada"
+          color="info"
+          size="small"
+          sx={{ fontWeight: 'bold' }}
+        />
+      );
+    case 'MANT_PENDIENTE':
+      return (
+        <Chip
+          icon={<BuildIcon />}
+          label="Mant. Pendiente"
+          color="warning"
+          size="small"
+          sx={{ fontWeight: 'bold' }}
+        />
+      );
     default:
       return (
         <Chip
@@ -118,22 +140,27 @@ function SalesMachineInfoTab({ salesMachine }) {
   const [selectedWarehouse, setSelectedWarehouse] = useState(salesMachine?.currentWarehouse?._id || null);
   const [selectedVehicle, setSelectedVehicle] = useState(salesMachine?.currentVehicle?._id || null);
   const [warrantyDate, setWarrantyDate] = useState<Date>(salesMachine?.warranty ? convertDateToLocal(new Date(salesMachine.warranty)) : null);
+  const [selectedStatus, setSelectedStatus] = useState(salesMachine?.status || 'DISPONIBLE');
 
-  // Only allow editing if machine is DISPONIBLE (not sold or pending delivery)
-  const canEdit = salesMachine && salesMachine.status === 'DISPONIBLE' && !salesMachine.isSold;
+  // Allow editing if machine is DISPONIBLE, PENDIENTE, RECOLECTADA, or MANT_PENDIENTE (in repair workflow)
+  // But not if it's VENDIDO and with customer
+  const canEdit = salesMachine && 
+    (salesMachine.status === 'DISPONIBLE' || salesMachine.status === 'PENDIENTE' || 
+     salesMachine.status === 'RECOLECTADA' || salesMachine.status === 'MANT_PENDIENTE') && 
+    !(salesMachine.isSold && salesMachine.status === 'VENDIDO');
 
   const getLocationDisplay = () => {
-    // If sold, show customer name
-    if (salesMachine?.isSold && salesMachine?.sale?.customer) {
+    // Priority 1: If in vehicle (e.g., picked up for repair)
+    if (salesMachine?.currentVehicle) {
       return (
-        <Label color="error">
-          <PersonIcon fontSize="small" sx={{ mr: 0.5 }} />
-          <b>Cliente: {salesMachine.sale.customer.name}</b>
+        <Label color="warning">
+          <LocalShippingIcon fontSize="small" sx={{ mr: 0.5 }} />
+          <b>Vehículo: {salesMachine.currentVehicle.operator?.name || 'N/A'}</b>
         </Label>
       );
     }
     
-    // If in warehouse
+    // Priority 2: If in warehouse
     if (salesMachine?.currentWarehouse) {
       return (
         <Label color="info">
@@ -143,12 +170,12 @@ function SalesMachineInfoTab({ salesMachine }) {
       );
     }
     
-    // If in vehicle
-    if (salesMachine?.currentVehicle) {
+    // Priority 3: If sold, show customer name
+    if (salesMachine?.isSold && salesMachine?.sale?.customer) {
       return (
-        <Label color="warning">
-          <LocalShippingIcon fontSize="small" sx={{ mr: 0.5 }} />
-          <b>Vehículo: {salesMachine.currentVehicle.operator?.name || 'N/A'}</b>
+        <Label color="error">
+          <PersonIcon fontSize="small" sx={{ mr: 0.5 }} />
+          <b>Cliente: {salesMachine.sale.customer.name}</b>
         </Label>
       );
     }
@@ -177,6 +204,7 @@ function SalesMachineInfoTab({ salesMachine }) {
       setSelectedVehicle(null);
     }
     setWarrantyDate(salesMachine?.warranty ? convertDateToLocal(new Date(salesMachine.warranty)) : null);
+    setSelectedStatus(salesMachine?.status || 'DISPONIBLE');
     setIsEditing(true);
   };
 
@@ -184,6 +212,7 @@ function SalesMachineInfoTab({ salesMachine }) {
     setSelectedWarehouse(salesMachine?.currentWarehouse?._id || null);
     setSelectedVehicle(salesMachine?.currentVehicle?._id || null);
     setWarrantyDate(salesMachine?.warranty ? convertDateToLocal(new Date(salesMachine.warranty)) : null);
+    setSelectedStatus(salesMachine?.status || 'DISPONIBLE');
     setIsEditing(false);
   };
 
@@ -210,7 +239,8 @@ function SalesMachineInfoTab({ salesMachine }) {
         serialNumber: salesMachine.serialNumber,
         currentWarehouse: locationType === 'warehouse' ? selectedWarehouse : null,
         currentVehicle: locationType === 'vehicle' ? selectedVehicle : null,
-        warranty: warrantyDate
+        warranty: warrantyDate,
+        status: selectedStatus
       });
 
       if (!result.error) {
@@ -345,12 +375,34 @@ function SalesMachineInfoTab({ salesMachine }) {
                   }
                 />
 
-                <DetailRow
-                  label="Estado"
-                  isLoading={isLoading}
-                  isChip={true} 
-                  value={getStatusChip(salesMachine?.status)}
-                />
+                <Grid item xs={12} sm={4} md={3} textAlign={{ sm: 'right' }}>
+                  <Box pr={2} pb={2}>
+                    Estado:
+                  </Box>
+                </Grid>
+                <Grid item xs={12} sm={8} md={9}>
+                  <Box sx={{ maxWidth: { xs: 'auto', sm: 400 } }}>
+                    {isLoading ? (
+                      <Skeleton variant="text" sx={{ fontSize: '1rem', width: '150px' }} />
+                    ) : !isEditing || salesMachine?.status === 'MANT_PENDIENTE' ? (
+                      getStatusChip(salesMachine?.status)
+                    ) : salesMachine?.status === 'RECOLECTADA' ? (
+                      <FormControl fullWidth size="small">
+                        <InputLabel>Estado</InputLabel>
+                        <Select
+                          value={selectedStatus}
+                          label="Estado"
+                          onChange={(e) => setSelectedStatus(e.target.value)}
+                        >
+                          <MenuItem value="RECOLECTADA">Recolectada</MenuItem>
+                          <MenuItem value="MANT_PENDIENTE">Mant. Pendiente</MenuItem>
+                        </Select>
+                      </FormControl>
+                    ) : (
+                      getStatusChip(salesMachine?.status)
+                    )}
+                  </Box>
+                </Grid>
 
                 <Grid item xs={12} sm={4} md={3} textAlign={{ sm: 'right' }}>
                   <Box pr={2} pb={2}>
@@ -361,7 +413,7 @@ function SalesMachineInfoTab({ salesMachine }) {
                   <Box sx={{ maxWidth: { xs: 'auto', sm: 400 } }}>
                     {isLoading ? (
                       <Skeleton variant="text" sx={{ fontSize: '1rem', width: '150px' }} />
-                    ) : !isEditing ? (
+                    ) : !isEditing || salesMachine?.status === 'MANT_PENDIENTE' ? (
                       getLocationDisplay()
                     ) : (
                       <Box>

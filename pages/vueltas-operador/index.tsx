@@ -19,10 +19,12 @@ import Footer from "@/components/Footer";
 import {
   useGetPendingDeliveries,
   useGetPendingPickups,
+  useGetPendingSalePickups,
   useGetPendingChanges,
   useGetDeliveries,
   useGetPickups,
   useGetChanges,
+  useGetSalePickups,
   getFetcher,
 } from "../api/useRequest";
 import TablaVueltasOperador from "./TablaVueltasOperador";
@@ -44,6 +46,8 @@ function VueltasOperador({ session }) {
     useGetPendingDeliveries(getFetcher);
   const { pendingPickupsList, pendingPickupsError } =
     useGetPendingPickups(getFetcher);
+  const { pendingSalePickupsList, pendingSalePickupsError } =
+    useGetPendingSalePickups(getFetcher);
   const { pendingChangesList, pendingChangesError } =
     useGetPendingChanges(getFetcher);
 
@@ -69,19 +73,35 @@ function VueltasOperador({ session }) {
     null, 
     formatTZDate(selectedDate, "YYYY-MM-DD")
   );
+  const { salePickupsData, salePickupsError } = useGetSalePickups(
+    getFetcher,
+    1,
+    1000,
+    '',
+    formatTZDate(selectedDate, "YYYY-MM-DD")
+  );
 
   const generalError =
-    pendingDeliveriesError || pendingPickupsError || pendingChangesError ||
-    deliveriesError || pickupsError || changesError;
+    pendingDeliveriesError || pendingPickupsError || pendingSalePickupsError || pendingChangesError ||
+    deliveriesError || pickupsError || changesError || salePickupsError;
   const completeData =
-    pendingDeliveriesList && pendingPickupsList && pendingChangesList &&
-    deliveriesList && pickups && changes;
+    pendingDeliveriesList && pendingPickupsList && pendingSalePickupsList && pendingChangesList &&
+    deliveriesList && pickups && changes && salePickupsData;
   
   const isBlocked = currentUser?.isBlocked === true;
 
   // Combine all tasks into a single array with type
   const allPendingTasks = completeData
     ? [
+        // Sale warranty pickups (PRIORITY - always first)
+        ...(pendingSalePickupsList || []).map((item) => ({
+          ...item,
+          type: "RECOLECCION_VENTA",
+          sector: item.sale?.customer?.currentResidence?.city?.sectors?.find(
+            (s) => s._id === item.sale?.customer?.currentResidence?.sector?._id
+          )?.name,
+          isPriority: true,
+        })),
         // All pending deliveries (no date filter)
         ...(pendingDeliveriesList || []).map((item) => ({
           ...item,
@@ -107,7 +127,11 @@ function VueltasOperador({ session }) {
           )?.name,
         })),
       ].sort((a, b) => {
-        // Sort by takenAt - older first (ascending order)
+        // Priority items (sale pickups) always first
+        if (a.isPriority && !b.isPriority) return -1;
+        if (!a.isPriority && b.isPriority) return 1;
+        
+        // Then sort by takenAt - older first (ascending order)
         const dateA = new Date(a.takenAt || a.createdAt).getTime();
         const dateB = new Date(b.takenAt || b.createdAt).getTime();
         return dateA - dateB;
@@ -131,6 +155,14 @@ function VueltasOperador({ session }) {
           type: "RECOLECCION",
           sector: item.rent?.customer?.currentResidence?.city?.sectors?.find(
             (s) => s._id === item.rent?.customer?.currentResidence?.sector?._id
+          )?.name,
+        })),
+        // Completed sale pickups for the selected date (backend filtered)
+        ...((salePickupsData?.list || []).filter(item => item.status === 'COMPLETADA')).map((item) => ({
+          ...item,
+          type: "RECOLECCION_VENTA",
+          sector: item.sale?.customer?.currentResidence?.city?.sectors?.find(
+            (s) => s._id === item.sale?.customer?.currentResidence?.sector?._id
           )?.name,
         })),
         // Completed changes for the selected date (backend filtered)

@@ -18,6 +18,7 @@ import RegisterPaymentModal from "@/components/RegisterPaymentModal";
 import TablaVentas from "@/components/TablaVentas";
 import TablaPendingSales from "@/components/TablaPendingSales";
 import TablaCompletedSalesByOperator from "@/components/TablaCompletedSalesByOperator";
+import TablaRecoleccionesVentasPendientes from "../../pages/recolecciones-ventas-pendientes/TablaRecoleccionesVentasPendientes";
 import AssignOperatorModal from "@/components/AssignOperatorModal";
 import FormatModal from "@/components/FormatModal";
 import { useSnackbar } from "notistack";
@@ -44,6 +45,12 @@ function Ventas({ session }) {
     ROUTES.ALL_PENDING_SALES_API,
     fetcher
   );
+
+  // Fetch pending warranty pickups
+  const { data: pendingPickupsData } = useSWR(
+    `${ROUTES.ALL_PENDING_SALE_PICKUPS_API}?detailed=true`,
+    fetcher
+  );
   
   const [modalIsOpen, setModalIsOpen] = useState(false);
   const [paymentModalIsOpen, setPaymentModalIsOpen] = useState(false);
@@ -57,6 +64,7 @@ function Ventas({ session }) {
   const salesList = salesData?.data || null;
   const pendingSalesList = isOperator ? pendingData?.data?.pending : pendingData?.data;
   const completedSalesList = isOperator ? pendingData?.data?.completed : [];
+  const pendingPickupsList = pendingPickupsData?.data || [];
   const completeData = !!salesList && (isOperator ? !!(pendingSalesList && completedSalesList) : !!pendingSalesList);
 
   const handleClickOpen = () => {
@@ -164,81 +172,95 @@ function Ventas({ session }) {
           alignItems="stretch"
           spacing={4}
         >
-          <Grid item xs={12}>
-            {salesError ? (
+          {salesError ? (
+            <Grid item xs={12}>
               <Alert severity="error">
                 {salesError?.message || "Error al cargar las ventas"}
               </Alert>
-            ) : !completeData ? (
+            </Grid>
+          ) : !completeData ? (
+            <Grid item xs={12}>
               <Skeleton
                 variant="rectangular"
                 width={"100%"}
                 height={500}
                 animation="wave"
               />
-            ) : (
-              <>
-                {/* For Operators: Show Pending and Completed deliveries */}
-                {isOperator ? (
-                  <>
-                    {/* Pending Sales Table */}
-                    {pendingSalesList && (
-                      <Grid item xs={12}>
-                        <Card>
-                          <TablaPendingSales
-                            userRole={session.user.role}
-                            salesList={pendingSalesList}
-                            onUpdate={mutatePending}
-                            onAssignClick={handleAssignClick}
-                            onWhatsAppClick={handleWhatsAppClick}
-                          />
-                        </Card>
-                      </Grid>
-                    )}
-                    
-                    {/* Completed Deliveries Table */}
-                    {completedSalesList && completedSalesList.length > 0 && (
-                      <Grid item xs={12} sx={{ mt: 4 }}>
-                        <TablaCompletedSalesByOperator
-                          salesList={completedSalesList}
-                        />
-                      </Grid>
-                    )}
-                  </>
-                ) : (
-                  /* For ADMIN/AUX: Show Pending and Completed sales */
-                  <>
-                    {/* Pending Sales Table */}
-                    {pendingSalesList && (
-                      <Grid item xs={12}>
-                        <Card>
-                          <TablaPendingSales
-                            userRole={session.user.role}
-                            salesList={pendingSalesList}
-                            onUpdate={mutatePending}
-                            onAssignClick={handleAssignClick}
-                            onWhatsAppClick={handleWhatsAppClick}
-                          />
-                        </Card>
-                      </Grid>
-                    )}
-                    
-                    {/* Completed Sales Table */}
-                    <Grid item xs={12} sx={{ mt: 4 }}>
+            </Grid>
+          ) : (
+            <>
+              {/* For Operators: Show Pending and Completed deliveries */}
+              {isOperator ? (
+                <>
+                  {/* Pending Sales Table */}
+                  {pendingSalesList && (
+                    <Grid item xs={12}>
                       <Card>
-                        <TablaVentas
+                        <TablaPendingSales
                           userRole={session.user.role}
-                          salesList={salesList}
-                          onUpdate={mutateSales}
-                          onPaymentClick={handlePaymentClick}
+                          salesList={pendingSalesList}
+                          onUpdate={mutatePending}
+                          onAssignClick={handleAssignClick}
+                          onWhatsAppClick={handleWhatsAppClick}
                         />
                       </Card>
                     </Grid>
-                  </>
-                )}
-              </>
-            )}
-          </Grid>
+                  )}
+                  
+                  {/* Completed Deliveries Table */}
+                  {completedSalesList && completedSalesList.length > 0 && (
+                    <Grid item xs={12}>
+                      <TablaCompletedSalesByOperator
+                        salesList={completedSalesList}
+                      />
+                    </Grid>
+                  )}
+                </>
+              ) : (
+                /* For ADMIN/AUX: Show Pending and Completed sales */
+                <>
+                  {/* Pending Sales Table */}
+                  {pendingSalesList && (
+                    <Grid item xs={12}>
+                      <Card>
+                        <TablaPendingSales
+                          userRole={session.user.role}
+                          salesList={pendingSalesList}
+                          onUpdate={mutatePending}
+                          onAssignClick={handleAssignClick}
+                          onWhatsAppClick={handleWhatsAppClick}
+                        />
+                      </Card>
+                    </Grid>
+                  )}
+                  
+                  {/* Pending Warranty Pickups Table */}
+                  {pendingPickupsList && pendingPickupsList.length > 0 && (
+                    <Grid item xs={12}>
+                      <Card>
+                        <TablaRecoleccionesVentasPendientes
+                          userRole={session.user.role}
+                          pickupList={pendingPickupsList}
+                        />
+                      </Card>
+                    </Grid>
+                  )}
+
+                  {/* Completed Sales Table */}
+                  <Grid item xs={12}>
+                    <Card>
+                      <TablaVentas
+                        userRole={session.user.role}
+                        salesList={salesList}
+                        onUpdate={mutateSales}
+                        onPaymentClick={handlePaymentClick}
+                      />
+                    </Card>
+                  </Grid>
+                </>
+              )}
+            </>
+          )}
         </Grid>
       </Container>
       {modalIsOpen ? (

@@ -24,6 +24,7 @@ import DeleteTwoToneIcon from '@mui/icons-material/DeleteTwoTone';
 import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
 import HourglassEmptyIcon from '@mui/icons-material/HourglassEmpty';
 import SellIcon from '@mui/icons-material/Sell';
+import BuildIcon from '@mui/icons-material/Build';
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import { useSnackbar } from 'notistack';
 import { deleteSalesMachines } from '../../lib/client/salesMachinesFetch';
@@ -63,6 +64,26 @@ const getStatusChip = (status: string) => {
           icon={<SellIcon />}
           label="Vendido"
           color="error"
+          size="small"
+          sx={{ fontWeight: 'bold' }}
+        />
+      );
+    case 'RECOLECTADA':
+      return (
+        <Chip
+          icon={<HourglassEmptyIcon />}
+          label="Recolectada"
+          color="info"
+          size="small"
+          sx={{ fontWeight: 'bold' }}
+        />
+      );
+    case 'MANT_PENDIENTE':
+      return (
+        <Chip
+          icon={<BuildIcon />}
+          label="Mant. Pendiente"
+          color="warning"
           size="small"
           sx={{ fontWeight: 'bold' }}
         />
@@ -238,16 +259,17 @@ const TablaSalesMachines: FC<TablaSalesMachinesProps> = ({
                   <TableCell>
                     <Typography
                       variant="body2"
-                      color={machine.isSold ? "error.main" : "text.secondary"}
+                      color={machine.isSold && !machine.currentVehicle ? "error.main" : "text.secondary"}
                       noWrap
-                      sx={{ fontWeight: machine.isSold ? 'bold' : 'normal' }}
+                      sx={{ fontWeight: machine.isSold && !machine.currentVehicle ? 'bold' : 'normal' }}
                     >
-                      {machine.isSold && machine.sale?.customer
+                      {machine.currentVehicle?.operator?.name
+                        ? `Vehículo: ${machine.currentVehicle.operator.name}`
+                        : machine.currentWarehouse?.name
+                        ? machine.currentWarehouse.name
+                        : machine.isSold && machine.sale?.customer
                         ? `Cliente: ${machine.sale.customer.name}`
-                        : machine.currentWarehouse?.name || 
-                          (machine.currentVehicle?.operator?.name 
-                            ? `Vehículo: ${machine.currentVehicle.operator.name}`
-                            : 'Sin asignar')}
+                        : 'Sin asignar'}
                     </Typography>
                   </TableCell>
                   <TableCell>
