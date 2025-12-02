@@ -237,7 +237,7 @@ function RecoleccionVentaPendiente({ session }) {
                     orientation="vertical"
                     sx={{ backgroundColor: 'transparent' }}
                   >
-                    {steps.map((step, index) => (
+                    {steps.map((step) => (
                       <Step key={step.label}>
                         <StepLabel>{step.label}</StepLabel>
                         <StepContent>
