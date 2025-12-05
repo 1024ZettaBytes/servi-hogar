@@ -395,3 +395,84 @@ export const useGetPendingCollections = (fetcher) => {
   const { data, error } = useSWR(ROUTES.ALL_PENDING_COLLECTIONS_API, fetcher);
   return { pendingCollectionsList: data?.data, pendingCollectionsError: error };
 };
+
+// Sale Pickups (Warranty Claims)
+export const useGetPendingSalePickups = (fetcher, detailed = true) => {
+  const { data, error, isLoading } = useSWR(
+    ROUTES.ALL_PENDING_SALE_PICKUPS_API + `?detailed=${detailed}`,
+    fetcher
+  );
+  return {
+    pendingSalePickupsList: data?.data,
+    pendingSalePickupsError: error,
+    isLoadingSalePickups: isLoading
+  };
+};
+
+export const useGetSalePickups = (fetcher, page, limit, searchTerm = '', date = null) => {
+  const queryParams = new URLSearchParams({
+    page: page?.toString() || '1',
+    limit: limit?.toString() || '10',
+    ...(searchTerm && { searchTerm }),
+    ...(date && { date })
+  });
+  
+  const { data, error, isLoading } = useSWR(
+    `${ROUTES.ALL_SALE_PICKUPS_API}?${queryParams}`,
+    fetcher
+  );
+  return {
+    salePickupsData: data?.data,
+    salePickupsError: error,
+    isLoadingSalePickups: isLoading
+  };
+};
+
+export const useGetSalePickupById = (fetcher, id) => {
+  const { data, error, isLoading } = useSWR(
+    id ? ROUTES.SALE_PICKUP_BY_ID_API.replace(':id', id) : null,
+    fetcher
+  );
+  return {
+    salePickup: data?.data,
+    salePickupByIdError: error,
+    isLoadingSalePickup: isLoading
+  };
+};
+
+// Sale Repairs
+export const useGetPendingSaleRepairs = (fetcher) => {
+  const { data, error, isLoading } = useSWR(
+    ROUTES.ALL_PENDING_SALE_REPAIRS_API,
+    fetcher
+  );
+  return {
+    pendingSaleRepairsList: data?.data,
+    pendingSaleRepairsError: error,
+    isLoadingSaleRepairs: isLoading
+  };
+};
+
+export const useGetSaleRepairs = (fetcher) => {
+  const { data, error, isLoading } = useSWR(
+    ROUTES.ALL_SALE_REPAIRS_API,
+    fetcher
+  );
+  return {
+    saleRepairsData: data?.data,
+    saleRepairsError: error,
+    isLoadingSaleRepairs: isLoading
+  };
+};
+
+export const useGetSaleRepairById = (fetcher, id) => {
+  const { data, error, isLoading } = useSWR(
+    id ? ROUTES.SALE_REPAIR_BY_ID_API.replace(':id', id) : null,
+    fetcher
+  );
+  return {
+    saleRepairData: data?.data,
+    saleRepairError: error,
+    isLoadingSaleRepair: isLoading
+  };
+};

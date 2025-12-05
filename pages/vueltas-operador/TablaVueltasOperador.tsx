@@ -73,7 +73,17 @@ const TablaVueltasOperador: FC<TablaVueltasOperadorProps> = ({
   };
 
   const handleOpenImages = (task: any) => {
-    let images = task.rent?.imagesUrl;
+    let images;
+    
+    if (task.type === 'RECOLECCION_VENTA') {
+      // For sale warranty pickups, check pickup images first (completed pickups)
+      // Then fall back to delivery images (pending pickups shown in operator view)
+      images = task.imagesUrl || task.sale?.delivery?.imagesUrl;
+    } else {
+      // For rent-related tasks (deliveries, pickups, changes)
+      images = task.rent?.imagesUrl;
+    }
+    
     setSelectedImages(images);
     setOpenImagesDialog(true);
   };
@@ -122,6 +132,9 @@ const handleConfirmCompletion = async (outcome: string) => {
       case 'RECOLECCION':
         route = `/recolecciones-pendientes/${task._id}`;
         break;
+      case 'RECOLECCION_VENTA':
+        route = `/recolecciones-ventas-pendientes/${task._id}`;
+        break;
       case 'CAMBIO':
         route = `/cambios-pendientes/${task._id}`;
         break;
@@ -143,6 +156,8 @@ const handleConfirmCompletion = async (outcome: string) => {
         return 'error';
       case 'COBRANZA':
         return 'info';
+      case 'RECOLECCION_VENTA':
+        return 'error';
       default:
         return 'default';
     }
@@ -197,21 +212,32 @@ const handleConfirmCompletion = async (outcome: string) => {
               const source = task.rent || task.sale; 
               const customer = source?.customer;
               const residence = customer?.currentResidence;
-              
+
+              const typeLabel = task.type === 'RECOLECCION_VENTA' ? 'RECOLECCIÓN GARANTÍA' : task.type;
+              const isPriority = task.isPriority || false;
+
               const customerName = customer?.name || 'N/A';
               const sectorName = residence?.sector?.name || 'N/A';
-              const cellPhone = customer?.cell || 'N/A';
-
+              
+              const cellPhone = customer?.cell || customer?.phone || 'N/A';
               return (
-                <TableRow hover key={task._id}>
+                <TableRow hover key={task._id} sx={isPriority ? { backgroundColor: '#fff3cd' } : {}}>
                   <TableCell>
                     <Box display="flex" alignItems="center" gap={1}>
                       <Chip
-                        label={task.type}
+                        label={typeLabel}
                         color={getTypeColor(task.type)}
                         size="small"
                       />
-                      {task.type === 'CAMBIO' && task.reason && (
+                      {isPriority && (
+                        <Chip
+                          label="PRIORIDAD"
+                          color="warning"
+                          size="small"
+                          sx={{ fontWeight: 'bold' }}
+                        />
+                      )}
+                      {(task.type === 'CAMBIO' || task.type === 'RECOLECCION_VENTA') && task.reason && (
                         <Tooltip title={`Motivo: ${task.reason}`} arrow>
                           <InfoOutlinedIcon 
                             fontSize="small" 
@@ -285,7 +311,7 @@ const handleConfirmCompletion = async (outcome: string) => {
                     </Typography>
                   </TableCell>
                   <TableCell align="center">
-                    {task.rent?.imagesUrl ? (
+                    {(task.rent?.imagesUrl || task.sale?.delivery?.imagesUrl || task.imagesUrl) ? (
                       <Tooltip title="Ver fotos" arrow>
                         <IconButton
                           sx={{
@@ -419,6 +445,7 @@ const handleConfirmCompletion = async (outcome: string) => {
         <DialogContent>
           {selectedImages && (
             <Grid container spacing={2}>
+              {/* Rent delivery images */}
               {selectedImages.front && (
                 <Grid item xs={12} md={6}>
                   <Box>
@@ -469,6 +496,49 @@ const handleConfirmCompletion = async (outcome: string) => {
                     </Typography>
                     <img
                       src={selectedImages.tag}
+                      alt="Etiqueta"
+                      style={{ width: '100%', height: 'auto', borderRadius: 8 }}
+                    />
+                  </Box>
+                </Grid>
+              )}
+              {/* Sale delivery images */}
+              {selectedImages.ine && (
+                <Grid item xs={12} md={6}>
+                  <Box>
+                    <Typography variant="subtitle2" gutterBottom>
+                      INE
+                    </Typography>
+                    <img
+                      src={selectedImages.ine}
+                      alt="INE"
+                      style={{ width: '100%', height: 'auto', borderRadius: 8 }}
+                    />
+                  </Box>
+                </Grid>
+              )}
+              {selectedImages.frontal && (
+                <Grid item xs={12} md={6}>
+                  <Box>
+                    <Typography variant="subtitle2" gutterBottom>
+                      Foto Frontal
+                    </Typography>
+                    <img
+                      src={selectedImages.frontal}
+                      alt="Foto Frontal"
+                      style={{ width: '100%', height: 'auto', borderRadius: 8 }}
+                    />
+                  </Box>
+                </Grid>
+              )}
+              {selectedImages.label && (
+                <Grid item xs={12} md={6}>
+                  <Box>
+                    <Typography variant="subtitle2" gutterBottom>
+                      Etiqueta
+                    </Typography>
+                    <img
+                      src={selectedImages.label}
                       alt="Etiqueta"
                       style={{ width: '100%', height: 'auto', borderRadius: 8 }}
                     />

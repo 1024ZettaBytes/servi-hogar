@@ -129,6 +129,11 @@ const TablaMantPendientes: FC<TablaMantPendientesProps> = ({
             </TableHead>
             <TableBody>
               {paginatedMants.map((mant) => {
+                const isSaleRepair = mant?.type === 'SALE';
+                const detailUrl = isSaleRepair 
+                  ? `/reparaciones-ventas/${mant?._id}` 
+                  : `/mantenimientos/${mant?._id}`;
+                
                 return (
                   <TableRow
                     key={mant?._id}
@@ -141,7 +146,15 @@ const TablaMantPendientes: FC<TablaMantPendientesProps> = ({
                     <TableCell align="center">
                       <Typography fontWeight="bold">
                         {mant?.machine?.machineNum}
-                      </Typography>{' '}
+                      </Typography>
+                      {isSaleRepair && (
+                        <Chip 
+                          label="Venta" 
+                          size="small" 
+                          color="info"
+                          sx={{ ml: 1, fontSize: '0.7rem' }}
+                        />
+                      )}
                     </TableCell>
                     <TableCell align="center">
                       {getStatusLabel(canComplete ? mant?.status : 'ALERTA')}
@@ -155,7 +168,7 @@ const TablaMantPendientes: FC<TablaMantPendientesProps> = ({
                       </TableCell>
                     )}
                     <TableCell align="center">
-                      <NextLink href={`/mantenimientos/${mant?._id}`}>
+                      <NextLink href={detailUrl}>
                         <Tooltip title="Ver detalle" arrow>
                           <IconButton
                             disabled={!canComplete}

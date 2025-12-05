@@ -2,6 +2,8 @@ import mongoose, { Model, model, Schema, Document } from 'mongoose';
 
 export interface ISaleDelivery extends Document {
   sale: Schema.Types.ObjectId;
+  saleRepair: Schema.Types.ObjectId; // Optional: if this delivery is for a repaired machine
+  isRepairReturn: boolean; // true if this is a repair return delivery
   status: string; // PENDIENTE, ASIGNADA, COMPLETADA, CANCELADA
   assignedAt: Date;
   assignedTo: Schema.Types.ObjectId;
@@ -36,6 +38,12 @@ const SaleDeliverySchema = new Schema<ISaleDelivery>({
     enum: ['ENTREGA', 'COBRANZA'], 
     default: 'ENTREGA'
   },
+  saleRepair: {
+    type: Schema.Types.ObjectId,
+    ref: 'sale_repairs',
+    default: null
+  },
+  isRepairReturn: { type: Boolean, default: false },
   status: {
     type: String,
     enum: ['PENDIENTE', 'ASIGNADA', 'COMPLETADA', 'CANCELADA'],

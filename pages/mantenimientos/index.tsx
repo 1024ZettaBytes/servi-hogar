@@ -11,13 +11,37 @@ import Footer from "@/components/Footer";
 import NextBreadcrumbs from "@/components/Shared/BreadCrums";
 import TablaMant from "./TablaMant";
 import TablaMantPendientes from "./TablaMantPendientes";
-import { getFetcher, useGetMantainances, useGetPendingMantainances } from "pages/api/useRequest";
+import { getFetcher, useGetMantainances, useGetPendingMantainances, useGetPendingSaleRepairs, useGetSaleRepairs } from "pages/api/useRequest";
 
 function Mantenimientos({ session }) {
   const { user } = session;
   const paths = ["Inicio", "Mantenimientos"];
   const { pendingMantData, pendingMantError } = useGetPendingMantainances(getFetcher);
   const { mantData, mantError } = useGetMantainances(getFetcher);
+  const { pendingSaleRepairsList, pendingSaleRepairsError } = useGetPendingSaleRepairs(getFetcher);
+  const { saleRepairsData, saleRepairsError } = useGetSaleRepairs(getFetcher);
+
+  // Combine rent maintenance and sale repairs for pending list
+  // Sale repairs have priority (appear first)
+  const combinedPendingList = [
+    ...(pendingSaleRepairsList || []).map(item => ({ ...item, type: 'SALE' })),
+    ...(pendingMantData || []).map(item => ({ ...item, type: 'RENT' }))
+  ];
+
+  // Combine rent maintenance and sale repairs for completed list
+  // Sale repairs have priority (appear first)
+  const combinedCompletedList = [
+    ...(saleRepairsData || []).map(item => ({ ...item, type: 'SALE' })),
+    ...(mantData || []).map(item => ({ ...item, type: 'RENT' }))
+  ];
+
+  const hasPendingError = pendingMantError || pendingSaleRepairsError;
+  const pendingErrorMessage = pendingMantError?.message || pendingSaleRepairsError?.message;
+  const isLoadingPending = !pendingMantData || !pendingSaleRepairsList;
+
+  const hasCompletedError = mantError || saleRepairsError;
+  const completedErrorMessage = mantError?.message || saleRepairsError?.message;
+  const isLoadingCompleted = !mantData || !saleRepairsData;
   return (
     <>
       <Head>
@@ -36,9 +60,9 @@ function Mantenimientos({ session }) {
           spacing={4}
         >
           <Grid item xs={12}>
-            {pendingMantError ? (
-              <Alert severity="error">{pendingMantError?.message}</Alert>
-            ) : !pendingMantData ? (
+            {hasPendingError ? (
+              <Alert severity="error">{pendingErrorMessage}</Alert>
+            ) : isLoadingPending ? (
               <Skeleton
                 variant="rectangular"
                 width={"100%"}
@@ -48,7 +72,7 @@ function Mantenimientos({ session }) {
             ) : (
               <Card>
                 <TablaMantPendientes
-                  listData={pendingMantData}
+                  listData={combinedPendingList}
                   userRole={user?.role}
                 />
               </Card>
@@ -65,9 +89,9 @@ function Mantenimientos({ session }) {
           spacing={4}
         >
           <Grid item xs={12}>
-            {mantError ? (
-              <Alert severity="error">{mantError?.message}</Alert>
-            ) : !mantData ? (
+            {hasCompletedError ? (
+              <Alert severity="error">{completedErrorMessage}</Alert>
+            ) : isLoadingCompleted ? (
               <Skeleton
                 variant="rectangular"
                 width={"100%"}
@@ -76,7 +100,7 @@ function Mantenimientos({ session }) {
               />
             ) : (
               <Card>
-                <TablaMant listData={mantData} />
+                <TablaMant listData={combinedCompletedList} />
               </Card>
             )}
           </Grid>
