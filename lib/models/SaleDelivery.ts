@@ -22,6 +22,7 @@ export interface ISaleDelivery extends Document {
   updatedAt: Date;
   createdBy: Schema.Types.ObjectId;
   lastUpdatedBy: Schema.Types.ObjectId;
+  type: string;
 }
 
 const SaleDeliverySchema = new Schema<ISaleDelivery>({
@@ -29,6 +30,11 @@ const SaleDeliverySchema = new Schema<ISaleDelivery>({
     type: Schema.Types.ObjectId,
     ref: 'sales',
     required: true
+  },
+  type: {
+    type: String,
+    enum: ['ENTREGA', 'COBRANZA'], 
+    default: 'ENTREGA'
   },
   status: {
     type: String,

@@ -20,6 +20,7 @@ import {
   useGetPendingDeliveries,
   useGetPendingPickups,
   useGetPendingChanges,
+  useGetPendingCollections,
   useGetDeliveries,
   useGetPickups,
   useGetChanges,
@@ -46,6 +47,8 @@ function VueltasOperador({ session }) {
     useGetPendingPickups(getFetcher);
   const { pendingChangesList, pendingChangesError } =
     useGetPendingChanges(getFetcher);
+  const { pendingCollectionsList, pendingCollectionsError } = 
+    useGetPendingCollections(getFetcher);
 
   // Fetch all tasks (including completed) - using high limit to get all for the day
   const { deliveriesList, deliveriesError } = useGetDeliveries(
@@ -71,10 +74,10 @@ function VueltasOperador({ session }) {
   );
 
   const generalError =
-    pendingDeliveriesError || pendingPickupsError || pendingChangesError ||
+    pendingDeliveriesError || pendingPickupsError || pendingChangesError || pendingCollectionsError ||
     deliveriesError || pickupsError || changesError;
   const completeData =
-    pendingDeliveriesList && pendingPickupsList && pendingChangesList &&
+    pendingDeliveriesList && pendingPickupsList && pendingChangesList && pendingCollectionsList &&
     deliveriesList && pickups && changes;
   
   const isBlocked = currentUser?.isBlocked === true;
@@ -105,6 +108,12 @@ function VueltasOperador({ session }) {
           sector: item.rent?.customer?.currentResidence?.city?.sectors?.find(
             (s) => s._id === item.rent?.customer?.currentResidence?.sector?._id
           )?.name,
+        })),
+        ...(pendingCollectionsList || []).map((item) => ({
+          ...item,
+          type: "COBRANZA",
+          sector: item.sale?.customer?.currentResidence?.sector?.name,
+          takenAt: item.createdAt 
         })),
       ].sort((a, b) => {
         // Sort by takenAt - older first (ascending order)

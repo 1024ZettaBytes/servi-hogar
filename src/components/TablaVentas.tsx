@@ -21,11 +21,15 @@ import {
   InputAdornment,
   Chip
 } from '@mui/material';
+import RequestQuoteIcon from '@mui/icons-material/RequestQuote'; 
+import GenericModal from '@/components/GenericModal'; 
+import { scheduleCollectionVisit } from '../../lib/client/salesFetch';
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
 import SearchIcon from '@mui/icons-material/Search';
 import PaymentIcon from '@mui/icons-material/Payment';
 import ImageSearchIcon from '@mui/icons-material/ImageSearch';
+import { useSnackbar } from 'notistack';
 import { formatTZDate, setDateToInitial } from 'lib/client/utils';
 import * as str from 'string';
 import { useRouter } from 'next/router';
@@ -145,11 +149,15 @@ const getDaysUntilPayment = (nextPaymentDate: Date | null) => {
 const TablaVentas: FC<TablaSalesProps> = ({ salesList, onPaymentClick }) => {
   const theme = useTheme();
   const router = useRouter();
+  const { enqueueSnackbar } = useSnackbar();
   const [page, setPage] = useState<number>(0);
   const [limit, setLimit] = useState<number>(10);
   const [filter, setFilter] = useState<string>('');
   const [openImages, setOpenImages] = useState<boolean>(false);
   const [selectedImages, setSelectedImages] = useState<any>(null);
+  const [collectionModalOpen, setCollectionModalOpen] = useState(false);
+  const [isScheduling, setIsScheduling] = useState(false);
+  const [saleForCollection, setSaleForCollection] = useState<any>(null);
 
   const handleOnCloseImages = () => {
     setOpenImages(false);
@@ -167,6 +175,34 @@ const TablaVentas: FC<TablaSalesProps> = ({ salesList, onPaymentClick }) => {
 
   const handleLimitChange = (event: ChangeEvent<HTMLInputElement>): void => {
     setLimit(parseInt(event.target.value));
+  };
+
+  const handleOpenCollectionModal = (sale: any) => {
+    setSaleForCollection(sale);
+    setCollectionModalOpen(true);
+  };
+
+  const handleConfirmCollection = async () => {
+    setIsScheduling(true);
+    
+    const result = await scheduleCollectionVisit(saleForCollection._id);
+    
+    setIsScheduling(false);
+    setCollectionModalOpen(false);
+    setSaleForCollection(null);
+
+    if (!result.error) {
+      enqueueSnackbar(result.msg, { 
+        variant: 'success',
+        anchorOrigin: { vertical: 'top', horizontal: 'center' },
+        autoHideDuration: 2000
+      });
+    } else {
+      enqueueSnackbar(result.msg, { 
+        variant: 'error',
+        anchorOrigin: { vertical: 'top', horizontal: 'center' }
+      });
+    }
   };
 
   const filteredSales = applyFilters(salesList, filter);
@@ -223,6 +259,44 @@ const TablaVentas: FC<TablaSalesProps> = ({ salesList, onPaymentClick }) => {
                   ? `#${sale.machine.machineNum} - ${sale.machine.brand}`
                   : sale.serialNumber || 'N/A';
                 const customerName = sale.customer?.name || 'N/A';
+
+                const daysLeft = getDaysUntilPayment(sale.nextPaymentDate);
+                const isOverdue = isPaymentOverdue(sale.nextPaymentDate, sale.status);
+                let missedPayments = 0;
+                if (isOverdue) {
+                  const daysOverdue = Math.abs(daysLeft);
+                  missedPayments = Math.floor(daysOverdue / 7) + 1;
+                }
+
+
+                const visits = sale.collectionVisits || [];
+                const visitsCount = visits.length;
+                const lastVisit = visitsCount > 0 ? visits[visitsCount - 1] : null;
+                const isLastVisitPending = lastVisit && !lastVisit.completed;
+
+                const showCollectionButton = missedPayments > 2 && sale.status === 'ACTIVA';
+
+                let isCollectionDisabled = false;
+                let tooltipText = "";
+                if (isLastVisitPending) {
+                  isCollectionDisabled = true;
+                  tooltipText = `Cobranza pendiente | Visita ${visitsCount}/3 en curso`;
+                } else if (visitsCount >= 3) {
+                  isCollectionDisabled = true;
+                  tooltipText = `Límite de visitas alcanzado (3/3)`;
+                  
+                  if (lastVisit && lastVisit.outcome) {
+                    const outcomeLabel = lastVisit.outcome === 'PROMESA' ? 'Promesa' : 'Pagó';
+                    tooltipText += ` - Última: ${outcomeLabel}`;
+                  }
+                } else {
+                  tooltipText = `Agendar Cobranza | ${visitsCount}/3`;
+
+                  if (lastVisit && lastVisit.outcome) {
+                    const outcomeLabel = lastVisit.outcome === 'PROMESA' ? 'Promesa' : 'Pagó';
+                    tooltipText += ` (Última: ${outcomeLabel})`;
+                  }
+                }
 
                 return (
                   <TableRow hover key={sale._id}>
@@ -427,7 +501,7 @@ const TablaVentas: FC<TablaSalesProps> = ({ salesList, onPaymentClick }) => {
                         )}
                       </Typography>
                     </TableCell>
-                    <TableCell align="center">
+                    <TableCell align="center"> 
                       <Box
                         sx={{
                           display: 'flex',
@@ -467,6 +541,25 @@ const TablaVentas: FC<TablaSalesProps> = ({ salesList, onPaymentClick }) => {
                             <VisibilityIcon fontSize="small" />
                           </IconButton>
                         </Tooltip>
+                        {(showCollectionButton) && (
+                          <Tooltip title={tooltipText} arrow>
+                            <span>
+                              <IconButton
+                                sx={{
+                                  '&:hover': { background: theme.colors.warning.lighter },
+                                  color: theme.colors.warning.main,
+                                  opacity: isCollectionDisabled ? 0.6 : 1 
+                                }}
+                                color="inherit"
+                                size="small"
+                                disabled={isCollectionDisabled} 
+                                onClick={() => handleOpenCollectionModal(sale)}
+                              >
+                                <RequestQuoteIcon fontSize="small" />
+                              </IconButton>
+                            </span>
+                          </Tooltip>
+                        )}
                       </Box>
                     </TableCell>
                   </TableRow>
@@ -494,6 +587,22 @@ const TablaVentas: FC<TablaSalesProps> = ({ salesList, onPaymentClick }) => {
           title="Fotos de la entrega"
           text=""
           onClose={handleOnCloseImages}
+        />
+      )}
+      {saleForCollection && (
+        <GenericModal
+          open={collectionModalOpen}
+          title="Atención"
+          requiredReason={false}
+          text={`¿Está seguro de agendar una visita de cobranza para ${saleForCollection.customer?.name || 'el cliente'}? 
+                 (Esta será la visita ${ (saleForCollection.collectionVisits?.length || 0) + 1 } de 3)`}
+          isLoading={isScheduling}
+          onAccept={handleConfirmCollection}
+          onCancel={() => {
+            setCollectionModalOpen(false);
+            setIsScheduling(false);
+            setSaleForCollection(null);
+          }}
         />
       )}
     </>

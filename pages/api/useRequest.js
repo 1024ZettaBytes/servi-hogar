@@ -389,3 +389,9 @@ export const useGetMantainenceById = (fetcher, id) => {
   );
   return { mantData: data?.data, mantByIdError: error, isLoadingMant: isLoading };
 };
+
+// Collection
+export const useGetPendingCollections = (fetcher) => {
+  const { data, error } = useSWR(ROUTES.ALL_PENDING_COLLECTIONS_API, fetcher);
+  return { pendingCollectionsList: data?.data, pendingCollectionsError: error };
+};
