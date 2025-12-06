@@ -14,6 +14,15 @@ export interface ISale extends Document {
   accumulatedPayment: number;
   isPaid: boolean;
   status: string;
+  collectionVisits: {
+    visitNumber: number;
+    createdAt: Date;
+    completed: boolean;
+    deliveryRef?: Schema.Types.ObjectId;
+    outcome?: string;
+    completedAt?: Date;
+    completedBy?: Schema.Types.ObjectId;
+  }[];
   saleDate: Date;
   lastPaymentDate: Date;
   nextPaymentDate: Date;
@@ -49,6 +58,17 @@ const SaleSchema = new Schema<ISale>({
     enum: ['ACTIVA', 'PAGADA', 'CANCELADA'],
     default: 'ACTIVA'
   },
+  collectionVisits: [
+    {
+      visitNumber: { type: Number, required: true },
+      createdAt: { type: Date, default: Date.now },
+      completed: { type: Boolean, default: false },
+      deliveryRef: { type: Schema.Types.ObjectId, ref: 'sale_deliveries' },
+      outcome: { type: String, enum: ['PROMESA', 'PAGO', null], default: null },
+      completedAt: { type: Date },
+      completedBy: { type: Schema.Types.ObjectId, ref: 'users' }
+    }
+  ],
   saleDate: { type: Date, required: true },
   lastPaymentDate: { type: Date, default: null },
   nextPaymentDate: { type: Date, default: null },
