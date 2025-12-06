@@ -39,6 +39,7 @@ export const getStatusLabel = (status) => {
         ></Chip>
       );
     case 'FINALIZADO':
+    case 'COMPLETADA':
       return (
         <Chip
           icon={<DoneOutlineIcon fontSize="small" />}
@@ -48,6 +49,7 @@ export const getStatusLabel = (status) => {
         ></Chip>
       );
     case 'CANCELADO':
+    case 'CANCELADA':
       return (
         <Chip
           icon={<DoNotDisturbOnOutlinedIcon fontSize="small" />}
