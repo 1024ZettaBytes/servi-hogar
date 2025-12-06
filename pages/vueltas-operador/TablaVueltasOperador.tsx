@@ -24,8 +24,11 @@ import {
 import MapIcon from '@mui/icons-material/Map';
 import PhotoLibraryIcon from '@mui/icons-material/PhotoLibrary';
 import CloseIcon from '@mui/icons-material/Close';
+import { useSnackbar } from 'notistack';
 import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
 import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
+import CompleteCollectionModal from '@/components/CompleteCollectionModal';
+import { completeCollectionVisit } from '../../lib/client/salesFetch';
 import { formatTZDate } from 'lib/client/utils';
 import { useRouter } from 'next/router';
 
@@ -56,6 +59,10 @@ const TablaVueltasOperador: FC<TablaVueltasOperadorProps> = ({
   const [limit, setLimit] = useState<number>(10);
   const [openImagesDialog, setOpenImagesDialog] = useState<boolean>(false);
   const [selectedImages, setSelectedImages] = useState<any>(null);
+  const [completeModalOpen, setCompleteModalOpen] = useState(false);
+  const [taskToComplete, setTaskToComplete] = useState<any>(null);
+  const [isCompleting, setIsCompleting] = useState(false);
+  const { enqueueSnackbar } = useSnackbar();
 
   const handlePageChange = (_event: any, newPage: number): void => {
     setPage(newPage);
@@ -86,8 +93,38 @@ const TablaVueltasOperador: FC<TablaVueltasOperadorProps> = ({
     setSelectedImages(null);
   };
 
+const handleConfirmCompletion = async (outcome: string) => {
+    setIsCompleting(true);
+    
+    const result = await completeCollectionVisit(taskToComplete._id, outcome);
+    
+    setIsCompleting(false);
+    setCompleteModalOpen(false);
+    setTaskToComplete(null);
+
+    if (!result.error) {
+       enqueueSnackbar(result.msg || 'Visita completada correctamente', { 
+         variant: 'success',
+         anchorOrigin: { vertical: 'top', horizontal: 'center' },
+         autoHideDuration: 2000
+       });
+       
+       //router.replace(router.asPath); 
+    } else {
+       enqueueSnackbar(result.msg, { 
+         variant: 'error',
+         anchorOrigin: { vertical: 'top', horizontal: 'center' }
+       });
+    }
+  };
+
   const handleGoToCompletion = (task: any) => {
     let route = '';
+    if (task.type === 'COBRANZA') {
+      setTaskToComplete(task);
+      setCompleteModalOpen(true);
+      return;
+    }
     switch (task.type) {
       case 'ENTREGA':
         route = `/entregas-pendientes/${task._id}`;
@@ -117,6 +154,8 @@ const TablaVueltasOperador: FC<TablaVueltasOperadorProps> = ({
         return 'warning';
       case 'RECOLECCION':
         return 'error';
+      case 'COBRANZA':
+        return 'info';
       case 'RECOLECCION_VENTA':
         return 'error';
       default:
@@ -170,10 +209,17 @@ const TablaVueltasOperador: FC<TablaVueltasOperadorProps> = ({
                 ? calculateTimeBetween(task, nextTask)
                 : null;
 
+              const source = task.rent || task.sale; 
+              const customer = source?.customer;
+              const residence = customer?.currentResidence;
+
               const typeLabel = task.type === 'RECOLECCION_VENTA' ? 'RECOLECCIÓN GARANTÍA' : task.type;
-              const customer = task.type === 'RECOLECCION_VENTA' ? task.sale?.customer : task.rent?.customer;
               const isPriority = task.isPriority || false;
+
+              const customerName = customer?.name || 'N/A';
+              const sectorName = residence?.sector?.name || 'N/A';
               
+              const cellPhone = customer?.cell || customer?.phone || 'N/A';
               return (
                 <TableRow hover key={task._id} sx={isPriority ? { backgroundColor: '#fff3cd' } : {}}>
                   <TableCell>
@@ -210,7 +256,7 @@ const TablaVueltasOperador: FC<TablaVueltasOperadorProps> = ({
                       gutterBottom
                       noWrap
                     >
-                      {customer?.name || 'N/A'}
+                      {customerName || 'N/A'}
                     </Typography>
                   </TableCell>
                   {!showTimeBetween && (
@@ -222,7 +268,7 @@ const TablaVueltasOperador: FC<TablaVueltasOperadorProps> = ({
                         gutterBottom
                         noWrap
                       >
-                        {customer?.currentResidence?.sector?.name || 'N/A'}
+                        {sectorName || 'N/A'}
                       </Typography>
                     </TableCell>
                   )}
@@ -234,7 +280,7 @@ const TablaVueltasOperador: FC<TablaVueltasOperadorProps> = ({
                       gutterBottom
                       noWrap
                     >
-                      {customer?.cell || customer?.phone || 'N/A'}
+                      {cellPhone || 'N/A'}
                     </Typography>
                   </TableCell>
                   {userRole === 'ADMIN' && (
@@ -288,7 +334,7 @@ const TablaVueltasOperador: FC<TablaVueltasOperadorProps> = ({
                     )}
                   </TableCell>
                   <TableCell align="center">
-                    {(task.rent?.customer?.currentResidence?.maps || task.sale?.customer?.currentResidence?.maps) ? (
+                    {residence?.maps ? (
                       <Tooltip title="Ver ubicación" arrow>
                         <IconButton
                           sx={{
@@ -301,7 +347,7 @@ const TablaVueltasOperador: FC<TablaVueltasOperadorProps> = ({
                           size="small"
                           onClick={() =>
                             window.open(
-                              task.rent?.customer?.currentResidence?.maps || task.sale?.customer?.currentResidence?.maps,
+                              residence.maps,
                               '_blank'
                             )
                           }
@@ -503,6 +549,17 @@ const TablaVueltasOperador: FC<TablaVueltasOperadorProps> = ({
           )}
         </DialogContent>
       </Dialog>
+      {taskToComplete && (
+         <CompleteCollectionModal
+           open={completeModalOpen}
+           handleOnClose={() => { 
+             setCompleteModalOpen(false);
+             setTaskToComplete(null);
+           }}
+           handleOnConfirm={handleConfirmCompletion} 
+           isLoading={isCompleting}
+         />
+       )}
     </Card>
   );
 };
