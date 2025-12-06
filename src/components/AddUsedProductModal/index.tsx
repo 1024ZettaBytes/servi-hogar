@@ -19,23 +19,32 @@ import { LoadingButton } from '@mui/lab';
 import { getFetcher, useGetProducts } from '../../../pages/api/useRequest';
 import numeral from 'numeral';
 import { saveUsedProduct } from "../../../lib/client/mantainanacesFetch";
+import { addUsedProductToRepair } from "../../../lib/client/saleRepairsFetch";
+
 function AddUsedProductModal(props) {
-  const { handleOnClose, open, mantId } = props;
+  const { handleOnClose, open, mantId, saleRepairId } = props;
   const [isLoading, setIsLoading] = useState(false);
   const [hasError, setHasError] = useState({ error: false, msg: '' });
   const [selectedProduct, setSelectedProduct] = useState(null);
   const { productsList, productsError, isLoadingProducts } =
     useGetProducts(getFetcher);
+  
   async function submitHandler(event) {
     event.preventDefault();
     setIsLoading(true);
     setHasError({ error: false, msg: '' });
 
-    const result = await saveUsedProduct({
-      mantainanceId: mantId,
-      productId: selectedProduct._id,
-      qty: parseInt(event?.target?.qty?.value),
-    });
+    const qty = parseInt(event?.target?.qty?.value);
+    
+    // Use different function based on whether it's maintenance or sale repair
+    const result = saleRepairId
+      ? await addUsedProductToRepair(saleRepairId, selectedProduct._id, qty)
+      : await saveUsedProduct({
+          mantainanceId: mantId,
+          productId: selectedProduct._id,
+          qty
+        });
+    
     setIsLoading(false);
     if (!result.error) {
       handleSavedUsedProduct(result.msg);
