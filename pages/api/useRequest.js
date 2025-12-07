@@ -396,6 +396,15 @@ export const useGetPendingCollections = (fetcher) => {
   return { pendingCollectionsList: data?.data, pendingCollectionsError: error };
 };
 
+export const useGetCompletedCollections = (fetcher, limit, page, date = null) => {
+  let url = getPaginatedUrl(ROUTES.COMPLETED_COLLECTIONS_API, limit, page);
+  if (date) {
+    url += `&date=${formatTZDate(date, 'YYYY-MM-DD')}`;
+  }
+  const { data, error } = useSWR(url, fetcher);
+  return { completedCollectionsList: data?.data, completedCollectionsError: error };
+};
+
 // Sale Pickups (Warranty Claims)
 export const useGetPendingSalePickups = (fetcher, detailed = true) => {
   const { data, error, isLoading } = useSWR(
