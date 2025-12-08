@@ -26,6 +26,7 @@ import {
   useGetPickups,
   useGetChanges,
   useGetSalePickups,
+  useGetCompletedCollections,
   getFetcher,
 } from "../api/useRequest";
 import TablaVueltasOperador from "./TablaVueltasOperador";
@@ -83,13 +84,20 @@ function VueltasOperador({ session }) {
     '',
     formatTZDate(selectedDate, "YYYY-MM-DD")
   );
+  const { completedCollectionsList, completedCollectionsError } = useGetCompletedCollections(
+    getFetcher, 
+    1000, 
+    1, 
+    formatTZDate(selectedDate, "YYYY-MM-DD")
+  );
 
   const generalError =
     pendingDeliveriesError || pendingPickupsError || pendingSalePickupsError || pendingChangesError ||
-    deliveriesError || pickupsError || changesError || salePickupsError || pendingCollectionsError;
+    deliveriesError || pickupsError || changesError || salePickupsError || pendingCollectionsError ||
+    completedCollectionsError;
   const completeData =
     pendingDeliveriesList && pendingPickupsList && pendingSalePickupsList && pendingChangesList &&
-    deliveriesList && pickups && changes && salePickupsData && pendingCollectionsList;
+    deliveriesList && pickups && changes && salePickupsData && pendingCollectionsList && completedCollectionsList;
   
   const isBlocked = currentUser?.isBlocked === true;
 
@@ -132,7 +140,8 @@ function VueltasOperador({ session }) {
         ...(pendingCollectionsList || []).map((item) => ({
           ...item,
           type: "COBRANZA",
-          sector: item.sale?.customer?.currentResidence?.sector?.name
+          sector: item.sale?.customer?.currentResidence?.sector?.name,
+          takenAt: item.createdAt
         })),
       ].sort((a, b) => {
         // Priority items (sale pickups) always first
@@ -180,6 +189,14 @@ function VueltasOperador({ session }) {
           sector: item.rent?.customer?.currentResidence?.city?.sectors?.find(
             (s) => s._id === item.rent?.customer?.currentResidence?.sector?._id
           )?.name,
+        })),
+        ...(completedCollectionsList?.list || []).map((item) => ({
+          ...item,
+          type: "COBRANZA",
+          sector: item.sale?.customer?.currentResidence?.sector?.name,
+          finishedAt: item.completedAt, 
+          operator: item.completedBy,
+          takenAt: item.createdAt
         })),
       ].sort((a, b) => {
         // Sort by finishedAt - most recent first (descending order)

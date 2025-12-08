@@ -1,4 +1,4 @@
-import { FC, ChangeEvent, useState } from 'react';
+import { FC, ChangeEvent, useState, useEffect, useRef } from 'react';
 import PropTypes from 'prop-types';
 import {
   Tooltip,
@@ -63,6 +63,14 @@ const TablaVueltasOperador: FC<TablaVueltasOperadorProps> = ({
   const [taskToComplete, setTaskToComplete] = useState<any>(null);
   const [isCompleting, setIsCompleting] = useState(false);
   const { enqueueSnackbar } = useSnackbar();
+  const isMounted = useRef(true);
+
+  useEffect(() => {
+    isMounted.current = true;
+    return () => {
+      isMounted.current = false;
+    };
+  }, []);
 
   const handlePageChange = (_event: any, newPage: number): void => {
     setPage(newPage);
@@ -98,9 +106,11 @@ const handleConfirmCompletion = async (outcome: string) => {
     
     const result = await completeCollectionVisit(taskToComplete._id, outcome);
     
-    setIsCompleting(false);
-    setCompleteModalOpen(false);
-    setTaskToComplete(null);
+    if (isMounted.current) {
+      setIsCompleting(false);
+      setCompleteModalOpen(false);
+      setTaskToComplete(null);
+    }
 
     if (!result.error) {
        enqueueSnackbar(result.msg || 'Visita completada correctamente', { 
@@ -109,7 +119,6 @@ const handleConfirmCompletion = async (outcome: string) => {
          autoHideDuration: 2000
        });
        
-       //router.replace(router.asPath); 
     } else {
        enqueueSnackbar(result.msg, { 
          variant: 'error',
