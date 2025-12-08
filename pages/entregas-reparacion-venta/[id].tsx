@@ -21,7 +21,6 @@ import {
   Button as MuiButton
 } from '@mui/material';
 import Button from '@mui/material/Button';
-import Paper from '@mui/material/Paper';
 import { DesktopDatePicker } from '@mui/x-date-pickers';
 import { completeRepairReturnDelivery } from 'lib/client/salesFetch';
 import { getSession } from 'next-auth/react';
