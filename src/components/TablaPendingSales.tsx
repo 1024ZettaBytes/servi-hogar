@@ -249,6 +249,14 @@ const TablaPendingSales: FC<TablaPendingSalesProps> = ({
                     >
                       {customerName}
                     </Typography>
+                    {sale.delivery?.isRepairReturn && (
+                      <Chip 
+                        label="Reparación" 
+                        color="warning" 
+                        size="small"
+                        sx={{ mt: 0.5 }}
+                      />
+                    )}
                   </TableCell>
                   <TableCell align="center">
                     <Typography
@@ -355,7 +363,14 @@ const TablaPendingSales: FC<TablaPendingSalesProps> = ({
                         </Tooltip>
                       )}
                       {isOperator && (
-                        <NextLink href={`/ventas-pendientes/${sale._id}`} passHref>
+                        <NextLink 
+                          href={
+                            sale?.delivery?.isRepairReturn 
+                              ? `/entregas-reparacion-venta/${sale._id}`
+                              : `/ventas-pendientes/${sale._id}`
+                          } 
+                          passHref
+                        >
                           <Tooltip title="Completar entrega" arrow>
                             <IconButton
                               sx={{

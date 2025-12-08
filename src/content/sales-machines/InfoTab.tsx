@@ -98,6 +98,16 @@ const getStatusChip = (status: string) => {
           sx={{ fontWeight: 'bold' }}
         />
       );
+    case 'LISTO':
+      return (
+        <Chip
+          icon={<CheckCircleOutlineIcon />}
+          label="Listo"
+          color="success"
+          size="small"
+          sx={{ fontWeight: 'bold' }}
+        />
+      );
     default:
       return (
         <Chip
@@ -142,11 +152,12 @@ function SalesMachineInfoTab({ salesMachine }) {
   const [warrantyDate, setWarrantyDate] = useState<Date>(salesMachine?.warranty ? convertDateToLocal(new Date(salesMachine.warranty)) : null);
   const [selectedStatus, setSelectedStatus] = useState(salesMachine?.status || 'DISPONIBLE');
 
-  // Allow editing if machine is DISPONIBLE, PENDIENTE, RECOLECTADA, or MANT_PENDIENTE (in repair workflow)
+  // Allow editing if machine is DISPONIBLE, PENDIENTE, RECOLECTADA, MANT_PENDIENTE, or LISTO (in repair workflow)
   // But not if it's VENDIDO and with customer
   const canEdit = salesMachine && 
     (salesMachine.status === 'DISPONIBLE' || salesMachine.status === 'PENDIENTE' || 
-     salesMachine.status === 'RECOLECTADA' || salesMachine.status === 'MANT_PENDIENTE') && 
+     salesMachine.status === 'RECOLECTADA' || salesMachine.status === 'MANT_PENDIENTE' || 
+     salesMachine.status === 'LISTO') && 
     !(salesMachine.isSold && salesMachine.status === 'VENDIDO');
 
   const getLocationDisplay = () => {
@@ -384,7 +395,7 @@ function SalesMachineInfoTab({ salesMachine }) {
                   <Box sx={{ maxWidth: { xs: 'auto', sm: 400 } }}>
                     {isLoading ? (
                       <Skeleton variant="text" sx={{ fontSize: '1rem', width: '150px' }} />
-                    ) : !isEditing || salesMachine?.status === 'MANT_PENDIENTE' ? (
+                    ) : !isEditing || salesMachine?.status === 'MANT_PENDIENTE' || salesMachine?.status === 'LISTO' ? (
                       getStatusChip(salesMachine?.status)
                     ) : salesMachine?.status === 'RECOLECTADA' ? (
                       <FormControl fullWidth size="small">
@@ -413,7 +424,9 @@ function SalesMachineInfoTab({ salesMachine }) {
                   <Box sx={{ maxWidth: { xs: 'auto', sm: 400 } }}>
                     {isLoading ? (
                       <Skeleton variant="text" sx={{ fontSize: '1rem', width: '150px' }} />
-                    ) : !isEditing || salesMachine?.status === 'MANT_PENDIENTE' ? (
+                    ) : !isEditing ? (
+                      getLocationDisplay()
+                    ) : salesMachine?.status === 'MANT_PENDIENTE' ? (
                       getLocationDisplay()
                     ) : (
                       <Box>

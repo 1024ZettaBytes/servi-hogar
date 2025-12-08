@@ -17,6 +17,7 @@ export interface ISaleDelivery extends Document {
     label: string;
     board: string;
   };
+  evidenceImageUrl: string; // For repair return deliveries - single evidence image
   customerDataUpdated: boolean;
   updatedCustomerData: object;
   cancellationReason: string;
@@ -76,6 +77,7 @@ const SaleDeliverySchema = new Schema<ISaleDelivery>({
     },
     default: null
   },
+  evidenceImageUrl: { type: String, default: null }, // For repair return deliveries
   customerDataUpdated: { type: Boolean, default: false },
   updatedCustomerData: { type: Object, default: null },
   cancellationReason: { type: String, default: '' },
