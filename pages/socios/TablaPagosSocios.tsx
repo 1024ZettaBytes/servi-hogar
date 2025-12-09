@@ -29,7 +29,9 @@ import SearchIcon from "@mui/icons-material/Search";
 import ImageSearchIcon from "@mui/icons-material/ImageSearch";
 import { formatTZDate } from "lib/client/utils";
 import { PAYOUT_KEYS } from "../../lib/consts/OBJ_CONTS";
+import { ROUTES } from "../../lib/consts/API_URL_CONST";
 import { updatePayout } from "../../lib/client/payoutsFetch";
+import { refreshData } from "../api/useRequest";
 
 import Label from "@/components/Label";
 import ConfirmWithFileModal from "@/components/ConfirmWithFileModal";
@@ -110,7 +112,12 @@ const TablaPagosSocios: FC<TablaPagosSociosProps> = ({ payoutsList }) => {
       setHasErrorSubmitting({ msg: result.msg });
       return;
     }
+    
+    // Close modal and reset state first
     setCompleteModalIsOpen(false);
+    setSelectedPayout(null);
+    
+    // Show notification
     enqueueSnackbar(result.msg, {
       variant: "success",
       anchorOrigin: {
@@ -119,7 +126,10 @@ const TablaPagosSocios: FC<TablaPagosSociosProps> = ({ payoutsList }) => {
       },
       autoHideDuration: 2000,
     });
-    setSelectedPayout(null);
+    
+    // Refresh data after all state updates are complete
+    await refreshData(ROUTES.ALL_PAYOUTS);
+    await refreshData(ROUTES.PARTNER_MACHINES);
   };
   const handleSearchChange = (e: ChangeEvent<HTMLInputElement>): void => {
     const value = e.target.value;
