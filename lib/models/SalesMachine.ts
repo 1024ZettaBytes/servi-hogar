@@ -36,7 +36,7 @@ const SalesMachineSchema = new Schema<ISalesMachine>({
   isSold: { type: 'boolean', default: false },
   status: {
     type: String,
-    enum: ['DISPONIBLE', 'PENDIENTE', 'VENDIDO', 'RECOLECTADA', 'MANT_PENDIENTE'],
+    enum: ['DISPONIBLE', 'PENDIENTE', 'VENDIDO', 'RECOLECTADA', 'MANT_PENDIENTE', 'LISTO'],
     default: 'DISPONIBLE'
   },
   currentWarehouse: {

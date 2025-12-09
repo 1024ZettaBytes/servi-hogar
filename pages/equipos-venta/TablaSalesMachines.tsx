@@ -88,6 +88,16 @@ const getStatusChip = (status: string) => {
           sx={{ fontWeight: 'bold' }}
         />
       );
+    case 'LISTO':
+      return (
+        <Chip
+          icon={<CheckCircleOutlineIcon />}
+          label="Listo"
+          color="success"
+          size="small"
+          sx={{ fontWeight: 'bold' }}
+        />
+      );
     default:
       return (
         <Chip
