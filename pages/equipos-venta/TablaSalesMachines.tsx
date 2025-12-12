@@ -25,6 +25,7 @@ import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
 import HourglassEmptyIcon from '@mui/icons-material/HourglassEmpty';
 import SellIcon from '@mui/icons-material/Sell';
 import BuildIcon from '@mui/icons-material/Build';
+import MonetizationOnTwoToneIcon from '@mui/icons-material/MonetizationOnTwoTone';
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import { useSnackbar } from 'notistack';
 import { deleteSalesMachines } from '../../lib/client/salesMachinesFetch';
@@ -34,6 +35,7 @@ interface TablaSalesMachinesProps {
   userRole: string;
   salesMachinesList: any[];
   onUpdate: () => void;
+  onSellClick: (machine: any) => void;
 }
 
 const getStatusChip = (status: string) => {
@@ -114,7 +116,8 @@ const getStatusChip = (status: string) => {
 const TablaSalesMachines: FC<TablaSalesMachinesProps> = ({
   userRole,
   salesMachinesList,
-  onUpdate
+  onUpdate,
+  onSellClick
 }) => {
   const { enqueueSnackbar } = useSnackbar();
   const theme = useTheme();
@@ -286,6 +289,23 @@ const TablaSalesMachines: FC<TablaSalesMachinesProps> = ({
                     {getStatusChip(machine.status)}
                   </TableCell>
                   <TableCell align="right">
+                    {!machine.isSold && machine.status === 'DISPONIBLE' && (
+                        <Tooltip title="Registrar venta" arrow>
+                          <IconButton
+                            sx={{
+                              '&:hover': {
+                                background: theme.colors.success.lighter
+                              },
+                              color: theme.colors.success.main
+                            }}
+                            color="inherit"
+                            size="small"
+                            onClick={() => onSellClick(machine)}
+                          >
+                            <MonetizationOnTwoToneIcon fontSize="small" />
+                          </IconButton>
+                        </Tooltip>
+                    )}
                     <NextLink href={`/equipos-venta/${machine._id}`} passHref>
                       <Tooltip title="Ver Detalle" arrow>
                         <IconButton
@@ -342,7 +362,8 @@ const TablaSalesMachines: FC<TablaSalesMachinesProps> = ({
 };
 
 TablaSalesMachines.propTypes = {
-  salesMachinesList: PropTypes.array.isRequired
+  salesMachinesList: PropTypes.array.isRequired,
+  onSellClick: PropTypes.func.isRequired
 };
 
 export default TablaSalesMachines;
