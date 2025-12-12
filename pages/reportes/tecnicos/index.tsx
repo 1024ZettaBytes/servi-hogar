@@ -44,7 +44,7 @@ import WeekPicker from '@/components/WeekPicker';
 import { getFetcher, useGetReport } from 'pages/api/useRequest';
 
 
-function TechniciansReport({ session }) {
+function TechniciansReport() {
   
   const [selectedDate, setSelectedDate] = useState<Date>(
     convertDateToLocal(new Date())
