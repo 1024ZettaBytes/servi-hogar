@@ -9,6 +9,7 @@ export interface IUser extends Document {
   password: string;
   startM: number;
   endM: number;
+  tecPay: number;
   auxActionTimestamps?: Date[];
 }
 
@@ -45,6 +46,10 @@ const UserSchema = new Schema<IUser>({
   endM: {
     type: Number,
     default: -1
+  },
+  tecPay: {
+    type: Number,
+    default: 0
   },
   auxActionTimestamps: {
     type: [Date],

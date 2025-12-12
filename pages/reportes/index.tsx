@@ -16,6 +16,7 @@ import CalendarMonthIcon from '@mui/icons-material/CalendarMonth';
 import SidebarLayout from '@/layouts/SidebarLayout';
 import LocalLaundryServiceIcon from '@mui/icons-material/LocalLaundryService';
 import RequestQuoteIcon from '@mui/icons-material/RequestQuote';
+import ConstructionIcon from '@mui/icons-material/Construction';
 import { validateServerSideSession } from 'lib/auth';
 import { getSession } from 'next-auth/react';
 import Footer from '@/components/Footer';
@@ -47,6 +48,13 @@ const AvatarWrapperNormal = styled(Avatar)(
   ({ theme }) => `
         background-color: ${theme.colors.info.dark};
         color:  ${theme.colors.warning.main};
+  `
+);
+
+const AvatarWrapperTech = styled(Avatar)(
+  ({ theme }) => `
+        background-color: ${theme.colors.info.light};
+        color:  ${theme.colors.error.light};
   `
 );
 
@@ -214,6 +222,36 @@ function Reportes({ session }) {
                     >
                       <Typography variant="h3" gutterBottom noWrap>
                         Ingresos
+                      </Typography>
+                    </Box>
+                  </CardContent>
+                </Card>
+              </NextLink>
+            </Grid>
+          )}
+          {user?.role === 'ADMIN' && (
+            <Grid xs={12} sm={6} md={4} item>
+              <NextLink href="/reportes/tecnicos">
+                <Card
+                  sx={{
+                    px: 1,
+                    cursor: 'pointer',
+                    '&:hover': {
+                      background: theme.palette.grey[300]
+                    }
+                  }}
+                >
+                  <CardContent>
+                    <AvatarWrapperTech>
+                      <ConstructionIcon />
+                    </AvatarWrapperTech>
+                    <Box
+                      sx={{
+                        pt: 3
+                      }}
+                    >
+                      <Typography variant="h3" gutterBottom noWrap>
+                        Técnicos
                       </Typography>
                     </Box>
                   </CardContent>
