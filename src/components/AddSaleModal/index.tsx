@@ -25,7 +25,7 @@ import { saveSale } from '../../../lib/client/salesFetch';
 import { getAllSalesMachines } from '../../../lib/client/salesMachinesFetch';
 
 function AddSaleModal(props) {
-  const { handleOnClose, open } = props;
+  const { handleOnClose, open, preSelectedMachine } = props;
   const { customerList, customerError } = useGetAllCustomers(getFetcher, false);
 
   const [isLoading, setIsLoading] = useState(false);
@@ -57,6 +57,13 @@ function AddSaleModal(props) {
       fetchSalesMachines();
     }
   }, [open]);
+
+  useEffect(() => {
+    if (open && preSelectedMachine) {
+      setUseExistingMachine(true);
+      setSelectedMachine(preSelectedMachine);
+    }
+  }, [open, preSelectedMachine]);
 
   // Get available sales machines (active ones that are not sold)
   const availableMachines = salesMachines.filter(
@@ -146,6 +153,7 @@ function AddSaleModal(props) {
                   control={
                     <Switch
                       checked={useExistingMachine}
+                      disabled={!!preSelectedMachine}
                       onChange={(e) => {
                         setUseExistingMachine(e.target.checked);
                         setSelectedMachine(null);
@@ -170,6 +178,7 @@ function AddSaleModal(props) {
                     />
                   ) : (
                     <Autocomplete
+                    disabled={!!preSelectedMachine}
                       options={availableMachines}
                       getOptionLabel={(option) =>
                         `#${option.machineNum} - ${option.brand} ${
@@ -177,6 +186,7 @@ function AddSaleModal(props) {
                         }`
                       }
                       value={selectedMachine}
+                      isOptionEqualToValue={(option, value) => option._id === value._id}
                       onChange={(_event, newValue) => {
                         setSelectedMachine(newValue);
                       }}
@@ -338,7 +348,8 @@ function AddSaleModal(props) {
 
 AddSaleModal.propTypes = {
   open: PropTypes.bool.isRequired,
-  handleOnClose: PropTypes.func.isRequired
+  handleOnClose: PropTypes.func.isRequired,
+  preSelectedMachine: PropTypes.object
 };
 
 export default AddSaleModal;

@@ -14,6 +14,7 @@ import {
 } from "@mui/material";
 import Footer from "@/components/Footer";
 import AddSalesMachineModal from "@/components/AddSalesMachineModal";
+import AddSaleModal from "@/components/AddSaleModal";
 import { useSnackbar } from "notistack";
 import NextBreadcrumbs from "@/components/Shared/BreadCrums";
 import AddTwoTone from "@mui/icons-material/AddTwoTone";
@@ -24,6 +25,8 @@ function EquiposVenta({ session }) {
   const paths = ["Inicio", "Equipos de Venta"];
   const { enqueueSnackbar } = useSnackbar();
   const [modalIsOpen, setModalIsOpen] = useState(false);
+  const [saleModalIsOpen, setSaleModalIsOpen] = useState(false);
+  const [selectedMachineForSale, setSelectedMachineForSale] = useState(null);
   const [salesMachines, setSalesMachines] = useState(null);
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -61,6 +64,27 @@ function EquiposVenta({ session }) {
         autoHideDuration: 1500,
       });
       fetchData(); // Refresh the list
+    }
+  };
+
+  const handleSellClick = (machine) => {
+    setSelectedMachineForSale(machine);
+    setSaleModalIsOpen(true);
+  };
+
+  const handleSaleModalClose = (saved, successMessage = null) => {
+    setSaleModalIsOpen(false);
+    setSelectedMachineForSale(null); 
+    if (saved && successMessage) {
+      enqueueSnackbar(successMessage, {
+        variant: "success",
+        anchorOrigin: {
+          vertical: "top",
+          horizontal: "center",
+        },
+        autoHideDuration: 1500,
+      });
+      fetchData(); 
     }
   };
 
@@ -108,12 +132,20 @@ function EquiposVenta({ session }) {
                   userRole={user?.role}
                   salesMachinesList={salesMachines}
                   onUpdate={fetchData}
+                  onSellClick={handleSellClick}
                 />
               </Card>
             )}
           </Grid>
           {modalIsOpen && (
             <AddSalesMachineModal open={modalIsOpen} handleOnClose={handleClose} />
+          )}
+          {saleModalIsOpen && (
+            <AddSaleModal 
+              open={saleModalIsOpen} 
+              handleOnClose={handleSaleModalClose}
+              preSelectedMachine={selectedMachineForSale} 
+            />
           )}
         </Grid>
       </Container>
