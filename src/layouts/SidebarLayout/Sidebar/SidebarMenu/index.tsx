@@ -639,7 +639,7 @@ function SidebarMenu({ userRole }) {
             </List>
           </SubMenuWrapper>
                   </List>*/}
-        {['ADMIN', 'AUX', 'SUB'].includes(userRole) ? (
+        {['ADMIN', 'AUX', 'SUB', "TEC"].includes(userRole) ? (
           <List
             component="div"
             subheader={
@@ -748,7 +748,27 @@ function SidebarMenu({ userRole }) {
                       Reportes
                     </Button>
                   </NextLink>
-                </ListItem></>)}
+                </ListItem></>
+              )}
+              {
+                userRole === 'TEC' && (
+                  <ListItem component="div">
+                  <NextLink href={"/reportes/tecnicos"} passHref>
+                    <Button
+                      className={
+                        currentRoute.includes('/reportes') ? 'active' : ''
+                      }
+                      disableRipple
+                      component="a"
+                      onClick={closeSidebar}
+                      startIcon={<AssessmentIcon />}
+                    >
+                      Reportes
+                    </Button>
+                  </NextLink>
+                </ListItem>
+                )
+              }
                 {userRole === 'ADMIN' && (
                   <ListItem component="div">
                     <NextLink href="/usuarios" passHref>

@@ -2,9 +2,10 @@ import {
   getSummaryByDay,
   getSummaryByRange,
   getProfitsReport,
-  getProfitsByRange
+  getProfitsByRange,
+  getTechniciansReport
 } from "../../../lib/data/Reports";
-import { validateUserPermissions } from "../auth/authUtils";
+import { getUserId, getUserRole, validateUserPermissions } from "../auth/authUtils";
 async function getSummaryAPI(req, res) {
   try {
     const { filter, start, end } = req.query;
@@ -33,6 +34,14 @@ async function getSummaryAPI(req, res) {
         }
         return;
       }
+      case "technicians": {
+        if(await validateUserPermissions(req, res, ["ADMIN", "AUX", "TEC"])){
+          const userRole = await getUserRole(req);
+          data = await getTechniciansReport(start, end, userRole);
+          res.status(200).json({ data });
+        }
+        return;
+      }
     }
   } catch (e) {
     console.error(e);
@@ -44,7 +53,7 @@ async function getSummaryAPI(req, res) {
 }
 async function handler(req, res) {
   const { filter } = req.query;
-  const validRole = await validateUserPermissions(req, res, filter === "profits" ? ["ADMIN"] : ["ADMIN", "AUX", "OPE", "SUB"]);
+  const validRole = await validateUserPermissions(req, res, filter === "profits" ? ["ADMIN"] : ["ADMIN", "AUX", "OPE", "SUB" , "TEC"]);
   if(validRole)
   switch (req.method) {
     case "GET":
