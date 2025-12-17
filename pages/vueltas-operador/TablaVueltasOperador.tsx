@@ -22,15 +22,27 @@ import {
   Button
 } from '@mui/material';
 import MapIcon from '@mui/icons-material/Map';
+import WhatsAppIcon from '@mui/icons-material/WhatsApp';
 import PhotoLibraryIcon from '@mui/icons-material/PhotoLibrary';
 import CloseIcon from '@mui/icons-material/Close';
-import { useSnackbar } from 'notistack';
+
 import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
 import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
 import CompleteCollectionModal from '@/components/CompleteCollectionModal';
+import FormatModal from '@/components/FormatModal';
 import { completeCollectionVisit } from '../../lib/client/salesFetch';
 import { formatTZDate } from 'lib/client/utils';
 import { useRouter } from 'next/router';
+import { useSnackbar } from 'notistack';
+import { 
+  getFormatForDelivery, 
+  getFormatForChange,
+  getFormatForPickup 
+} from '../../lib/consts/OBJ_CONTS';
+import { markWasSentDelivery } from '../../lib/client/deliveriesFetch';
+import { markWasSentChange } from '../../lib/client/changesFetch';
+import { markWasSentPickup } from '../../lib/client/pickupsFetch';
+import { getFetcher, useGetPrices } from 'pages/api/useRequest';
 
 interface TablaVueltasOperadorProps {
   className?: string;
@@ -62,6 +74,16 @@ const TablaVueltasOperador: FC<TablaVueltasOperadorProps> = ({
   const [completeModalOpen, setCompleteModalOpen] = useState(false);
   const [taskToComplete, setTaskToComplete] = useState<any>(null);
   const [isCompleting, setIsCompleting] = useState(false);
+  const [formatIsOpen, setFormatIsOpen] = useState(false);
+  const [formatText, setFormatText] = useState<string>('');
+  const [formatConfig, setFormatConfig] = useState<{
+    title: string;
+    action: any; 
+    task: any;
+  } | null>(null);
+
+  const { prices } = useGetPrices(getFetcher);
+
   const { enqueueSnackbar } = useSnackbar();
   const isMounted = useRef(true);
 
@@ -101,7 +123,40 @@ const TablaVueltasOperador: FC<TablaVueltasOperadorProps> = ({
     setSelectedImages(null);
   };
 
-const handleConfirmCompletion = async (outcome: string) => {
+  const handleOpenFormat = (task: any) => {
+    let text = '';
+    let action = null;
+    let title = '';
+
+    if (task.type === 'ENTREGA' && task.rent) {
+      text = getFormatForDelivery(task.rent, task, task);
+      action = markWasSentDelivery;
+      title = 'Formato de entrega';
+
+    } else if (task.type === 'CAMBIO' && task.rent) {
+      text = getFormatForChange(task.rent, task, task.reason, task);
+      action = markWasSentChange;
+      title = 'Formato de cambio';
+
+    } else if (task.type === 'RECOLECCION' && task.rent) {
+      const dayPrice = prices?.dayPrice || 0; 
+      text = getFormatForPickup(task.rent, task, task, dayPrice);
+      action = markWasSentPickup;
+      title = 'Formato de recolección';
+    }
+
+    if (text && action) {
+      setFormatConfig({
+        title,
+        action,
+        task
+      });
+      setFormatText(text);
+      setFormatIsOpen(true);
+    }
+  };
+
+  const handleConfirmCompletion = async (outcome: string) => {
     setIsCompleting(true);
     
     const result = await completeCollectionVisit(taskToComplete._id, outcome);
@@ -200,6 +255,7 @@ const handleConfirmCompletion = async (outcome: string) => {
               <TableCell>HORA ASIGNACIÓN</TableCell>
               <TableCell align="center">FOTOS</TableCell>
               <TableCell align="center">UBICACIÓN</TableCell>
+              <TableCell align="center"></TableCell>
               {showTimeBetween && (
                 <>
                   <TableCell>HORA DE REALIZACIÓN</TableCell>
@@ -368,6 +424,25 @@ const handleConfirmCompletion = async (outcome: string) => {
                       <Typography variant="body2" color="text.secondary">
                         Ψ
                       </Typography>
+                    )}
+                  </TableCell>
+                  <TableCell align="center">
+                    {(task.type === 'ENTREGA' || task.type === 'CAMBIO' || task.type === 'RECOLECCION') ? (
+                      <Tooltip title="Ver formato" arrow>
+                        <IconButton
+                          sx={{ 
+                            '&:hover': { background: 'rgba(0, 0, 0, 0.08)' }, 
+                            color: 'success.main' 
+                          }}
+                          color="inherit"
+                          size="small"
+                          onClick={() => handleOpenFormat(task)}
+                        >
+                          <WhatsAppIcon fontSize="small" />
+                        </IconButton>
+                      </Tooltip>
+                    ) : (
+                      <Typography variant="body2" color="text.secondary">-</Typography>
                     )}
                   </TableCell>
                   {showTimeBetween && (
@@ -569,6 +644,22 @@ const handleConfirmCompletion = async (outcome: string) => {
            isLoading={isCompleting}
          />
        )}
+       {formatIsOpen && formatConfig && (
+        <FormatModal
+          selectedId={formatConfig.task?._id}
+          open={formatIsOpen}
+          title={formatConfig.title}
+          text={formatConfig.task?.wasSent ? 'ENVIADO' : null}
+          textColor={'green'}
+          formatText={formatText}
+          onAccept={() => {
+            setFormatIsOpen(false);
+            setFormatText('');
+            setFormatConfig(null);
+          }}
+          onSubmitAction={formatConfig.action} 
+        />
+      )}
     </Card>
   );
 };
