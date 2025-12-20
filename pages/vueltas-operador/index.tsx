@@ -30,10 +30,12 @@ import {
   getFetcher,
 } from "../api/useRequest";
 import TablaVueltasOperador from "./TablaVueltasOperador";
+import ScheduleTimeline from "@/components/ScheduleTimeline";
 import { formatTZDate, setDateToEnd } from "lib/client/utils";
 import numeral from "numeral";
 import { useState } from "react";
 import { DesktopDatePicker } from "@mui/x-date-pickers";
+import { mutate } from "swr";
 
 function VueltasOperador({ session }) {
   const { data: sessionData } = useSession();
@@ -42,6 +44,21 @@ function VueltasOperador({ session }) {
   // Use client-side session data if available, otherwise fall back to server-side session
   const currentUser = sessionData?.user || session?.user;
   const userRole = (currentUser as any)?.role;
+
+  const handleRefresh = () => {
+    // Trigger re-fetch of all pending tasks
+    mutate('/api/deliveries/list/pending');
+    mutate('/api/pickups/list/pending');
+    mutate('/api/sale-pickups/list/pending');
+    mutate('/api/changes/list/pending');
+    mutate('/api/sales/collections/pending');
+    // Trigger re-fetch of completed tasks for the selected date
+    mutate(`/api/deliveries/list?limit=1000&page=1&date=${selectedDate.toISOString()}`);
+    mutate(`/api/pickups/list?limit=1000&page=1&date=${formatTZDate(selectedDate, "YYYY-MM-DD")}`);
+    mutate(`/api/changes/list?limit=1000&page=1&date=${formatTZDate(selectedDate, "YYYY-MM-DD")}`);
+    mutate(`/api/sale-pickups/list?page=1&limit=1000&date=${formatTZDate(selectedDate, "YYYY-MM-DD")}`);
+    mutate(`/api/sales/collections/completed?limit=1000&page=1&date=${formatTZDate(selectedDate, "YYYY-MM-DD")}`);
+  };
   
   // Fetch pending tasks
   const { pendingDeliveriesList, pendingDeliveriesError } =
@@ -148,7 +165,16 @@ function VueltasOperador({ session }) {
         if (a.isPriority && !b.isPriority) return -1;
         if (!a.isPriority && b.isPriority) return 1;
         
-        // Then sort by takenAt - older first (ascending order)
+        // Scheduled tasks before unscheduled
+        if (a.scheduledTime && !b.scheduledTime) return -1;
+        if (!a.scheduledTime && b.scheduledTime) return 1;
+        
+        // Sort scheduled tasks by scheduledTime
+        if (a.scheduledTime && b.scheduledTime) {
+          return new Date(a.scheduledTime).getTime() - new Date(b.scheduledTime).getTime();
+        }
+        
+        // Unscheduled tasks by takenAt - older first (ascending order)
         const dateA = new Date(a.takenAt || a.createdAt).getTime();
         const dateB = new Date(b.takenAt || b.createdAt).getTime();
         return dateA - dateB;
@@ -321,6 +347,9 @@ function VueltasOperador({ session }) {
                     </Typography>
                   </Alert>
                 )}
+
+                {/* Schedule Timeline */}
+                <ScheduleTimeline selectedDate={selectedDate} />
                 
                 {/* Pending Tasks Section */}
                 <Card sx={{ mb: 4 }}>
@@ -334,6 +363,8 @@ function VueltasOperador({ session }) {
                     tasksList={allPendingTasks}
                     showTimeBetween={false}
                     isBlocked={isBlocked}
+                    selectedDate={selectedDate}
+                    onRefresh={handleRefresh}
                   />
                 </Card>
 
@@ -349,6 +380,8 @@ function VueltasOperador({ session }) {
                     tasksList={allCompletedTasks}
                     showTimeBetween={true}
                     isBlocked={isBlocked}
+                    selectedDate={selectedDate}
+                    onRefresh={handleRefresh}
                   />
                 </Card>
 

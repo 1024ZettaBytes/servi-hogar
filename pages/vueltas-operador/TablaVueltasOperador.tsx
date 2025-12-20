@@ -24,10 +24,12 @@ import {
 import MapIcon from '@mui/icons-material/Map';
 import PhotoLibraryIcon from '@mui/icons-material/PhotoLibrary';
 import CloseIcon from '@mui/icons-material/Close';
+import AccessTimeIcon from '@mui/icons-material/AccessTime';
 import { useSnackbar } from 'notistack';
 import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
 import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
 import CompleteCollectionModal from '@/components/CompleteCollectionModal';
+import ScheduleTimePicker from '@/components/ScheduleTimePicker';
 import { completeCollectionVisit } from '../../lib/client/salesFetch';
 import { formatTZDate } from 'lib/client/utils';
 import { useRouter } from 'next/router';
@@ -38,6 +40,8 @@ interface TablaVueltasOperadorProps {
   userRole: string;
   showTimeBetween: boolean;
   isBlocked?: boolean;
+  selectedDate?: Date;
+  onRefresh?: () => void;
 }
 
 const applyPagination = (
@@ -52,7 +56,9 @@ const TablaVueltasOperador: FC<TablaVueltasOperadorProps> = ({
   tasksList,
   userRole,
   showTimeBetween,
-  isBlocked = false
+  isBlocked = false,
+  selectedDate = new Date(),
+  onRefresh = () => {}
 }) => {
   const router = useRouter();
   const [page, setPage] = useState<number>(0);
@@ -62,6 +68,8 @@ const TablaVueltasOperador: FC<TablaVueltasOperadorProps> = ({
   const [completeModalOpen, setCompleteModalOpen] = useState(false);
   const [taskToComplete, setTaskToComplete] = useState<any>(null);
   const [isCompleting, setIsCompleting] = useState(false);
+  const [scheduleModalOpen, setScheduleModalOpen] = useState(false);
+  const [taskToSchedule, setTaskToSchedule] = useState<any>(null);
   const { enqueueSnackbar } = useSnackbar();
   const isMounted = useRef(true);
 
@@ -125,6 +133,20 @@ const handleConfirmCompletion = async (outcome: string) => {
          anchorOrigin: { vertical: 'top', horizontal: 'center' }
        });
     }
+  };
+
+  const handleOpenSchedule = (task: any) => {
+    setTaskToSchedule(task);
+    setScheduleModalOpen(true);
+  };
+
+  const handleScheduleSaved = () => {
+    enqueueSnackbar('Hora programada exitosamente', {
+      variant: 'success',
+      anchorOrigin: { vertical: 'top', horizontal: 'center' },
+      autoHideDuration: 2000
+    });
+    onRefresh();
   };
 
   const handleGoToCompletion = (task: any) => {
@@ -192,6 +214,7 @@ const handleConfirmCompletion = async (outcome: string) => {
         <Table>
           <TableHead>
             <TableRow>
+              {!showTimeBetween && <TableCell align="center">HORA PROGRAMADA</TableCell>}
               <TableCell>TIPO DE VUELTA</TableCell>
               <TableCell>CLIENTE</TableCell>
               {!showTimeBetween && <TableCell>SECTOR</TableCell>}
@@ -231,6 +254,29 @@ const handleConfirmCompletion = async (outcome: string) => {
               const cellPhone = customer?.cell || customer?.phone || 'N/A';
               return (
                 <TableRow hover key={task._id} sx={isPriority ? { backgroundColor: '#fff3cd' } : {}}>
+                  {!showTimeBetween && (
+                    <TableCell align="center">
+                      {task.scheduledTime ? (
+                        <Chip
+                          label={formatTZDate(new Date(task.scheduledTime), 'HH:mm')}
+                          color="success"
+                          size="small"
+                          icon={<AccessTimeIcon />}
+                          onClick={() => handleOpenSchedule(task)}
+                          sx={{ cursor: 'pointer' }}
+                        />
+                      ) : (
+                        <Button
+                          size="small"
+                          variant="outlined"
+                          onClick={() => handleOpenSchedule(task)}
+                          startIcon={<AccessTimeIcon />}
+                        >
+                          Programar
+                        </Button>
+                      )}
+                    </TableCell>
+                  )}
                   <TableCell>
                     <Box display="flex" alignItems="center" gap={1}>
                       <Chip
@@ -569,6 +615,20 @@ const handleConfirmCompletion = async (outcome: string) => {
            isLoading={isCompleting}
          />
        )}
+      {scheduleModalOpen && taskToSchedule && (
+        <ScheduleTimePicker
+          open={scheduleModalOpen}
+          onClose={() => {
+            setScheduleModalOpen(false);
+            setTaskToSchedule(null);
+          }}
+          taskId={taskToSchedule._id}
+          taskType={taskToSchedule.type}
+          currentScheduledTime={taskToSchedule.scheduledTime}
+          onScheduleSaved={handleScheduleSaved}
+          selectedDate={selectedDate}
+        />
+      )}
     </Card>
   );
 };
