@@ -23,6 +23,7 @@ export interface IRentChange extends Document {
   wasSent: boolean;
   finishedAt: Date;
   operator: Schema.Types.ObjectId;
+  scheduledTime: Date;
   createdAt: Date;
   updatedAt: Date;
   createdBy: Schema.Types.ObjectId;
@@ -62,6 +63,7 @@ const RentChangeSchema = new Schema<IRentChange>({
   reason: { type: String, required: true },
   cancellationReason: { type: String, default: '' },
   finishedAt: { type: Date, default: null },
+  scheduledTime: { type: Date, default: null },
   createdAt: { type: Date, required: true },
   operator: { type: Schema.Types.ObjectId, default: null, ref: 'users' },
   updatedAt: { type: Date, required: true },

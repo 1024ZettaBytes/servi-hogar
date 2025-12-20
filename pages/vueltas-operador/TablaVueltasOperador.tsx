@@ -25,7 +25,8 @@ import MapIcon from '@mui/icons-material/Map';
 import WhatsAppIcon from '@mui/icons-material/WhatsApp';
 import PhotoLibraryIcon from '@mui/icons-material/PhotoLibrary';
 import CloseIcon from '@mui/icons-material/Close';
-
+import AccessTimeIcon from '@mui/icons-material/AccessTime';
+import ScheduleTimePicker from '@/components/ScheduleTimePicker';
 import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
 import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
 import CompleteCollectionModal from '@/components/CompleteCollectionModal';
@@ -34,10 +35,10 @@ import { completeCollectionVisit } from '../../lib/client/salesFetch';
 import { formatTZDate } from 'lib/client/utils';
 import { useRouter } from 'next/router';
 import { useSnackbar } from 'notistack';
-import { 
-  getFormatForDelivery, 
+import {
+  getFormatForDelivery,
   getFormatForChange,
-  getFormatForPickup 
+  getFormatForPickup
 } from '../../lib/consts/OBJ_CONTS';
 import { markWasSentDelivery } from '../../lib/client/deliveriesFetch';
 import { markWasSentChange } from '../../lib/client/changesFetch';
@@ -50,6 +51,8 @@ interface TablaVueltasOperadorProps {
   userRole: string;
   showTimeBetween: boolean;
   isBlocked?: boolean;
+  selectedDate?: Date;
+  onRefresh?: () => void;
 }
 
 const applyPagination = (
@@ -64,7 +67,9 @@ const TablaVueltasOperador: FC<TablaVueltasOperadorProps> = ({
   tasksList,
   userRole,
   showTimeBetween,
-  isBlocked = false
+  isBlocked = false,
+  selectedDate = new Date(),
+  onRefresh = () => {}
 }) => {
   const router = useRouter();
   const [page, setPage] = useState<number>(0);
@@ -74,11 +79,13 @@ const TablaVueltasOperador: FC<TablaVueltasOperadorProps> = ({
   const [completeModalOpen, setCompleteModalOpen] = useState(false);
   const [taskToComplete, setTaskToComplete] = useState<any>(null);
   const [isCompleting, setIsCompleting] = useState(false);
+  const [scheduleModalOpen, setScheduleModalOpen] = useState(false);
+  const [taskToSchedule, setTaskToSchedule] = useState<any>(null);
   const [formatIsOpen, setFormatIsOpen] = useState(false);
   const [formatText, setFormatText] = useState<string>('');
   const [formatConfig, setFormatConfig] = useState<{
     title: string;
-    action: any; 
+    action: any;
     task: any;
   } | null>(null);
 
@@ -104,7 +111,7 @@ const TablaVueltasOperador: FC<TablaVueltasOperadorProps> = ({
 
   const handleOpenImages = (task: any) => {
     let images;
-    
+
     if (task.type === 'RECOLECCION_VENTA') {
       // For sale warranty pickups, check pickup images first (completed pickups)
       // Then fall back to delivery images (pending pickups shown in operator view)
@@ -113,7 +120,7 @@ const TablaVueltasOperador: FC<TablaVueltasOperadorProps> = ({
       // For rent-related tasks (deliveries, pickups, changes)
       images = task.rent?.imagesUrl;
     }
-    
+
     setSelectedImages(images);
     setOpenImagesDialog(true);
   };
@@ -132,14 +139,12 @@ const TablaVueltasOperador: FC<TablaVueltasOperadorProps> = ({
       text = getFormatForDelivery(task.rent, task, task);
       action = markWasSentDelivery;
       title = 'Formato de entrega';
-
     } else if (task.type === 'CAMBIO' && task.rent) {
       text = getFormatForChange(task.rent, task, task.reason, task);
       action = markWasSentChange;
       title = 'Formato de cambio';
-
     } else if (task.type === 'RECOLECCION' && task.rent) {
-      const dayPrice = prices?.dayPrice || 0; 
+      const dayPrice = prices?.dayPrice || 0;
       text = getFormatForPickup(task.rent, task, task, dayPrice);
       action = markWasSentPickup;
       title = 'Formato de recolección';
@@ -158,9 +163,9 @@ const TablaVueltasOperador: FC<TablaVueltasOperadorProps> = ({
 
   const handleConfirmCompletion = async (outcome: string) => {
     setIsCompleting(true);
-    
+
     const result = await completeCollectionVisit(taskToComplete._id, outcome);
-    
+
     if (isMounted.current) {
       setIsCompleting(false);
       setCompleteModalOpen(false);
@@ -168,18 +173,31 @@ const TablaVueltasOperador: FC<TablaVueltasOperadorProps> = ({
     }
 
     if (!result.error) {
-       enqueueSnackbar(result.msg || 'Visita completada correctamente', { 
-         variant: 'success',
-         anchorOrigin: { vertical: 'top', horizontal: 'center' },
-         autoHideDuration: 2000
-       });
-       
+      enqueueSnackbar(result.msg || 'Visita completada correctamente', {
+        variant: 'success',
+        anchorOrigin: { vertical: 'top', horizontal: 'center' },
+        autoHideDuration: 2000
+      });
     } else {
-       enqueueSnackbar(result.msg, { 
-         variant: 'error',
-         anchorOrigin: { vertical: 'top', horizontal: 'center' }
-       });
+      enqueueSnackbar(result.msg, {
+        variant: 'error',
+        anchorOrigin: { vertical: 'top', horizontal: 'center' }
+      });
     }
+  };
+
+  const handleOpenSchedule = (task: any) => {
+    setTaskToSchedule(task);
+    setScheduleModalOpen(true);
+  };
+
+  const handleScheduleSaved = () => {
+    enqueueSnackbar('Hora programada exitosamente', {
+      variant: 'success',
+      anchorOrigin: { vertical: 'top', horizontal: 'center' },
+      autoHideDuration: 2000
+    });
+    onRefresh();
   };
 
   const handleGoToCompletion = (task: any) => {
@@ -247,6 +265,9 @@ const TablaVueltasOperador: FC<TablaVueltasOperadorProps> = ({
         <Table>
           <TableHead>
             <TableRow>
+              {!showTimeBetween && (
+                <TableCell align="center">HORA PROGRAMADA</TableCell>
+              )}
               <TableCell>TIPO DE VUELTA</TableCell>
               <TableCell>CLIENTE</TableCell>
               {!showTimeBetween && <TableCell>SECTOR</TableCell>}
@@ -262,31 +283,69 @@ const TablaVueltasOperador: FC<TablaVueltasOperadorProps> = ({
                   <TableCell align="center">TIEMPO ENTRE VUELTAS</TableCell>
                 </>
               )}
-              {!showTimeBetween && userRole !== "ADMIN" && <TableCell align="center">ACCIÓN</TableCell>}
+              {!showTimeBetween && userRole !== 'ADMIN' && (
+                <TableCell align="center">ACCIÓN</TableCell>
+              )}
             </TableRow>
           </TableHead>
           <TableBody>
             {paginatedTasks.map((task, index) => {
               // Since tasks are sorted descending (most recent first),
               // the "next" task in the array is chronologically earlier
-              const nextTask = index < paginatedTasks.length - 1 ? paginatedTasks[index + 1] : null;
+              const nextTask =
+                index < paginatedTasks.length - 1
+                  ? paginatedTasks[index + 1]
+                  : null;
               const timeBetween = showTimeBetween
                 ? calculateTimeBetween(task, nextTask)
                 : null;
 
-              const source = task.rent || task.sale; 
+              const source = task.rent || task.sale;
               const customer = source?.customer;
               const residence = customer?.currentResidence;
 
-              const typeLabel = task.type === 'RECOLECCION_VENTA' ? 'RECOLECCIÓN GARANTÍA' : task.type;
+              const typeLabel =
+                task.type === 'RECOLECCION_VENTA'
+                  ? 'RECOLECCIÓN GARANTÍA'
+                  : task.type;
               const isPriority = task.isPriority || false;
 
               const customerName = customer?.name || 'N/A';
               const sectorName = residence?.sector?.name || 'N/A';
-              
+
               const cellPhone = customer?.cell || customer?.phone || 'N/A';
               return (
-                <TableRow hover key={task._id} sx={isPriority ? { backgroundColor: '#fff3cd' } : {}}>
+                <TableRow
+                  hover
+                  key={task._id}
+                  sx={isPriority ? { backgroundColor: '#fff3cd' } : {}}
+                >
+                  {!showTimeBetween && (
+                    <TableCell align="center">
+                      {task.scheduledTime ? (
+                        <Chip
+                          label={formatTZDate(
+                            new Date(task.scheduledTime),
+                            'HH:mm'
+                          )}
+                          color="success"
+                          size="small"
+                          icon={<AccessTimeIcon />}
+                          onClick={() => handleOpenSchedule(task)}
+                          sx={{ cursor: 'pointer' }}
+                        />
+                      ) : (
+                        <Button
+                          size="small"
+                          variant="outlined"
+                          onClick={() => handleOpenSchedule(task)}
+                          startIcon={<AccessTimeIcon />}
+                        >
+                          Programar
+                        </Button>
+                      )}
+                    </TableCell>
+                  )}
                   <TableCell>
                     <Box display="flex" alignItems="center" gap={1}>
                       <Chip
@@ -302,15 +361,17 @@ const TablaVueltasOperador: FC<TablaVueltasOperadorProps> = ({
                           sx={{ fontWeight: 'bold' }}
                         />
                       )}
-                      {(task.type === 'CAMBIO' || task.type === 'RECOLECCION_VENTA') && task.reason && (
-                        <Tooltip title={`Motivo: ${task.reason}`} arrow>
-                          <InfoOutlinedIcon 
-                            fontSize="small" 
-                            color="warning"
-                            sx={{ cursor: 'help' }}
-                          />
-                        </Tooltip>
-                      )}
+                      {(task.type === 'CAMBIO' ||
+                        task.type === 'RECOLECCION_VENTA') &&
+                        task.reason && (
+                          <Tooltip title={`Motivo: ${task.reason}`} arrow>
+                            <InfoOutlinedIcon
+                              fontSize="small"
+                              color="warning"
+                              sx={{ cursor: 'help' }}
+                            />
+                          </Tooltip>
+                        )}
                     </Box>
                   </TableCell>
                   <TableCell>
@@ -367,7 +428,7 @@ const TablaVueltasOperador: FC<TablaVueltasOperadorProps> = ({
                       fontWeight="bold"
                       color="text.primary"
                       gutterBottom
-                      align='center'
+                      align="center"
                       noWrap
                     >
                       {task.takenAt
@@ -376,7 +437,9 @@ const TablaVueltasOperador: FC<TablaVueltasOperadorProps> = ({
                     </Typography>
                   </TableCell>
                   <TableCell align="center">
-                    {(task.rent?.imagesUrl || task.sale?.delivery?.imagesUrl || task.imagesUrl) ? (
+                    {task.rent?.imagesUrl ||
+                    task.sale?.delivery?.imagesUrl ||
+                    task.imagesUrl ? (
                       <Tooltip title="Ver fotos" arrow>
                         <IconButton
                           sx={{
@@ -410,12 +473,7 @@ const TablaVueltasOperador: FC<TablaVueltasOperadorProps> = ({
                           }}
                           color="inherit"
                           size="small"
-                          onClick={() =>
-                            window.open(
-                              residence.maps,
-                              '_blank'
-                            )
-                          }
+                          onClick={() => window.open(residence.maps, '_blank')}
                         >
                           <MapIcon fontSize="small" />
                         </IconButton>
@@ -427,12 +485,14 @@ const TablaVueltasOperador: FC<TablaVueltasOperadorProps> = ({
                     )}
                   </TableCell>
                   <TableCell align="center">
-                    {(task.type === 'ENTREGA' || task.type === 'CAMBIO' || task.type === 'RECOLECCION') ? (
+                    {task.type === 'ENTREGA' ||
+                    task.type === 'CAMBIO' ||
+                    task.type === 'RECOLECCION' ? (
                       <Tooltip title="Ver formato" arrow>
                         <IconButton
-                          sx={{ 
-                            '&:hover': { background: 'rgba(0, 0, 0, 0.08)' }, 
-                            color: 'success.main' 
+                          sx={{
+                            '&:hover': { background: 'rgba(0, 0, 0, 0.08)' },
+                            color: 'success.main'
                           }}
                           color="inherit"
                           size="small"
@@ -442,7 +502,9 @@ const TablaVueltasOperador: FC<TablaVueltasOperadorProps> = ({
                         </IconButton>
                       </Tooltip>
                     ) : (
-                      <Typography variant="body2" color="text.secondary">-</Typography>
+                      <Typography variant="body2" color="text.secondary">
+                        -
+                      </Typography>
                     )}
                   </TableCell>
                   {showTimeBetween && (
@@ -463,7 +525,7 @@ const TablaVueltasOperador: FC<TablaVueltasOperadorProps> = ({
                       <TableCell align="center">
                         {timeBetween !== null && nextTask ? (
                           <Chip
-                            label={timeBetween+ ' min.'}
+                            label={timeBetween + ' min.'}
                             color={timeBetween > 30 ? 'error' : 'success'}
                             size="small"
                           />
@@ -475,7 +537,7 @@ const TablaVueltasOperador: FC<TablaVueltasOperadorProps> = ({
                       </TableCell>
                     </>
                   )}
-                  {!showTimeBetween && userRole !== "ADMIN" && (
+                  {!showTimeBetween && userRole !== 'ADMIN' && (
                     <TableCell align="center">
                       <Button
                         variant="contained"
@@ -634,17 +696,31 @@ const TablaVueltasOperador: FC<TablaVueltasOperadorProps> = ({
         </DialogContent>
       </Dialog>
       {taskToComplete && (
-         <CompleteCollectionModal
-           open={completeModalOpen}
-           handleOnClose={() => { 
-             setCompleteModalOpen(false);
-             setTaskToComplete(null);
-           }}
-           handleOnConfirm={handleConfirmCompletion} 
-           isLoading={isCompleting}
-         />
-       )}
-       {formatIsOpen && formatConfig && (
+        <CompleteCollectionModal
+          open={completeModalOpen}
+          handleOnClose={() => {
+            setCompleteModalOpen(false);
+            setTaskToComplete(null);
+          }}
+          handleOnConfirm={handleConfirmCompletion}
+          isLoading={isCompleting}
+        />
+      )}
+      {scheduleModalOpen && taskToSchedule && (
+        <ScheduleTimePicker
+          open={scheduleModalOpen}
+          onClose={() => {
+            setScheduleModalOpen(false);
+            setTaskToSchedule(null);
+          }}
+          taskId={taskToSchedule._id}
+          taskType={taskToSchedule.type}
+          currentScheduledTime={taskToSchedule.scheduledTime}
+          onScheduleSaved={handleScheduleSaved}
+          selectedDate={selectedDate}
+        />
+      )}
+      {formatIsOpen && formatConfig && (
         <FormatModal
           selectedId={formatConfig.task?._id}
           open={formatIsOpen}
@@ -657,7 +733,7 @@ const TablaVueltasOperador: FC<TablaVueltasOperadorProps> = ({
             setFormatText('');
             setFormatConfig(null);
           }}
-          onSubmitAction={formatConfig.action} 
+          onSubmitAction={formatConfig.action}
         />
       )}
     </Card>

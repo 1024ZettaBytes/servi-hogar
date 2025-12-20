@@ -16,6 +16,7 @@ export interface IRentDelivery extends Document {
   wasSent: boolean;
   operator: Schema.Types.ObjectId;
   cancellationReason: string;
+  scheduledTime: Date;
   createdAt: Date;
   updatedAt: Date;
   createdBy: Schema.Types.ObjectId;
@@ -46,6 +47,7 @@ const RentDeliverySchema = new Schema<IRentDelivery>({
   wasSent: { type: Boolean, default: false},
   cancellationReason: { type: String, default: '' },
   operator: { type: Schema.Types.ObjectId, default: null, ref: 'users' },
+  scheduledTime: { type: Date, default: null },
   createdAt: { type: Date, required: true },
   updatedAt: { type: Date, required: true },
   createdBy: { type: Schema.Types.ObjectId, default: null, ref: 'users' },

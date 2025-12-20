@@ -21,6 +21,7 @@ export interface ISaleDelivery extends Document {
   customerDataUpdated: boolean;
   updatedCustomerData: object;
   cancellationReason: string;
+  scheduledTime: Date;
   createdAt: Date;
   updatedAt: Date;
   createdBy: Schema.Types.ObjectId;
@@ -81,6 +82,7 @@ const SaleDeliverySchema = new Schema<ISaleDelivery>({
   customerDataUpdated: { type: Boolean, default: false },
   updatedCustomerData: { type: Object, default: null },
   cancellationReason: { type: String, default: '' },
+  scheduledTime: { type: Date, default: null },
   createdAt: { type: Date, required: true },
   updatedAt: { type: Date, required: true },
   createdBy: { type: Schema.Types.ObjectId, required: true, ref: 'users' },

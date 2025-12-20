@@ -485,3 +485,16 @@ export const useGetSaleRepairById = (fetcher, id) => {
     isLoadingSaleRepair: isLoading
   };
 };
+
+// Scheduled Tasks
+export const useGetScheduledSlots = (fetcher, date) => {
+  const { data, error, isLoading } = useSWR(
+    date ? `${ROUTES.SCHEDULED_SLOTS_API}?date=${date}` : null,
+    fetcher
+  );
+  return {
+    scheduledSlotsData: data?.data,
+    scheduledSlotsError: error,
+    isLoadingScheduledSlots: isLoading
+  };
+};
