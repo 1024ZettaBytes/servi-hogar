@@ -22,17 +22,28 @@ import {
   Button
 } from '@mui/material';
 import MapIcon from '@mui/icons-material/Map';
+import WhatsAppIcon from '@mui/icons-material/WhatsApp';
 import PhotoLibraryIcon from '@mui/icons-material/PhotoLibrary';
 import CloseIcon from '@mui/icons-material/Close';
 import AccessTimeIcon from '@mui/icons-material/AccessTime';
-import { useSnackbar } from 'notistack';
+import ScheduleTimePicker from '@/components/ScheduleTimePicker';
 import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
 import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
 import CompleteCollectionModal from '@/components/CompleteCollectionModal';
-import ScheduleTimePicker from '@/components/ScheduleTimePicker';
+import FormatModal from '@/components/FormatModal';
 import { completeCollectionVisit } from '../../lib/client/salesFetch';
 import { formatTZDate } from 'lib/client/utils';
 import { useRouter } from 'next/router';
+import { useSnackbar } from 'notistack';
+import {
+  getFormatForDelivery,
+  getFormatForChange,
+  getFormatForPickup
+} from '../../lib/consts/OBJ_CONTS';
+import { markWasSentDelivery } from '../../lib/client/deliveriesFetch';
+import { markWasSentChange } from '../../lib/client/changesFetch';
+import { markWasSentPickup } from '../../lib/client/pickupsFetch';
+import { getFetcher, useGetPrices } from 'pages/api/useRequest';
 
 interface TablaVueltasOperadorProps {
   className?: string;
@@ -70,6 +81,16 @@ const TablaVueltasOperador: FC<TablaVueltasOperadorProps> = ({
   const [isCompleting, setIsCompleting] = useState(false);
   const [scheduleModalOpen, setScheduleModalOpen] = useState(false);
   const [taskToSchedule, setTaskToSchedule] = useState<any>(null);
+  const [formatIsOpen, setFormatIsOpen] = useState(false);
+  const [formatText, setFormatText] = useState<string>('');
+  const [formatConfig, setFormatConfig] = useState<{
+    title: string;
+    action: any;
+    task: any;
+  } | null>(null);
+
+  const { prices } = useGetPrices(getFetcher);
+
   const { enqueueSnackbar } = useSnackbar();
   const isMounted = useRef(true);
 
@@ -90,7 +111,7 @@ const TablaVueltasOperador: FC<TablaVueltasOperadorProps> = ({
 
   const handleOpenImages = (task: any) => {
     let images;
-    
+
     if (task.type === 'RECOLECCION_VENTA') {
       // For sale warranty pickups, check pickup images first (completed pickups)
       // Then fall back to delivery images (pending pickups shown in operator view)
@@ -99,7 +120,7 @@ const TablaVueltasOperador: FC<TablaVueltasOperadorProps> = ({
       // For rent-related tasks (deliveries, pickups, changes)
       images = task.rent?.imagesUrl;
     }
-    
+
     setSelectedImages(images);
     setOpenImagesDialog(true);
   };
@@ -109,11 +130,42 @@ const TablaVueltasOperador: FC<TablaVueltasOperadorProps> = ({
     setSelectedImages(null);
   };
 
-const handleConfirmCompletion = async (outcome: string) => {
+  const handleOpenFormat = (task: any) => {
+    let text = '';
+    let action = null;
+    let title = '';
+
+    if (task.type === 'ENTREGA' && task.rent) {
+      text = getFormatForDelivery(task.rent, task, task);
+      action = markWasSentDelivery;
+      title = 'Formato de entrega';
+    } else if (task.type === 'CAMBIO' && task.rent) {
+      text = getFormatForChange(task.rent, task, task.reason, task);
+      action = markWasSentChange;
+      title = 'Formato de cambio';
+    } else if (task.type === 'RECOLECCION' && task.rent) {
+      const dayPrice = prices?.dayPrice || 0;
+      text = getFormatForPickup(task.rent, task, task, dayPrice);
+      action = markWasSentPickup;
+      title = 'Formato de recolección';
+    }
+
+    if (text && action) {
+      setFormatConfig({
+        title,
+        action,
+        task
+      });
+      setFormatText(text);
+      setFormatIsOpen(true);
+    }
+  };
+
+  const handleConfirmCompletion = async (outcome: string) => {
     setIsCompleting(true);
-    
+
     const result = await completeCollectionVisit(taskToComplete._id, outcome);
-    
+
     if (isMounted.current) {
       setIsCompleting(false);
       setCompleteModalOpen(false);
@@ -121,17 +173,16 @@ const handleConfirmCompletion = async (outcome: string) => {
     }
 
     if (!result.error) {
-       enqueueSnackbar(result.msg || 'Visita completada correctamente', { 
-         variant: 'success',
-         anchorOrigin: { vertical: 'top', horizontal: 'center' },
-         autoHideDuration: 2000
-       });
-       
+      enqueueSnackbar(result.msg || 'Visita completada correctamente', {
+        variant: 'success',
+        anchorOrigin: { vertical: 'top', horizontal: 'center' },
+        autoHideDuration: 2000
+      });
     } else {
-       enqueueSnackbar(result.msg, { 
-         variant: 'error',
-         anchorOrigin: { vertical: 'top', horizontal: 'center' }
-       });
+      enqueueSnackbar(result.msg, {
+        variant: 'error',
+        anchorOrigin: { vertical: 'top', horizontal: 'center' }
+      });
     }
   };
 
@@ -214,7 +265,9 @@ const handleConfirmCompletion = async (outcome: string) => {
         <Table>
           <TableHead>
             <TableRow>
-              {!showTimeBetween && <TableCell align="center">HORA PROGRAMADA</TableCell>}
+              {!showTimeBetween && (
+                <TableCell align="center">HORA PROGRAMADA</TableCell>
+              )}
               <TableCell>TIPO DE VUELTA</TableCell>
               <TableCell>CLIENTE</TableCell>
               {!showTimeBetween && <TableCell>SECTOR</TableCell>}
@@ -223,42 +276,58 @@ const handleConfirmCompletion = async (outcome: string) => {
               <TableCell>HORA ASIGNACIÓN</TableCell>
               <TableCell align="center">FOTOS</TableCell>
               <TableCell align="center">UBICACIÓN</TableCell>
+              <TableCell align="center"></TableCell>
               {showTimeBetween && (
                 <>
                   <TableCell>HORA DE REALIZACIÓN</TableCell>
                   <TableCell align="center">TIEMPO ENTRE VUELTAS</TableCell>
                 </>
               )}
-              {!showTimeBetween && userRole !== "ADMIN" && <TableCell align="center">ACCIÓN</TableCell>}
+              {!showTimeBetween && userRole !== 'ADMIN' && (
+                <TableCell align="center">ACCIÓN</TableCell>
+              )}
             </TableRow>
           </TableHead>
           <TableBody>
             {paginatedTasks.map((task, index) => {
               // Since tasks are sorted descending (most recent first),
               // the "next" task in the array is chronologically earlier
-              const nextTask = index < paginatedTasks.length - 1 ? paginatedTasks[index + 1] : null;
+              const nextTask =
+                index < paginatedTasks.length - 1
+                  ? paginatedTasks[index + 1]
+                  : null;
               const timeBetween = showTimeBetween
                 ? calculateTimeBetween(task, nextTask)
                 : null;
 
-              const source = task.rent || task.sale; 
+              const source = task.rent || task.sale;
               const customer = source?.customer;
               const residence = customer?.currentResidence;
 
-              const typeLabel = task.type === 'RECOLECCION_VENTA' ? 'RECOLECCIÓN GARANTÍA' : task.type;
+              const typeLabel =
+                task.type === 'RECOLECCION_VENTA'
+                  ? 'RECOLECCIÓN GARANTÍA'
+                  : task.type;
               const isPriority = task.isPriority || false;
 
               const customerName = customer?.name || 'N/A';
               const sectorName = residence?.sector?.name || 'N/A';
-              
+
               const cellPhone = customer?.cell || customer?.phone || 'N/A';
               return (
-                <TableRow hover key={task._id} sx={isPriority ? { backgroundColor: '#fff3cd' } : {}}>
+                <TableRow
+                  hover
+                  key={task._id}
+                  sx={isPriority ? { backgroundColor: '#fff3cd' } : {}}
+                >
                   {!showTimeBetween && (
                     <TableCell align="center">
                       {task.scheduledTime ? (
                         <Chip
-                          label={formatTZDate(new Date(task.scheduledTime), 'HH:mm')}
+                          label={formatTZDate(
+                            new Date(task.scheduledTime),
+                            'HH:mm'
+                          )}
                           color="success"
                           size="small"
                           icon={<AccessTimeIcon />}
@@ -292,15 +361,17 @@ const handleConfirmCompletion = async (outcome: string) => {
                           sx={{ fontWeight: 'bold' }}
                         />
                       )}
-                      {(task.type === 'CAMBIO' || task.type === 'RECOLECCION_VENTA') && task.reason && (
-                        <Tooltip title={`Motivo: ${task.reason}`} arrow>
-                          <InfoOutlinedIcon 
-                            fontSize="small" 
-                            color="warning"
-                            sx={{ cursor: 'help' }}
-                          />
-                        </Tooltip>
-                      )}
+                      {(task.type === 'CAMBIO' ||
+                        task.type === 'RECOLECCION_VENTA') &&
+                        task.reason && (
+                          <Tooltip title={`Motivo: ${task.reason}`} arrow>
+                            <InfoOutlinedIcon
+                              fontSize="small"
+                              color="warning"
+                              sx={{ cursor: 'help' }}
+                            />
+                          </Tooltip>
+                        )}
                     </Box>
                   </TableCell>
                   <TableCell>
@@ -357,7 +428,7 @@ const handleConfirmCompletion = async (outcome: string) => {
                       fontWeight="bold"
                       color="text.primary"
                       gutterBottom
-                      align='center'
+                      align="center"
                       noWrap
                     >
                       {task.takenAt
@@ -366,7 +437,9 @@ const handleConfirmCompletion = async (outcome: string) => {
                     </Typography>
                   </TableCell>
                   <TableCell align="center">
-                    {(task.rent?.imagesUrl || task.sale?.delivery?.imagesUrl || task.imagesUrl) ? (
+                    {task.rent?.imagesUrl ||
+                    task.sale?.delivery?.imagesUrl ||
+                    task.imagesUrl ? (
                       <Tooltip title="Ver fotos" arrow>
                         <IconButton
                           sx={{
@@ -400,12 +473,7 @@ const handleConfirmCompletion = async (outcome: string) => {
                           }}
                           color="inherit"
                           size="small"
-                          onClick={() =>
-                            window.open(
-                              residence.maps,
-                              '_blank'
-                            )
-                          }
+                          onClick={() => window.open(residence.maps, '_blank')}
                         >
                           <MapIcon fontSize="small" />
                         </IconButton>
@@ -413,6 +481,29 @@ const handleConfirmCompletion = async (outcome: string) => {
                     ) : (
                       <Typography variant="body2" color="text.secondary">
                         Ψ
+                      </Typography>
+                    )}
+                  </TableCell>
+                  <TableCell align="center">
+                    {task.type === 'ENTREGA' ||
+                    task.type === 'CAMBIO' ||
+                    task.type === 'RECOLECCION' ? (
+                      <Tooltip title="Ver formato" arrow>
+                        <IconButton
+                          sx={{
+                            '&:hover': { background: 'rgba(0, 0, 0, 0.08)' },
+                            color: 'success.main'
+                          }}
+                          color="inherit"
+                          size="small"
+                          onClick={() => handleOpenFormat(task)}
+                        >
+                          <WhatsAppIcon fontSize="small" />
+                        </IconButton>
+                      </Tooltip>
+                    ) : (
+                      <Typography variant="body2" color="text.secondary">
+                        -
                       </Typography>
                     )}
                   </TableCell>
@@ -434,7 +525,7 @@ const handleConfirmCompletion = async (outcome: string) => {
                       <TableCell align="center">
                         {timeBetween !== null && nextTask ? (
                           <Chip
-                            label={timeBetween+ ' min.'}
+                            label={timeBetween + ' min.'}
                             color={timeBetween > 30 ? 'error' : 'success'}
                             size="small"
                           />
@@ -446,7 +537,7 @@ const handleConfirmCompletion = async (outcome: string) => {
                       </TableCell>
                     </>
                   )}
-                  {!showTimeBetween && userRole !== "ADMIN" && (
+                  {!showTimeBetween && userRole !== 'ADMIN' && (
                     <TableCell align="center">
                       <Button
                         variant="contained"
@@ -605,16 +696,16 @@ const handleConfirmCompletion = async (outcome: string) => {
         </DialogContent>
       </Dialog>
       {taskToComplete && (
-         <CompleteCollectionModal
-           open={completeModalOpen}
-           handleOnClose={() => { 
-             setCompleteModalOpen(false);
-             setTaskToComplete(null);
-           }}
-           handleOnConfirm={handleConfirmCompletion} 
-           isLoading={isCompleting}
-         />
-       )}
+        <CompleteCollectionModal
+          open={completeModalOpen}
+          handleOnClose={() => {
+            setCompleteModalOpen(false);
+            setTaskToComplete(null);
+          }}
+          handleOnConfirm={handleConfirmCompletion}
+          isLoading={isCompleting}
+        />
+      )}
       {scheduleModalOpen && taskToSchedule && (
         <ScheduleTimePicker
           open={scheduleModalOpen}
@@ -627,6 +718,22 @@ const handleConfirmCompletion = async (outcome: string) => {
           currentScheduledTime={taskToSchedule.scheduledTime}
           onScheduleSaved={handleScheduleSaved}
           selectedDate={selectedDate}
+        />
+      )}
+      {formatIsOpen && formatConfig && (
+        <FormatModal
+          selectedId={formatConfig.task?._id}
+          open={formatIsOpen}
+          title={formatConfig.title}
+          text={formatConfig.task?.wasSent ? 'ENVIADO' : null}
+          textColor={'green'}
+          formatText={formatText}
+          onAccept={() => {
+            setFormatIsOpen(false);
+            setFormatText('');
+            setFormatConfig(null);
+          }}
+          onSubmitAction={formatConfig.action}
         />
       )}
     </Card>
