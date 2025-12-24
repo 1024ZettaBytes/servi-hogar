@@ -19,6 +19,7 @@ export interface IMachine extends Document {
   lastUpdatedBy: Schema.Types.ObjectId;
   partner: Schema.Types.ObjectId;
   evidencesUrls: [String];
+  warranty: Date;
   active: boolean;
 }
 
@@ -56,6 +57,7 @@ const MachineSchema = new Schema<IMachine>({
   lastUpdatedBy: { type: Schema.Types.ObjectId, required: true, ref: 'users' },
   partner: { type: Schema.Types.ObjectId, default: null, ref: 'partners' },
   evidencesUrls: { type: [String], default: [] },
+  warranty: { type: Date, default: null },
   active: { type: 'boolean', default: true }
 });
 
