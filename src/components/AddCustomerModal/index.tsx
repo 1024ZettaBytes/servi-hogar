@@ -21,6 +21,7 @@ import {
   Radio,
   Autocomplete,
   Alert,
+  Checkbox,
 } from "@mui/material";
 import { LoadingButton } from "@mui/lab";
 import { saveCustomer } from "../../../lib/client/customersFetch";
@@ -35,6 +36,7 @@ function AddCustomerModal(props) {
   const [wasReferred, setWasReferred] = useState(false);
   const [selectedHowFound, setSelectedHowFound] = useState();
   const [referredBy, setReferredBy] = useState();
+  const [isPlanOro, setIsPlanOro] = useState(false);
 
   function handleCitySelection(city) {
     setSelectedCity(city);
@@ -70,6 +72,7 @@ function AddCustomerModal(props) {
       nameRef: event.target.nameRef.value,
       telRef: event.target.telRef.value,
       maps: event.target.maps.value,
+      isPlanOro: isPlanOro,
     });
     setIsLoading(false);
     if (!result.error) {
@@ -191,6 +194,17 @@ function AddCustomerModal(props) {
                   />
                 </Grid>
               ) : null}
+              <Grid item lg={12}>
+                <FormControlLabel
+                  control={
+                    <Checkbox
+                      checked={isPlanOro}
+                      onChange={(e) => setIsPlanOro(e.target.checked)}
+                    />
+                  }
+                  label="Plan Oro ($499/mes - 4 semanas)"
+                />
+              </Grid>
               <Grid item lg={12}>
                 <Typography
                   variant="h5"

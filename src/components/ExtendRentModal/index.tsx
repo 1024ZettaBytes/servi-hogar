@@ -27,6 +27,7 @@ import {
 } from "../../../pages/api/useRequest";
 import { extendRent } from "../../../lib/client/rentsFetch";
 import { capitalizeFirstLetter, addDaysToDate, formatTZDate } from "lib/client/utils";
+import { PLAN_ORO } from "lib/consts/OBJ_CONTS";
 import numeral from "numeral";
 import { useSnackbar } from "notistack";
 import { ROUTES } from "lib/consts/API_URL_CONST";
@@ -49,6 +50,14 @@ function ExtendRentModal(props) {
     msg: "",
   });
   const [paymentModalIsOpen, setPaymentModalIsOpen] = useState<boolean>(false);
+
+  // Check if customer has Plan Oro
+  const isPlanOro = rent?.customer?.isPlanOro || false;
+
+  // For Plan Oro customers, override the selected weeks to always be 4
+  const effectiveRentPeriod = isPlanOro 
+    ? { selectedWeeks: PLAN_ORO.WEEKS, useFreeWeeks: false }
+    : rentPeriod;
 
   // Initialize lateFeeDays when rent data loads
   useEffect(() => {
@@ -81,7 +90,7 @@ function ExtendRentModal(props) {
       const diffTime = today.getTime() - originalEndDate.getTime();
       daysLate = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
     
-      const { selectedWeeks } = rentPeriod;
+      const { selectedWeeks } = effectiveRentPeriod;
       const extensionCoveredDays = selectedWeeks * 7;
       const maxChargeableDays = Math.min(daysLate, extensionCoveredDays);
       
@@ -94,16 +103,24 @@ function ExtendRentModal(props) {
 
   let totalDue = 0;
   if (rent) {
-    const weeksToPay =
-      rentPeriod.selectedWeeks -
-      (rentPeriod.useFreeWeeks ? rent.customer.freeWeeks : 0);
-    
-    const newWeeksCost = weeksToPay * rent.customer?.level?.weekPrice;
-
+    let newWeeksCost;
+    if (isPlanOro) {
+      // Plan Oro has fixed price
+      newWeeksCost = PLAN_ORO.PRICE;
+    } else {
+      const weeksToPay =
+        effectiveRentPeriod.selectedWeeks -
+        (effectiveRentPeriod.useFreeWeeks ? rent.customer.freeWeeks : 0);
+      newWeeksCost = weeksToPay * rent.customer?.level?.weekPrice;
+    }
     totalDue = newWeeksCost + (chargeLateFee ? lateFeeAmount : 0);
   }
 
   const onChangePeriod = (id, value) => {
+    // Plan Oro customers can only extend for exactly 4 weeks
+    if (isPlanOro) {
+      return;
+    }
     setRentPeriod({ ...rentPeriod, [id]: value });
   };
   const checkCustomerBalance = () => {
@@ -120,8 +137,8 @@ function ExtendRentModal(props) {
   const checkEnabledButton = () => {
     return (
       rent &&
-      rentPeriod.selectedWeeks &&
-      rentPeriod.selectedWeeks > 0 &&
+      effectiveRentPeriod.selectedWeeks &&
+      effectiveRentPeriod.selectedWeeks > 0 &&
       (customerHasBalance || rent.customer.balance + getToPay() === 0)
     );
   };
@@ -132,7 +149,7 @@ function ExtendRentModal(props) {
     setIsSubmitting(true);
     const result = await extendRent({
       rentId,
-      rentPeriod,
+      rentPeriod: effectiveRentPeriod,
       lateFee: chargeLateFee ? lateFeeAmount : 0,
     });
     setIsSubmitting(false);
@@ -309,12 +326,13 @@ function ExtendRentModal(props) {
                         <Grid item lg={12} mt={4}>
                           <RentPeriodExtend
                             label={"Extender"}
-                            selectedWeeks={rentPeriod.selectedWeeks}
-                            useFreeWeeks={rentPeriod.useFreeWeeks}
+                            selectedWeeks={effectiveRentPeriod.selectedWeeks}
+                            useFreeWeeks={effectiveRentPeriod.useFreeWeeks}
                             freeWeeks={rent.customer?.freeWeeks}
                             weekPrice={rent.customer?.level?.weekPrice}
                             onChangePeriod={onChangePeriod}
                             lateFee={chargeLateFee ? lateFeeAmount : 0}
+                            isPlanOro={isPlanOro}
                           />
                         </Grid>
                         {daysLate > 0 && (
@@ -342,14 +360,14 @@ function ExtendRentModal(props) {
                                     value={lateFeeDays}
                                     onChange={(e) => {
                                       const value = parseInt(e.target.value) || 0;
-                                      const maxDays = Math.min(daysLate, rentPeriod.selectedWeeks * 7);
+                                      const maxDays = Math.min(daysLate, effectiveRentPeriod.selectedWeeks * 7);
                                       setLateFeeDays(Math.min(Math.max(0, value), maxDays));
                                     }}
                                     inputProps={{
                                       min: 0,
-                                      max: Math.min(daysLate, rentPeriod.selectedWeeks * 7)
+                                      max: Math.min(daysLate, effectiveRentPeriod.selectedWeeks * 7)
                                     }}
-                                    helperText={`Máximo: ${Math.min(daysLate, rentPeriod.selectedWeeks * 7)} días. Cargo: $${lateFeeAmount.toFixed(2)} ($${LATE_FEE_PER_DAY} por día)`}
+                                    helperText={`Máximo: ${Math.min(daysLate, effectiveRentPeriod.selectedWeeks * 7)} días. Cargo: $${lateFeeAmount.toFixed(2)} ($${LATE_FEE_PER_DAY} por día)`}
                                   />
                                 </Box>
                               )}
@@ -396,7 +414,7 @@ function ExtendRentModal(props) {
                                 formatTZDate(
                                   addDaysToDate(
                                     new Date(rent?.endDate),
-                                    rentPeriod.selectedWeeks * 7
+                                    effectiveRentPeriod.selectedWeeks * 7
                                   ),
                                   "MMMM DD YYYY"
                                 )
