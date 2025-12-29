@@ -158,7 +158,7 @@ function AddSalesMachineModal(props) {
                     setWarrantyDate(newValue);
                   }}
                   renderInput={(params) => (
-                    <TextField {...params} required fullWidth/>
+                    <TextField {...params} fullWidth/>
                   )}
                 />
               </Grid>
