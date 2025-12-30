@@ -19,7 +19,8 @@ import {
   Tooltip,
   IconButton,
   useTheme,
-  InputAdornment
+  InputAdornment,
+  Checkbox
 } from '@mui/material';
 import { useSnackbar } from 'notistack';
 import { Skeleton } from '@mui/material';
@@ -240,7 +241,7 @@ function CustomerInfoTab({
                 Datos personales
               </Typography>
             </Box>
-            {!isEditing.info && (
+            {!isEditing.info && customer && (
               <Button
                 variant="text"
                 startIcon={<EditTwoToneIcon />}
@@ -442,6 +443,46 @@ function CustomerInfoTab({
                                   maxPayDays: e.target.value
                                 });
                               }}
+                            />
+                          )
+                        ) : (
+                          <Skeleton
+                            variant="text"
+                            sx={{ fontSize: '1rem', width: '100px' }}
+                          />
+                        )}
+                      </Box>
+                    </Grid>
+                    <Grid item xs={3} sm={6} md={6} mt={1} textAlign={{ sm: 'right' }}>
+                      <Box pr={2} pb={2}>
+                        Plan Oro:
+                      </Box>
+                    </Grid>
+                    <Grid item xs={9} sm={6} md={6} mt={1}>
+                      <Box sx={{ maxWidth: { xs: 'auto', sm: 300 } }}>
+                        {customer ? (
+                          !isEditing.info || role !== 'ADMIN' ? (
+                            customer?.isPlanOro ? (
+                              <Label color="warning">
+                                <b>Plan Oro Activo</b>
+                              </Label>
+                            ) : (
+                              <Text color="black">No</Text>
+                            )
+                          ) : (
+                            <FormControlLabel
+                              control={
+                                <Checkbox
+                                  checked={customerToEdit?.isPlanOro || false}
+                                  onChange={(e) => {
+                                    setCustomerToEdit({
+                                      ...customerToEdit,
+                                      isPlanOro: e.target.checked
+                                    });
+                                  }}
+                                />
+                              }
+                              label="Activar Plan Oro ($499/mes)"
                             />
                           )
                         ) : (
@@ -659,7 +700,7 @@ function CustomerInfoTab({
                 Se muestra el domicilio actual del cliente
               </Typography>
             </Box>
-            {!isEditing.residence && (
+            {!isEditing.residence && customer && (
               <Button
                 variant="text"
                 startIcon={<EditTwoToneIcon />}

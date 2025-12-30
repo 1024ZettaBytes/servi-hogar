@@ -1,6 +1,12 @@
 import { connectToDatabase, isConnected } from '../../../lib/db';
 import { Machine } from '../../../lib/models/Machine';
 import { Partner } from '../../../lib/models/Partner';
+import { Sale } from '../../../lib/models/Sale';
+import { SalesMachine } from '../../../lib/models/SalesMachine';
+import { SaleDelivery } from '../../../lib/models/SaleDelivery';
+import { addDays } from 'date-fns';
+import { set } from 'nprogress';
+import { setDateToEnd } from '../../../lib/client/utils';
 
 async function partnerAssign(req, res) {
   try {
@@ -45,10 +51,45 @@ async function partnerAssign(req, res) {
   }
 }
 
+async function setWarrantyDate(req, res) {
+  try {
+    await connectToDatabase();
+    const sales = await Sale.find();
+    for (const sale of sales) {
+      const delivery = await SaleDelivery.findOne({ sale: sale._id });
+      if (!delivery || delivery.isRepairReturn) {
+        console.log(`No delivery found for sale ${sale.saleNum}`);
+        continue;
+      }
+      if(delivery.status !== "COMPLETADA") continue;
+
+      let machine = await SalesMachine.findById(sale.machine);
+      if(!machine){
+        machine = await Machine.findById(sale.machine);
+      }
+
+      const saleDate = sale.saleDate;
+      if(machine.isFromRent){
+        machine.warranty = addDays(setDateToEnd(saleDate), 90);
+      }
+      else{
+        machine.warranty = addDays(setDateToEnd(saleDate), 180);
+      }
+      await machine.save();
+      console.log(`Warranty date set for machine ${machine.machineNum} to ${machine.warranty}`);
+    }
+    res.status(200).json({ message: "Warranty dates updated successfully" });
+
+  } catch (e) {
+    console.error(e);
+    res.status(500).json({ errorMsg: e.message });
+  }
+}
+
 async function handler(req, res) {
   switch (req.method) {
     case 'GET':
-      await partnerAssign(req, res);
+      await setWarrantyDate(req, res);
       break;
     case 'POST':
       break;
