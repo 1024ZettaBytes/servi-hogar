@@ -38,6 +38,7 @@ import {
 } from "lib/client/utils";
 import NextBreadcrumbs from "@/components/Shared/BreadCrums";
 import numeral from "numeral";
+import { PAYMENT_METHODS } from "lib/consts/OBJ_CONTS";
 
 const cellStyle = { border: "2px solid #374246" };
 const headerStyle = {
@@ -47,7 +48,8 @@ const headerStyle = {
   fontWeight: "bold",
 };
 
-function DayReport() {
+function DayReport({session}) {
+  const isSuperUser = session?.user?.isSuperUser || false;
   const paths = ["Inicio", "Reportes", "Ingresos", "Diario"];
   const [selectedDate, setSelectedDate] = useState<Date>(
     convertDateToLocal(new Date())
@@ -186,7 +188,7 @@ function DayReport() {
                               align="center"
                               style={headerStyle}
                             >
-                              {group.account}
+                              {group.account || PAYMENT_METHODS[group.method]}
                             </TableCell>
                           ))}
                         </TableRow>
@@ -208,7 +210,9 @@ function DayReport() {
                               >
                                 {numeral(group.days[0].done).format(
                                   `$${group.days[0].done}0,0.00`
-                                )}
+                                )}{
+                                  isSuperUser && group.days[0].count > 0 ? ` (${group.days[0].count})` : ""
+                                }
                               </Typography>
                             </TableCell>
                           ))}

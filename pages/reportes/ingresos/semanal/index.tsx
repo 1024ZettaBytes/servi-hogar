@@ -42,7 +42,8 @@ const headerStyle = {
   fontWeight: "bold",
 };
 const paymentStyle = { ...headerStyle, backgroundColor: "#89C3F4" };
-function DayReport() {
+function DayReport({session}) {
+  const isSuperUser = session?.user?.isSuperUser || false;
   const paths = ["Inicio", "Reportes", "Ingresos", "Semanal"];
   const [selectedDate, setSelectedDate] = useState<Date>(
     convertDateToLocal(new Date())
@@ -175,6 +176,7 @@ function DayReport() {
                   <Grid container spacing={4} p={2}>
                     <Grid item lg={12}>
                       <ActivityReportTable
+                        isSuperUser={isSuperUser}
                         colorStyle={paymentStyle}
                         list={reportData.groups}
                         TOTAL={reportData.TOTAL}
