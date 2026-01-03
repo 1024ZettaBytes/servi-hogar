@@ -4,6 +4,7 @@ import { Role } from "../../../lib/models/Role";
 import { User } from "../../../lib/models/User";
 import { connectToDatabase, isConnected } from "../../../lib/db";
 Role.init();
+const SUPER_USERS = ['WIL-ADM', 'Wilfrido-ADM'];
 export default NextAuth({
   session: {
     jwt: true,
@@ -21,10 +22,12 @@ export default NextAuth({
         session.user={wasRemoved:true};
         return session;
       }
+      const isSuperUser = SUPER_USERS.includes(userOnDb.id);
       if (userOnDb?.role?.id === tokenUser?.role) {
         session.user = {
           ...tokenUser,
-          isBlocked: userOnDb.isBlocked
+          isBlocked: userOnDb.isBlocked,
+          isSuperUser
         };
       }
       else{
@@ -32,7 +35,8 @@ export default NextAuth({
           id: userOnDb?._id, 
           name: userOnDb?.name, 
           role: userOnDb?.role?.id,
-          isBlocked: userOnDb.isBlocked
+          isBlocked: userOnDb.isBlocked,
+          isSuperUser
         }
       }
       return session;

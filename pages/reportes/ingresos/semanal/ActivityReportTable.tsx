@@ -16,12 +16,14 @@ import numeral from "numeral";
 import { PAYMENT_METHODS } from "lib/consts/OBJ_CONTS";
 
 interface ActivityReportTableProps {
+  isSuperUser?: boolean;
   colorStyle: object;
   list: any[];
   TOTAL: number;
 }
 const cellStyle = { border: "2px solid #374246" };
 const ActivityReportTable: React.FC<ActivityReportTableProps> = ({
+  isSuperUser = false,
   colorStyle,
   list,
   TOTAL,
@@ -46,6 +48,7 @@ const ActivityReportTable: React.FC<ActivityReportTableProps> = ({
                   style={colorStyle}
                 >
                   {group.account ||  PAYMENT_METHODS[group.method]}
+                  {isSuperUser && group.count > 0 ? ` (${group.count})` : ""}
                 </TableCell>
               ))}
             </TableRow>
@@ -81,6 +84,7 @@ const ActivityReportTable: React.FC<ActivityReportTableProps> = ({
                         {numeral(list[gIndex].days[dIndex].done).format(
                           `$${list[gIndex].days[dIndex].done}0,0.00`
                         )}
+                        {isSuperUser && list[gIndex].days[dIndex].count > 0 ? ` (${list[gIndex].days[dIndex].count})` : ""}
                       </Typography>
                     </TableCell>
                   ))}
