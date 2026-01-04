@@ -1,5 +1,5 @@
-import * as React from "react";
-import PropTypes from "prop-types";
+import * as React from 'react';
+import PropTypes from 'prop-types';
 import {
   Divider,
   TableContainer,
@@ -9,25 +9,28 @@ import {
   TableCell,
   TableBody,
   Typography,
-  Box,
-} from "@mui/material";
-import { format } from "date-fns";
-import es from "date-fns/locale/es";
-import { capitalizeFirstLetter } from "lib/client/utils";
+  Box
+} from '@mui/material';
+import { format } from 'date-fns';
+import es from 'date-fns/locale/es';
+import { capitalizeFirstLetter } from 'lib/client/utils';
 
 interface RegistersReportTableProps {
   header: string;
   colorStyle: object;
   list: any[];
   totalData: any;
+  type?: string;
 }
-const cellStyle = { border: "2px solid #374246" };
+const cellStyle = { border: '2px solid #374246' };
 const RegistersReportTable: React.FC<RegistersReportTableProps> = ({
   header,
   colorStyle,
   list,
   totalData,
+  type
 }) => {
+  const isBonus = type === 'BONUS';
   return (
     <div>
       <Divider />
@@ -35,7 +38,11 @@ const RegistersReportTable: React.FC<RegistersReportTableProps> = ({
         <Table size="small">
           <TableHead>
             <TableRow>
-              <TableCell align="center" style={colorStyle} colSpan={3}>
+              <TableCell
+                align="center"
+                style={colorStyle}
+                colSpan={isBonus ? 6 : 3}
+              >
                 {header}
               </TableCell>
             </TableRow>
@@ -51,6 +58,17 @@ const RegistersReportTable: React.FC<RegistersReportTableProps> = ({
               <TableCell align="center" style={colorStyle}>
                 Registro
               </TableCell>
+              {isBonus && ( <>
+              <TableCell align="center" style={colorStyle}>
+                Cliente
+              </TableCell>
+              <TableCell align="center" style={colorStyle}>
+                Descripción
+              </TableCell>
+              <TableCell align="center" style={colorStyle}>
+                Usuario
+              </TableCell>
+              </>)}
             </TableRow>
             {list?.map((day) => (
               <TableRow key={`${header}-${day?.weekDay}`}>
@@ -62,7 +80,7 @@ const RegistersReportTable: React.FC<RegistersReportTableProps> = ({
                     gutterBottom
                     noWrap
                   >
-                    {format(new Date(day?.date),"dd/MM/yyyy", { locale: es})}
+                    {format(new Date(day?.date), 'dd/MM/yyyy', { locale: es })}
                   </Typography>
                 </TableCell>
                 <TableCell align="center" style={cellStyle}>
@@ -85,11 +103,46 @@ const RegistersReportTable: React.FC<RegistersReportTableProps> = ({
                     {day?.done}
                   </Typography>
                 </TableCell>
+                {isBonus && ( <>
+                <TableCell align="center" style={cellStyle}>
+                  {day?.list?.map((reg, index) => (
+                    <TableRow key={`${header}-customer-${index}`}>
+                      <TableCell align="center" style={cellStyle}>
+                        <Typography variant="body1" color="text.primary" noWrap>
+                          {reg?.customer?.name}
+                        </Typography>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableCell>
+                <TableCell align="center" style={cellStyle}>
+                  {day?.list?.map((reg, index) => (
+                    <TableRow key={`${header}-desc-${index}`}>
+                      <TableCell align="center" style={cellStyle}>
+                        <Typography variant="body1" color="text.primary" noWrap>
+                          {reg?.description}
+                        </Typography>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableCell>
+                <TableCell align="center" style={cellStyle}>
+                  {day?.list?.map((reg, index) => (
+                    <TableRow key={`${header}-user-${index}`}>
+                      <TableCell align="center" style={cellStyle}>
+                        <Typography variant="body1" color="text.primary" noWrap>
+                          {reg?.createdBy?.name}
+                        </Typography>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableCell>
+                </>)}
               </TableRow>
             ))}
 
             <TableRow>
-              <TableCell align="center" style={{ border: "none" }}></TableCell>
+              <TableCell align="center" style={{ border: 'none' }}></TableCell>
               <TableCell align="center" style={colorStyle}>
                 <Typography variant="h5" gutterBottom noWrap>
                   TOTAL
@@ -112,6 +165,6 @@ RegistersReportTable.propTypes = {
   header: PropTypes.string.isRequired,
   colorStyle: PropTypes.object.isRequired,
   list: PropTypes.array.isRequired,
-  totalData: PropTypes.any.isRequired,
+  totalData: PropTypes.any.isRequired
 };
 export default RegistersReportTable;

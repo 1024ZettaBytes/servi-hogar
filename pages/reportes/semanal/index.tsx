@@ -224,13 +224,14 @@ function DayReport({ session }) {
                         />
                       )}
                     </Grid>
-                    <Grid item lg={6}>
+                    <Grid item lg={12}>
                       {!onlyChanges && (
                         <RegistersReportTable
                           header="BONIFICACIONES"
                           colorStyle={bonusStyle}
                           totalData={reportData.bonuses.totalData}
                           list={reportData.bonuses.days}
+                          type='BONUS'
                         />
                       )}
                     </Grid>

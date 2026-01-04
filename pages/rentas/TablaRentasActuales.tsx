@@ -321,6 +321,7 @@ const TablaRentasActuales: FC<TablaRentasActualesProps> = ({
             </TableHead>
             <TableBody>
               {paginatedRents.map((rent) => {
+                const hasBonusAlready = rent.customer.movements?.some((movement => movement.type === 'BONUS'));
                 const maxPayDays = rent.customer.maxPayDays || 7;
                 const DEFAULT_RED_DAYS = 15;
 
@@ -516,14 +517,14 @@ const TablaRentasActuales: FC<TablaRentasActualesProps> = ({
                               </IconButton>
                             </span>
                           </Tooltip>
-                          <Tooltip title="Bonificar" arrow>
+                          <Tooltip title={`Bonificar${hasBonusAlready ? ' (Ya bonificado antes)' : ''}`} arrow>
                             <span>
                               <IconButton
                                 disabled={
                                   shouldDisableActions ||
                                   ['EN_CAMBIO', 'EN_RECOLECCION'].includes(
                                     rent.status.id
-                                  )
+                                  ) || (hasBonusAlready && userRole !== 'ADMIN')
                                 }
                                 onClick={() => {
                                   handleOnBonusClick(rent);
