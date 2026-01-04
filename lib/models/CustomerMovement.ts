@@ -7,6 +7,7 @@ export interface ICustomerMovement extends Document {
   type: string;
   description: string;
   date: Date;
+  createdBy: Schema.Types.ObjectId;
 }
 
 const CustomerMovementSchema = new Schema<ICustomerMovement>({
@@ -15,7 +16,8 @@ const CustomerMovementSchema = new Schema<ICustomerMovement>({
   machine: { type: Schema.Types.ObjectId, default: null, ref:'machines' },
   type: { type: String, required: true },
   description: { type: String, required: true },
-  date: { type: Date, required: true }
+  date: { type: Date, required: true },
+  createdBy: { type: Schema.Types.ObjectId, default: null, ref:'users' },
 });
 
 export const CustomerMovement: Model<ICustomerMovement> =
