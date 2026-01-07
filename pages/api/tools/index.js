@@ -76,7 +76,6 @@ async function setWarrantyDate(req, res) {
         machine.warranty = addDays(setDateToEnd(saleDate), 180);
       }
       await machine.save();
-      console.log(`Warranty date set for machine ${machine.machineNum} to ${machine.warranty}`);
     }
     res.status(200).json({ message: "Warranty dates updated successfully" });
 

@@ -41,13 +41,13 @@ const ActivityReportTable: React.FC<ActivityReportTableProps> = ({
               >
                 Fecha
               </TableCell>
-              {list?.map((group) => (
+              {list?.map((group, gIndex) => (
                 <TableCell
-                  key={group.account || group.method}
+                  key={gIndex + (group.paymentAccount || group.method)}
                   align="center"
                   style={colorStyle}
                 >
-                  {group.account ||  PAYMENT_METHODS[group.method]}
+                  {group.paymentAccount ||  PAYMENT_METHODS[group.method]}
                   {isSuperUser && group.count > 0 ? ` (${group.count})` : ""}
                 </TableCell>
               ))}
@@ -71,7 +71,7 @@ const ActivityReportTable: React.FC<ActivityReportTableProps> = ({
                   </TableCell>
                   {list.map((group, gIndex) => (
                     <TableCell
-                      key={day.date + group.account}
+                      key={day.date + group.paymentAccount + gIndex}
                       align="center"
                       style={cellStyle}
                     >
@@ -97,9 +97,9 @@ const ActivityReportTable: React.FC<ActivityReportTableProps> = ({
                   TOTAL
                 </Typography>
               </TableCell>
-              {list?.map((group) => (
+              {list?.map((group, gIndex) => (
                 <TableCell
-                  key={group.account}
+                  key={gIndex + (group.paymentAccount || group.method) +"TOTAL"}
                   align="center"
                   style={{ ...colorStyle, background: "#DAF7A6" }}
                 >

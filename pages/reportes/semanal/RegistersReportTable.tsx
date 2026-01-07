@@ -19,18 +19,21 @@ interface RegistersReportTableProps {
   header: string;
   colorStyle: object;
   list: any[];
+  days?: { payments?: any[]; externalPayments?: any[]; salesPayments?: any[] };
   totalData: any;
   type?: string;
 }
 const cellStyle = { border: '2px solid #374246' };
 const RegistersReportTable: React.FC<RegistersReportTableProps> = ({
   header,
+  days,
   colorStyle,
   list,
   totalData,
   type
 }) => {
   const isBonus = type === 'BONUS';
+  const isPayment = type === 'PAYMENT';
   return (
     <div>
       <Divider />
@@ -41,7 +44,7 @@ const RegistersReportTable: React.FC<RegistersReportTableProps> = ({
               <TableCell
                 align="center"
                 style={colorStyle}
-                colSpan={isBonus ? 6 : 3}
+                colSpan={isPayment ? 5: (isBonus ? 6 : 3)}
               >
                 {header}
               </TableCell>
@@ -55,22 +58,40 @@ const RegistersReportTable: React.FC<RegistersReportTableProps> = ({
               <TableCell align="center" style={colorStyle}>
                 Día
               </TableCell>
-              <TableCell align="center" style={colorStyle}>
-                Registro
-              </TableCell>
-              {isBonus && ( <>
-              <TableCell align="center" style={colorStyle}>
-                Cliente
-              </TableCell>
-              <TableCell align="center" style={colorStyle}>
-                Descripción
-              </TableCell>
-              <TableCell align="center" style={colorStyle}>
-                Usuario
-              </TableCell>
-              </>)}
+              {isPayment ? (
+                <>
+                  <TableCell align="center" style={colorStyle}>
+                    Rentas
+                  </TableCell>
+                  <TableCell align="center" style={colorStyle}>
+                    Rep. Externas
+                  </TableCell>
+                  <TableCell align="center" style={colorStyle}>
+                    Ventas
+                  </TableCell>
+                </>
+              ) : (
+                <>
+                  <TableCell align="center" style={colorStyle}>
+                    Registro
+                  </TableCell>
+                  {isBonus && (
+                    <>
+                      <TableCell align="center" style={colorStyle}>
+                        Cliente
+                      </TableCell>
+                      <TableCell align="center" style={colorStyle}>
+                        Descripción
+                      </TableCell>
+                      <TableCell align="center" style={colorStyle}>
+                        Usuario
+                      </TableCell>
+                    </>
+                  )}
+                </>
+              )}
             </TableRow>
-            {list?.map((day) => (
+            {list?.map((day, index) => (
               <TableRow key={`${header}-${day?.weekDay}`}>
                 <TableCell align="center" style={cellStyle}>
                   <Typography
@@ -93,51 +114,102 @@ const RegistersReportTable: React.FC<RegistersReportTableProps> = ({
                     {capitalizeFirstLetter(day?.weekDay)}
                   </Typography>
                 </TableCell>
-                <TableCell align="center" style={cellStyle}>
-                  <Typography
-                    variant="body1"
-                    color="text.primary"
-                    gutterBottom
-                    noWrap
-                  >
-                    {day?.done}
-                  </Typography>
-                </TableCell>
-                {isBonus && ( <>
-                <TableCell align="center" style={cellStyle}>
-                  {day?.list?.map((reg, index) => (
-                    <TableRow key={`${header}-customer-${index}`}>
-                      <TableCell align="center" style={cellStyle}>
-                        <Typography variant="body1" color="text.primary" noWrap>
-                          {reg?.customer?.name}
-                        </Typography>
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableCell>
-                <TableCell align="center" style={cellStyle}>
-                  {day?.list?.map((reg, index) => (
-                    <TableRow key={`${header}-desc-${index}`}>
-                      <TableCell align="center" style={cellStyle}>
-                        <Typography variant="body1" color="text.primary" noWrap>
-                          {reg?.description}
-                        </Typography>
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableCell>
-                <TableCell align="center" style={cellStyle}>
-                  {day?.list?.map((reg, index) => (
-                    <TableRow key={`${header}-user-${index}`}>
-                      <TableCell align="center" style={cellStyle}>
-                        <Typography variant="body1" color="text.primary" noWrap>
-                          {reg?.createdBy?.name}
-                        </Typography>
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableCell>
-                </>)}
+                {isPayment ? (
+                  <>
+                    <TableCell align="center" style={cellStyle}>
+                      <Typography
+                        variant="body1"
+                        color="text.primary"
+                        gutterBottom
+                        noWrap
+                      >
+                        {days.payments[index].done}
+                      </Typography>
+                    </TableCell>
+                    <TableCell align="center" style={cellStyle}>
+                      <Typography
+                        variant="body1"
+                        color="text.primary"
+                        gutterBottom
+                        noWrap
+                      >
+                        {days.externalPayments[index].done}
+                      </Typography>
+                    </TableCell>
+                    <TableCell align="center" style={cellStyle}>
+                      <Typography
+                        variant="body1"
+                        color="text.primary"
+                        gutterBottom
+                        noWrap
+                      >
+                        {days.salesPayments[index].done}
+                      </Typography>
+                    </TableCell>
+                  </>
+                ) : (
+                  <>
+                    <TableCell align="center" style={cellStyle}>
+                      <Typography
+                        variant="body1"
+                        color="text.primary"
+                        gutterBottom
+                        noWrap
+                      >
+                        {day?.done}
+                      </Typography>
+                    </TableCell>
+                    {isBonus && (
+                      <>
+                        <TableCell align="center" style={cellStyle}>
+                          {day?.list?.map((reg, index) => (
+                            <TableRow key={`${header}-customer-${index}`}>
+                              <TableCell align="center" style={cellStyle}>
+                                <Typography
+                                  variant="body1"
+                                  color="text.primary"
+                                  noWrap
+                                >
+                                  {reg?.customer?.name}
+                                </Typography>
+                              </TableCell>
+                            </TableRow>
+                          ))}
+                        </TableCell>
+                        <TableCell align="center" style={cellStyle}>
+                          {day?.list?.map((reg, index) => (
+                            <TableRow key={`${header}-desc-${index}`}>
+                              <TableCell align="center" style={cellStyle}>
+                                <Typography
+                                  variant="body1"
+                                  color="text.primary"
+                                  noWrap
+                                >
+                                  {reg?.description}
+                                </Typography>
+                              </TableCell>
+                            </TableRow>
+                          ))}
+                        </TableCell>
+                        <TableCell align="center" style={cellStyle}>
+                          {day?.list?.map((reg, index) => (
+                            <TableRow key={`${header}-user-${index}`}>
+                              <TableCell align="center" style={cellStyle}>
+                                <Typography
+                                  variant="body1"
+                                  color="text.primary"
+                                  noWrap
+                                >
+                                  {reg?.createdBy?.name}
+                                </Typography>
+                              </TableCell>
+                            </TableRow>
+                          ))}
+                        </TableCell>
+                      </>
+                    )}
+                  </>
+                )}
               </TableRow>
             ))}
 
@@ -148,11 +220,31 @@ const RegistersReportTable: React.FC<RegistersReportTableProps> = ({
                   TOTAL
                 </Typography>
               </TableCell>
-              <TableCell align="center" style={colorStyle}>
-                <Typography variant="h5" gutterBottom noWrap>
-                  {totalData?.done}
-                </Typography>
-              </TableCell>
+              {isPayment ? (
+                <>
+                  <TableCell align="center" style={colorStyle}>
+                    <Typography variant="h5" gutterBottom noWrap>
+                      {totalData?.payments.done}
+                    </Typography>
+                  </TableCell>
+                  <TableCell align="center" style={colorStyle}>
+                    <Typography variant="h5" gutterBottom noWrap>
+                      {totalData?.externalPayments.done}
+                    </Typography>
+                  </TableCell>
+                  <TableCell align="center" style={colorStyle}>
+                    <Typography variant="h5" gutterBottom noWrap>
+                      {totalData?.salesPayments.done}
+                    </Typography>
+                  </TableCell>
+                </>
+              ) : (
+                <TableCell align="center" style={colorStyle}>
+                  <Typography variant="h5" gutterBottom noWrap>
+                    {totalData?.done}
+                  </Typography>
+                </TableCell>
+              )}
             </TableRow>
           </TableBody>
         </Table>

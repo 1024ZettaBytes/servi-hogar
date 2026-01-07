@@ -1,10 +1,10 @@
-import Head from "next/head";
-import { getSession } from "next-auth/react";
-import { useState } from "react";
-import SidebarLayout from "@/layouts/SidebarLayout";
-import { validateServerSideSession } from "../../../lib/auth";
-import PageHeader from "@/components/PageHeader";
-import PageTitleWrapper from "@/components/PageTitleWrapper";
+import Head from 'next/head';
+import { getSession } from 'next-auth/react';
+import { useState } from 'react';
+import SidebarLayout from '@/layouts/SidebarLayout';
+import { validateServerSideSession } from '../../../lib/auth';
+import PageHeader from '@/components/PageHeader';
+import PageTitleWrapper from '@/components/PageTitleWrapper';
 import {
   Card,
   Container,
@@ -22,33 +22,44 @@ import {
   TableRow,
   Typography,
   TextField,
-  CardContent,
-} from "@mui/material";
-import Footer from "@/components/Footer";
-import { DesktopDatePicker } from "@mui/x-date-pickers";
-import { getFetcher, useGetReport } from "../../api/useRequest";
-import CloudDownloadIcon from "@mui/icons-material/CloudDownload";
-import { capitalizeFirstLetter, convertDateToLocal, convertDateToTZ, formatTZDate, printElement, sleep } from "lib/client/utils";
+  CardContent
+} from '@mui/material';
+import Footer from '@/components/Footer';
+import { DesktopDatePicker } from '@mui/x-date-pickers';
+import { getFetcher, useGetReport } from '../../api/useRequest';
+import CloudDownloadIcon from '@mui/icons-material/CloudDownload';
+import {
+  capitalizeFirstLetter,
+  convertDateToLocal,
+  convertDateToTZ,
+  formatTZDate,
+  printElement,
+  sleep
+} from 'lib/client/utils';
 
-const cellStyle = { border: "2px solid #374246" };
+const cellStyle = { border: '2px solid #374246' };
 const headerStyle = {
   ...cellStyle,
-  backgroundColor: "#35AEE2",
-  color: "black",
-  fontWeight: "bold",
+  backgroundColor: '#35AEE2',
+  color: 'black',
+  fontWeight: 'bold'
 };
-const deliveryStyle = { ...headerStyle, backgroundColor: "#DAF7A6" };
-const pickupStyle = { ...headerStyle, backgroundColor: "#EE5656" };
-const changeStyle = { ...headerStyle, backgroundColor: "#FFC300" };
-const customerStyle = { ...headerStyle, backgroundColor: "#E570EE" };
-const paymentStyle = { ...headerStyle, backgroundColor: "#A580EE" };
-const bonusStyle = { ...headerStyle, backgroundColor: "#C7C6BC" };
+const deliveryStyle = { ...headerStyle, backgroundColor: '#DAF7A6' };
+const pickupStyle = { ...headerStyle, backgroundColor: '#EE5656' };
+const changeStyle = { ...headerStyle, backgroundColor: '#FFC300' };
+const customerStyle = { ...headerStyle, backgroundColor: '#E570EE' };
+const paymentStyle = { ...headerStyle, backgroundColor: '#A580EE' };
+const externalPaymentStyle = { ...headerStyle, backgroundColor: '#89C3F4' };
+const salesPaymentStyle = { ...headerStyle, backgroundColor: '#708FE5' };
+const bonusStyle = { ...headerStyle, backgroundColor: '#C7C6BC' };
 function DayReport() {
-  const [selectedDate, setSelectedDate] = useState<Date>(convertDateToLocal(new Date()));
+  const [selectedDate, setSelectedDate] = useState<Date>(
+    convertDateToLocal(new Date())
+  );
   const [isPrinting, setIsPrinting] = useState<boolean>(false);
   const { reportData, reportError } = useGetReport(
     getFetcher,
-    "day",
+    'day',
     convertDateToTZ(selectedDate)
   );
   const generalError = reportError;
@@ -57,31 +68,27 @@ function DayReport() {
   const handleClickOpen = async () => {
     setIsPrinting(true);
     await sleep(1000);
-    const fileName = `DIARIO_${formatTZDate(selectedDate, "DD-MM-YYYY")}.pdf`;
+    const fileName = `DIARIO_${formatTZDate(selectedDate, 'DD-MM-YYYY')}.pdf`;
     await printElement(document, fileName);
     setIsPrinting(false);
   };
   const handleOnSelectDate = (newValue) => {
-    if (newValue && newValue.toString() !== "Invalid Date") {
+    if (newValue && newValue.toString() !== 'Invalid Date') {
       setSelectedDate(newValue);
     }
   };
   const button = {
-    text: "Descargar PDF",
+    text: 'Descargar PDF',
     onClick: handleClickOpen,
     startIcon: <CloudDownloadIcon />,
     isLoading: isPrinting,
-    variant: "outlined",
-    color: "info",
+    variant: 'outlined',
+    color: 'info'
   };
   const getHeader = () => {
-    const weekDay = capitalizeFirstLetter(
-      formatTZDate(selectedDate, "dddd")
-    );
+    const weekDay = capitalizeFirstLetter(formatTZDate(selectedDate, 'dddd'));
     const monthDay = selectedDate.getDate();
-    const month = capitalizeFirstLetter(
-      formatTZDate(selectedDate, "MMMM")
-    );
+    const month = capitalizeFirstLetter(formatTZDate(selectedDate, 'MMMM'));
     const year = selectedDate.getFullYear();
     return `${weekDay} ${monthDay} de ${month}, ${year}`;
   };
@@ -92,8 +99,8 @@ function DayReport() {
       </Head>
       <PageTitleWrapper>
         <PageHeader
-          title={"Reporte Diario"}
-          subtitle={""}
+          title={'Reporte Diario'}
+          subtitle={''}
           button={!generalError && completeData ? button : null}
         />
       </PageTitleWrapper>
@@ -101,7 +108,7 @@ function DayReport() {
         <Card
           sx={{
             px: 1,
-            mb: 1,
+            mb: 1
           }}
         >
           <CardContent>
@@ -110,11 +117,11 @@ function DayReport() {
                 item
                 alignItems="center"
                 justifyContent="center"
-                display={"flex"}
+                display={'flex'}
                 mr={1}
               >
-                <Typography fontWeight={"bold"} fontSize={15}>
-                  Seleccione día:{" "}
+                <Typography fontWeight={'bold'} fontSize={15}>
+                  Seleccione día:{' '}
                 </Typography>
               </Grid>
               <Grid item lg={10}>
@@ -147,7 +154,7 @@ function DayReport() {
               ) : !completeData ? (
                 <Skeleton
                   variant="rectangular"
-                  width={"100%"}
+                  width={'100%'}
                   height={500}
                   animation="wave"
                 />
@@ -155,13 +162,13 @@ function DayReport() {
                 <div>
                   <CardHeader
                     sx={{
-                      display: "flex",
-                      textAlign: "center",
-                      alignItems: "center",
-                      justifyContent: "space-between",
-                      flexWrap: "wrap",
+                      display: 'flex',
+                      textAlign: 'center',
+                      alignItems: 'center',
+                      justifyContent: 'space-between',
+                      flexWrap: 'wrap'
                     }}
-                    title={"REPORTE DIARIO"}
+                    title={'REPORTE DIARIO'}
                     subheader={getHeader()}
                   />
                   <Divider />
@@ -178,7 +185,10 @@ function DayReport() {
                           <TableCell
                             align="center"
                             style={headerStyle}
-                          >{`Total ${formatTZDate(selectedDate, "MMMM")}`}</TableCell>
+                          >{`Total ${formatTZDate(
+                            selectedDate,
+                            'MMMM'
+                          )}`}</TableCell>
                         </TableRow>
                       </TableHead>
                       <TableBody>
@@ -323,7 +333,7 @@ function DayReport() {
                               gutterBottom
                               noWrap
                             >
-                              Depositos
+                              Depósitos (Rentas)
                             </Typography>
                           </TableCell>
                           <TableCell align="center" style={cellStyle}>
@@ -344,6 +354,72 @@ function DayReport() {
                               noWrap
                             >
                               {reportData?.payments?.monthTotal}
+                            </Typography>
+                          </TableCell>
+                        </TableRow>
+                        <TableRow>
+                          <TableCell align="center" style={externalPaymentStyle}>
+                            <Typography
+                              variant="body1"
+                              fontWeight="bold"
+                              color="text.primary"
+                              gutterBottom
+                              noWrap
+                            >
+                              Depósitos (Rep. Externa)
+                            </Typography>
+                          </TableCell>
+                          <TableCell align="center" style={cellStyle}>
+                            <Typography
+                              variant="body1"
+                              color="text.primary"
+                              gutterBottom
+                              noWrap
+                            >
+                              {reportData?.externalPayments?.dayTotal}
+                            </Typography>
+                          </TableCell>
+                          <TableCell align="center" style={cellStyle}>
+                            <Typography
+                              variant="body1"
+                              color="text.primary"
+                              gutterBottom
+                              noWrap
+                            >
+                              {reportData?.externalPayments?.monthTotal}
+                            </Typography>
+                          </TableCell>
+                        </TableRow>
+                        <TableRow>
+                          <TableCell align="center" style={salesPaymentStyle}>
+                            <Typography
+                              variant="body1"
+                              fontWeight="bold"
+                              color="text.primary"
+                              gutterBottom
+                              noWrap
+                            >
+                              Depósitos (Ventas)
+                            </Typography>
+                          </TableCell>
+                          <TableCell align="center" style={cellStyle}>
+                            <Typography
+                              variant="body1"
+                              color="text.primary"
+                              gutterBottom
+                              noWrap
+                            >
+                              {reportData?.salesPayments?.dayTotal}
+                            </Typography>
+                          </TableCell>
+                          <TableCell align="center" style={cellStyle}>
+                            <Typography
+                              variant="body1"
+                              color="text.primary"
+                              gutterBottom
+                              noWrap
+                            >
+                              {reportData?.salesPayments?.monthTotal}
                             </Typography>
                           </TableCell>
                         </TableRow>
