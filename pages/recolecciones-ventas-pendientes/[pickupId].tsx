@@ -205,7 +205,7 @@ function RecoleccionVentaPendiente({ session }) {
                       <Grid item xs={12} sm={12} lg={12} />
                       <Grid item xs={2} sm={2} lg={12} textAlign="center">
                         <Typography color="black" fontWeight="bold">
-                          {salePickup.machine.machineNum}
+                          {salePickup.machine?.machineNum}
                         </Typography>
                       </Grid>
                     </Grid>

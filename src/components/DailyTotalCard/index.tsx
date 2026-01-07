@@ -56,7 +56,6 @@ export default function DailyTotalCard({ dailyTotal, isLoading, error, userRole 
       </Card>
     );
   }
-console.log('User Role in DailyTotalCard:', userRole);
   return (
     <Card
       sx={{

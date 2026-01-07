@@ -141,7 +141,7 @@ const TablaPagos: FC<TablaPagosProps> = () => {
                         gutterBottom
                         noWrap
                       >
-                        {payment.number}
+                        {payment.number || "VENTA"}
                       </Typography>
                     </TableCell>
                     <TableCell align="center">
@@ -153,7 +153,7 @@ const TablaPagos: FC<TablaPagosProps> = () => {
                         noWrap
                       >
                         {capitalizeFirstLetter(
-                          formatTZDate(payment?.date, 'MMMM DD YYYY')
+                          formatTZDate(payment?.date || payment?.paymentDate, 'MMMM DD YYYY')
                         )}
                       </Typography>
                     </TableCell>
@@ -165,7 +165,7 @@ const TablaPagos: FC<TablaPagosProps> = () => {
                         gutterBottom
                         noWrap
                       >
-                        {payment?.customer?.name}
+                        {payment?.customer?.name || payment?.sale?.customer?.name}
                       </Typography>
                     </TableCell>
                     <TableCell align="center">
@@ -176,7 +176,7 @@ const TablaPagos: FC<TablaPagosProps> = () => {
                         gutterBottom
                         noWrap
                       >
-                        {payment?.description}
+                        {payment?.description || `Abono de venta`}
                       </Typography>
                     </TableCell>
                     <TableCell align="center">
@@ -187,7 +187,7 @@ const TablaPagos: FC<TablaPagosProps> = () => {
                         gutterBottom
                         noWrap
                       >
-                        {PAYMENT_METHODS[payment?.method]}
+                        {PAYMENT_METHODS[payment?.method] || 'N/A'}
                       </Typography>
                     </TableCell>
                     <TableCell align="center">
@@ -198,7 +198,11 @@ const TablaPagos: FC<TablaPagosProps> = () => {
                         gutterBottom
                         noWrap
                       >
-                        {payment?.account ? payment?.account : 'N/A'}
+                        {payment?.paymentAccount 
+                          ? `${payment.paymentAccount.bank} ${payment.paymentAccount.count} (${payment.paymentAccount.number.slice(-4)})` 
+                          : payment?.account 
+                            ? payment.account 
+                            : 'N/A'}
                       </Typography>
                     </TableCell>
                     <TableCell align="center">
@@ -213,9 +217,9 @@ const TablaPagos: FC<TablaPagosProps> = () => {
                       </Typography>
                     </TableCell>
                     <TableCell align="center">
-                      {payment.voucherUrl ? (
+                      {payment.voucherUrl || payment.imageUrl ? (
                         <a
-                          href={payment.voucherUrl}
+                          href={payment.voucherUrl || payment.imageUrl}
                           target="_blank"
                           rel="noopener noreferrer"
                         >
@@ -257,7 +261,7 @@ const TablaPagos: FC<TablaPagosProps> = () => {
                         color="text.primary"
                         gutterBottom
                       >
-                        {payment?.lastUpdatedBy?.name}
+                        {payment?.lastUpdatedBy?.name || payment?.createdBy?.name}
                       </Typography>
                     </TableCell>
                   </TableRow>

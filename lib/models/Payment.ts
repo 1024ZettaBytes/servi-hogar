@@ -8,6 +8,7 @@ export interface IPayment extends Document {
   description: string;
   method: string;
   account: string;
+  paymentAccount?: Schema.Types.ObjectId;
   folio: string;
   voucherUrl: string;
   date: Date;
@@ -27,6 +28,11 @@ const PaymentSchema = new Schema<IPayment>({
   description: { type: String, required: true },
   method: { type: String, required: true },
   account: { type: String, default:null },
+  paymentAccount: {
+    type: Schema.Types.ObjectId,
+    ref: 'payment_accounts',
+    default: null
+  },
   folio: { type:String, default:null },
   voucherUrl: { type: String, default:null },
   date: { type: Date, required: true },

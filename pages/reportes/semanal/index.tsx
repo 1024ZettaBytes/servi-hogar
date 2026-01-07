@@ -48,7 +48,6 @@ const customerStyle = { ...headerStyle, backgroundColor: '#F4F189' };
 const paymentStyle = { ...headerStyle, backgroundColor: '#89C3F4' };
 const bonusStyle = { ...headerStyle, backgroundColor: '#C7C6BC' };
 function DayReport({ session }) {
-
   const { user } = session;
   const userRole = user.role;
   const onlyChanges = userRole === 'SUB';
@@ -209,8 +208,19 @@ function DayReport({ session }) {
                         <RegistersReportTable
                           header="DEPOSITOS"
                           colorStyle={paymentStyle}
-                          totalData={reportData.payments.totalData}
+                          totalData={{
+                            payments: reportData.payments.totalData,
+                            externalPayments:
+                              reportData.externalPayments.totalData,
+                            salesPayments: reportData.salesPayments.totalData
+                          }}
+                          days={{
+                            payments: reportData.payments.days,
+                            externalPayments: reportData.externalPayments.days,
+                            salesPayments: reportData.salesPayments.days
+                          }}
                           list={reportData.payments.days}
+                          type='PAYMENT'
                         />
                       )}
                     </Grid>
@@ -231,7 +241,7 @@ function DayReport({ session }) {
                           colorStyle={bonusStyle}
                           totalData={reportData.bonuses.totalData}
                           list={reportData.bonuses.days}
-                          type='BONUS'
+                          type="BONUS"
                         />
                       )}
                     </Grid>

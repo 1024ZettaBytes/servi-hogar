@@ -33,7 +33,7 @@ dayjs.extend(LocalizedFormat);
 import AccountBalanceWalletIcon from '@mui/icons-material/AccountBalanceWallet';
 import Image from 'next/image';
 import { LoadingButton } from '@mui/lab';
-import { useGetAllCustomers, getFetcher } from '../../../pages/api/useRequest';
+import { useGetAllCustomers, useGetPaymentAccounts, getFetcher } from '../../../pages/api/useRequest';
 import { savePayment } from '../../../lib/client/paymentsFetch';
 import {
   PAYMENT_REASONS,
@@ -46,10 +46,11 @@ import { convertDateToTZ, dateDiffInDays, compressImage } from 'lib/client/utils
 function AddPaymentModal(props) {
   const { customerId, handleOnClose, open, reason, amount, lateFee } = props;
   const { customerList, customerError } = useGetAllCustomers(getFetcher, false);
+  const { paymentAccounts } = useGetPaymentAccounts(getFetcher);
   const [selectedCustomer, setSelectedCustomer] = useState<any>(null);
   const [selectedReason, setSelectedReason] = useState<any>(null);
   const [selectedMethod, setSelectedMethod] = useState<any>(null);
-  const [account, setAccount] = useState<string>(null);
+  const [selectedPaymentAccount, setSelectedPaymentAccount] = useState<any>(null);
   const [paymentDate, setPaymentDate] = useState<Date>(null);
   const [selectedAmount, setSelectedAmount] = useState<any>(null);
   const [selectedFolio, setSelectedFolio] = useState<any>(null);
@@ -94,7 +95,7 @@ function AddPaymentModal(props) {
       customerId: selectedCustomer._id,
       reason: selectedReason,
       method: selectedMethod,
-      account,
+      paymentAccountId: selectedPaymentAccount?._id || null,
       paymentDate: convertDateToTZ(paymentDate),
       amount: selectedAmount,
       folio: selectedFolio,
@@ -321,23 +322,42 @@ function AddPaymentModal(props) {
                                       !['CASH', 'CASH_OFFICE'].includes(
                                         selectedMethod
                                       ) && (
-                                        <Grid item lg={4} m={1}>
-                                          <TextField
-                                            label="Cuenta"
-                                            required
-                                            value={account}
-                                            variant="outlined"
-                                            InputProps={{
-                                              startAdornment: (
+                                        <Grid item lg={6} m={1}>
+                                          <FormControl sx={{ width: '100%' }}>
+                                            <InputLabel id="payment-account-id">
+                                              Cuenta*
+                                            </InputLabel>
+                                            <Select
+                                              labelId="payment-account-id"
+                                              label="Cuenta*"
+                                              id="paymentAccount"
+                                              name="paymentAccount"
+                                              required
+                                              autoComplete="off"
+                                              size="medium"
+                                              value={selectedPaymentAccount?._id || ''}
+                                              onChange={(event) => {
+                                                const selected = paymentAccounts?.find(
+                                                  (acc) => acc._id === event.target.value
+                                                );
+                                                setSelectedPaymentAccount(selected);
+                                              }}
+                                              startAdornment={
                                                 <InputAdornment position="start">
                                                   <AccountBalanceWalletIcon />
                                                 </InputAdornment>
-                                              )
-                                            }}
-                                            onChange={(event) => {
-                                              setAccount(event.target.value);
-                                            }}
-                                          />
+                                              }
+                                            >
+                                              {paymentAccounts?.map((acc) => (
+                                                <MenuItem
+                                                  key={acc._id}
+                                                  value={acc._id}
+                                                >
+                                                  {`${acc.bank} ${acc.count} (${acc.number.slice(-4)})`}
+                                                </MenuItem>
+                                              ))}
+                                            </Select>
+                                          </FormControl>
                                         </Grid>
                                       )}
                                   </Grid>

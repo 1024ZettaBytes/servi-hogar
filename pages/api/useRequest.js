@@ -215,6 +215,12 @@ export const useGetDailyPaymentsTotal = (fetcher) => {
   return { dailyTotal: data, dailyTotalError: error };
 };
 
+// Payment Accounts
+export const useGetPaymentAccounts = (fetcher) => {
+  const { data, error } = useSWR(ROUTES.ALL_PAYMENT_ACCOUNTS_API, fetcher);
+  return { paymentAccounts: data?.data, paymentAccountsError: error };
+};
+
 // Reports
 export const useGetReport = (
   fetcher,
