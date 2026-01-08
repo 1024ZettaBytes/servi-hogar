@@ -8,7 +8,7 @@ import {
 import { getUserRole, validateUserPermissions } from "../auth/authUtils";
 async function getSummaryAPI(req, res) {
   try {
-    const { filter, start, period } = req.query;
+    const { filter, start, end, period } = req.query;
     let data = {};
     switch (filter) {
       case "day":

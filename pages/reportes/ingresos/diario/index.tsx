@@ -58,6 +58,7 @@ function DayReport({session}) {
   const { reportData, reportError } = useGetReport(
     getFetcher,
     "profits-range",
+    null,
     convertDateToTZ(selectedDate),
     convertDateToTZ(selectedDate)
   );

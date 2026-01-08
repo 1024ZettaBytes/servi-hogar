@@ -60,6 +60,7 @@ function TechniciansReport() {
   const { reportData, reportError } = useGetReport(
         getFetcher,
         'technicians',
+        null,
         convertDateToTZ(start),
         convertDateToTZ(end)
   );

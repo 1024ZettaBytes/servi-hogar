@@ -58,6 +58,7 @@ function MonthReport({session}) {
   const { reportData, reportError } = useGetReport(
     getFetcher,
     "profits-range",
+    null,
     convertDateToTZ(start),
     convertDateToTZ(end)
   );
