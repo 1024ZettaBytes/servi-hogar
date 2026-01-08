@@ -5,10 +5,10 @@ import {
   getProfitsByRange,
   getTechniciansReport
 } from "../../../lib/data/Reports";
-import { getUserId, getUserRole, validateUserPermissions } from "../auth/authUtils";
+import { getUserRole, validateUserPermissions } from "../auth/authUtils";
 async function getSummaryAPI(req, res) {
   try {
-    const { filter, start, end } = req.query;
+    const { filter, start, period } = req.query;
     let data = {};
     switch (filter) {
       case "day":
@@ -16,7 +16,7 @@ async function getSummaryAPI(req, res) {
         res.status(200).json({ data });
         break;
       case "range":
-        data = await getSummaryByRange(start, end);
+        data = await getSummaryByRange(start, period);
         res.status(200).json({ data });
         break;
 

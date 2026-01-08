@@ -61,6 +61,7 @@ function DayReport() {
   const { reportData, reportError } = useGetReport(
     getFetcher,
     "range",
+    'month',
     convertDateToTZ(start),
     convertDateToTZ(end)
   );
