@@ -21,7 +21,7 @@ import {
   InputAdornment
 } from '@mui/material';
 import NextLink from 'next/link';
-import { capitalizeFirstLetter, dateDiffInDays, formatTZDate } from 'lib/client/utils';
+import { capitalizeFirstLetter, formatTZDate } from 'lib/client/utils';
 import { format } from 'date-fns';
 import es from 'date-fns/locale/es';
 import { cancelPickup, markWasSentPickup, savePickupPromise } from '../../lib/client/pickupsFetch';
