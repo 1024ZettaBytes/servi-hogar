@@ -27,21 +27,27 @@ async function handler(req, res) {
 
       const paymentImage = files.paymentImage?.[0] || files.paymentImage;
             
-      if (!paymentImage) {
-        console.error('No payment image found in request');
-        return res.status(400).json({ errorMsg: 'Se requiere una foto del comprobante de pago' });
-      }
+
 
       // Extract values - formidable v3 returns single values directly, not in arrays
       const saleId = Array.isArray(fields.saleId) ? fields.saleId[0] : fields.saleId;
       const paymentAmount = Array.isArray(fields.paymentAmount) ? parseFloat(fields.paymentAmount[0]) : parseFloat(fields.paymentAmount);
       const paymentDate = Array.isArray(fields.paymentDate) ? new Date(fields.paymentDate[0]) : new Date(fields.paymentDate);
+      const paymentMethod = Array.isArray(fields.paymentMethod) ? fields.paymentMethod[0] : fields.paymentMethod;
+      const paymentAccountId = Array.isArray(fields.paymentAccountId) ? fields.paymentAccountId[0] : fields.paymentAccountId;
+      const requiresImage = paymentMethod === 'TRANSFER' || paymentMethod === 'DEP';
+      if (requiresImage && !paymentImage) {
+        console.error('No payment image found in request');
+        return res.status(400).json({ errorMsg: 'Se requiere una foto del comprobante de pago' });
+      }
       const result = await registerSalePayment({
         saleId,
         paymentAmount,
         paymentDate,
-        paymentImagePath: paymentImage.filepath,
-        paymentImageName: paymentImage.originalFilename,
+        paymentMethod,
+        paymentAccountId: paymentAccountId || null,
+        paymentImagePath: requiresImage ? paymentImage.filepath : null,
+        paymentImageName: paymentImage ? paymentImage.originalFilename : null,
         lastUpdatedBy: userId
       });
       
