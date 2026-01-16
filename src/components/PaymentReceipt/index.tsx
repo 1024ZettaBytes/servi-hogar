@@ -14,6 +14,7 @@ import {
 import PrintIcon from '@mui/icons-material/Print';
 import DownloadIcon from '@mui/icons-material/Download';
 import { useReactToPrint } from 'react-to-print';
+import { formatReceiptNumber } from 'lib/client/utils';
 
 // Receipt object based on Receipt model
 interface Receipt {
@@ -141,7 +142,7 @@ export const PaymentReceipt: React.FC<PaymentReceiptProps> = ({
         </div>
         <div className={styles.headerInfo}>
           <div className={styles.headerLine}>
-            <span className={styles.label}>Folio:</span> {receipt.receiptNumber}
+            <span className={styles.label}>Folio:</span> {formatReceiptNumber(receipt.receiptNumber)}
           </div>
           <div className={styles.headerLine}>
             <span className={styles.label}>Fecha:</span> {formatDate(receipt.date)}
@@ -311,7 +312,7 @@ export const PaymentReceipt: React.FC<PaymentReceiptProps> = ({
         </div>
         <div className={styles.footerContact}>
           <strong>QUEJAS, SUGERENCIAS Y PREMIOS:</strong><br />
-          TODO
+          687 191 40 85
         </div>
       </div>
     </div>

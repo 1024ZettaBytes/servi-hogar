@@ -344,4 +344,8 @@ export const compressImage = async (
   return { file: compressedFile, url };
 };
 
+export const formatReceiptNumber = (number: number, totalLength: number = 6): string => {
+  return `SH-${number.toString().padStart(totalLength, '0')}`;
+}
+
 export default useDeviceType;

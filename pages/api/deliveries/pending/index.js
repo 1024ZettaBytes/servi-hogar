@@ -41,8 +41,8 @@ async function completeDeliveryAPI(req, res, userId) {
 
     const body = JSON.parse(fields?.body);
 
-    await markCompleteDeliveryData({ ...body, files, lastUpdatedBy: userId });
-    res.status(200).json({ msg: "La entrega ha sido completada." });
+    const receipt = await markCompleteDeliveryData({ ...body, files, lastUpdatedBy: userId });
+    res.status(200).json({ msg: "La entrega ha sido completada.", receipt });
   } catch (e) {
     console.error(e);
     res.status(500).json({ errorMsg: e.message });
