@@ -347,7 +347,7 @@ const TablaRecoleccionesPendientes: FC<TablaRecoleccionesPendientesProps> = ({
                   pickup.rent.remaining < 0
                     ? Math.abs(pickup.rent.remaining)
                     : 0;
-                const shouldDisableActions = userRole !== "ADMIN" && dateDiffInDays(new Date(pickup.updatedAt), new Date()) > 2;
+                const shouldDisableActions = false // userRole !== "ADMIN" && dateDiffInDays(new Date(pickup.updatedAt), new Date()) > 2;
                 return (
                   <TableRow hover key={pickup?._id}>
                     <TableCell align="center">
