@@ -24,6 +24,7 @@ import { registerPayment } from "../../../lib/client/salesFetch";
 import numeral from "numeral";
 import { convertDateToTZ, compressImage } from "../../../lib/client/utils";
 import { useCheckBlocking } from "src/hooks/useCheckBlocking";
+import PaymentReceipt from "../PaymentReceipt";
 
 function RegisterPaymentModal(props) {
   const { handleOnClose, open, sale } = props;
@@ -34,6 +35,8 @@ function RegisterPaymentModal(props) {
   const [paymentDate, setPaymentDate] = useState(new Date());
   const [paymentImage, setPaymentImage] = useState(null);
   const [paymentImagePreview, setPaymentImagePreview] = useState(null);
+  const [receipt, setReceipt] = useState<any>(null);
+  const [showReceipt, setShowReceipt] = useState(false);
 
   // Reset state when modal opens with a new sale
   useEffect(() => {
@@ -43,6 +46,8 @@ function RegisterPaymentModal(props) {
       setHasError({ error: false, msg: "" });
       setPaymentImage(null);
       setPaymentImagePreview(null);
+      setReceipt(null);
+      setShowReceipt(false);
     }
   }, [open, sale]);
 
@@ -150,7 +155,9 @@ function RegisterPaymentModal(props) {
     if (!result.error) {
       // Check if user was blocked
       await checkBlocking(result.wasBlocked);
-      handleSavedPayment(result.msg);
+      // Show the receipt
+      setReceipt(result.data);
+      setShowReceipt(true);
     } else {
       handleErrorOnSave(result.msg);
     }
@@ -166,11 +173,15 @@ function RegisterPaymentModal(props) {
     }
     setPaymentImage(null);
     setPaymentImagePreview(null);
+    setReceipt(null);
+    setShowReceipt(false);
     handleOnClose(false);
   };
 
-  const handleSavedPayment = (successMessage) => {
-    handleOnClose(true, successMessage);
+  const handleCloseReceipt = () => {
+    setShowReceipt(false);
+    setReceipt(null);
+    handleOnClose(true, 'Pago registrado con éxito');
   };
 
   const handleErrorOnSave = (msg) => {
@@ -178,6 +189,7 @@ function RegisterPaymentModal(props) {
   };
 
   return (
+    <>
     <Dialog open={open} fullWidth={true} maxWidth="sm" scroll={"body"}>
       <Card>
         <CardHeader title="Registrar Pago" />
@@ -444,6 +456,16 @@ function RegisterPaymentModal(props) {
         </CardContent>
       </Card>
     </Dialog>
+
+    {/* Receipt Dialog */}
+    {showReceipt && (
+      <PaymentReceipt
+        receipt={receipt}
+        open={showReceipt}
+        onClose={handleCloseReceipt}
+      />
+    )}
+  </>
   );
 }
 

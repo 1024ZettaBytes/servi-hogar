@@ -5,7 +5,7 @@ import {
   getProfitsByRange,
   getTechniciansReport
 } from "../../../lib/data/Reports";
-import { getUserRole, validateUserPermissions } from "../auth/authUtils";
+import { getUserId, getUserRole, validateUserPermissions } from "../auth/authUtils";
 async function getSummaryAPI(req, res) {
   try {
     const { filter, start, end, period } = req.query;
@@ -37,7 +37,8 @@ async function getSummaryAPI(req, res) {
       case "technicians": {
         if(await validateUserPermissions(req, res, ["ADMIN", "AUX", "TEC"])){
           const userRole = await getUserRole(req);
-          data = await getTechniciansReport(start, end, userRole);
+          const userId = await getUserId(req);
+          data = await getTechniciansReport(start, end, userRole, userId);
           res.status(200).json({ data });
         }
         return;

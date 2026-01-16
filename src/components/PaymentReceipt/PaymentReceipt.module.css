@@ -1,0 +1,242 @@
+.receipt {
+  width: 210mm; /* A4 width */
+  min-height: 297mm; /* A4 height */
+  padding: 20mm;
+  margin: 0 auto;
+  background: white;
+  font-family: Arial, sans-serif;
+  font-size: 11pt;
+  color: #000;
+  box-sizing: border-box;
+}
+
+/* Header */
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 10px;
+}
+
+.logoContainer {
+  flex: 0 0 auto;
+}
+
+.logo {
+  width: 180px;
+  height: auto;
+}
+
+.headerInfo {
+  text-align: right;
+  font-size: 11pt;
+}
+
+.headerLine {
+  margin-bottom: 4px;
+}
+
+.label {
+  font-weight: bold;
+}
+
+/* Title */
+.title {
+  text-align: center;
+  font-size: 24pt;
+  font-weight: bold;
+  margin: 20px 0;
+  letter-spacing: 1px;
+}
+
+/* Client Summary */
+.clientSummary {
+  display: flex;
+  justify-content: space-between;
+  border: 2px solid #000;
+  border-radius: 8px;
+  padding: 15px;
+  margin-bottom: 15px;
+}
+
+.summaryLeft,
+.summaryRight {
+  display: flex;
+  flex-direction: column;
+}
+
+.summaryLine {
+  margin-bottom: 6px;
+  font-size: 11pt;
+}
+
+/* Sections */
+.section {
+  margin-bottom: 15px;
+  border: 2px solid #000;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.sectionHeader {
+  background-color: #3d2817;
+  color: white;
+  padding: 8px 12px;
+  font-weight: bold;
+  font-size: 11pt;
+  letter-spacing: 0.5px;
+}
+
+.sectionContent {
+  padding: 12px;
+  background-color: white;
+}
+
+.dataLine {
+  margin-bottom: 8px;
+  font-size: 11pt;
+}
+
+/* Checkboxes */
+.checkboxGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+
+.checkbox {
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+  font-size: 11pt;
+}
+
+.checkbox input[type="checkbox"] {
+  width: 16px;
+  height: 16px;
+  margin-right: 8px;
+  cursor: pointer;
+  accent-color: #3d2817;
+}
+
+.checkbox span {
+  user-select: none;
+}
+
+.description {
+  margin-top: 10px;
+  font-size: 11pt;
+}
+
+/* Two Columns Layout */
+.twoColumns {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 15px;
+  margin-bottom: 15px;
+}
+
+/* Period Lines */
+.periodLine {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 8px;
+  font-size: 11pt;
+}
+
+.amount {
+  font-weight: bold;
+}
+
+.totalLine {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 12px;
+  padding-top: 10px;
+  border-top: 2px solid #3d2817;
+  background-color: #fff4e6;
+  padding: 10px 8px;
+  border-radius: 4px;
+  font-weight: bold;
+}
+
+.totalLabel {
+  font-size: 12pt;
+  letter-spacing: 0.5px;
+}
+
+.totalAmount {
+  font-size: 14pt;
+  color: #3d2817;
+}
+
+/* Observations */
+.observations {
+  margin: 0;
+  font-size: 11pt;
+  line-height: 1.5;
+}
+
+/* Confirmation */
+.confirmation {
+  background-color: #fff4e6;
+  border: 2px solid #f5a623;
+  border-radius: 8px;
+  padding: 15px;
+  margin-bottom: 20px;
+}
+
+.confirmationText {
+  font-weight: bold;
+  font-size: 12pt;
+  letter-spacing: 0.5px;
+}
+
+.confirmationMessage {
+  margin: 10px 0 0 24px;
+  font-size: 10.5pt;
+  line-height: 1.4;
+}
+
+/* Footer */
+.footer {
+  background-color: #fff4e6;
+  border: 2px solid #f5a623;
+  border-radius: 8px;
+  padding: 15px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.footerLogo {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+
+.footerLogoImage {
+  width: 80px;
+  height: auto;
+}
+
+.footerPhone {
+  font-size: 11pt;
+  line-height: 1.4;
+}
+
+.footerContact {
+  text-align: right;
+  font-size: 11pt;
+  line-height: 1.4;
+}
+
+/* Print Styles */
+@media print {
+  .receipt {
+    width: 100%;
+    padding: 15mm;
+    margin: 0;
+  }
+}

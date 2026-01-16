@@ -43,8 +43,9 @@ import { MuiFileInput } from 'mui-file-input';
 import numeral from 'numeral';
 import { DesktopDatePicker } from '@mui/x-date-pickers';
 import { convertDateToTZ, dateDiffInDays, compressImage } from 'lib/client/utils';
+import PaymentReceipt from '../PaymentReceipt';
 function AddPaymentModal(props) {
-  const { customerId, handleOnClose, open, reason, amount, lateFee } = props;
+  const { customerId, handleOnClose, open, reason, amount, lateFee, lateFeeDays } = props;
   const { customerList, customerError } = useGetAllCustomers(getFetcher, false);
   const { paymentAccounts } = useGetPaymentAccounts(getFetcher);
   const [selectedCustomer, setSelectedCustomer] = useState<any>(null);
@@ -67,6 +68,16 @@ function AddPaymentModal(props) {
     error: false,
     msg: ''
   });
+  
+  const [receipt, setReceipt] = useState<any>(null);
+  const [showReceipt, setShowReceipt] = useState<boolean>(false);
+  
+  // Determine if reason is locked (passed via props) and filter available reasons
+  const isReasonLocked = Boolean(reason);
+  const availableReasons = isReasonLocked 
+    ? Object.keys(PAYMENT_REASONS)
+    : Object.keys(PAYMENT_REASONS).filter(key => key !== 'RENT_EXT' && key !== 'ADD');
+  
   const handleCustomerSelect = (selected: any) => {
     const found = customerList.filter(
       (c) => c._id.toString() === selected?.id
@@ -86,7 +97,6 @@ function AddPaymentModal(props) {
       label: 'Cantidad y comprobante'
     }
   ];
-
   const handleOnSubmit = async (event) => {
     event.preventDefault();
     setHasErrorSubmitting({ error: false, msg: '' });
@@ -100,10 +110,15 @@ function AddPaymentModal(props) {
       amount: selectedAmount,
       folio: selectedFolio,
       lateFee: lateFee || 0,
+      lateFeeDays: lateFeeDays || null,
     });
     setIsSubmitting(false);
     if (!result.error) {
-      handleSavedPayment(result.msg);
+      // Pass the receipt data from backend
+      handleSavedPayment({
+        receipt: result.receipt,
+        successMessage: result.msg
+      });
     } else {
       setHasErrorSubmitting({ error: true, msg: result.msg });
     }
@@ -119,10 +134,23 @@ function AddPaymentModal(props) {
   const handleClose = () => {
     setHasErrorSubmitting({ error: false, msg: '' });
     setIsSubmitting(false);
+    setReceipt(null);
+    setShowReceipt(false);
     handleOnClose(false);
   };
-  const handleSavedPayment = (successMessage) => {
-    handleOnClose(true, successMessage);
+  
+  const handleSavedPayment = (savedPaymentData) => {
+
+    setReceipt({
+      ...savedPaymentData.receipt,
+    });
+    setShowReceipt(true);
+  };
+  
+  const handleCloseReceipt = () => {
+    setShowReceipt(false);
+    setReceipt(null);
+    handleOnClose(true, 'Pago guardado exitosamente');
   };
   if (customerId && customerList && !selectedCustomer) {
     handleCustomerSelect({ id: customerId });
@@ -138,6 +166,7 @@ function AddPaymentModal(props) {
   }
 
   return (
+    <>
     <Dialog open={open} fullWidth={true} maxWidth={'md'} scroll={'body'}>
       <Card>
         <CardHeader title="Nuevo pago" />
@@ -261,6 +290,7 @@ function AddPaymentModal(props) {
                                           required
                                           autoComplete="off"
                                           size="medium"
+                                          disabled={isReasonLocked}
                                           value={selectedReason || ''}
                                           onChange={(event) =>
                                             setSelectedReason(
@@ -268,7 +298,7 @@ function AddPaymentModal(props) {
                                             )
                                           }
                                         >
-                                          {Object.keys(PAYMENT_REASONS).map(
+                                          {availableReasons.map(
                                             (reasonKey) => (
                                               <MenuItem
                                                 key={reasonKey}
@@ -633,6 +663,16 @@ function AddPaymentModal(props) {
         </CardContent>
       </Card>
     </Dialog>
+    
+    {/* Receipt Dialog */}
+    {showReceipt && (
+      <PaymentReceipt
+        receipt={receipt}
+        open={showReceipt}
+        onClose={handleCloseReceipt}
+      />
+    )}
+  </>
   );
 }
 
@@ -643,6 +683,7 @@ AddPaymentModal.propTypes = {
   reason: PropTypes.string,
   amount: PropTypes.number,
   lateFee: PropTypes.number,
+  lateFeeDays: PropTypes.number,
 };
 
 export default AddPaymentModal;
