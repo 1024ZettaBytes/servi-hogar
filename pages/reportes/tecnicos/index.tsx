@@ -48,7 +48,6 @@ import WeekPicker from '@/components/WeekPicker';
 import { getFetcher, useGetReport } from 'pages/api/useRequest';
 import { updateTechnicianBonus } from 'lib/client/techniciansFetch';
 import { useSnackbar } from 'notistack';
-import { mutate } from 'swr';
 
 function TechniciansReport({ session }) {
   const { enqueueSnackbar } = useSnackbar();
