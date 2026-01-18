@@ -253,7 +253,7 @@ const TablaRecoleccionesPendientes: FC<TablaRecoleccionesPendientesProps> = ({
   const filteredPickups = applyFilters(pickupList, filter);
   const paginatedPickups = applyPagination(filteredPickups, page, limit);
   const changeOperatorIcon = (pickup: any, disabled: boolean) => {
-    if (!['ADMIN', 'AUX'].includes(userRole)) return '';
+    if (!['ADMIN', 'AUX'].includes(userRole)) return null;
     
     // AUX can only assign if no operator is assigned yet
     // ADMIN can always change operator
@@ -519,16 +519,17 @@ const TablaRecoleccionesPendientes: FC<TablaRecoleccionesPendientesProps> = ({
                       </Typography>
                     </TableCell>
                     <TableCell align="center">
-                      <Typography
-                        variant="body1"
-                        fontWeight="bold"
-                        color="text.primary"
-                        gutterBottom
-                        noWrap
-                      >
-                        {pickup?.operator ? pickup.operator.name : 'N/A'}
+                      <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 0.5 }}>
+                        <Typography
+                          variant="body1"
+                          fontWeight="bold"
+                          color="text.primary"
+                          noWrap
+                        >
+                          {pickup?.operator ? pickup.operator.name : 'N/A'}
+                        </Typography>
                         {changeOperatorIcon(pickup, shouldDisableActions)}
-                      </Typography>
+                      </Box>
                     </TableCell>
                     <TableCell align="center">
                       <NextLink
