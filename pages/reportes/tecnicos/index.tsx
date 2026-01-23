@@ -27,13 +27,17 @@ import {
   Box,
   Chip,
   Tooltip,
-  Switch
+  Switch,
+  IconButton,
+  Collapse
 } from '@mui/material';
 import Footer from '@/components/Footer';
 import CloudDownloadIcon from '@mui/icons-material/CloudDownload';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import AccessTimeIcon from '@mui/icons-material/AccessTime';
 import BuildIcon from '@mui/icons-material/Build';
+import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
+import KeyboardArrowUpIcon from '@mui/icons-material/KeyboardArrowUp';
 import {
   capitalizeFirstLetter,
   getLastWeekDay,
@@ -62,6 +66,7 @@ function TechniciansReport({ session }) {
   );
   const [isPrinting, setIsPrinting] = useState<boolean>(false);
   const [updatingBonus, setUpdatingBonus] = useState<string | null>(null);
+  const [expandedFailures, setExpandedFailures] = useState<Record<string, boolean>>({});
 
   const { reportData, reportError } = useGetReport(
     getFetcher,
@@ -94,6 +99,13 @@ function TechniciansReport({ session }) {
     } else {
       enqueueSnackbar(result.msg, { variant: 'error' });
     }
+  };
+
+  const handleToggleFailures = (technicianId: string) => {
+    setExpandedFailures(prev => ({
+      ...prev,
+      [technicianId]: !prev[technicianId]
+    }));
   };
 
   const handleClickOpen = async () => {
@@ -311,7 +323,7 @@ function TechniciansReport({ session }) {
                               </Typography>
                               <Grid container spacing={2}>
                                 {/* Maintenances payment */}
-                                <Grid item xs={12} sm={6} md={3}>
+                                <Grid item xs={12} sm={6} md={2.4}>
                                   <Card sx={{ p: 2, backgroundColor: '#e8f5e9' }}>
                                     <Typography variant="subtitle2" color="text.secondary">
                                       Mantenimientos
@@ -326,7 +338,7 @@ function TechniciansReport({ session }) {
                                 </Grid>
                                 
                                 {/* Punctuality bonus */}
-                                <Grid item xs={12} sm={6} md={3}>
+                                <Grid item xs={12} sm={6} md={2.4}>
                                   <Card sx={{ 
                                     p: 2, 
                                     backgroundColor: techReport.bonuses?.punctuality?.active ? '#e3f2fd' : '#ffebee',
@@ -370,7 +382,7 @@ function TechniciansReport({ session }) {
                                 </Grid>
                                 
                                 {/* Repair bonus */}
-                                <Grid item xs={12} sm={6} md={3}>
+                                <Grid item xs={12} sm={6} md={2.4}>
                                   <Card sx={{ 
                                     p: 2, 
                                     backgroundColor: techReport.bonuses?.repair?.active ? '#fff3e0' : '#ffebee',
@@ -380,7 +392,7 @@ function TechniciansReport({ session }) {
                                       <Box>
                                         <Typography variant="subtitle2" color="text.secondary">
                                           <BuildIcon sx={{ fontSize: 14, mr: 0.5, verticalAlign: 'middle' }} />
-                                          Reparación
+                                          0 por reparar
                                         </Typography>
                                         <Typography variant="h5" fontWeight="bold">
                                           {techReport.bonuses?.repair?.active 
@@ -408,8 +420,89 @@ function TechniciansReport({ session }) {
                                   </Card>
                                 </Grid>
                                 
+                                {/* No Failures bonus */}
+                                <Grid item xs={12} sm={6} md={2.4}>
+                                  <Card sx={{ 
+                                    p: 2, 
+                                    backgroundColor: techReport.bonuses?.noFailures?.active ? '#f1f8e9' : '#ffebee',
+                                    border: techReport.bonuses?.noFailures?.active ? '2px solid #8bc34a' : '2px solid #f44336'
+                                  }}>
+                                    <Box display="flex" alignItems="center" justifyContent="space-between">
+                                      <Box>
+                                        <Typography variant="subtitle2" color="text.secondary">
+                                          ⭐ No Fallas
+                                        </Typography>
+                                        <Typography variant="h5" fontWeight="bold">
+                                          {techReport.bonuses?.noFailures?.active 
+                                            ? `$${techReport.bonuses.noFailures.amount}` 
+                                            : '$0.00'}
+                                        </Typography>
+                                      </Box>
+                                    </Box>
+                                    <Box display="flex" alignItems="center" justifyContent="space-between" mt={1}>
+                                      <Chip 
+                                        label={
+                                          techReport.bonuses?.noFailures?.active 
+                                            ? `✓ ${techReport.bonuses?.noFailures?.failuresCount || 0}/5 fallas` 
+                                            : `✗ ${techReport.bonuses?.noFailures?.failuresCount || 0}/5 fallas`
+                                        }
+                                        color={techReport.bonuses?.noFailures?.active ? 'success' : 'error'}
+                                        size="small"
+                                      />
+                                      {techReport.bonuses?.noFailures?.failures && 
+                                       techReport.bonuses.noFailures.failures.length > 0 && (
+                                        <IconButton 
+                                          size="small" 
+                                          onClick={() => handleToggleFailures(techReport.technician._id)}
+                                          sx={{ ml: 1 }}
+                                        >
+                                          {expandedFailures[techReport.technician._id] ? 
+                                            <KeyboardArrowUpIcon fontSize="small" /> : 
+                                            <KeyboardArrowDownIcon fontSize="small" />
+                                          }
+                                        </IconButton>
+                                      )}
+                                    </Box>
+                                    
+                                    {/* Collapsible list of failures */}
+                                    {techReport.bonuses?.noFailures?.failures && 
+                                     techReport.bonuses.noFailures.failures.length > 0 && (
+                                      <Collapse in={expandedFailures[techReport.technician._id]} timeout="auto" unmountOnExit>
+                                        <Box mt={2} sx={{ maxHeight: 150, overflowY: 'auto' }}>
+                                          <Typography variant="caption" color="text.secondary" fontWeight="bold" display="block" mb={0.5}>
+                                            Equipos reportados:
+                                          </Typography>
+                                          {techReport.bonuses.noFailures.failures.map((failure, idx) => (
+                                            <Box 
+                                              key={idx} 
+                                              sx={{ 
+                                                fontSize: '0.7rem',
+                                                p: 0.5,
+                                                mb: 0.5,
+                                                backgroundColor: 'rgba(0,0,0,0.05)',
+                                                borderRadius: 1,
+                                                borderLeft: '2px solid #f44336'
+                                              }}
+                                            >
+                                              <Typography variant="caption" fontWeight="bold" display="block">
+                                                Equipo #{failure.machineNum}
+                                              </Typography>
+                                              <Typography variant="caption" color="text.secondary" display="block">
+                                                {formatTZDate(failure.date, 'DD/MM/YY HH:mm')}
+                                              </Typography>
+                                              <Typography variant="caption" color="text.secondary" display="block" sx={{ fontSize: '0.65rem' }}>
+                                                {failure.problem}
+                                              </Typography>
+                                            </Box>
+                                          ))}
+                                        </Box>
+                                      </Collapse>
+                                    )}
+                                  </Card>
+                                </Grid>
+                                
                                 {/* Total */}
-                                <Grid item xs={12} sm={6} md={3}>
+                                <Grid item xs={12} sm={6} md={2.4}>
                                   <Card sx={{ p: 2, backgroundColor: '#f3e5f5', border: '2px solid #9c27b0' }}>
                                     <Typography variant="subtitle2" color="text.secondary">
                                       Total Semanal

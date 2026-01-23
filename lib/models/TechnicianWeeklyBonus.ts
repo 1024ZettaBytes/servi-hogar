@@ -15,6 +15,8 @@ const TechnicianWeeklyBonusSchema = new Schema(
       type: Date,
       required: true
     },
+    // Only manual bonuses are stored in the database
+    // Automatic bonuses (repair, noFailures) are calculated in real-time in the report
     punctualityBonus: {
       amount: {
         type: Number,
@@ -23,25 +25,6 @@ const TechnicianWeeklyBonusSchema = new Schema(
       active: {
         type: Boolean,
         default: true
-      }
-    },
-    repairBonus: {
-      amount: {
-        type: Number,
-        default: 100
-      },
-      active: {
-        type: Boolean,
-        default: true
-      },
-      // Stores info about the calculation
-      totalMaintenances: {
-        type: Number,
-        default: 0
-      },
-      completedMaintenances: {
-        type: Number,
-        default: 0
       }
     }
   },
