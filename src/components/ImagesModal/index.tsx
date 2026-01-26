@@ -34,9 +34,16 @@ export default function ImagesModal({
     error: false,
     msg: "",
   });
-  const [timestamp] = React.useState<string>(
+  const [timestamp, setTimestamp] = React.useState<string>(
     Date.now().toString()
   );
+  
+  // Regenerate timestamp when modal opens to bust cache
+  React.useEffect(() => {
+    if (open) {
+      setTimestamp(Date.now().toString());
+    }
+  }, [open]);
   
   // Initialize attached state dynamically based on imagesObj keys
   const [attached, setAttached] = React.useState<any>(() => {

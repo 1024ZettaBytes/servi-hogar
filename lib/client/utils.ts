@@ -128,6 +128,28 @@ export const getFileFromUrl = (url: string): string => {
   return splited[splited.length - 1];
 };
 
+// Extract full file path from cloud storage URL (includes folders)
+// URL format: https://storage.googleapis.com/bucket-name/path/to/file.jpg
+// Returns: path/to/file.jpg
+export const getFilePathFromUrl = (url: string): string => {
+  const patterns = [
+    /storage\.googleapis\.com\/[^\/]+\/(.+)$/,  // Google Cloud Storage
+    /storage\.cloud\.google\.com\/[^\/]+\/(.+)$/, // Alternative GCS URL
+    /\.com\/[^\/]+\/(.+)$/ // Generic pattern: domain.com/bucket/path
+  ];
+  
+  for (const pattern of patterns) {
+    const match = url.match(pattern);
+    if (match && match[1]) {
+      return match[1];
+    }
+  }
+  
+  // Fallback to last segment
+  const splited = url.split('/');
+  return splited[splited.length - 1];
+};
+
 export const dateDiffInDays = (initial: Date, end: Date): number => {
   const _MS_PER_DAY = 1000 * 60 * 60 * 24;
   // Discard the time and time-zone information.

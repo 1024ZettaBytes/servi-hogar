@@ -1,5 +1,5 @@
 import Head from "next/head";
-import { getSession } from "next-auth/react";
+import { getSession, useSession } from "next-auth/react";
 import { useRouter } from "next/router";
 import { useState } from "react";
 import SidebarLayout from "@/layouts/SidebarLayout";
@@ -35,14 +35,20 @@ import { formatTZDate } from "../../lib/client/utils";
 import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import ImageSearchIcon from "@mui/icons-material/ImageSearch";
+import PhotoCameraIcon from "@mui/icons-material/PhotoCamera";
 import NextLink from "next/link";
 import ImagesModal from "@/components/ImagesModal";
 
 function SaleDetail() {
   const router = useRouter();
   const { saleId } = router.query;
+  const { data: session } = useSession();
+  const userRole = session?.user?.role;
+  const canEditImages = ['ADMIN', 'AUX'].includes(userRole);
+  
   const [openImages, setOpenImages] = useState(false);
   const [selectedImages, setSelectedImages] = useState({});
+  const [openDeliveryImages, setOpenDeliveryImages] = useState(false);
 
   const fetcher = (url) => fetch(url).then((res) => res.json());
   const { data: saleData, error: saleError } = useSWR(
@@ -54,9 +60,47 @@ function SaleDetail() {
     setOpenImages(false);
   };
 
+  const handleCloseDeliveryImages = () => {
+    setOpenDeliveryImages(false);
+    // Refresh data after closing the modal (in case images were updated)
+    router.replace(router.asPath);
+  };
+
   const handleViewImage = (imageUrl) => {
     setSelectedImages({ payment: imageUrl });
     setOpenImages(true);
+  };
+
+  // Helper function to check if a string is a valid URL
+  const isValidUrl = (url) => {
+    if (!url || typeof url !== 'string') return false;
+    return url.startsWith('http://') || url.startsWith('https://') || url.startsWith('/');
+  };
+
+  // Filter only valid image URLs
+  const getValidDeliveryImages = () => {
+    if (!sale?.delivery?.imagesUrl) return {};
+    const validImages = {};
+    Object.entries(sale.delivery.imagesUrl).forEach(([key, url]) => {
+      if (isValidUrl(url)) {
+        validImages[key] = url;
+      }
+    });
+    return validImages;
+  };
+
+  const handleViewDeliveryImages = () => {
+    const validImages = getValidDeliveryImages();
+    if (Object.keys(validImages).length > 0) {
+      setSelectedImages(validImages);
+      setOpenDeliveryImages(true);
+    }
+  };
+
+  // Check if there are valid delivery images
+  const hasValidDeliveryImages = () => {
+    const validImages = getValidDeliveryImages();
+    return Object.keys(validImages).length > 0;
   };
 
   const sale = saleData?.data;
@@ -376,6 +420,74 @@ function SaleDetail() {
                   </Box>
                 </Card>
               </Grid>
+
+              {/* Delivery Information - Only show if delivery exists and is completed */}
+              {sale.delivery && sale.delivery.status === 'COMPLETADA' && (
+                <Grid item xs={12}>
+                  <Card>
+                    <Box p={3}>
+                      <Box display="flex" justifyContent="space-between" alignItems="center">
+                        <Typography variant="h4" gutterBottom>
+                          Información de Entrega
+                        </Typography>
+                        {hasValidDeliveryImages() && (
+                          <Button
+                            variant="outlined"
+                            color="primary"
+                            startIcon={<PhotoCameraIcon />}
+                            onClick={handleViewDeliveryImages}
+                          >
+                            Ver Fotos de Entrega
+                          </Button>
+                        )}
+                      </Box>
+                      <Divider sx={{ my: 2 }} />
+                      <Grid container spacing={2}>
+                        <Grid item xs={6} md={3}>
+                          <Typography variant="caption" color="text.secondary">
+                            Estado de Entrega
+                          </Typography>
+                          <Box mt={0.5}>
+                            <Chip
+                              label="Completada"
+                              color="success"
+                              size="small"
+                            />
+                          </Box>
+                        </Grid>
+                        <Grid item xs={6} md={3}>
+                          <Typography variant="caption" color="text.secondary">
+                            Fecha de Entrega
+                          </Typography>
+                          <Typography variant="body2">
+                            {sale.delivery.completedAt 
+                              ? formatTZDate(sale.delivery.completedAt, "DD/MM/YYYY HH:mm")
+                              : 'N/A'}
+                          </Typography>
+                        </Grid>
+                        <Grid item xs={6} md={3}>
+                          <Typography variant="caption" color="text.secondary">
+                            Entregado por
+                          </Typography>
+                          <Typography variant="body2">
+                            {sale.delivery.completedBy?.name || 'N/A'}
+                          </Typography>
+                        </Grid>
+                        <Grid item xs={6} md={3}>
+                          <Typography variant="caption" color="text.secondary">
+                            Fotos de Entrega
+                          </Typography>
+                          <Typography variant="body2">
+                            {hasValidDeliveryImages()
+                              ? `${Object.keys(getValidDeliveryImages()).length} foto(s)`
+                              : 'Sin fotos'}
+                          </Typography>
+                        </Grid>
+                      </Grid>
+                    </Box>
+                  </Card>
+                </Grid>
+              )}
             </>
           )}
         </Grid>
@@ -387,6 +499,15 @@ function SaleDetail() {
         title="Comprobante de Pago"
         text="Imagen del comprobante de pago"
         imagesObj={selectedImages}
+      />
+      {/* Modal for delivery images with edit capability */}
+      <ImagesModal
+        open={openDeliveryImages}
+        onClose={handleCloseDeliveryImages}
+        title="Fotos de Entrega"
+        text="Imágenes de la entrega de venta"
+        imagesObj={selectedImages}
+        canEdit={canEditImages && sale?.delivery?.status === 'COMPLETADA'}
       />
     </>
   );
