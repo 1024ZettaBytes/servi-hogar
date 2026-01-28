@@ -5,7 +5,9 @@ export interface ISalePayment extends Document {
   amount: number;
   paymentDate: Date;
   weeksCovered: number;
-  imageUrl: string;
+  imageUrl?: string;
+  method: 'TRANSFER' | 'DEP' | 'CASH' | 'CASH_OFFICE';
+  paymentAccount?: Schema.Types.ObjectId;
   createdBy: Schema.Types.ObjectId;
   createdAt: Date;
 }
@@ -19,7 +21,13 @@ const SalePaymentSchema = new Schema<ISalePayment>({
   amount: { type: Number, required: true },
   paymentDate: { type: Date, required: true },
   weeksCovered: { type: Number, required: true },
-  imageUrl: { type: String, required: true },
+  imageUrl: { type: String, default: null },
+  method: {
+    type: String,
+    enum: ['TRANSFER', 'DEP', 'CASH', 'CASH_OFFICE'],
+    required: true
+  },
+  paymentAccount: { type: Schema.Types.ObjectId, ref: 'paymentAccounts', default: null },
   createdBy: { type: Schema.Types.ObjectId, required: true, ref: 'users' },
   createdAt: { type: Date, required: true }
 });

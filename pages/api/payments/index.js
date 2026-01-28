@@ -42,12 +42,15 @@ async function savePaymentAPI(req, res, userId) {
     });
 
     const body = JSON.parse(fields?.body);
-    await savePaymentData({
+    const result = await savePaymentData({
       ...body,
       files: Object.keys(files).length > 0 ? files : null,
       lastUpdatedBy: userId,
     });
-    res.status(200).json({ msg: "¡Pago guardado con éxito!"});
+    res.status(200).json({ 
+      msg: "¡Pago guardado con éxito!", 
+      receipt: result
+    });
   } catch (e) {
     console.error(e);
     res.status(500).json({ errorMsg: e.message });

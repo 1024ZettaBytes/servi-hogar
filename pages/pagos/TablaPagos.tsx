@@ -24,10 +24,12 @@ import {
 } from '@mui/material';
 
 import ImageSearchIcon from '@mui/icons-material/ImageSearch';
+import ReceiptIcon from '@mui/icons-material/Receipt';
 import SearchIcon from '@mui/icons-material/Search';
 import { capitalizeFirstLetter, formatTZDate } from 'lib/client/utils';
 import { PAYMENT_METHODS } from '../../lib/consts/OBJ_CONTS';
 import { getFetcher, useGetPayments } from 'pages/api/useRequest';
+import PaymentReceipt from 'src/components/PaymentReceipt';
 interface TablaPagosProps {
   className?: string;
 }
@@ -38,6 +40,8 @@ const TablaPagos: FC<TablaPagosProps> = () => {
   const [limit, setLimit] = useState(30);
   const [searchTerm, setSearchTerm] = useState(null);
   const [searchText, setSearchText] = useState(null);
+  const [selectedReceipt, setSelectedReceipt] = useState(null);
+  const [showReceipt, setShowReceipt] = useState(false);
 
   const { payments, paymentsError } = useGetPayments(
     getFetcher,
@@ -124,6 +128,7 @@ const TablaPagos: FC<TablaPagosProps> = () => {
                 <TableCell align="center">Cuenta</TableCell>
                 <TableCell align="center">Folio</TableCell>
                 <TableCell align="center">Comprobante</TableCell>
+                <TableCell align="center">Recibo</TableCell>
                 <TableCell align="center">Importe</TableCell>
                 <TableCell align='center'>Recargo</TableCell>
                 <TableCell align="center">Usuario</TableCell>
@@ -241,6 +246,28 @@ const TablaPagos: FC<TablaPagosProps> = () => {
                       ) : null}
                     </TableCell>
                     <TableCell align="center">
+                      {payment.receipt ? (
+                        <Tooltip title="Ver recibo" arrow>
+                          <IconButton
+                            sx={{
+                              '&:hover': {
+                                background: theme.colors.success.lighter
+                              },
+                              color: theme.palette.success.main
+                            }}
+                            color="inherit"
+                            size="small"
+                            onClick={() => {
+                              setSelectedReceipt(payment.receipt);
+                              setShowReceipt(true);
+                            }}
+                          >
+                            <ReceiptIcon fontSize="small" />
+                          </IconButton>
+                        </Tooltip>
+                      ) : null}
+                    </TableCell>
+                    <TableCell align="center">
                       <Typography variant="body2" color="green" noWrap>
                         {numeral(payment?.amount).format(
                           `$${payment.amount}0,0.00`
@@ -283,6 +310,18 @@ const TablaPagos: FC<TablaPagosProps> = () => {
         </Box>
       </Card>
       </Card>
+    )}
+
+    {/* Receipt Dialog */}
+    {showReceipt && (
+      <PaymentReceipt
+        receipt={selectedReceipt}
+        open={showReceipt}
+        onClose={() => {
+          setShowReceipt(false);
+          setSelectedReceipt(null);
+        }}
+      />
     )}
   </Grid>
 

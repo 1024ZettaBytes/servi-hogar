@@ -472,6 +472,7 @@ function ExtendRentModal(props) {
               reason={"RENT_EXT"}
               amount={getToPay()}
               lateFee={chargeLateFee ? lateFeeAmount : 0}
+              lateFeeDays={lateFeeDays}
             />
           )}
         </CardContent>

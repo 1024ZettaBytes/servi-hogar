@@ -225,10 +225,11 @@ export const useGetPaymentAccounts = (fetcher) => {
 export const useGetReport = (
   fetcher,
   filter,
+  period,
   startDate = null,
-  endDate = null
+  endDate = null,
 ) => {
-  let url = `${ROUTES.REPORT_API}?filter=${filter}`;
+  let url = `${ROUTES.REPORT_API}?filter=${filter}&period=${period}`;
   url =
     url + (startDate ? `&start=${formatTZDate(startDate, 'YYYY-MM-DD')}` : '');
   url = url + (endDate ? `&end=${formatTZDate(endDate, 'YYYY-MM-DD')}` : '');

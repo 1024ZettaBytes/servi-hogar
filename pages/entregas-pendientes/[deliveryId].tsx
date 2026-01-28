@@ -4,6 +4,7 @@ import PageTitleWrapper from '@/components/PageTitleWrapper';
 import NextBreadcrumbs from '@/components/Shared/BreadCrums';
 import SidebarLayout from '@/layouts/SidebarLayout';
 import MyLocationIcon from '@mui/icons-material/MyLocation';
+import ReceiptIcon from '@mui/icons-material/Receipt';
 import { LoadingButton } from '@mui/lab';
 import {
   Alert,
@@ -57,6 +58,7 @@ import {
   useGetDeliveryById,
   useGetMachinesForRent
 } from '../api/useRequest';
+import PaymentReceipt from 'src/components/PaymentReceipt';
 function RentaRapida({ session }) {
   const router = useRouter();
   const { data: sessionData, update: updateSession } = useSession();
@@ -107,6 +109,8 @@ function RentaRapida({ session }) {
     error: false,
     msg: ''
   });
+  const [receipt, setReceipt] = useState<any>(null);
+  const [showReceipt, setShowReceipt] = useState(false);
   const [activeStep, setActiveStep] = useState(0);
   const generalError = deliveryByIdError || citiesError || machinesError;
   const completeData = delivery && citiesList;
@@ -282,6 +286,10 @@ function RentaRapida({ session }) {
     });
     setIsSubmitting(false);
     if (!result.error) {
+      // Store receipt if returned
+      if (result.receipt) {
+        setReceipt(result.receipt);
+      }
       // Update session to get latest user data (including isBlocked status)
       await updateSession();
       handleNext(event);
@@ -1068,11 +1076,24 @@ function RentaRapida({ session }) {
                 {activeStep === steps.length && (
                   <Paper square elevation={0} sx={{ p: 3 }}>
                     <Alert severity="success">La entrega fue completada</Alert>
-                    <NextLink href="/entregas-pendientes">
-                      <Button sx={{ mt: 1, mr: 1 }}>
-                        Lista de entregas pendientes
-                      </Button>
-                    </NextLink>
+                    <Box sx={{ mt: 2, display: 'flex', gap: 1, flexWrap: 'wrap' }}>
+                      <NextLink href="/entregas-pendientes">
+                        <Button sx={{ mt: 1, mr: 1 }}>
+                          Lista de entregas pendientes
+                        </Button>
+                      </NextLink>
+                      {receipt && (
+                        <Button
+                          variant="outlined"
+                          color="success"
+                          startIcon={<ReceiptIcon />}
+                          sx={{ mt: 1 }}
+                          onClick={() => setShowReceipt(true)}
+                        >
+                          Ver recibo
+                        </Button>
+                      )}
+                    </Box>
                   </Paper>
                 )}
               </Card>
@@ -1081,6 +1102,15 @@ function RentaRapida({ session }) {
         </Grid>
       </Container>
       <Footer />
+
+      {/* Receipt Dialog */}
+      {showReceipt && (
+        <PaymentReceipt
+          receipt={receipt}
+          open={showReceipt}
+          onClose={() => setShowReceipt(false)}
+        />
+      )}
     </>
   );
 }

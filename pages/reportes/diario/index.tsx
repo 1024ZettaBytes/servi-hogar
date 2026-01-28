@@ -60,6 +60,7 @@ function DayReport() {
   const { reportData, reportError } = useGetReport(
     getFetcher,
     'day',
+    null,
     convertDateToTZ(selectedDate)
   );
   const generalError = reportError;

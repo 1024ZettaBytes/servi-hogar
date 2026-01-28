@@ -44,6 +44,7 @@ function ProfitsReport() {
   const { reportData, reportError } = useGetReport(
     getFetcher,
     "profits",
+    null,
     convertDateToTZ(selectedDate)
   );
   const generalError = reportError;

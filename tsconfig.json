@@ -27,8 +27,9 @@
     "resolveJsonModule": true,
     "isolatedModules": true,
     "noFallthroughCasesInSwitch": true,
-    "incremental": true
+    "incremental": true,
+    "typeRoots": ["./node_modules/@types", "./types"]
   },
   "exclude": ["node_modules"],
-  "include": ["src", "next-env.d.ts", "**/*.ts", "**/*.tsx", "pages/api/customers/index.js"]
+  "include": ["src", "next-env.d.ts", "types/**/*.d.ts", "**/*.ts", "**/*.tsx", "pages/api/customers/index.js"]
 }

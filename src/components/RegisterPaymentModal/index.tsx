@@ -15,39 +15,55 @@ import {
   Chip,
   CardMedia,
   IconButton,
+  FormControl,
+  InputLabel,
+  Select,
+  MenuItem,
 } from "@mui/material";
 import { LoadingButton } from "@mui/lab";
 import { DesktopDatePicker } from "@mui/x-date-pickers";
 import PhotoCamera from "@mui/icons-material/PhotoCamera";
 import DeleteIcon from "@mui/icons-material/Delete";
 import { registerPayment } from "../../../lib/client/salesFetch";
+import { PAYMENT_METHODS } from "../../../lib/consts/OBJ_CONTS";
+import { useGetPaymentAccounts, getFetcher } from "../../../pages/api/useRequest";
 import numeral from "numeral";
 import { convertDateToTZ, compressImage } from "../../../lib/client/utils";
 import { useCheckBlocking } from "src/hooks/useCheckBlocking";
+import PaymentReceipt from "../PaymentReceipt";
 
 function RegisterPaymentModal(props) {
   const { handleOnClose, open, sale } = props;
   const { checkBlocking } = useCheckBlocking();
+  const { paymentAccounts } = useGetPaymentAccounts(getFetcher);
   const [isLoading, setIsLoading] = useState(false);
   const [hasError, setHasError] = useState({ error: false, msg: "" });
   const [paymentAmount, setPaymentAmount] = useState("");
   const [paymentDate, setPaymentDate] = useState(new Date());
+  const [paymentMethod, setPaymentMethod] = useState("");
+  const [selectedPaymentAccount, setSelectedPaymentAccount] = useState<any>(null);
   const [paymentImage, setPaymentImage] = useState(null);
   const [paymentImagePreview, setPaymentImagePreview] = useState(null);
+  const [receipt, setReceipt] = useState<any>(null);
+  const [showReceipt, setShowReceipt] = useState(false);
 
   // Reset state when modal opens with a new sale
   useEffect(() => {
     if (open && sale) {
       setPaymentAmount("");
       setPaymentDate(new Date());
+      setPaymentMethod("");
+      setSelectedPaymentAccount(null);
       setHasError({ error: false, msg: "" });
       setPaymentImage(null);
       setPaymentImagePreview(null);
+      setReceipt(null);
+      setShowReceipt(false);
     }
   }, [open, sale]);
 
   if (!sale) return null;
-
+  const requiresImage = paymentMethod === 'TRANSFER' || paymentMethod === 'DEP';
   const handleImageUpload = async (event) => {
     const imageFile = event.target.files[0];
     
@@ -123,8 +139,22 @@ function RegisterPaymentModal(props) {
       return;
     }
 
-    if (!paymentImage) {
-      setHasError({ error: true, msg: "Debe adjuntar una foto del pago" });
+    if (!paymentMethod) {
+      setHasError({ error: true, msg: "Debe seleccionar un método de pago" });
+      setIsLoading(false);
+      return;
+    }
+
+    // Account is required for TRANSFER and DEP methods
+    if (requiresImage && !selectedPaymentAccount) {
+      setHasError({ error: true, msg: "Debe seleccionar una cuenta de pago" });
+      setIsLoading(false);
+      return;
+    }
+
+    // Image is only required for TRANSFER and DEP methods
+    if (requiresImage && !paymentImage) {
+      setHasError({ error: true, msg: "Debe adjuntar una foto del comprobante de pago" });
       setIsLoading(false);
       return;
     }
@@ -142,7 +172,13 @@ function RegisterPaymentModal(props) {
     formData.append('saleId', sale._id);
     formData.append('paymentAmount', amount.toString());
     formData.append('paymentDate', convertDateToTZ(paymentDate).toISOString());
-    formData.append('paymentImage', paymentImage);
+    formData.append('paymentMethod', paymentMethod);
+    if (selectedPaymentAccount) {
+      formData.append('paymentAccountId', selectedPaymentAccount._id);
+    }
+    if (paymentImage) {
+      formData.append('paymentImage', paymentImage);
+    }
 
     const result = await registerPayment(formData);
 
@@ -150,7 +186,9 @@ function RegisterPaymentModal(props) {
     if (!result.error) {
       // Check if user was blocked
       await checkBlocking(result.wasBlocked);
-      handleSavedPayment(result.msg);
+      // Show the receipt
+      setReceipt(result.data);
+      setShowReceipt(true);
     } else {
       handleErrorOnSave(result.msg);
     }
@@ -161,16 +199,22 @@ function RegisterPaymentModal(props) {
     setIsLoading(false);
     setPaymentAmount("");
     setPaymentDate(new Date());
+    setPaymentMethod("");
+    setSelectedPaymentAccount(null);
     if (paymentImagePreview) {
       URL.revokeObjectURL(paymentImagePreview);
     }
     setPaymentImage(null);
     setPaymentImagePreview(null);
+    setReceipt(null);
+    setShowReceipt(false);
     handleOnClose(false);
   };
 
-  const handleSavedPayment = (successMessage) => {
-    handleOnClose(true, successMessage);
+  const handleCloseReceipt = () => {
+    setShowReceipt(false);
+    setReceipt(null);
+    handleOnClose(true, 'Pago registrado con éxito');
   };
 
   const handleErrorOnSave = (msg) => {
@@ -178,6 +222,7 @@ function RegisterPaymentModal(props) {
   };
 
   return (
+    <>
     <Dialog open={open} fullWidth={true} maxWidth="sm" scroll={"body"}>
       <Card>
         <CardHeader title="Registrar Pago" />
@@ -298,6 +343,59 @@ function RegisterPaymentModal(props) {
                 />
               </Grid>
 
+              {/* Payment Method Select */}
+              <Grid item xs={12}>
+                <FormControl fullWidth required>
+                  <InputLabel id="payment-method-label">Método de Pago</InputLabel>
+                  <Select
+                    labelId="payment-method-label"
+                    id="paymentMethod"
+                    value={paymentMethod}
+                    label="Método de Pago"
+                    onChange={(e) => {
+                      setPaymentMethod(e.target.value);
+                      // Clear account when switching to cash methods
+                      if (e.target.value !== 'TRANSFER' && e.target.value !== 'DEP') {
+                        setSelectedPaymentAccount(null);
+                      }
+                    }}
+                  >
+                    {Object.keys(PAYMENT_METHODS).map((key) => (
+                      <MenuItem key={key} value={key}>
+                        {PAYMENT_METHODS[key]}
+                      </MenuItem>
+                    ))}
+                  </Select>
+                </FormControl>
+              </Grid>
+
+              {/* Payment Account Select (only for TRANSFER/DEP) */}
+              {requiresImage && (
+                <Grid item xs={12}>
+                  <FormControl fullWidth required>
+                    <InputLabel id="payment-account-label">Cuenta</InputLabel>
+                    <Select
+                      labelId="payment-account-label"
+                      id="paymentAccount"
+                      value={selectedPaymentAccount?._id || ''}
+                      label="Cuenta"
+                      onChange={(e) => {
+                        const selected = paymentAccounts?.find(
+                          (acc) => acc._id === e.target.value
+                        );
+                        setSelectedPaymentAccount(selected);
+                      }}
+                    >
+                      {paymentAccounts?.map((acc) => (
+                        <MenuItem key={acc._id} value={acc._id}>
+                          {`${acc.bank} ${acc.count} (${acc.number.slice(-4)})`}
+                        </MenuItem>
+                      ))}
+                    </Select>
+                  </FormControl>
+                </Grid>
+              )}
+
               {/* Payment Amount Input */}
               <Grid item xs={12}>
                 <TextField
@@ -319,7 +417,9 @@ function RegisterPaymentModal(props) {
                 />
               </Grid>
 
-              {/* Payment Image Upload */}
+              {
+              /* Payment Image Upload */
+              requiresImage && (
               <Grid item xs={12}>
                 <Typography variant="subtitle2" gutterBottom>
                   Foto del comprobante de pago *
@@ -360,6 +460,7 @@ function RegisterPaymentModal(props) {
                   </Card>
                 )}
               </Grid>
+              )}
 
               {/* Payment Calculation Preview */}
               {paymentAmount && parseFloat(paymentAmount) > 0 && (
@@ -432,7 +533,8 @@ function RegisterPaymentModal(props) {
                     type="submit"
                     variant="contained"
                     disabled={
-                      !paymentAmount || !paymentImage
+                      !paymentAmount || !paymentMethod || 
+                      ((paymentMethod === 'TRANSFER' || paymentMethod === 'DEP') && (!paymentImage || !selectedPaymentAccount))
                     }
                   >
                     Registrar Pago
@@ -444,6 +546,16 @@ function RegisterPaymentModal(props) {
         </CardContent>
       </Card>
     </Dialog>
+
+    {/* Receipt Dialog */}
+    {showReceipt && (
+      <PaymentReceipt
+        receipt={receipt}
+        open={showReceipt}
+        onClose={handleCloseReceipt}
+      />
+    )}
+  </>
   );
 }
 

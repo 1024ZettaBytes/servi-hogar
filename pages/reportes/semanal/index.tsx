@@ -64,8 +64,9 @@ function DayReport({ session }) {
   const { reportData, reportError } = useGetReport(
     getFetcher,
     'range',
+    'week',
     convertDateToTZ(start),
-    convertDateToTZ(end)
+    convertDateToTZ(end),
   );
   const generalError = reportError;
   const completeData = reportData;

@@ -167,6 +167,7 @@ const TablaCambios: FC<TablaCambiosProps> = ({userRole}) => {
                       //<TableCell align="center">Renta</TableCell>
                     }
                     <TableCell align="center">Razón</TableCell>
+                    <TableCell align="center">Reportado</TableCell>
                     <TableCell align="center">Cliente</TableCell>
                     <TableCell align="center">Solicitado</TableCell>
                     <TableCell align="center">Realizado</TableCell>
@@ -227,10 +228,22 @@ const TablaCambios: FC<TablaCambiosProps> = ({userRole}) => {
                             gutterBottom
                             noWrap
                           >
+                        {capitalizeFirstLetter(
+                          formatTZDate(new Date(change?.createdAt), 'MMM DD YYYY')
+                        )}
+                          </Typography>
+                        </TableCell>
+                        <TableCell align="center">
+                          <Typography
+                            variant="body1"
+                            fontWeight="bold"
+                            color="text.primary"
+                            gutterBottom
+                            noWrap
+                          >
                             {change?.rent?.customer?.name}
                           </Typography>
                         </TableCell>
-
                         <TableCell align="center">
                           <Typography
                             variant="body1"
@@ -266,16 +279,20 @@ const TablaCambios: FC<TablaCambiosProps> = ({userRole}) => {
                           </Typography>
                         </TableCell>
                         <TableCell align="center">
-                          {change.pickedMachine
-                            ? change.pickedMachine.machineNum
-                            : 'N/A'}
+                          <Typography variant="body2">
+                            {change.pickedMachine
+                              ? change.pickedMachine.machineNum
+                              : 'N/A'}
+                          </Typography>
                         </TableCell>
                         <TableCell align="center">
-                          {change?.wasFixed
-                            ? 'Solucionado'
-                            : change.leftMachine
-                            ? change.leftMachine.machineNum
-                            : 'N/A'}
+                          <Typography variant="body2">
+                            {change?.wasFixed
+                              ? 'Solucionado'
+                              : change.leftMachine
+                              ? change.leftMachine.machineNum
+                              : 'N/A'}
+                          </Typography>
                         </TableCell>
                         <TableCell align="center">
                           {change.imagesUrl ? (
@@ -298,7 +315,7 @@ const TablaCambios: FC<TablaCambiosProps> = ({userRole}) => {
                               </IconButton>
                             </Tooltip>
                           ) : (
-                            'N/A'
+                            <Typography variant="body2">N/A</Typography>
                           )}
                         </TableCell>
                         <TableCell
@@ -309,16 +326,17 @@ const TablaCambios: FC<TablaCambiosProps> = ({userRole}) => {
                             justifyContent: 'center'
                           }}
                         >
-                          {getStatusLabel(change?.status, change?.wasFixed)}
-                          {change?.status === 'CANCELADO' && (
-                            <Tooltip
-                              title={change?.cancellationReason || 'SIN RAZÓN'}
-                              arrow
-                            >
-                              <InfoOutlinedIcon fontSize="small" />
-                            </Tooltip>
-                          )}
-                          
+                          <Box display="flex" alignItems="center" gap={0.5}>
+                            {getStatusLabel(change?.status, change?.wasFixed)}
+                            {change?.status === 'CANCELADO' && (
+                              <Tooltip
+                                title={change?.cancellationReason || 'SIN RAZÓN'}
+                                arrow
+                              >
+                                <InfoOutlinedIcon fontSize="small" />
+                              </Tooltip>
+                            )}
+                          </Box>
                         </TableCell>
                         {showUser && <TableCell align="center">
                         <Typography
@@ -385,7 +403,6 @@ const TablaCambios: FC<TablaCambiosProps> = ({userRole}) => {
           </Dialog>
         </Card>
       )}
-      ;
     </Grid>
   );
 };
