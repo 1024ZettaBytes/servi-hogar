@@ -285,6 +285,7 @@ const TablaCambiosPendientes: FC<TablaCambiosPendientesProps> = ({
             <TableHead>
               <TableRow>
                 <TableCell align="center">Equipo</TableCell>
+                <TableCell align="center">Reportado</TableCell>
                 <TableCell align="center">Fotos</TableCell>
                 <TableCell align="center">Ubicación</TableCell>
                 <TableCell align="center">Cliente</TableCell>
@@ -310,6 +311,19 @@ const TablaCambiosPendientes: FC<TablaCambiosPendientesProps> = ({
                         noWrap
                       >
                         {change?.rent?.machine?.machineNum}
+                      </Typography>
+                    </TableCell>
+                    <TableCell align="center">
+                      <Typography
+                        variant="body1"
+                        fontWeight="bold"
+                        color="text.primary"
+                        gutterBottom
+                        noWrap
+                      >
+                        {capitalizeFirstLetter(
+                          formatTZDate(new Date(change?.createdAt), 'MMM DD YYYY')
+                        )}
                       </Typography>
                     </TableCell>
                     <TableCell align="center">

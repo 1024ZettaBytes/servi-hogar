@@ -167,6 +167,7 @@ const TablaCambios: FC<TablaCambiosProps> = ({userRole}) => {
                       //<TableCell align="center">Renta</TableCell>
                     }
                     <TableCell align="center">Razón</TableCell>
+                    <TableCell align="center">Reportado</TableCell>
                     <TableCell align="center">Cliente</TableCell>
                     <TableCell align="center">Solicitado</TableCell>
                     <TableCell align="center">Realizado</TableCell>
@@ -227,10 +228,22 @@ const TablaCambios: FC<TablaCambiosProps> = ({userRole}) => {
                             gutterBottom
                             noWrap
                           >
+                        {capitalizeFirstLetter(
+                          formatTZDate(new Date(change?.createdAt), 'MMM DD YYYY')
+                        )}
+                          </Typography>
+                        </TableCell>
+                        <TableCell align="center">
+                          <Typography
+                            variant="body1"
+                            fontWeight="bold"
+                            color="text.primary"
+                            gutterBottom
+                            noWrap
+                          >
                             {change?.rent?.customer?.name}
                           </Typography>
                         </TableCell>
-
                         <TableCell align="center">
                           <Typography
                             variant="body1"

@@ -668,8 +668,7 @@ function TechniciansReport({ session }) {
                                             <TableCell align="left">
                                               <Typography variant="body2">
                                                 {
-                                                  machine.latestChange
-                                                    .problemDesc
+                                                 machine.latestChange.problemDesc !== 'N/A' ? machine.latestChange.problemDesc : machine.latestChange.reason
                                                 }
                                               </Typography>
                                             </TableCell>
