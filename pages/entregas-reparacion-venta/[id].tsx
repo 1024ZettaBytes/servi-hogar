@@ -296,7 +296,7 @@ function CompletarEntregaReparacion() {
                     {hasErrorSubmitting.error && (
                       <Grid item xs={12}>
                         <Alert severity="error">
-                          {hasErrorSubmitting.msg}
+                          {String(hasErrorSubmitting.msg || 'Ocurrió un error desconocido')}
                         </Alert>
                       </Grid>
                     )}
