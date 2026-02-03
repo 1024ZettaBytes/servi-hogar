@@ -1,6 +1,7 @@
 import useSWR, { mutate } from 'swr';
 import { ROUTES } from '../../lib/consts/API_URL_CONST';
 import { formatTZDate } from 'lib/client/utils';
+import { format } from 'date-fns';
 const noRefreshOptions = {
   revalidateIfStale: false,
   revalidateOnFocus: false,
@@ -503,5 +504,57 @@ export const useGetScheduledSlots = (fetcher, date) => {
     scheduledSlotsData: data?.data,
     scheduledSlotsError: error,
     isLoadingScheduledSlots: isLoading
+  };
+};
+
+// Payroll
+export const useGetAuxUsers = (fetcher) => {
+  const { data, error, isLoading } = useSWR(ROUTES.ALL_AUX_USERS, fetcher);
+  return {
+    auxUsersData: data?.data,
+    auxUsersError: error,
+    isLoadingAuxUsers: isLoading
+  };
+};
+
+export const getPayrollSwrKey = (userId, dateStr) => {
+  // Don't generate a key if userId is not provided - prevents calling API without a user
+  if (!userId) return null;
+  
+  const params = [`userId=${userId}`];
+  if (dateStr) params.push(`date=${dateStr}`);
+  const queryString = '?' + params.join('&');
+  return `${ROUTES.PAYROLL_WEEKLY}${queryString}`;
+};
+
+export const useGetWeeklyPayroll = (fetcher, userId, dateStr) => {
+  const swrKey = getPayrollSwrKey(userId, dateStr);
+  
+  const { data, error, isLoading } = useSWR(
+    swrKey,
+    fetcher
+  );
+  return {
+    payrollData: data?.data,
+    payrollError: error,
+    isLoadingPayroll: isLoading,
+    swrKey
+  };
+};
+
+export const useGetPaymentsProgress = (fetcher, weekStartStr) => {
+  const url = weekStartStr 
+    ? `${ROUTES.PAYMENTS_PROGRESS}?weekStart=${weekStartStr}` 
+    : ROUTES.PAYMENTS_PROGRESS;
+  const { data, error, isLoading } = useSWR(
+    url,
+    fetcher,
+    { refreshInterval: 30000 }
+  );
+  return {
+    progressData: data?.data,
+    progressError: error,
+    isLoadingProgress: isLoading,
+    swrKey: url
   };
 };

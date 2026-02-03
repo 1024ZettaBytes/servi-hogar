@@ -14,6 +14,7 @@ import NextLink from 'next/link';
 import { SidebarContext } from 'src/contexts/SidebarContext';
 
 import AddBusinessIcon from '@mui/icons-material/AddBusiness';
+import ReceiptLongIcon from '@mui/icons-material/ReceiptLong';
 import HomeIcon from '@mui/icons-material/Home';
 import PendingActionsIcon from '@mui/icons-material/PendingActions';
 import ListIcon from '@mui/icons-material/List';
@@ -780,6 +781,21 @@ function SidebarMenu({ userRole }) {
                         startIcon={<GroupIcon />}
                       >
                         Usuarios
+                      </Button>
+                    </NextLink>
+                  </ListItem>
+                )}
+              { ['ADMIN', 'AUX'].includes(userRole) && (
+                  <ListItem component="div">
+                    <NextLink href="/nomina" passHref>
+                      <Button
+                        className={currentRoute === '/nomina' ? 'active' : ''}
+                        disableRipple
+                        component="a"
+                        onClick={closeSidebar}
+                        startIcon={<ReceiptLongIcon />}
+                      >
+                        Nómina
                       </Button>
                     </NextLink>
                   </ListItem>
