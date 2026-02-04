@@ -68,16 +68,35 @@ async function getPaymentsProgressAPI(req, res) {
     const target85 = Math.ceil(totalActiveRents * 0.85);
 
     // For each AUX user, count their RENT_EXT payments this week
+    // Use weeksToPay field if exists, otherwise count as 1
     const usersProgress = await Promise.all(
       auxUsers.map(async (user) => {
-        const paymentsCount = await Payment.countDocuments({
-          lastUpdatedBy: user._id,
-          reason: 'RENT_EXT',
-          date: {
-            $gte: weekStart,
-            $lte: weekEnd
+        const paymentAggregation = await Payment.aggregate([
+          {
+            $match: {
+              lastUpdatedBy: user._id,
+              reason: 'RENT_EXT',
+              date: {
+                $gte: weekStart,
+                $lte: weekEnd
+              }
+            }
+          },
+          {
+            $group: {
+              _id: null,
+              totalWeeks: {
+                $sum: {
+                  $ifNull: ['$weeksToPay', 1]
+                }
+              }
+            }
           }
-        });
+        ]);
+
+        const paymentsCount = paymentAggregation.length > 0 
+          ? paymentAggregation[0].totalWeeks 
+          : 0;
 
         return {
           _id: user._id,
