@@ -274,9 +274,19 @@ function SaleDetail() {
                     </Typography>
                     <Divider sx={{ my: 2 }} />
                     <Grid container spacing={2}>
+                      {sale.cashPrice && (
+                        <Grid item xs={6}>
+                          <Typography variant="caption" color="text.secondary">
+                            Precio de contado
+                          </Typography>
+                          <Typography variant="h6" color="success.main">
+                            ${numeral(sale.cashPrice).format('0,0.00')}
+                          </Typography>
+                        </Grid>
+                      )}
                       <Grid item xs={6}>
                         <Typography variant="caption" color="text.secondary">
-                          Total de la venta
+                          {sale.cashPrice ? 'Precio a crédito' : 'Total de la venta'}
                         </Typography>
                         <Typography variant="h6">
                           ${numeral(sale.totalAmount).format('0,0.00')}
@@ -375,11 +385,14 @@ function SaleDetail() {
                           <TableBody>
                             {/* Payment History */}
                             {sale.payments.map((payment, index) => (
-                              <TableRow key={payment._id}>
+                              <TableRow key={payment._id} sx={payment.isCashSettlement ? { bgcolor: 'success.light' } : {}}>
                                 <TableCell>{sale.payments.length - index}</TableCell>
                                 <TableCell>{formatTZDate(payment.paymentDate, "DD/MM/YYYY HH:mm")}</TableCell>
                                 <TableCell align="right">
                                   ${numeral(payment.amount).format('0,0.00')}
+                                  {payment.isCashSettlement && (
+                                    <Chip label="Contado" size="small" color="success" sx={{ ml: 1 }} />
+                                  )}
                                 </TableCell>
                                 <TableCell align="center">{payment.weeksCovered}</TableCell>
                                 <TableCell>{payment.createdBy?.name || 'N/A'}</TableCell>

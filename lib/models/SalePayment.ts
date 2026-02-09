@@ -8,6 +8,7 @@ export interface ISalePayment extends Document {
   imageUrl?: string;
   method: 'TRANSFER' | 'DEP' | 'CASH' | 'CASH_OFFICE';
   paymentAccount?: Schema.Types.ObjectId;
+  isCashSettlement: boolean;
   createdBy: Schema.Types.ObjectId;
   createdAt: Date;
 }
@@ -28,6 +29,7 @@ const SalePaymentSchema = new Schema<ISalePayment>({
     required: true
   },
   paymentAccount: { type: Schema.Types.ObjectId, ref: 'paymentAccounts', default: null },
+  isCashSettlement: { type: Boolean, default: false },
   createdBy: { type: Schema.Types.ObjectId, required: true, ref: 'users' },
   createdAt: { type: Date, required: true }
 });

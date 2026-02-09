@@ -35,6 +35,8 @@ async function handler(req, res) {
       const paymentDate = Array.isArray(fields.paymentDate) ? new Date(fields.paymentDate[0]) : new Date(fields.paymentDate);
       const paymentMethod = Array.isArray(fields.paymentMethod) ? fields.paymentMethod[0] : fields.paymentMethod;
       const paymentAccountId = Array.isArray(fields.paymentAccountId) ? fields.paymentAccountId[0] : fields.paymentAccountId;
+      const isCashSettlement = Array.isArray(fields.isCashSettlement) ? fields.isCashSettlement[0] === 'true' : fields.isCashSettlement === 'true';
+      const cashPriceOverride = Array.isArray(fields.cashPriceOverride) ? parseFloat(fields.cashPriceOverride[0]) : (fields.cashPriceOverride ? parseFloat(fields.cashPriceOverride) : null);
       const requiresImage = paymentMethod === 'TRANSFER' || paymentMethod === 'DEP';
       if (requiresImage && !paymentImage) {
         console.error('No payment image found in request');
@@ -48,6 +50,8 @@ async function handler(req, res) {
         paymentAccountId: paymentAccountId || null,
         paymentImagePath: requiresImage ? paymentImage.filepath : null,
         paymentImageName: paymentImage ? paymentImage.originalFilename : null,
+        isCashSettlement,
+        cashPriceOverride,
         lastUpdatedBy: userId
       });
       

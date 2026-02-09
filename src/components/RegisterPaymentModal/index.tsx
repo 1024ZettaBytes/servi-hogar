@@ -19,6 +19,8 @@ import {
   InputLabel,
   Select,
   MenuItem,
+  FormControlLabel,
+  Switch,
 } from "@mui/material";
 import { LoadingButton } from "@mui/lab";
 import { DesktopDatePicker } from "@mui/x-date-pickers";
@@ -46,6 +48,8 @@ function RegisterPaymentModal(props) {
   const [paymentImagePreview, setPaymentImagePreview] = useState(null);
   const [receipt, setReceipt] = useState<any>(null);
   const [showReceipt, setShowReceipt] = useState(false);
+  const [isCashSettlement, setIsCashSettlement] = useState(false);
+  const [cashPriceInput, setCashPriceInput] = useState("");
 
   // Reset state when modal opens with a new sale
   useEffect(() => {
@@ -59,11 +63,32 @@ function RegisterPaymentModal(props) {
       setPaymentImagePreview(null);
       setReceipt(null);
       setShowReceipt(false);
+      setIsCashSettlement(false);
+      setCashPriceInput("");
     }
   }, [open, sale]);
 
   if (!sale) return null;
   const requiresImage = paymentMethod === 'TRANSFER' || paymentMethod === 'DEP';
+
+  // Calculate if cash settlement is available (delivery completed <= 30 days ago)
+  const deliveryCompletedAt = sale.delivery?.completedAt;
+  const daysSinceDelivery = deliveryCompletedAt 
+    ? Math.floor((new Date().getTime() - new Date(deliveryCompletedAt).getTime()) / (1000 * 60 * 60 * 24))
+    : null;
+  const canUseCashSettlement = deliveryCompletedAt && daysSinceDelivery !== null && daysSinceDelivery <= 30;
+
+  // Determine the cash price to use
+  const effectiveCashPrice = sale.cashPrice || (cashPriceInput ? parseFloat(cashPriceInput) : null);
+  
+  // Calculate previous payments (excluding initial payment)
+  const previousPaymentsTotal = sale.totalAmount - sale.initialPayment - sale.remainingAmount;
+  
+  // Calculate cash settlement amount
+  const cashSettlementAmount = effectiveCashPrice 
+    ? Math.max(0, effectiveCashPrice - sale.initialPayment - previousPaymentsTotal)
+    : null;
+
   const handleImageUpload = async (event) => {
     const imageFile = event.target.files[0];
     
@@ -131,7 +156,10 @@ function RegisterPaymentModal(props) {
     setIsLoading(true);
     setHasError({ error: false, msg: "" });
 
-    const amount = parseFloat(paymentAmount);
+    // For cash settlement, use calculated amount
+    const amount = isCashSettlement && cashSettlementAmount 
+      ? cashSettlementAmount 
+      : parseFloat(paymentAmount);
 
     if (!amount || amount <= 0) {
       setHasError({ error: true, msg: "El monto debe ser mayor a 0" });
@@ -143,6 +171,20 @@ function RegisterPaymentModal(props) {
       setHasError({ error: true, msg: "Debe seleccionar un método de pago" });
       setIsLoading(false);
       return;
+    }
+
+    // Validate cash settlement requirements
+    if (isCashSettlement) {
+      if (!effectiveCashPrice) {
+        setHasError({ error: true, msg: "Debe ingresar el precio de contado" });
+        setIsLoading(false);
+        return;
+      }
+      if (effectiveCashPrice >= sale.totalAmount) {
+        setHasError({ error: true, msg: "El precio de contado debe ser menor al precio a crédito" });
+        setIsLoading(false);
+        return;
+      }
     }
 
     // Account is required for TRANSFER and DEP methods
@@ -159,7 +201,7 @@ function RegisterPaymentModal(props) {
       return;
     }
  
-    if (amount > sale.remainingAmount) {
+    if (!isCashSettlement && amount > sale.remainingAmount) {
       setHasError({ 
         error: true, 
         msg: `El monto no puede ser mayor al saldo restante ($${numeral(sale.remainingAmount).format('0,0.00')})` 
@@ -178,6 +220,13 @@ function RegisterPaymentModal(props) {
     }
     if (paymentImage) {
       formData.append('paymentImage', paymentImage);
+    }
+    // Add cash settlement fields
+    if (isCashSettlement) {
+      formData.append('isCashSettlement', 'true');
+      if (!sale.cashPrice && effectiveCashPrice) {
+        formData.append('cashPriceOverride', effectiveCashPrice.toString());
+      }
     }
 
     const result = await registerPayment(formData);
@@ -208,6 +257,8 @@ function RegisterPaymentModal(props) {
     setPaymentImagePreview(null);
     setReceipt(null);
     setShowReceipt(false);
+    setIsCashSettlement(false);
+    setCashPriceInput("");
     handleOnClose(false);
   };
 
@@ -331,6 +382,80 @@ function RegisterPaymentModal(props) {
                 <Divider />
               </Grid>
 
+              {/* Cash Settlement Option */}
+              {canUseCashSettlement && (
+                <Grid item xs={12}>
+                  <Alert severity="info" sx={{ mb: 1 }}>
+                    <Typography variant="body2">
+                      <strong>Pago de contado disponible</strong> - Entrega hace {daysSinceDelivery} días
+                    </Typography>
+                  </Alert>
+                  <FormControlLabel
+                    control={
+                      <Switch
+                        checked={isCashSettlement}
+                        onChange={(e) => {
+                          setIsCashSettlement(e.target.checked);
+                          if (!e.target.checked) {
+                            setCashPriceInput("");
+                          }
+                        }}
+                        color="success"
+                      />
+                    }
+                    label="Liquidar con pago de contado"
+                  />
+                  
+                  {isCashSettlement && (
+                    <Box sx={{ mt: 2, p: 2, bgcolor: 'success.light', borderRadius: 1, color: 'success.contrastText' }}>
+                      {!sale.cashPrice ? (
+                        <TextField
+                          type="number"
+                          autoComplete="off"
+                          required
+                          id="cashPriceInput"
+                          name="cashPriceInput"
+                          label="Precio de Contado ($)"
+                          fullWidth
+                          value={cashPriceInput}
+                          onChange={(e) => setCashPriceInput(e.target.value)}
+                          inputProps={{ min: 1, step: "any", max: sale.totalAmount - 1 }}
+                          helperText={`Debe ser menor a $${numeral(sale.totalAmount).format('0,0.00')} (precio a crédito)`}
+                          sx={{ mb: 2, bgcolor: 'background.paper', borderRadius: 1 }}
+                        />
+                      ) : (
+                        <Typography variant="body2" gutterBottom>
+                          <strong>Precio de contado registrado:</strong> ${numeral(sale.cashPrice).format('0,0.00')}
+                        </Typography>
+                      )}
+                      
+                      {effectiveCashPrice && (
+                        <>
+                          <Typography variant="body2">
+                            • Precio de contado: ${numeral(effectiveCashPrice).format('0,0.00')}
+                          </Typography>
+                          <Typography variant="body2">
+                            • Pago inicial: -${numeral(sale.initialPayment).format('0,0.00')}
+                          </Typography>
+                          {previousPaymentsTotal > 0 && (
+                            <Typography variant="body2">
+                              • Pagos anteriores: -${numeral(previousPaymentsTotal).format('0,0.00')}
+                            </Typography>
+                          )}
+                          <Divider sx={{ my: 1, borderColor: 'success.dark' }} />
+                          <Typography variant="h6">
+                            Monto a pagar: ${numeral(cashSettlementAmount).format('0,0.00')}
+                          </Typography>
+                          <Typography variant="caption">
+                            Ahorro: ${numeral(sale.remainingAmount - cashSettlementAmount).format('0,0.00')}
+                          </Typography>
+                        </>
+                      )}
+                    </Box>
+                  )}
+                </Grid>
+              )}
+
               {/* Payment Date Input */}
               <Grid item xs={12}>
                 <DesktopDatePicker
@@ -397,6 +522,7 @@ function RegisterPaymentModal(props) {
               )}
 
               {/* Payment Amount Input */}
+              {!isCashSettlement && (
               <Grid item xs={12}>
                 <TextField
                   type="number"
@@ -416,6 +542,7 @@ function RegisterPaymentModal(props) {
                   helperText={`Máximo: $${numeral(sale.remainingAmount).format('0,0.00')}`}
                 />
               </Grid>
+              )}
 
               {
               /* Payment Image Upload */
@@ -463,7 +590,7 @@ function RegisterPaymentModal(props) {
               )}
 
               {/* Payment Calculation Preview */}
-              {paymentAmount && parseFloat(paymentAmount) > 0 && (
+              {!isCashSettlement && paymentAmount && parseFloat(paymentAmount) > 0 && (
                 <Grid item xs={12}>
                   <Alert severity="info">
                     <Typography variant="body2" gutterBottom>
@@ -532,12 +659,15 @@ function RegisterPaymentModal(props) {
                     loading={isLoading}
                     type="submit"
                     variant="contained"
+                    color={isCashSettlement ? "success" : "primary"}
                     disabled={
-                      !paymentAmount || !paymentMethod || 
+                      (!isCashSettlement && !paymentAmount) || 
+                      (isCashSettlement && !effectiveCashPrice) ||
+                      !paymentMethod || 
                       ((paymentMethod === 'TRANSFER' || paymentMethod === 'DEP') && (!paymentImage || !selectedPaymentAccount))
                     }
                   >
-                    Registrar Pago
+                    {isCashSettlement ? 'Liquidar Venta' : 'Registrar Pago'}
                   </LoadingButton>
                 </Grid>
               </Grid>
