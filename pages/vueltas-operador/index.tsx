@@ -27,19 +27,26 @@ import {
   useGetChanges,
   useGetSalePickups,
   useGetCompletedCollections,
+  useGetPendingExtraTrips,
+  useGetCompletedExtraTrips,
   getFetcher,
 } from "../api/useRequest";
 import TablaVueltasOperador from "./TablaVueltasOperador";
+import TablaVueltasExtras from "./TablaVueltasExtras";
 import ScheduleTimeline from "@/components/ScheduleTimeline";
+import AddExtraTripModal from "@/components/AddExtraTripModal";
 import { formatTZDate, setDateToEnd } from "lib/client/utils";
 import numeral from "numeral";
 import { useState } from "react";
 import { DesktopDatePicker } from "@mui/x-date-pickers";
 import { mutate } from "swr";
+import { Button } from "@mui/material";
+import AddIcon from "@mui/icons-material/Add";
 
 function VueltasOperador({ session }) {
   const { data: sessionData } = useSession();
   const [selectedDate, setSelectedDate] = useState<Date>(new Date());
+  const [addExtraTripModalOpen, setAddExtraTripModalOpen] = useState(false);
   
   // Use client-side session data if available, otherwise fall back to server-side session
   const currentUser = sessionData?.user || session?.user;
@@ -52,12 +59,14 @@ function VueltasOperador({ session }) {
     mutate('/api/sale-pickups/list/pending');
     mutate('/api/changes/list/pending');
     mutate('/api/sales/collections/pending');
+    mutate('/api/extra-trips/pending');
     // Trigger re-fetch of completed tasks for the selected date
     mutate(`/api/deliveries/list?limit=1000&page=1&date=${selectedDate.toISOString()}`);
     mutate(`/api/pickups/list?limit=1000&page=1&date=${formatTZDate(selectedDate, "YYYY-MM-DD")}`);
     mutate(`/api/changes/list?limit=1000&page=1&date=${formatTZDate(selectedDate, "YYYY-MM-DD")}`);
     mutate(`/api/sale-pickups/list?page=1&limit=1000&date=${formatTZDate(selectedDate, "YYYY-MM-DD")}`);
     mutate(`/api/sales/collections/completed?limit=1000&page=1&date=${formatTZDate(selectedDate, "YYYY-MM-DD")}`);
+    mutate(`/api/extra-trips/completed?date=${formatTZDate(selectedDate, "YYYY-MM-DD")}`);
   };
   
   // Fetch pending tasks
@@ -107,14 +116,22 @@ function VueltasOperador({ session }) {
     1, 
     formatTZDate(selectedDate, "YYYY-MM-DD")
   );
+  
+  // Fetch extra trips
+  const { pendingExtraTripsList, pendingExtraTripsError } = useGetPendingExtraTrips(getFetcher);
+  const { completedExtraTripsList, completedExtraTripsError } = useGetCompletedExtraTrips(
+    getFetcher,
+    formatTZDate(selectedDate, "YYYY-MM-DD")
+  );
 
   const generalError =
     pendingDeliveriesError || pendingPickupsError || pendingSalePickupsError || pendingChangesError ||
     deliveriesError || pickupsError || changesError || salePickupsError || pendingCollectionsError ||
-    completedCollectionsError;
+    completedCollectionsError || pendingExtraTripsError || completedExtraTripsError;
   const completeData =
     pendingDeliveriesList && pendingPickupsList && pendingSalePickupsList && pendingChangesList &&
-    deliveriesList && pickups && changes && salePickupsData && pendingCollectionsList && completedCollectionsList;
+    deliveriesList && pickups && changes && salePickupsData && pendingCollectionsList && completedCollectionsList &&
+    pendingExtraTripsList !== undefined && completedExtraTripsList !== undefined;
   
   const isBlocked = currentUser?.isBlocked === true;
 
@@ -308,6 +325,18 @@ function VueltasOperador({ session }) {
                 }}
               />
             </Grid>
+            {["ADMIN", "AUX"].includes(userRole) && (
+              <Grid item>
+                <Button
+                  variant="contained"
+                  color="secondary"
+                  startIcon={<AddIcon />}
+                  onClick={() => setAddExtraTripModalOpen(true)}
+                >
+                  Vuelta Extra
+                </Button>
+              </Grid>
+            )}
           </Grid>
         </Box>
       </PageTitleWrapper>
@@ -368,8 +397,30 @@ function VueltasOperador({ session }) {
                   />
                 </Card>
 
+                {/* Extra Trips Section */}
+                {(pendingExtraTripsList?.length > 0 || completedExtraTripsList?.length > 0) && (
+                  <>
+                    {/* Pending Extra Trips */}
+                    {pendingExtraTripsList?.length > 0 && (
+                      <Card sx={{ mt: 4 }}>
+                        <Box sx={{ p: 2, backgroundColor: "#fff3e0" }}>
+                          <Typography variant="h4" fontWeight="bold">
+                            VUELTAS EXTRAS PENDIENTES
+                          </Typography>
+                        </Box>
+                        <TablaVueltasExtras
+                          userRole={userRole}
+                          extraTripsList={pendingExtraTripsList}
+                          showCompleted={false}
+                          isBlocked={isBlocked}
+                          selectedDate={selectedDate}
+                          onRefresh={handleRefresh}
+                        />
+                      </Card>
+                    )}
+
                 {/* Completed Tasks Section */}
-                <Card>
+                <Card sx={{ mt: 4 }}>
                   <Box sx={{ p: 2, backgroundColor: "#f5f5f5" }}>
                     <Typography variant="h4" fontWeight="bold">
                       VUELTAS REALIZADAS
@@ -385,6 +436,27 @@ function VueltasOperador({ session }) {
                   />
                 </Card>
 
+                    {/* Completed Extra Trips */}
+                    {completedExtraTripsList?.length > 0 && (
+                      <Card sx={{ mt: 4 }}>
+                        <Box sx={{ p: 2, backgroundColor: "#e8f5e9" }}>
+                          <Typography variant="h4" fontWeight="bold">
+                            VUELTAS EXTRAS FINALIZADAS
+                          </Typography>
+                        </Box>
+                        <TablaVueltasExtras
+                          userRole={userRole}
+                          extraTripsList={completedExtraTripsList}
+                          showCompleted={true}
+                          isBlocked={isBlocked}
+                          selectedDate={selectedDate}
+                          onRefresh={handleRefresh}
+                        />
+                      </Card>
+                    )}
+                  </>
+                )}
+
                 {/* Warning for blocking */}
                 {allCompletedTasks.length > 0 && (
                   <Box sx={{ mt: 2, textAlign: "right" }}>
@@ -399,6 +471,19 @@ function VueltasOperador({ session }) {
         </Grid>
       </Container>
       <Footer />
+      
+      {/* Add Extra Trip Modal */}
+      {addExtraTripModalOpen && (
+        <AddExtraTripModal
+          open={addExtraTripModalOpen}
+          handleOnClose={(success) => {
+            setAddExtraTripModalOpen(false);
+            if (success) {
+              handleRefresh();
+            }
+          }}
+        />
+      )}
     </>
   );
 }

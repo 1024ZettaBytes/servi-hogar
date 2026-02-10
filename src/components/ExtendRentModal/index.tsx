@@ -471,6 +471,7 @@ function ExtendRentModal(props) {
               customerId={rent.customer?._id}
               reason={"RENT_EXT"}
               amount={getToPay()}
+              weeksToPay={effectiveRentPeriod.selectedWeeks}
               lateFee={chargeLateFee ? lateFeeAmount : 0}
               lateFeeDays={lateFeeDays}
             />

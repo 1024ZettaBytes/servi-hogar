@@ -349,7 +349,7 @@ function SidebarMenu({ userRole }) {
           </>
         )}
 
-        {['OPE', 'ADMIN'].includes(userRole) && (
+        {['OPE', 'ADMIN', 'AUX'].includes(userRole) && (
           <>
             <List
               component="div"

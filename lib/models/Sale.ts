@@ -5,6 +5,7 @@ export interface ISale extends Document {
   machine: Schema.Types.ObjectId;
   serialNumber: string;
   customer: Schema.Types.ObjectId;
+  cashPrice: number;
   totalAmount: number;
   initialPayment: number;
   remainingAmount: number;
@@ -45,6 +46,7 @@ const SaleSchema = new Schema<ISale>({
     ref: 'customers',
     default: null
   },
+  cashPrice: { type: Number, default: null },
   totalAmount: { type: Number, required: true },
   initialPayment: { type: Number, required: true },
   remainingAmount: { type: Number, required: true },

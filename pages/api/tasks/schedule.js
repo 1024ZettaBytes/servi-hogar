@@ -22,7 +22,7 @@ export default async function handler(req, res) {
       });
     }
 
-    const validTaskTypes = ['ENTREGA', 'RECOLECCION', 'CAMBIO', 'RECOLECCION_VENTA', 'COBRANZA'];
+    const validTaskTypes = ['ENTREGA', 'RECOLECCION', 'CAMBIO', 'RECOLECCION_VENTA', 'COBRANZA', 'VUELTA_EXTRA'];
     if (!validTaskTypes.includes(taskType)) {
       return res.status(400).json({ 
         error: true, 

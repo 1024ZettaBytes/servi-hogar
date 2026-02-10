@@ -2,15 +2,16 @@ import { getUserRole } from '../auth/authUtils';
 import { connectToDatabase, isConnected } from '../../../lib/db';
 import { User } from '../../../lib/models/User';
 import { Role } from '../../../lib/models/Role';
-import { Rent } from '../../../lib/models/Rent';
-import { RentStatus } from '../../../lib/models/RentStatus';
 import { Payment } from '../../../lib/models/Payment';
 import {
   getFirstWeekDay,
   getLastWeekDay,
   setDateToInitial,
-  setDateToEnd
+  setDateToEnd,
+  addDaysToDate,
+  dateToPlainString
 } from '../../../lib/client/utils';
+import { CurrentRentsLog } from '../../../lib/models/CurrentRentsLog';
 
 /**
  * Get payments progress for all AUX users for a specific week
@@ -43,6 +44,8 @@ async function getPaymentsProgressAPI(req, res) {
     const weekStart = setDateToInitial(getFirstWeekDay(baseDate));
     const weekEnd = setDateToEnd(getLastWeekDay(baseDate));
 
+    const pastWeekEnd = new Date(addDaysToDate(weekStart, -1));
+
     // Get all AUX users
     const auxRole = await Role.findOne({ id: 'AUX' });
     if (!auxRole) {
@@ -53,31 +56,45 @@ async function getPaymentsProgressAPI(req, res) {
       .select({ _id: 1, id: 1, name: 1 })
       .lean();
 
-    // Count total active rents (status: RENTADO, EN_CAMBIO, VENCIDA, EN_RECOLECCION)
-    const validStatuses = await RentStatus.find({
-      id: { $in: ['RENTADO', 'EN_CAMBIO', 'VENCIDA', 'EN_RECOLECCION'] }
-    });
-    const validStatusIds = validStatuses.map(s => s._id);
-
-    const totalActiveRents = await Rent.countDocuments({
-      status: { $in: validStatusIds }
-    });
-
+    const activeRentLog = await CurrentRentsLog.findOne({ dateText: dateToPlainString(pastWeekEnd) }).lean();
+    if(!activeRentLog) {
+      return res.status(500).json({ errorMsg: `No se encontró el registro de rentas activas para la semana pasada ${dateToPlainString(pastWeekEnd)}` });
+    }
+    const totalActiveRents = activeRentLog.amount;
     // Calculate targets
     const target80 = Math.ceil(totalActiveRents * 0.80);
     const target85 = Math.ceil(totalActiveRents * 0.85);
 
     // For each AUX user, count their RENT_EXT payments this week
+    // Use weeksToPay field if exists, otherwise count as 1
     const usersProgress = await Promise.all(
       auxUsers.map(async (user) => {
-        const paymentsCount = await Payment.countDocuments({
-          lastUpdatedBy: user._id,
-          reason: 'RENT_EXT',
-          date: {
-            $gte: weekStart,
-            $lte: weekEnd
+        const paymentAggregation = await Payment.aggregate([
+          {
+            $match: {
+              lastUpdatedBy: user._id,
+              reason: 'RENT_EXT',
+              date: {
+                $gte: weekStart,
+                $lte: weekEnd
+              }
+            }
+          },
+          {
+            $group: {
+              _id: null,
+              totalWeeks: {
+                $sum: {
+                  $ifNull: ['$weeksToPay', 1]
+                }
+              }
+            }
           }
-        });
+        ]);
+
+        const paymentsCount = paymentAggregation.length > 0 
+          ? paymentAggregation[0].totalWeeks 
+          : 0;
 
         return {
           _id: user._id,

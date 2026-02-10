@@ -34,6 +34,7 @@ function AddSaleModal(props) {
   const [selectedMachine, setSelectedMachine] = useState(null);
   const [selectedCustomer, setSelectedCustomer] = useState(null);
   const [serialNumber, setSerialNumber] = useState('');
+  const [cashPrice, setCashPrice] = useState('');
   const [totalAmount, setTotalAmount] = useState('');
   const [initialPayment, setInitialPayment] = useState('');
   const [totalWeeks, setTotalWeeks] = useState('');
@@ -100,6 +101,7 @@ function AddSaleModal(props) {
       serialNumber: useExistingMachine ? '' : serialNumber,
       customerId: selectedCustomer?.id || null,
       saleDate: new Date(), // Will be updated when delivered
+      cashPrice: cashPrice ? parseFloat(cashPrice) : null,
       totalAmount: parseFloat(totalAmount),
       initialPayment: parseFloat(initialPayment),
       totalWeeks: parseInt(totalWeeks)
@@ -120,6 +122,7 @@ function AddSaleModal(props) {
     setSelectedMachine(null);
     setSelectedCustomer(null);
     setSerialNumber('');
+    setCashPrice('');
     setTotalAmount('');
     setInitialPayment('');
     setTotalWeeks('');
@@ -252,10 +255,25 @@ function AddSaleModal(props) {
                 <TextField
                   type="number"
                   autoComplete="off"
+                  id="cashPrice"
+                  name="cashPrice"
+                  label="Precio de Contado ($)"
+                  fullWidth={true}
+                  value={cashPrice}
+                  onChange={(e) => setCashPrice(e.target.value)}
+                  inputProps={{ min: 0, step: 0.01 }}
+                  helperText="Precio si el cliente paga en los primeros 30 días"
+                />
+              </Grid>
+
+              <Grid item lg={12}>
+                <TextField
+                  type="number"
+                  autoComplete="off"
                   required
                   id="totalAmount"
                   name="totalAmount"
-                  label="Monto Total ($)"
+                  label="Precio a Crédito ($)"
                   fullWidth={true}
                   value={totalAmount}
                   onChange={(e) => setTotalAmount(e.target.value)}
