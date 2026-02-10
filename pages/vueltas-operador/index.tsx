@@ -398,7 +398,7 @@ function VueltasOperador({ session }) {
                 </Card>
 
                 {/* Extra Trips Section */}
-                {(pendingExtraTripsList?.length > 0 || completedExtraTripsList?.length > 0) && (
+               
                   <>
                     {/* Pending Extra Trips */}
                     {pendingExtraTripsList?.length > 0 && (
@@ -455,7 +455,7 @@ function VueltasOperador({ session }) {
                       </Card>
                     )}
                   </>
-                )}
+                
 
                 {/* Warning for blocking */}
                 {allCompletedTasks.length > 0 && (
