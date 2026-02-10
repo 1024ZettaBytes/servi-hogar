@@ -30,6 +30,7 @@ import ScheduleTimePicker from '@/components/ScheduleTimePicker';
 import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
 import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
 import CompleteCollectionModal from '@/components/CompleteCollectionModal';
+import CompleteExtraTripModal from '@/components/CompleteExtraTripModal';
 import FormatModal from '@/components/FormatModal';
 import { completeCollectionVisit } from '../../lib/client/salesFetch';
 import { formatTZDate } from 'lib/client/utils';
@@ -81,6 +82,8 @@ const TablaVueltasOperador: FC<TablaVueltasOperadorProps> = ({
   const [isCompleting, setIsCompleting] = useState(false);
   const [scheduleModalOpen, setScheduleModalOpen] = useState(false);
   const [taskToSchedule, setTaskToSchedule] = useState<any>(null);
+  const [extraTripModalOpen, setExtraTripModalOpen] = useState(false);
+  const [tripToComplete, setTripToComplete] = useState<any>(null);
   const [formatIsOpen, setFormatIsOpen] = useState(false);
   const [formatText, setFormatText] = useState<string>('');
   const [formatConfig, setFormatConfig] = useState<{
@@ -89,6 +92,8 @@ const TablaVueltasOperador: FC<TablaVueltasOperadorProps> = ({
     task: any;
   } | null>(null);
 
+  const isAdmin = userRole === 'ADMIN';
+  const isOperator = userRole === 'OPE';
   const { prices } = useGetPrices(getFetcher);
 
   const { enqueueSnackbar } = useSnackbar();
@@ -207,6 +212,11 @@ const TablaVueltasOperador: FC<TablaVueltasOperadorProps> = ({
       setCompleteModalOpen(true);
       return;
     }
+    if (task.type === 'VUELTA_EXTRA') {
+      setTripToComplete(task);
+      setExtraTripModalOpen(true);
+      return;
+    }
     switch (task.type) {
       case 'ENTREGA':
         route = `/entregas-pendientes/${task._id}`;
@@ -240,6 +250,8 @@ const TablaVueltasOperador: FC<TablaVueltasOperadorProps> = ({
         return 'info';
       case 'RECOLECCION_VENTA':
         return 'error';
+      case 'VUELTA_EXTRA':
+        return 'secondary';
       default:
         return 'default';
     }
@@ -272,7 +284,7 @@ const TablaVueltasOperador: FC<TablaVueltasOperadorProps> = ({
               <TableCell>CLIENTE</TableCell>
               {!showTimeBetween && <TableCell>SECTOR</TableCell>}
               <TableCell>TELÉFONO</TableCell>
-              {userRole === 'ADMIN' && <TableCell>OPERADOR</TableCell>}
+              {isAdmin && <TableCell>OPERADOR</TableCell>}
               <TableCell>HORA ASIGNACIÓN</TableCell>
               <TableCell align="center">FOTOS</TableCell>
               <TableCell align="center">UBICACIÓN</TableCell>
@@ -283,7 +295,7 @@ const TablaVueltasOperador: FC<TablaVueltasOperadorProps> = ({
                   <TableCell align="center">TIEMPO ENTRE VUELTAS</TableCell>
                 </>
               )}
-              {!showTimeBetween && userRole !== 'ADMIN' && (
+              {!showTimeBetween && !isAdmin && (
                 <TableCell align="center">ACCIÓN</TableCell>
               )}
             </TableRow>
@@ -304,16 +316,26 @@ const TablaVueltasOperador: FC<TablaVueltasOperadorProps> = ({
               const customer = source?.customer;
               const residence = customer?.currentResidence;
 
+              // For extra trips, use destination as display name
+              const isExtraTrip = task.type === 'VUELTA_EXTRA';
               const typeLabel =
                 task.type === 'RECOLECCION_VENTA'
                   ? 'RECOLECCIÓN GARANTÍA'
+                  : task.type === 'VUELTA_EXTRA'
+                  ? 'VUELTA EXTRA'
                   : task.type;
               const isPriority = task.isPriority || false;
 
-              const customerName = customer?.name || 'N/A';
-              const sectorName = residence?.sector?.name || 'N/A';
+              const customerName = isExtraTrip
+                ? task.destination
+                : customer?.name || 'N/A';
+              const sectorName = isExtraTrip
+                ? task.reason || '-'
+                : residence?.sector?.name || 'N/A';
 
-              const cellPhone = customer?.cell || customer?.phone || 'N/A';
+              const cellPhone = isExtraTrip
+                ? '-'
+                : customer?.cell || customer?.phone || 'N/A';
               return (
                 <TableRow
                   hover
@@ -335,14 +357,16 @@ const TablaVueltasOperador: FC<TablaVueltasOperadorProps> = ({
                           sx={{ cursor: 'pointer' }}
                         />
                       ) : (
-                        <Button
-                          size="small"
-                          variant="outlined"
-                          onClick={() => handleOpenSchedule(task)}
-                          startIcon={<AccessTimeIcon />}
-                        >
-                          Programar
-                        </Button>
+                        (isAdmin || isOperator) && (
+                          <Button
+                            size="small"
+                            variant="outlined"
+                            onClick={() => handleOpenSchedule(task)}
+                            startIcon={<AccessTimeIcon />}
+                          >
+                            Programar
+                          </Button>
+                        )
                       )}
                     </TableCell>
                   )}
@@ -372,6 +396,15 @@ const TablaVueltasOperador: FC<TablaVueltasOperadorProps> = ({
                             />
                           </Tooltip>
                         )}
+                      {task.type === 'VUELTA_EXTRA' && task.notes && (
+                        <Tooltip title={`Notas: ${task.notes}`} arrow>
+                          <InfoOutlinedIcon
+                            fontSize="small"
+                            color="info"
+                            sx={{ cursor: 'help' }}
+                          />
+                        </Tooltip>
+                      )}
                     </Box>
                   </TableCell>
                   <TableCell>
@@ -409,7 +442,7 @@ const TablaVueltasOperador: FC<TablaVueltasOperadorProps> = ({
                       {cellPhone || 'N/A'}
                     </Typography>
                   </TableCell>
-                  {userRole === 'ADMIN' && (
+                  {isAdmin && (
                     <TableCell>
                       <Typography
                         variant="body1"
@@ -537,18 +570,20 @@ const TablaVueltasOperador: FC<TablaVueltasOperadorProps> = ({
                       </TableCell>
                     </>
                   )}
-                  {!showTimeBetween && userRole !== 'ADMIN' && (
+                  {!showTimeBetween && !isAdmin && (
                     <TableCell align="center">
-                      <Button
-                        variant="contained"
-                        color="primary"
-                        size="small"
-                        endIcon={<ArrowForwardIcon />}
-                        onClick={() => handleGoToCompletion(task)}
-                        disabled={isBlocked}
-                      >
-                        Completar
-                      </Button>
+                      {isOperator && (
+                        <Button
+                          variant="contained"
+                          color="primary"
+                          size="small"
+                          endIcon={<ArrowForwardIcon />}
+                          onClick={() => handleGoToCompletion(task)}
+                          disabled={isBlocked}
+                        >
+                          Completar
+                        </Button>
+                      )}
                     </TableCell>
                   )}
                 </TableRow>
@@ -704,6 +739,24 @@ const TablaVueltasOperador: FC<TablaVueltasOperadorProps> = ({
           }}
           handleOnConfirm={handleConfirmCompletion}
           isLoading={isCompleting}
+        />
+      )}
+      {tripToComplete && (
+        <CompleteExtraTripModal
+          open={extraTripModalOpen}
+          trip={tripToComplete}
+          handleOnClose={(success, msg) => {
+            setExtraTripModalOpen(false);
+            setTripToComplete(null);
+            if (success) {
+              enqueueSnackbar(msg || 'Vuelta extra completada', {
+                variant: 'success',
+                anchorOrigin: { vertical: 'top', horizontal: 'center' },
+                autoHideDuration: 2000
+              });
+              onRefresh();
+            }
+          }}
         />
       )}
       {scheduleModalOpen && taskToSchedule && (

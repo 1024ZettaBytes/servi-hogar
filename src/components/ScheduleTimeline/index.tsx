@@ -92,6 +92,8 @@ const ScheduleTimeline: FC<ScheduleTimelineProps> = ({ selectedDate }) => {
         return 'error';
       case 'COBRANZA':
         return 'info';
+      case 'VUELTA_EXTRA':
+        return 'secondary';
       default:
         return 'secondary';
     }
@@ -109,6 +111,8 @@ const ScheduleTimeline: FC<ScheduleTimelineProps> = ({ selectedDate }) => {
         return alpha(theme.palette.error.main, 0.15);
       case 'COBRANZA':
         return alpha(theme.palette.info.main, 0.15);
+      case 'VUELTA_EXTRA':
+        return alpha(theme.palette.secondary.main, 0.15);
       default:
         return alpha(theme.palette.grey[500], 0.15);
     }

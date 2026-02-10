@@ -47,6 +47,7 @@ const changeStyle = { ...headerStyle, backgroundColor: '#FFC300' };
 const customerStyle = { ...headerStyle, backgroundColor: '#F4F189' };
 const paymentStyle = { ...headerStyle, backgroundColor: '#89C3F4' };
 const bonusStyle = { ...headerStyle, backgroundColor: '#C7C6BC' };
+const extraTripStyle = { ...headerStyle, backgroundColor: '#B39DDB' };
 function DayReport({ session }) {
   const { user } = session;
   const userRole = user.role;
@@ -243,6 +244,16 @@ function DayReport({ session }) {
                           totalData={reportData.bonuses.totalData}
                           list={reportData.bonuses.days}
                           type="BONUS"
+                        />
+                      )}
+                    </Grid>
+                    <Grid item lg={6}>
+                      {!onlyChanges && reportData.extraTrips && (
+                        <RegistersReportTable
+                          header="VUELTAS EXTRA"
+                          colorStyle={extraTripStyle}
+                          totalData={reportData.extraTrips.totalData}
+                          list={reportData.extraTrips.days}
                         />
                       )}
                     </Grid>

@@ -558,3 +558,28 @@ export const useGetPaymentsProgress = (fetcher, weekStartStr) => {
     swrKey: url
   };
 };
+
+// Extra Trips
+export const useGetPendingExtraTrips = (fetcher) => {
+  const { data, error, isLoading } = useSWR(
+    '/api/extra-trips/pending',
+    fetcher
+  );
+  return {
+    pendingExtraTripsList: data?.data,
+    pendingExtraTripsError: error,
+    isLoadingPendingExtraTrips: isLoading
+  };
+};
+
+export const useGetCompletedExtraTrips = (fetcher, date) => {
+  const { data, error, isLoading } = useSWR(
+    date ? `/api/extra-trips/completed?date=${date}` : null,
+    fetcher
+  );
+  return {
+    completedExtraTripsList: data?.data,
+    completedExtraTripsError: error,
+    isLoadingCompletedExtraTrips: isLoading
+  };
+};
