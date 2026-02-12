@@ -18,7 +18,11 @@ import {
   useTheme,
   CardHeader,
   TextField,
-  InputAdornment
+  InputAdornment,
+  FormControl,
+  Select,
+  MenuItem,
+  InputLabel
 } from '@mui/material';
 import NextLink from 'next/link';
 import { format } from 'date-fns';
@@ -123,7 +127,15 @@ const applyFilters = (rentList: any[], filter: string): any[] => {
     );
   });
 };
-
+const customerFilter = (rentList: any[], customerTypeFilter: string): any[] => {
+  if (customerTypeFilter === 'TODOS') return rentList;
+  return rentList.filter((rent) => {
+    if (customerTypeFilter === 'ORO') {
+      return rent?.customer?.isPlanOro;
+    }
+    return true;
+  });
+};
 const applyPagination = (
   rentList: any[],
   page: number,
@@ -185,6 +197,7 @@ const TablaRentasActuales: FC<TablaRentasActualesProps> = ({
   const [page, setPage] = useState<number>(0);
   const [limit, setLimit] = useState<number>(30);
   const [filter, setFilter] = useState<string>('');
+  const [customerTypeFilter, setCustomerTypeFilter] = useState<string>('TODOS');
   const handleCloseModal = (wasSuccess, successMessage = null) => {
     setExtendModalIsOpen(false);
     setPayDayModalIsOpen(false);
@@ -270,7 +283,10 @@ const TablaRentasActuales: FC<TablaRentasActualesProps> = ({
     setBonusModalIsOpen(true);
   };
 
-  const filteredRents = applyFilters(rentList, filter);
+  const filteredRents = customerFilter(
+    applyFilters(rentList, filter),
+    customerTypeFilter
+  );
   const paginatedRents = applyPagination(filteredRents, page, limit);
 
   const theme = useTheme();
@@ -279,9 +295,22 @@ const TablaRentasActuales: FC<TablaRentasActualesProps> = ({
       <Card>
         <CardHeader
           action={
-            <Box width={200}>
+            <Box width={200} pt={2}>
+              <FormControl size='small'>
+                <InputLabel id="customer-filter-label">Cliente</InputLabel>
+                <Select
+                  defaultValue={'TODOS'}
+                  labelId="customer-filter-label"
+                  id="customer-filter"
+                  label="Cliente"
+                  onChange={(e) => setCustomerTypeFilter(e.target.value)}
+                >
+                  <MenuItem value={'TODOS'}>TODOS</MenuItem>
+                  <MenuItem value={'ORO'}>Plan Oro</MenuItem>
+                </Select>
+              </FormControl>
               <TextField
-                size="small"
+                size="medium"
                 id="input-search-rent"
                 label="Buscar"
                 onChange={handleSearchChange}
@@ -321,7 +350,9 @@ const TablaRentasActuales: FC<TablaRentasActualesProps> = ({
             </TableHead>
             <TableBody>
               {paginatedRents.map((rent) => {
-                const hasBonusAlready = rent.customer.movements?.some((movement => movement.type === 'BONUS'));
+                const hasBonusAlready = rent.customer.movements?.some(
+                  (movement) => movement.type === 'BONUS'
+                );
                 const maxPayDays = rent.customer.maxPayDays || 7;
                 const DEFAULT_RED_DAYS = 15;
 
@@ -360,6 +391,17 @@ const TablaRentasActuales: FC<TablaRentasActualesProps> = ({
                       <NextLink href={`/clientes/${rent?.customer?._id}`}>
                         <a className={styles.title_text}>
                           {rent?.customer?.name}
+                          {rent?.customer?.isPlanOro && (
+                            <Typography
+                              variant="caption"
+                              fontWeight="bold"
+                              color="#F0CF62"
+                              gutterBottom
+                              noWrap
+                            >
+                              {' (Oro)'}
+                            </Typography>
+                          )}
                         </a>
                       </NextLink>
                     </TableCell>
@@ -517,14 +559,20 @@ const TablaRentasActuales: FC<TablaRentasActualesProps> = ({
                               </IconButton>
                             </span>
                           </Tooltip>
-                          <Tooltip title={`Bonificar${hasBonusAlready ? ' (Ya bonificado antes)' : ''}`} arrow>
+                          <Tooltip
+                            title={`Bonificar${
+                              hasBonusAlready ? ' (Ya bonificado antes)' : ''
+                            }`}
+                            arrow
+                          >
                             <span>
                               <IconButton
                                 disabled={
                                   shouldDisableActions ||
                                   ['EN_CAMBIO', 'EN_RECOLECCION'].includes(
                                     rent.status.id
-                                  ) || (hasBonusAlready && userRole !== 'ADMIN')
+                                  ) ||
+                                  (hasBonusAlready && userRole !== 'ADMIN')
                                 }
                                 onClick={() => {
                                   handleOnBonusClick(rent);
