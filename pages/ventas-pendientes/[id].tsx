@@ -26,7 +26,12 @@ import {
   Select,
   Skeleton,
   TextField,
-  Typography
+  Typography,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogContentText,
+  DialogActions
 } from '@mui/material';
 import Button from '@mui/material/Button';
 import Paper from '@mui/material/Paper';
@@ -73,6 +78,8 @@ function CompletarVenta() {
   
   const [customerToEdit, setCustomerToEdit] = useState<any>({ isSet: false });
   const [deliveryDate, setDeliveryDate] = useState<any>(new Date());
+  const [openConfirmModal, setOpenConfirmModal] = useState(false);
+  const [pendingSaleData, setPendingSaleData] = useState(null);
   const [isGettingLocation, setIsGettingLocation] = useState<boolean>(false);
   const [isOk, setIsOk] = useState<any>({
     info: true,
@@ -261,7 +268,6 @@ function CompletarVenta() {
   const handleOnSubmit = async (event) => {
     event.preventDefault();
     setHasErrorSubmitting({ error: false, msg: '' });
-    setIsSubmitting(true);
 
     // Prepare sale data (like rent delivery does)
     const saleData = {
@@ -273,11 +279,22 @@ function CompletarVenta() {
       }
     };
 
+    setPendingSaleData(saleData);
+    setOpenConfirmModal(true);
+
+  };
+
+  const confirmDelivery = async () => {
+    if (!pendingSaleData) return;
+
+    setIsSubmitting(true);
+    setOpenConfirmModal(false);
+
     // Pass attachments and data separately (like rent delivery)
-    const result = await completeSaleDelivery(attached, saleData);
+    const result = await completeSaleDelivery(attached, pendingSaleData);
     setIsSubmitting(false);
     if (!result.error) {
-      handleNext(event);
+      setActiveStep((prev) => prev + 1);
     } else {
       setHasErrorSubmitting({ error: true, msg: result.msg });
     }
@@ -751,6 +768,9 @@ function CompletarVenta() {
                                 <Typography variant="body1" fontWeight="500">
                                   {machineInfo}
                                 </Typography>
+                                <Typography>
+                                  Serie: {sale?.serialNumber || 'Sin número de serie'}
+                                </Typography>
                               </Grid>
                               <Grid item xs={12} sm={6} lg={4} m={1}>
                                 <Typography variant="subtitle2" color="text.secondary">
@@ -1063,7 +1083,37 @@ function CompletarVenta() {
           </Grid>
         </Grid>
       </Container>
+      <Dialog open={openConfirmModal} maxWidth="xs" fullWidth>
+        <DialogTitle sx={{ fontWeight: 600 }}>
+          ⚠️ Confirmar entrega de equipo
+        </DialogTitle>
+        <DialogContent>
+          <DialogContentText sx={{ whiteSpace: "pre-line", mt: 1 }}>
+          {` Equipo: ${machineInfo}
+          Serie: ${sale?.serialNumber || 'Sin número de serie'}
+          Cliente: ${customer?.name || 'N/A'}
 
+          ¿Confirma que el equipo es el correcto para este cliente?`}
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button
+            variant="outlined"
+            disabled={isSubmitting}
+            onClick={() => setOpenConfirmModal(false)}
+          >
+            Cancelar
+          </Button>
+
+          <LoadingButton
+            loading={isSubmitting}
+            variant="contained"
+            onClick={confirmDelivery}
+          >
+            Confirmar entrega
+          </LoadingButton>
+        </DialogActions>
+      </Dialog>
       <Footer />
     </>
   );
