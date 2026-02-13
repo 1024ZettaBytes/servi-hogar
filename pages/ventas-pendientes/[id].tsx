@@ -26,12 +26,7 @@ import {
   Select,
   Skeleton,
   TextField,
-  Typography,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogContentText,
-  DialogActions
+  Typography
 } from '@mui/material';
 import Button from '@mui/material/Button';
 import Paper from '@mui/material/Paper';
@@ -59,6 +54,7 @@ import {
   useGetCities
 } from '../api/useRequest';
 import useSWR from 'swr';
+import ConfirmEquipmentDeliveryModal from '@/components/ConfirmEquipmentDeliveryModal';
 
 const fetcher = (url) => fetch(url).then((res) => res.json());
 
@@ -1083,37 +1079,16 @@ function CompletarVenta() {
           </Grid>
         </Grid>
       </Container>
-      <Dialog open={openConfirmModal} maxWidth="xs" fullWidth>
-        <DialogTitle sx={{ fontWeight: 600 }}>
-          ⚠️ Confirmar entrega de equipo
-        </DialogTitle>
-        <DialogContent>
-          <DialogContentText sx={{ whiteSpace: "pre-line", mt: 1 }}>
-          {` Equipo: ${machineInfo}
-          Serie: ${sale?.serialNumber || 'Sin número de serie'}
-          Cliente: ${customer?.name || 'N/A'}
-
-          ¿Confirma que el equipo es el correcto para este cliente?`}
-          </DialogContentText>
-        </DialogContent>
-        <DialogActions>
-          <Button
-            variant="outlined"
-            disabled={isSubmitting}
-            onClick={() => setOpenConfirmModal(false)}
-          >
-            Cancelar
-          </Button>
-
-          <LoadingButton
-            loading={isSubmitting}
-            variant="contained"
-            onClick={confirmDelivery}
-          >
-            Confirmar entrega
-          </LoadingButton>
-        </DialogActions>
-      </Dialog>
+      <ConfirmEquipmentDeliveryModal
+        open={openConfirmModal}
+        saleNum={sale?.saleNum}
+        machineInfo={machineInfo}
+        serialNumber={sale?.serialNumber}
+        customerName={customer?.name}
+        loading={isSubmitting}
+        onConfirm={confirmDelivery}
+        onCancel={() => setOpenConfirmModal(false)}
+      />
       <Footer />
     </>
   );
