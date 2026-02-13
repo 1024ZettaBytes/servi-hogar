@@ -35,6 +35,7 @@ import {
   setDateToMid
 } from '../../lib/client/utils';
 import useSWR from 'swr';
+import ConfirmEquipmentDeliveryModal from '@/components/ConfirmEquipmentDeliveryModal';
 
 const fetcher = (url) => fetch(url).then((res) => res.json());
 
@@ -64,6 +65,8 @@ function CompletarEntregaReparacion() {
     msg: ''
   });
   const [isCompleted, setIsCompleted] = useState<boolean>(false);
+  const [openConfirmModal, setOpenConfirmModal] = useState(false);
+  const [pendingDeliveryData, setPendingDeliveryData] = useState(null);
 
   async function handleImageSelection(imageFile) {
     // Handle file removal
@@ -107,16 +110,29 @@ function CompletarEntregaReparacion() {
   const handleOnSubmit = async (event) => {
     event.preventDefault();
     setHasErrorSubmitting({ error: false, msg: '' });
-    setIsSubmitting(true);
 
     const deliveryData = {
       saleId: id as string,
       deliveryDate: setDateToMid(new Date(deliveryDate)).toISOString()
     };
 
-    const result = await completeRepairReturnDelivery(attached.evidence, deliveryData);
+    setPendingDeliveryData(deliveryData);
+    setOpenConfirmModal(true);
+  };
+
+  const confirmDelivery = async () => {
+    if (!pendingDeliveryData) return;
+
+    setIsSubmitting(true);
+    setOpenConfirmModal(false);
+
+    const result = await completeRepairReturnDelivery(
+      attached.evidence,
+      pendingDeliveryData
+    );
+
     setIsSubmitting(false);
-    
+
     if (!result.error) {
       setIsCompleted(true);
     } else {
@@ -192,7 +208,7 @@ function CompletarEntregaReparacion() {
                       </Typography>
                     </Grid>
                     
-                    <Grid item xs={12} sm={6} md={4}>
+                    <Grid item xs={12} sm={6} md={3}>
                       <Typography variant="subtitle2" color="text.secondary">
                         Folio de Venta
                       </Typography>
@@ -201,7 +217,7 @@ function CompletarEntregaReparacion() {
                       </Typography>
                     </Grid>
 
-                    <Grid item xs={12} sm={6} md={4}>
+                    <Grid item xs={12} sm={6} md={3}>
                       <Typography variant="subtitle2" color="text.secondary">
                         Equipo Reparado
                       </Typography>
@@ -210,7 +226,16 @@ function CompletarEntregaReparacion() {
                       </Typography>
                     </Grid>
 
-                    <Grid item xs={12} sm={6} md={4}>
+                    <Grid item xs={12} sm={6} md={3}>
+                      <Typography variant="subtitle2" color="text.secondary">
+                        Serie
+                      </Typography>
+                      <Typography variant="body1" fontWeight="500">
+                        {sale?.serialNumber || 'Sin número de serie'}
+                      </Typography>
+                    </Grid>
+
+                    <Grid item xs={12} sm={6} md={3}>
                       <Typography variant="subtitle2" color="text.secondary">
                         Cliente
                       </Typography>
@@ -331,7 +356,16 @@ function CompletarEntregaReparacion() {
           </Grid>
         </Grid>
       </Container>
-
+      <ConfirmEquipmentDeliveryModal
+        open={openConfirmModal}
+        saleNum={sale?.saleNum}
+        machineInfo={machineInfo}
+        serialNumber={sale?.serialNumber}
+        customerName={customer?.name}
+        loading={isSubmitting}
+        onConfirm={confirmDelivery}
+        onCancel={() => setOpenConfirmModal(false)}
+      />
       <Footer />
     </>
   );
