@@ -583,3 +583,15 @@ export const useGetCompletedExtraTrips = (fetcher, date) => {
     isLoadingCompletedExtraTrips: isLoading
   };
 };
+
+export const useGetCollectedMachines = (fetcher) => {
+  const { data, error, isLoading } = useSWR(
+    ROUTES.COLLECTED_MACHINES_API,
+    fetcher
+  );
+  return {
+    collectedMachines: data?.data,
+    collectedMachinesError: error,
+    isLoadingCollectedMachines: isLoading
+  };
+};
