@@ -282,7 +282,7 @@ const TablaVueltasOperador: FC<TablaVueltasOperadorProps> = ({
               )}
               <TableCell>TIPO DE VUELTA</TableCell>
               <TableCell>CLIENTE</TableCell>
-              {!showTimeBetween && <TableCell>SECTOR</TableCell>}
+              {!showTimeBetween && <TableCell align='center'>SECTOR</TableCell>}
               <TableCell>TELÉFONO</TableCell>
               {isAdmin && <TableCell>OPERADOR</TableCell>}
               <TableCell>HORA ASIGNACIÓN</TableCell>
@@ -419,7 +419,7 @@ const TablaVueltasOperador: FC<TablaVueltasOperadorProps> = ({
                     </Typography>
                   </TableCell>
                   {!showTimeBetween && (
-                    <TableCell>
+                    <TableCell align='center'>
                       <Typography
                         variant="body1"
                         fontWeight="bold"
@@ -428,6 +428,11 @@ const TablaVueltasOperador: FC<TablaVueltasOperadorProps> = ({
                         noWrap
                       >
                         {sectorName || 'N/A'}
+                      </Typography>
+                      <Typography
+                        variant="body2" color="text.secondary" noWrap
+                      >
+                        {task.suburb && `${task.suburb}`}
                       </Typography>
                     </TableCell>
                   )}

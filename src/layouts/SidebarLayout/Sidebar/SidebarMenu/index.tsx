@@ -31,6 +31,7 @@ import HandshakeIcon from '@mui/icons-material/Handshake';
 import BuildIcon from '@mui/icons-material/Build';
 import AttachMoneyIcon from '@mui/icons-material/AttachMoney';
 import AssignmentIcon from '@mui/icons-material/Assignment';
+import NoCrashIcon from '@mui/icons-material/NoCrash';
 
 const MenuWrapper = styled(Box)(
   ({ theme }) => `
@@ -538,6 +539,23 @@ function SidebarMenu({ userRole }) {
         >
           <SubMenuWrapper>
             <List component="div">
+              <ListItem component="div">
+                <NextLink href="/recolectadas" passHref>
+                  <Button
+                    className={
+                      currentRoute.includes("/recolectadas")
+                        ? "active"
+                        : ""
+                    }
+                    disableRipple
+                    component="a"
+                    onClick={closeSidebar}
+                    startIcon={<NoCrashIcon />}
+                  >
+                    Recolectados
+                  </Button>
+                </NextLink>
+              </ListItem>
               <ListItem component="div">
                 <NextLink href="/mantenimientos" passHref>
                   <Button
