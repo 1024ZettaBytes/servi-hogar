@@ -145,6 +145,7 @@ function VueltasOperador({ session }) {
           sector: item.sale?.customer?.currentResidence?.city?.sectors?.find(
             (s) => s._id === item.sale?.customer?.currentResidence?.sector?._id
           )?.name,
+          suburb: item.sale?.customer?.currentResidence?.suburb,
           isPriority: true,
         })),
         // All pending deliveries (no date filter)
@@ -154,6 +155,7 @@ function VueltasOperador({ session }) {
           sector: item.rent?.customer?.currentResidence?.city?.sectors?.find(
             (s) => s._id === item.rent?.customer?.currentResidence?.sector?._id
           )?.name,
+          suburb: item.rent?.customer?.currentResidence?.suburb,
         })),
         // All pending pickups (no date filter)
         ...(pendingPickupsList || []).map((item) => ({
@@ -162,6 +164,7 @@ function VueltasOperador({ session }) {
           sector: item.rent?.customer?.currentResidence?.city?.sectors?.find(
             (s) => s._id === item.rent?.customer?.currentResidence?.sector?._id
           )?.name,
+          suburb: item.rent?.customer?.currentResidence?.suburb,
         })),
         // All pending changes (no date filter)
         ...(pendingChangesList || []).map((item) => ({
@@ -170,12 +173,14 @@ function VueltasOperador({ session }) {
           sector: item.rent?.customer?.currentResidence?.city?.sectors?.find(
             (s) => s._id === item.rent?.customer?.currentResidence?.sector?._id
           )?.name,
+          suburb: item.rent?.customer?.currentResidence?.suburb,
         })),
         ...(pendingCollectionsList || []).map((item) => ({
           ...item,
           type: "COBRANZA",
           sector: item.sale?.customer?.currentResidence?.sector?.name,
-          takenAt: item.createdAt
+          takenAt: item.createdAt,
+          suburb: item.sale?.customer?.currentResidence?.suburb,
         })),
       ].sort((a, b) => {
         // Priority items (sale pickups) always first
@@ -398,7 +403,7 @@ function VueltasOperador({ session }) {
                 </Card>
 
                 {/* Extra Trips Section */}
-                {(pendingExtraTripsList?.length > 0 || completedExtraTripsList?.length > 0) && (
+               
                   <>
                     {/* Pending Extra Trips */}
                     {pendingExtraTripsList?.length > 0 && (
@@ -455,7 +460,7 @@ function VueltasOperador({ session }) {
                       </Card>
                     )}
                   </>
-                )}
+                
 
                 {/* Warning for blocking */}
                 {allCompletedTasks.length > 0 && (
