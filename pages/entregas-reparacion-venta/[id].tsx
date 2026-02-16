@@ -140,7 +140,7 @@ function CompletarEntregaReparacion() {
     }
   };
 
-  const machineInfo = `#${sale.machine.machineNum} - ${sale.machine.brand}`
+  const machineInfo = `#${sale?.machine?.machineNum} - ${sale?.machine?.brand}`
 
   const canSubmit = deliveryDate &&
     deliveryDate.toString() !== 'Invalid Date' &&

@@ -316,7 +316,7 @@ function CompletarVenta() {
     setCustomerToEdit({ ...customer, isSet: true });
   }
 
-  const machineInfo = `#${sale.machine.machineNum} - ${sale.machine.brand}`
+  const machineInfo = `#${sale?.machine?.machineNum} - ${sale?.machine?.brand}`
 
   return (
     <>
