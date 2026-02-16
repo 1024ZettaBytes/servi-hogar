@@ -42,19 +42,19 @@ const fetcher = (url) => fetch(url).then((res) => res.json());
 function CompletarEntregaReparacion() {
   const router = useRouter();
   const { id } = router.query;
-  
+
   // Fetch sale data
   const { data: saleData, error: saleError } = useSWR(
     id ? `/api/sales/${id}?populate=full` : null,
     fetcher
   );
-  
+
   const sale = saleData?.data;
   const customer = sale?.customer;
   const paths = ['Inicio', 'Entregas', 'Completar entrega de reparación'];
-  
+
   const [deliveryDate, setDeliveryDate] = useState<any>(new Date());
-  
+
   const [attached, setAttached] = useState<any>({
     evidence: { file: null, url: null, error: false }
   });
@@ -79,7 +79,7 @@ function CompletarEntregaReparacion() {
 
     // Compress image using helper function
     const result = await compressImage(imageFile);
-    
+
     if (!result) {
       // Validation failed (invalid image type)
       setAttached({
@@ -140,12 +140,10 @@ function CompletarEntregaReparacion() {
     }
   };
 
-  const machineInfo = sale?.machine
-    ? `#${sale.machine.machineNum} - ${sale.machine.brand}`
-    : sale?.serialNumber || 'N/A';
+  const machineInfo = `#${sale.machine.machineNum} - ${sale.machine.brand}`
 
-  const canSubmit = deliveryDate && 
-    deliveryDate.toString() !== 'Invalid Date' && 
+  const canSubmit = deliveryDate &&
+    deliveryDate.toString() !== 'Invalid Date' &&
     attached.evidence.file;
 
   return (
@@ -207,7 +205,7 @@ function CompletarEntregaReparacion() {
                         Información del equipo reparado
                       </Typography>
                     </Grid>
-                    
+
                     <Grid item xs={12} sm={6} md={3}>
                       <Typography variant="subtitle2" color="text.secondary">
                         Folio de Venta
@@ -231,7 +229,7 @@ function CompletarEntregaReparacion() {
                         Serie
                       </Typography>
                       <Typography variant="body1" fontWeight="500">
-                        {sale?.serialNumber || 'Sin número de serie'}
+                        {sale?.machine?.serialNumber || 'Sin número de serie'}
                       </Typography>
                     </Grid>
 
@@ -356,16 +354,16 @@ function CompletarEntregaReparacion() {
           </Grid>
         </Grid>
       </Container>
-      <ConfirmEquipmentDeliveryModal
+      {openConfirmModal && <ConfirmEquipmentDeliveryModal
         open={openConfirmModal}
         saleNum={sale?.saleNum}
         machineInfo={machineInfo}
-        serialNumber={sale?.serialNumber}
+        serialNumber={sale?.machine?.serialNumber}
         customerName={customer?.name}
         loading={isSubmitting}
         onConfirm={confirmDelivery}
         onCancel={() => setOpenConfirmModal(false)}
-      />
+      />}
       <Footer />
     </>
   );

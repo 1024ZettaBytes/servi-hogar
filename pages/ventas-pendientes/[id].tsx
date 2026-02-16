@@ -61,17 +61,17 @@ const fetcher = (url) => fetch(url).then((res) => res.json());
 function CompletarVenta() {
   const router = useRouter();
   const { id } = router.query;
-  
+
   // Fetch sale data
   const { data: saleData, error: saleError } = useSWR(
     id ? `/api/sales/${id}?populate=full` : null,
     fetcher
   );
-  
+
   const sale = saleData?.data;
   const customer = sale?.customer;
   const paths = ['Inicio', 'Ventas', 'Completar entrega'];
-  
+
   const [customerToEdit, setCustomerToEdit] = useState<any>({ isSet: false });
   const [deliveryDate, setDeliveryDate] = useState<any>(new Date());
   const [openConfirmModal, setOpenConfirmModal] = useState(false);
@@ -81,9 +81,9 @@ function CompletarVenta() {
     info: true,
     residence: true
   });
-  
+
   const { citiesList, citiesError } = useGetCities(getFetcher);
-  
+
   const [attached, setAttached] = useState<any>({
     ine: { file: null, url: null },
     frontal: { file: null, url: null },
@@ -97,7 +97,7 @@ function CompletarVenta() {
     msg: ''
   });
   const [activeStep, setActiveStep] = useState(0);
-  
+
   const generalError = saleError || citiesError;
   const completeData = sale && citiesList;
 
@@ -143,7 +143,7 @@ function CompletarVenta() {
 
     // Compress image using helper function
     const result = await compressImage(imageFile);
-    
+
     if (!result) {
       // Validation failed (invalid image type)
       setAttached({
@@ -316,9 +316,7 @@ function CompletarVenta() {
     setCustomerToEdit({ ...customer, isSet: true });
   }
 
-  const machineInfo = sale?.machine
-    ? `#${sale.machine.machineNum} - ${sale.machine.brand} ${sale.machine.capacity}kg`
-    : sale?.serialNumber || 'N/A';
+  const machineInfo = `#${sale.machine.machineNum} - ${sale.machine.brand}`
 
   return (
     <>
@@ -555,13 +553,13 @@ function CompletarVenta() {
                                     >
                                       {citiesList
                                         ? citiesList.map((city) => (
-                                            <MenuItem
-                                              key={city._id}
-                                              value={city._id}
-                                            >
-                                              {city.name}
-                                            </MenuItem>
-                                          ))
+                                          <MenuItem
+                                            key={city._id}
+                                            value={city._id}
+                                          >
+                                            {city.name}
+                                          </MenuItem>
+                                        ))
                                         : null}
                                     </Select>
                                   </FormControl>
@@ -601,15 +599,15 @@ function CompletarVenta() {
                                       {customerToEdit?.currentResidence?.city
                                         ?.sectors?.length > 0
                                         ? customerToEdit?.currentResidence?.city?.sectors?.map(
-                                            (sector) => (
-                                              <MenuItem
-                                                key={sector._id}
-                                                value={sector._id}
-                                              >
-                                                {sector.name}
-                                              </MenuItem>
-                                            )
+                                          (sector) => (
+                                            <MenuItem
+                                              key={sector._id}
+                                              value={sector._id}
+                                            >
+                                              {sector.name}
+                                            </MenuItem>
                                           )
+                                        )
                                         : null}
                                     </Select>
                                   </FormControl>
@@ -765,7 +763,7 @@ function CompletarVenta() {
                                   {machineInfo}
                                 </Typography>
                                 <Typography>
-                                  Serie: {sale?.serialNumber || 'Sin número de serie'}
+                                  Serie: {sale?.machine?.serialNumber || 'Sin número de serie'}
                                 </Typography>
                               </Grid>
                               <Grid item xs={12} sm={6} lg={4} m={1}>
@@ -821,14 +819,14 @@ function CompletarVenta() {
                                   )}
                                 />
                               </Grid>
-                              
+
                               {/* Image Upload Section */}
                               <Grid item xs={12} m={1}>
                                 <Typography variant="subtitle2" color="text.secondary" gutterBottom>
                                   Fotos Requeridas
                                 </Typography>
                               </Grid>
-                              
+
                               {/* INE Image */}
                               <Grid item xs={12} md={4} m={1}>
                                 <Box>
@@ -974,7 +972,7 @@ function CompletarVenta() {
                                   )}
                                 </Box>
                               </Grid>
-                              
+
                               {/* Label Image */}
                               <Grid item xs={12} md={4} m={1}>
                                 <Box>
@@ -1079,16 +1077,15 @@ function CompletarVenta() {
           </Grid>
         </Grid>
       </Container>
-      <ConfirmEquipmentDeliveryModal
+      {openConfirmModal && <ConfirmEquipmentDeliveryModal
         open={openConfirmModal}
-        saleNum={sale?.saleNum}
         machineInfo={machineInfo}
-        serialNumber={sale?.serialNumber}
+        serialNumber={sale?.machine?.serialNumber}
         customerName={customer?.name}
         loading={isSubmitting}
         onConfirm={confirmDelivery}
         onCancel={() => setOpenConfirmModal(false)}
-      />
+      />}
       <Footer />
     </>
   );
