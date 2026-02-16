@@ -26,7 +26,7 @@ interface RecolectadasTableProps {
   userRole?: string;
 }
 
-const TablaRecolectadas: FC<RecolectadasTableProps> = ({ userRole }) => {
+const TablaRecolectadas: FC<RecolectadasTableProps> = () => {
   const { enqueueSnackbar } = useSnackbar();
   const [page, setPage] = useState<number>(0);
   const [limit, setLimit] = useState<number>(10);
@@ -37,6 +37,7 @@ const TablaRecolectadas: FC<RecolectadasTableProps> = ({ userRole }) => {
   const { collectedMachines, isLoadingCollectedMachines } = useGetCollectedMachines(getFetcher);
 
   const handlePageChange = (event: any, newPage: number): void => {
+    event?.preventDefault();
     setPage(newPage);
   };
 
