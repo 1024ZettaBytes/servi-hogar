@@ -23,7 +23,6 @@ interface Props {
 
 export default function ConfirmEquipmentDeliverModal({
   open,
-  saleNum,
   machineInfo,
   serialNumber,
   customerName,
@@ -45,12 +44,6 @@ export default function ConfirmEquipmentDeliverModal({
             mb: 2
             }}
         >
-            <Typography variant="caption" color="text.primary" fontWeight={700}>
-                FOLIO
-            </Typography>
-            <Typography fontWeight={500}>
-                #{saleNum || "N/A"}
-            </Typography>
             <Typography variant="caption" color="text.primary" fontWeight={700}>
                 EQUIPO
             </Typography>
