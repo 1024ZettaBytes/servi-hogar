@@ -13,7 +13,6 @@ import {
   TableContainer,
   Typography,
   CardHeader,
-  useTheme,
   Skeleton,
   Grid,
   Alert,
@@ -83,7 +82,6 @@ const TablaInvestigaciones: FC<TablaInvestigacionesProps> = ({ userRole }) => {
   const handleLimitChange = (event) => {
     setLimit(parseInt(event.target.value));
   };
-  const theme = useTheme();
 
   return (
     <Grid item xs={12}>
