@@ -4,6 +4,13 @@ import {
   deleteMachinesData,
 } from "../../../lib/data/Machines";
 import { validateUserPermissions, getUserId } from "../auth/authUtils";
+import formidable from 'formidable';
+
+export const config = {
+  api: {
+    bodyParser: false,
+  },
+};
 
 async function getMachinesAPI(req, res) {
   try {
@@ -20,8 +27,36 @@ async function getMachinesAPI(req, res) {
 
 async function saveMachineAPI(req, res, userId) {
   try {
-    await saveMachineData({ ...req.body, lastUpdatedBy: userId });
+    const form = new formidable.IncomingForm();
+    form.multiples = true;
+
+    const { fields, files } = await new Promise((resolve, reject) => {
+      form.parse(req, (err, fields, files) => {
+        if (err) {
+          console.error(err);
+          reject(
+            new Error(
+              'Ocurrió un error interno, por favor contacte al administrador.'
+            )
+          );
+          return;
+        }
+        resolve({ fields, files });
+      });
+    });
+
+    await saveMachineData({
+      brand: fields.brand,
+      cost: fields.cost,
+      status: fields.status,
+      location: fields.location || null,
+      partner: fields.partner || null,
+      files,
+      lastUpdatedBy: userId,
+    });
+
     res.status(200).json({ msg: "Equipo guardado con éxito!" });
+
   } catch (e) {
     console.error(e);
     res.status(500).json({ errorMsg: e.message });
