@@ -69,10 +69,15 @@ const BajarEquipoModal: FC<BajarEquipoModalProps> = ({
   const showNoArrivalAlert = arrived === 'no';
   const showMissingPartsAlert = arrived === 'yes' && hasMissingParts === 'yes';
 
-  const optionsWereSelected = arrived !== '' && (arrived === 'no' || (arrived === 'yes' && hasMissingParts !== ''));
-
+  const optionsWereSelected =
+    arrived !== '' &&
+    (arrived === 'no' || (arrived === 'yes' && hasMissingParts !== ''));
   const machineArrived = arrived === 'yes';
 
+  const canSave = optionsWereSelected && (machineArrived
+    ? hasMissingParts === 'no' ||
+      (hasMissingParts === 'yes' && allowSaveOnMissingParts)
+    : userRole === 'ADMIN');
   return (
     <Dialog open={open} onClose={handleClose} maxWidth="md" fullWidth>
       <DialogTitle>Recepción de Equipo #{machine?.machineNum}</DialogTitle>
@@ -163,7 +168,9 @@ const BajarEquipoModal: FC<BajarEquipoModalProps> = ({
                 El equipo no llegó
               </Typography>
               <Typography variant="body2">
-                Se creará un registro de seguimiento para investigar la situación del equipo.
+                {userRole === 'ADMIN'
+                  ? '| Se creará un registro de seguimiento para investigar la situación del equipo.'
+                  : '| Por favor LLAMAR AL SUPERVISOR, ya que no se permite crear un registro de seguimiento sin autorización. '}
               </Typography>
             </Alert>
           )}
@@ -208,8 +215,7 @@ const BajarEquipoModal: FC<BajarEquipoModalProps> = ({
               <Typography variant="body2">
                 {allowSaveOnMissingParts
                   ? '| Puede proceder a ingresar el equipo a bodega, pero asegúrese de reponer las piezas faltantes para su seguimiento.'
-                  : "| Por favor LLAMAR AL PERSONAL DE OFICINA, ya que no se permite ingresar el equipo a bodega con piezas faltantes."}
-
+                  : '| Por favor LLAMAR AL PERSONAL DE OFICINA, ya que no se permite ingresar el equipo a bodega con piezas faltantes.'}
               </Typography>
             </Alert>
           )}
@@ -224,9 +230,11 @@ const BajarEquipoModal: FC<BajarEquipoModalProps> = ({
           color="primary"
           onClick={handleSubmit}
           loading={isLoading}
-          disabled={!optionsWereSelected}
+          disabled={!canSave}
         >
-          {machineArrived ? 'Ingresar a Bodega' : 'Crear registro de seguimiento'}
+          {machineArrived
+            ? 'Ingresar a Bodega'
+            : 'Crear registro de seguimiento'}
         </LoadingButton>
       </DialogActions>
     </Dialog>

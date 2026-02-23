@@ -199,15 +199,17 @@ const TablaRecolectadas: FC<RecolectadasTableProps> = ({ userRole }) => {
         />
       </Card>
 
-      <BajarEquipoModal
-        open={modalOpen}
-        machine={selectedMachine}
-        pickupImages={selectedMachine?.pickupImages}
-        isLoading={isReceiving}
-        onClose={handleCloseModal}
-        onConfirm={handleConfirmReceive}
-        userRole={userRole}
-      />
+      {modalOpen && (
+        <BajarEquipoModal
+          open={modalOpen}
+          machine={selectedMachine}
+          pickupImages={selectedMachine?.pickupImages}
+          isLoading={isReceiving}
+          onClose={handleCloseModal}
+          onConfirm={handleConfirmReceive}
+          userRole={userRole}
+        />
+      )}
     </>
   );
 };
