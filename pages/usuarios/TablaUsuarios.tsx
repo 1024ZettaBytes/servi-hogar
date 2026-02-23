@@ -21,6 +21,7 @@ import {
   InputAdornment,
   Chip
 } from '@mui/material';
+import { useSession } from 'next-auth/react';
 
 import { updateUser, unlockUser } from '../../lib/client/usersFetch';
 import { useSnackbar } from 'notistack';
@@ -80,6 +81,8 @@ const applyPagination = (
 };
 
 const TablaUsuarios: FC<TablaUsuariosProps> = ({ userList }) => {
+  const { data: session } = useSession();
+  const isSuperUser = (session?.user as any)?.isSuperUser;
   const { enqueueSnackbar } = useSnackbar();
   const [updateModalIsOpen, setUpdateModalIsOpen] = useState(false);
   const [unlockModalIsOpen, setUnlockModalIsOpen] = useState(false);
@@ -109,11 +112,11 @@ const TablaUsuarios: FC<TablaUsuariosProps> = ({ userList }) => {
   const handleOnChangeStatus = (): void => {
     setUpdateModalIsOpen(true);
   };
-  
+
   const handleOnUnlock = (): void => {
     setUnlockModalIsOpen(true);
   };
-  
+
   const handleOnConfirmUpdate = async () => {
     setIsUpdating(true);
     const result = await updateUser(userToUpdate);
@@ -132,7 +135,7 @@ const TablaUsuarios: FC<TablaUsuariosProps> = ({ userList }) => {
       setUserToUpdate(null);
     }
   };
-  
+
   const handleOnConfirmUnlock = async (reason: string) => {
     setIsUnlocking(true);
     const result = await unlockUser(userToUnlock._id, reason);
@@ -151,7 +154,7 @@ const TablaUsuarios: FC<TablaUsuariosProps> = ({ userList }) => {
       setUserToUnlock(null);
     }
   };
-  
+
   const handleCloseAssign = (success, message) => {
     setAssignModalIsOpen(false);
     if (!success) {
@@ -287,7 +290,7 @@ const TablaUsuarios: FC<TablaUsuariosProps> = ({ userList }) => {
                           </IconButton>
                         </Tooltip>
                       )}
-                      {user?.isBlocked && user?.isActive && (
+                      {user?.isBlocked && user?.isActive && (user?.role?.id !== 'ADMIN' || isSuperUser) && (
                         <Tooltip title="Desbloquear Usuario" arrow>
                           <IconButton
                             onClick={() => {
@@ -374,19 +377,19 @@ const TablaUsuarios: FC<TablaUsuariosProps> = ({ userList }) => {
         }}
       />
       {unlockModalIsOpen && (
-      <GenericModal
-        open={unlockModalIsOpen}
-        title="Desbloquear Usuario"
-        requiredReason={true}
-        text={`¿Está seguro que desea desbloquear al usuario ${userToUnlock?.name}? El usuario podrá volver a completar vueltas. Por favor indique la razón del desbloqueo.`}
-        isLoading={isUnlocking}
-        onAccept={handleOnConfirmUnlock}
-        onCancel={() => {
-          setUnlockModalIsOpen(false);
-          setIsUnlocking(false);
-          setUserToUnlock(null);
-        }}
-      />
+        <GenericModal
+          open={unlockModalIsOpen}
+          title="Desbloquear Usuario"
+          requiredReason={true}
+          text={`¿Está seguro que desea desbloquear al usuario ${userToUnlock?.name}? El usuario podrá volver a completar vueltas. Por favor indique la razón del desbloqueo.`}
+          isLoading={isUnlocking}
+          onAccept={handleOnConfirmUnlock}
+          onCancel={() => {
+            setUnlockModalIsOpen(false);
+            setIsUnlocking(false);
+            setUserToUnlock(null);
+          }}
+        />
       )}
       {assignModalIsOpen && (
         <AssignMachineModal

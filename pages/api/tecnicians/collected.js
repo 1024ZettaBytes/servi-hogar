@@ -2,7 +2,7 @@ import { getCollectedMachinesData } from '../../../lib/data/Pickups';
 import { validateUserPermissions, getUserId } from '../../api/auth/authUtils';
 
 export default async function handler(req, res) {
-  const validRole = await validateUserPermissions(req, res, ['ADMIN', 'TEC']);
+  const validRole = await validateUserPermissions(req, res, ['ADMIN', 'TEC', 'AUX']);
   if (!validRole) return;
 
   if (req.method !== 'GET') {

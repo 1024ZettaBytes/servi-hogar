@@ -1,4 +1,6 @@
-import { getUserId, validateUserPermissions } from '../auth/authUtils';
+import { getUserId, validateUserPermissions, SUPER_USERS } from '../auth/authUtils';
+import { User } from '../../../lib/models/User';
+import { connectToDatabase } from '../../../lib/db';
 import {
   getUsersData,
   changeUserStatus,
@@ -49,6 +51,23 @@ async function unlockUserAPI(req, res) {
     
     if (!unlockedBy) {
       return res.status(401).json({ errorMsg: 'Usuario no autenticado.' });
+    }
+    
+    await connectToDatabase();
+    await User.init();
+    const userToUnlock = await User.findById(_id).populate('role');
+    if (!userToUnlock) {
+      return res.status(404).json({ errorMsg: 'Usuario a desbloquear no encontrado.' });
+    }
+    
+    let isSuperUser = false;
+    const unlockerUser = await User.findById(unlockedBy);
+    if (unlockerUser && SUPER_USERS.includes(unlockerUser.id)) {
+      isSuperUser = true;
+    }
+    
+    if (userToUnlock.role?.id === 'ADMIN' && !isSuperUser) {
+      return res.status(403).json({ errorMsg: 'No tienes permisos para desbloquear a otro administrador.' });
     }
     
     await unlockUser({ _id, reason, unlockedBy });

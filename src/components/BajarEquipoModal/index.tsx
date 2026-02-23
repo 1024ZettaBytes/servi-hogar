@@ -22,7 +22,8 @@ interface BajarEquipoModalProps {
   pickupImages: any;
   isLoading: boolean;
   onClose: () => void;
-  onConfirm: () => void;
+  onConfirm: (arrived: boolean) => void;
+  userRole: string;
 }
 
 const BajarEquipoModal: FC<BajarEquipoModalProps> = ({
@@ -31,15 +32,16 @@ const BajarEquipoModal: FC<BajarEquipoModalProps> = ({
   pickupImages,
   isLoading,
   onClose,
-  onConfirm
+  onConfirm,
+  userRole
 }) => {
   const [arrived, setArrived] = useState<string>('');
   const [hasMissingParts, setHasMissingParts] = useState<string>('');
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
-
+  const allowSaveOnMissingParts = ['ADMIN', 'AUX'].includes(userRole);
   const handleSubmit = () => {
     // All validations passed - call parent handler
-    onConfirm();
+    onConfirm(arrived === 'yes');
   };
 
   const handleClose = () => {
@@ -66,7 +68,10 @@ const BajarEquipoModal: FC<BajarEquipoModalProps> = ({
 
   const showNoArrivalAlert = arrived === 'no';
   const showMissingPartsAlert = arrived === 'yes' && hasMissingParts === 'yes';
-  const canSubmit = arrived === 'yes' && hasMissingParts === 'no';
+
+  const optionsWereSelected = arrived !== '' && (arrived === 'no' || (arrived === 'yes' && hasMissingParts !== ''));
+
+  const machineArrived = arrived === 'yes';
 
   return (
     <Dialog open={open} onClose={handleClose} maxWidth="md" fullWidth>
@@ -76,16 +81,31 @@ const BajarEquipoModal: FC<BajarEquipoModalProps> = ({
           {/* Images Section */}
           {images.length > 0 && (
             <Box sx={{ textAlign: 'center' }}>
-              <Typography variant="subtitle2" color="text.secondary" gutterBottom>
+              <Typography
+                variant="subtitle2"
+                color="text.secondary"
+                gutterBottom
+              >
                 Fotos del Equipo
               </Typography>
               <img
                 src={currentImage as string}
                 alt={`Foto ${currentImageIndex + 1}`}
-                style={{ maxWidth: '100%', maxHeight: '300px', borderRadius: '8px' }}
+                style={{
+                  maxWidth: '100%',
+                  maxHeight: '300px',
+                  borderRadius: '8px'
+                }}
               />
               {images.length > 1 && (
-                <Box sx={{ mt: 1, display: 'flex', justifyContent: 'center', gap: 1 }}>
+                <Box
+                  sx={{
+                    mt: 1,
+                    display: 'flex',
+                    justifyContent: 'center',
+                    gap: 1
+                  }}
+                >
                   <Button
                     size="small"
                     onClick={handlePrevImage}
@@ -143,7 +163,7 @@ const BajarEquipoModal: FC<BajarEquipoModalProps> = ({
                 El equipo no llegó
               </Typography>
               <Typography variant="body2">
-                Por favor, <strong>LLAMAR AL SUPERVISOR</strong> para reportar esta situación.
+                Se creará un registro de seguimiento para investigar la situación del equipo.
               </Typography>
             </Alert>
           )}
@@ -179,25 +199,24 @@ const BajarEquipoModal: FC<BajarEquipoModalProps> = ({
             </>
           )}
 
-          {/* Alert: Missing parts */}
           {showMissingPartsAlert && (
-            <Alert severity="warning">
+            <Alert severity={allowSaveOnMissingParts ? 'warning' : 'error'}>
               <Typography variant="body1" fontWeight="bold">
                 El equipo tiene piezas faltantes
               </Typography>
+
               <Typography variant="body2">
-                Por favor, <strong>LLAMAR AL SUPERVISOR</strong> antes de proceder.
+                {allowSaveOnMissingParts
+                  ? '| Puede proceder a ingresar el equipo a bodega, pero asegúrese de reponer las piezas faltantes para su seguimiento.'
+                  : "| Por favor LLAMAR AL PERSONAL DE OFICINA, ya que no se permite ingresar el equipo a bodega con piezas faltantes."}
+
               </Typography>
             </Alert>
           )}
         </Box>
       </DialogContent>
       <DialogActions>
-        <Button
-          variant="outlined"
-          onClick={handleClose}
-          disabled={isLoading}
-        >
+        <Button variant="outlined" onClick={handleClose} disabled={isLoading}>
           Cancelar
         </Button>
         <LoadingButton
@@ -205,9 +224,9 @@ const BajarEquipoModal: FC<BajarEquipoModalProps> = ({
           color="primary"
           onClick={handleSubmit}
           loading={isLoading}
-          disabled={!canSubmit}
+          disabled={!optionsWereSelected}
         >
-          Ingresar a Bodega
+          {machineArrived ? 'Ingresar a Bodega' : 'Crear registro de seguimiento'}
         </LoadingButton>
       </DialogActions>
     </Dialog>

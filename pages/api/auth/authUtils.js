@@ -40,3 +40,5 @@ export const getUserRole = async (req, res) => {
     return false;
   }
 }
+
+export const SUPER_USERS = ['WIL-ADM', 'Wilfrido-ADM'];

@@ -76,6 +76,13 @@ const getStatusLabel = (
           <b>En investigación</b>
         </Label>
       );
+    case MACHINE_STATUS_LIST.INVES:
+      return (
+        <Label color="secondary">
+          <SearchIcon fontSize="small" />
+          <b>En investigación (No llegó)</b>
+        </Label>
+      );
     case MACHINE_STATUS_LIST.RENTADO:
       return (
         <Label color="secondary">
@@ -336,7 +343,7 @@ function MachineInfoTab({ role, machine, statusList }) {
                             <Image
                               src={
                                 machine.evidencesUrls[
-                                  machine.evidencesUrls.length - 1
+                                machine.evidencesUrls.length - 1
                                 ]
                               }
                               alt="Ultima foto del equipo"
@@ -443,34 +450,34 @@ function MachineInfoTab({ role, machine, statusList }) {
                             >
                               {statusList
                                 ? statusList
-                                    .filter((s) => {
-                                      if (originalStatus === 'REC') {
-                                        if (role === 'ADMIN') {
-                                          return ![
-                                            'RENTADO',
-                                            'PERDIDO',
-                                            'VEHI'
-                                          ].includes(s.id);
-                                        }
+                                  .filter((s) => {
+                                    if (originalStatus === 'REC') {
+                                      if (role === 'ADMIN') {
                                         return ![
                                           'RENTADO',
                                           'PERDIDO',
-                                          'VEHI',
-                                          'LISTO'
+                                          'VEHI'
                                         ].includes(s.id);
                                       }
-                                      return !['REC', 'RENTADO'].includes(s.id);
-                                    })
-                                    .map((status) => {
-                                      return (
-                                        <MenuItem
-                                          key={status._id}
-                                          value={status._id}
-                                        >
-                                          {status.description}
-                                        </MenuItem>
-                                      );
-                                    })
+                                      return ![
+                                        'RENTADO',
+                                        'PERDIDO',
+                                        'VEHI',
+                                        'LISTO'
+                                      ].includes(s.id);
+                                    }
+                                    return !['REC', 'RENTADO'].includes(s.id);
+                                  })
+                                  .map((status) => {
+                                    return (
+                                      <MenuItem
+                                        key={status._id}
+                                        value={status._id}
+                                      >
+                                        {status.description}
+                                      </MenuItem>
+                                    );
+                                  })
                                 : null}
                             </Select>
                           </FormControl>
@@ -541,25 +548,25 @@ function MachineInfoTab({ role, machine, statusList }) {
                                       >
                                         {warehousesList
                                           ? warehousesList
-                                              .filter((warehouse) =>
-                                                role !== 'ADMIN'
-                                                  ? !(
-                                                      warehouse.name.includes(
-                                                        'Chica'
-                                                      ) ||
-                                                      warehouse.name ===
-                                                        'Desconocida'
-                                                    )
-                                                  : true
-                                              )
-                                              .map((warehouse) => (
-                                                <MenuItem
-                                                  key={warehouse._id}
-                                                  value={warehouse._id}
-                                                >
-                                                  {warehouse.name}
-                                                </MenuItem>
-                                              ))
+                                            .filter((warehouse) =>
+                                              role !== 'ADMIN'
+                                                ? !(
+                                                  warehouse.name.includes(
+                                                    'Chica'
+                                                  ) ||
+                                                  warehouse.name ===
+                                                  'Desconocida'
+                                                )
+                                                : true
+                                            )
+                                            .map((warehouse) => (
+                                              <MenuItem
+                                                key={warehouse._id}
+                                                value={warehouse._id}
+                                              >
+                                                {warehouse.name}
+                                              </MenuItem>
+                                            ))
                                           : null}
                                       </Select>
                                     </FormControl>
@@ -593,13 +600,13 @@ function MachineInfoTab({ role, machine, statusList }) {
                                       >
                                         {vehiclesList
                                           ? vehiclesList.map((vehicle) => (
-                                              <MenuItem
-                                                key={vehicle._id}
-                                                value={vehicle._id}
-                                              >
-                                                {vehicle.operator.name}
-                                              </MenuItem>
-                                            ))
+                                            <MenuItem
+                                              key={vehicle._id}
+                                              value={vehicle._id}
+                                            >
+                                              {vehicle.operator.name}
+                                            </MenuItem>
+                                          ))
                                           : null}
                                       </Select>
                                     </FormControl>
@@ -688,7 +695,7 @@ function MachineInfoTab({ role, machine, statusList }) {
                                   });
                                   return;
                                 }
-                                
+
                                 if (
                                   !file.type.includes('image/') &&
                                   !file.type.includes('/pdf')
@@ -706,7 +713,7 @@ function MachineInfoTab({ role, machine, statusList }) {
                                   });
                                   return;
                                 }
-                                
+
                                 // Skip compression for PDF files
                                 if (file.type.includes('/pdf')) {
                                   const url = URL.createObjectURL(file);
@@ -879,7 +886,7 @@ function MachineInfoTab({ role, machine, statusList }) {
           </CardContent>
         </Card>
       </Grid>
-            <Grid item xs={12}>
+      <Grid item xs={12}>
         <Card>
           <Box
             p={3}

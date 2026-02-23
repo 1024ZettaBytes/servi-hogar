@@ -180,6 +180,12 @@ export const useGetPickupById = (fetcher, id) => {
   return { pickup: data?.data, pickupByIdError: error };
 };
 
+export const useGetInvestigations = (fetcher, limit, page, searchTerm = null) => {
+  let url = getPaginatedUrl(ROUTES.ALL_INVESTIGATIONS_API, limit, page, searchTerm);
+  const { data, error } = useSWR(url, fetcher);
+  return { investigations: data?.data, investigationsError: error };
+};
+
 // Changes
 export const useGetPendingChanges = (fetcher) => {
   const { data, error } = useSWR(ROUTES.ALL_PENDING_CHANGES_API, fetcher);
@@ -562,7 +568,7 @@ export const useGetPaymentsProgress = (fetcher, weekStartStr) => {
 // Extra Trips
 export const useGetPendingExtraTrips = (fetcher) => {
   const { data, error, isLoading } = useSWR(
-    '/api/extra-trips/pending',
+    ROUTES.ALL_PENDING_EXTRA_TRIPS_API,
     fetcher
   );
   return {
@@ -574,7 +580,7 @@ export const useGetPendingExtraTrips = (fetcher) => {
 
 export const useGetCompletedExtraTrips = (fetcher, date) => {
   const { data, error, isLoading } = useSWR(
-    date ? `/api/extra-trips/completed?date=${date}` : null,
+    date ? `${ROUTES.ALL_COMPLETED_EXTRA_TRIPS_API}?date=${date}` : null,
     fetcher
   );
   return {

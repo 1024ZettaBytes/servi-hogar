@@ -20,6 +20,7 @@ import { SnackbarProvider, useSnackbar } from 'notistack';
 import ErrorBoundary from '@/components/ErrorBoundary';
 import setupAxiosInterceptors from '../lib/client/axiosConfig';
 import UserBlockedModal from '@/components/UserBlockedModal';
+import { useCheckAdminOverdue } from 'src/hooks/useCheckAdminOverdue';
 
 // Setup axios interceptors once
 setupAxiosInterceptors();
@@ -41,13 +42,16 @@ function GlobalErrorHandler({ children }: { children: ReactNode }) {
   const { data: session } = useSession();
   const { showBlockedModal, isBlockedModalOpen } = useUserBlocked();
 
+  // Run the overdue investigation check for ADMINs
+  useCheckAdminOverdue();
+
   // Check if user becomes blocked
   useEffect(() => {
     if (session?.user?.isBlocked === true) {
       showBlockedModal();
     }
   }, [session?.user?.isBlocked, showBlockedModal]);
-  
+
   // Use refs to persist values across renders and event handlers
   const isShowingErrorRef = useRef(false);
   const DEBOUNCE_TIME = 300; // 300ms
@@ -62,10 +66,10 @@ function GlobalErrorHandler({ children }: { children: ReactNode }) {
 
       // Set flag to prevent duplicates
       isShowingErrorRef.current = true;
-      
+
       // Show the alert
       alert(errorDetails);
-      
+
       // Show snackbar
       enqueueSnackbar(
         'Error detectado. Por favor envía la captura al soporte.',
