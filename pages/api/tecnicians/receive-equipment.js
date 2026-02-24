@@ -2,7 +2,7 @@ import { receiveCollectedEquipmentData } from '../../../lib/data/Machines';
 import { validateUserPermissions, getUserId } from '../auth/authUtils';
 
 export default async function handler(req, res) {
-  const validRole = await validateUserPermissions(req, res, ['ADMIN', 'TEC']);
+  const validRole = await validateUserPermissions(req, res, ['ADMIN', 'TEC', 'AUX']);
   if (!validRole) return;
 
   if (req.method !== 'POST') {
@@ -11,7 +11,7 @@ export default async function handler(req, res) {
 
   try {
     const userId = await getUserId(req);
-    const { machineId } = req.body;
+    const { machineId, arrived = true } = req.body;
 
     if (!machineId) {
       return res.status(400).json({ errorMsg: 'ID de equipo requerido' });
@@ -19,10 +19,11 @@ export default async function handler(req, res) {
 
     await receiveCollectedEquipmentData({
       machineId,
+      arrived,
       lastUpdatedBy: userId
     });
 
-    res.status(200).json({ message: 'Equipo recibido exitosamente' });
+    res.status(200).json({ message: 'Cambios guardados' });
   } catch (error) {
     console.error(error);
     res.status(500).json({ errorMsg: error.message || 'Error al recibir el equipo' });

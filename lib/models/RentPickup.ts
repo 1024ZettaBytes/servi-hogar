@@ -24,6 +24,8 @@ export interface IRentPickup extends Document {
   updatedAt: Date;
   createdBy: Schema.Types.ObjectId;
   lastUpdatedBy: Schema.Types.ObjectId;
+  machine: Schema.Types.ObjectId;
+  isUnderInvestigation: boolean;
 }
 
 const RentPickupSchema = new Schema<IRentPickup>({
@@ -60,7 +62,9 @@ const RentPickupSchema = new Schema<IRentPickup>({
   createdAt: { type: Date, required: true },
   updatedAt: { type: Date, required: true },
   createdBy: { type: Schema.Types.ObjectId, default: null, ref: 'users' },
-  lastUpdatedBy: { type: Schema.Types.ObjectId, required: true, ref: 'users' }
+  lastUpdatedBy: { type: Schema.Types.ObjectId, required: true, ref: 'users' },
+  machine: { type: Schema.Types.ObjectId, ref: 'machines', required: true },
+  isUnderInvestigation: { type: Boolean, default: false }
 });
 
 export const RentPickup: Model<IRentPickup> =

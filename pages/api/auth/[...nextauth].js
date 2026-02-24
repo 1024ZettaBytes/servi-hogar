@@ -3,8 +3,9 @@ import CredentialsProvider from "next-auth/providers/credentials";
 import { Role } from "../../../lib/models/Role";
 import { User } from "../../../lib/models/User";
 import { connectToDatabase, isConnected } from "../../../lib/db";
+import { SUPER_USERS } from "./authUtils";
+
 Role.init();
-const SUPER_USERS = ['WIL-ADM', 'Wilfrido-ADM'];
 export default NextAuth({
   session: {
     jwt: true,
