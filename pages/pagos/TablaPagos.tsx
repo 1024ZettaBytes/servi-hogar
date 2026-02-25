@@ -26,7 +26,7 @@ import {
 import ImageSearchIcon from '@mui/icons-material/ImageSearch';
 import ReceiptIcon from '@mui/icons-material/Receipt';
 import SearchIcon from '@mui/icons-material/Search';
-import { capitalizeFirstLetter, formatTZDate } from 'lib/client/utils';
+import { capitalizeFirstLetter, formatTZDate, getWeeksFromPayment } from 'lib/client/utils';
 import { PAYMENT_METHODS } from '../../lib/consts/OBJ_CONTS';
 import { getFetcher, useGetPayments } from 'pages/api/useRequest';
 import PaymentReceipt from 'src/components/PaymentReceipt';
@@ -129,6 +129,7 @@ const TablaPagos: FC<TablaPagosProps> = () => {
                 <TableCell align="center">Folio</TableCell>
                 <TableCell align="center">Comprobante</TableCell>
                 <TableCell align="center">Recibo</TableCell>
+                <TableCell align="center">Semanas</TableCell>
                 <TableCell align="center">Importe</TableCell>
                 <TableCell align='center'>Recargo</TableCell>
                 <TableCell align="center">Usuario</TableCell>
@@ -266,6 +267,14 @@ const TablaPagos: FC<TablaPagosProps> = () => {
                           </IconButton>
                         </Tooltip>
                       ) : null}
+                    </TableCell>
+                    <TableCell align="center">
+                      <Typography variant="body2" fontWeight="bold">
+                        {(() => {
+                          const weeks = getWeeksFromPayment(payment);
+                          return weeks ? `${weeks}` : '-';
+                        })()}
+                      </Typography>
                     </TableCell>
                     <TableCell align="center">
                       <Typography variant="body2" color="green" noWrap>
