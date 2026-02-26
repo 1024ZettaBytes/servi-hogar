@@ -737,6 +737,22 @@ function CompletarVenta() {
                           )}
                           {activeStep === 1 && (
                             <Grid container>
+                              {sale?.isPaid && (
+                                <Grid item xs={12} m={1}>
+                                  <Alert
+                                    severity="success"
+                                    variant="filled"
+                                    sx={{ fontSize: '1rem' }}
+                                  >
+                                    <Typography variant="body1" fontWeight="bold">
+                                      💰 PAGADA DE CONTADO — ${sale?.cashPrice?.toFixed(2) || sale?.totalAmount?.toFixed(2)}
+                                    </Typography>
+                                    <Typography variant="body2">
+                                      El cliente ya realizó el pago completo. Solo se requiere completar la entrega del equipo.
+                                    </Typography>
+                                  </Alert>
+                                </Grid>
+                              )}
                               <Grid item xs={12} sm={12} lg={12} m={1}>
                                 <Typography
                                   variant="h4"
