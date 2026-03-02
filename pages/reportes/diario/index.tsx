@@ -393,6 +393,73 @@ function DayReport() {
                         </TableRow>
                         <TableRow>
                           <TableCell align="center" style={salesPaymentStyle}>
+                            <Typography 
+                              variant="body1"
+                              fontWeight="bold"
+                              color="text.primary"
+                              gutterBottom
+                              noWrap
+                            >
+                              Ventas Realizadas
+                            </Typography>
+                          </TableCell>
+                          <TableCell align="center" style={cellStyle}>
+                            <Typography
+                              variant="body1"
+                              color="text.primary"
+                              gutterBottom
+                              noWrap
+                            >
+                              {reportData?.sales?.dayTotal}
+                            </Typography>
+                          </TableCell>
+                          <TableCell align="center" style={cellStyle}>
+                            <Typography
+                              variant="body1"
+                              color="text.primary"
+                              gutterBottom
+                              noWrap
+                            >
+                              {reportData?.sales?.monthTotal}
+                            </Typography>
+                          </TableCell>
+                        </TableRow>
+
+                        <TableRow>
+                          <TableCell align="center" style={externalPaymentStyle}>
+                            <Typography 
+                              variant="body1"
+                              fontWeight="bold"
+                              color="text.primary"
+                              gutterBottom
+                              noWrap
+                            >
+                              Vueltas de Cobranza
+                            </Typography>
+                          </TableCell>
+                          <TableCell align="center" style={cellStyle}>
+                            <Typography
+                              variant="body1"
+                              color="text.primary"
+                              gutterBottom
+                              noWrap
+                            >
+                              {reportData?.collectionVisits?.dayTotal}
+                            </Typography>
+                          </TableCell>
+                          <TableCell align="center" style={cellStyle}>
+                            <Typography
+                              variant="body1"
+                              color="text.primary"
+                              gutterBottom
+                              noWrap
+                            >
+                              {reportData?.collectionVisits?.monthTotal}
+                            </Typography>
+                          </TableCell>
+                        </TableRow>
+                        <TableRow>
+                          <TableCell align="center" style={salesPaymentStyle}>
                             <Typography
                               variant="body1"
                               fontWeight="bold"
