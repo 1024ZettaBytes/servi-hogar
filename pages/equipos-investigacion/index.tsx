@@ -31,7 +31,7 @@ function EquiposInvestigacion({ session }) {
           alignItems="stretch"
           spacing={4}
         >
-          <TablaInvestigaciones userRole={user?.role} />
+          <TablaInvestigaciones userRole={user?.role} isSuperUser={user?.isSuperUser || false} />
         </Grid>
       </Container>
       <Footer />

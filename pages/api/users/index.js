@@ -36,7 +36,8 @@ async function updateUserAPI(req, res) {
 
 async function saveUserAPI(req, res) {
   try {
-    await saveUserData({ ...req.body });
+    const callerUserId = await getUserId(req);
+    await saveUserData({ ...req.body, callerUserId });
     res.status(200).json({ msg: '¡Usuario guardado con éxito!' });
   } catch (e) {
     console.error(e);

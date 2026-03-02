@@ -1,6 +1,7 @@
 import type { ReactElement, ReactNode } from 'react';
 import { useEffect, useRef } from 'react';
 import { SessionProvider, useSession } from 'next-auth/react';
+import { useRouter } from 'next/router';
 import { useUserBlocked } from 'src/contexts/UserBlockedContext';
 import type { NextPage } from 'next';
 import type { AppProps } from 'next/app';
@@ -20,7 +21,10 @@ import { SnackbarProvider, useSnackbar } from 'notistack';
 import ErrorBoundary from '@/components/ErrorBoundary';
 import setupAxiosInterceptors from '../lib/client/axiosConfig';
 import UserBlockedModal from '@/components/UserBlockedModal';
+import TechToolConfirmationModal from '@/components/TechToolConfirmationModal';
+import AuxToolPendingModal from '@/components/AuxToolPendingModal';
 import { useCheckAdminOverdue } from 'src/hooks/useCheckAdminOverdue';
+import { useGetTechToolStatus, useGetAuxPendingTools, getFetcher } from './api/useRequest';
 
 // Setup axios interceptors once
 setupAxiosInterceptors();
@@ -188,10 +192,39 @@ ${errorInfo.stack.substring(0, 200)}
     };
   }, [enqueueSnackbar]);
 
+  // Check for pending tool confirmation for TEC users
+  const isTecUser = (session?.user as any)?.role === 'TEC';
+  const { techToolStatus } = useGetTechToolStatus(
+    getFetcher,
+    isTecUser
+  );
+  const showToolConfirmation = isTecUser && techToolStatus?.type;
+
+  // Check for pending tool actions for AUX users
+  const router = useRouter();
+  const isAuxUser = (session?.user as any)?.role === 'AUX';
+  const { auxPendingData } = useGetAuxPendingTools(getFetcher, isAuxUser);
+  const auxHasPending = isAuxUser && auxPendingData?.pending?.length > 0;
+  const isOnHerramientas = router.pathname === '/herramientas';
+  const showAuxPendingModal = auxHasPending && !isOnHerramientas;
+
   return (
     <>
       {children}
       <UserBlockedModal open={isBlockedModalOpen} />
+      {showToolConfirmation && (
+        <TechToolConfirmationModal
+          open={true}
+          statusType={techToolStatus.type}
+          assignment={techToolStatus.assignment}
+        />
+      )}
+      {showAuxPendingModal && (
+        <AuxToolPendingModal
+          open={true}
+          pending={auxPendingData.pending}
+        />
+      )}
     </>
   );
 }
@@ -205,7 +238,7 @@ function TokyoApp(props: TokyoAppProps) {
   Router.events.on('routeChangeComplete', nProgress.done);
 
   return (
-    <SessionProvider session={pageProps['session']}>
+    <SessionProvider session={pageProps['session']} refetchInterval={30}>
       <CacheProvider value={emotionCache}>
         <Head>
           <title>Servi Hogar: Soluciones a tu medida</title>
