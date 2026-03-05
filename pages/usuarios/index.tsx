@@ -113,6 +113,9 @@ function Usuarios({}) {
           open={addModalIsOpen}
           handleOnClose={handleClose}
           rolesList={rolesList}
+          tecList={userList?.filter(
+            (u) => u.role?.id === "TEC" && u.isActive
+          ) || []}
         />
       ) : null}
       <Footer />

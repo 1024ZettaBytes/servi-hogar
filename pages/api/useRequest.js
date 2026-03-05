@@ -601,3 +601,40 @@ export const useGetCollectedMachines = (fetcher) => {
     isLoadingCollectedMachines: isLoading
   };
 };
+
+export const useGetTechnicianTools = (fetcher) => {
+  const { data, error, isLoading } = useSWR(
+    ROUTES.ALL_TECHNICIAN_TOOLS,
+    fetcher
+  );
+  return {
+    toolsData: data?.data,
+    toolsError: error,
+    isLoadingTools: isLoading
+  };
+};
+
+export const useGetTechToolStatus = (fetcher, shouldFetch = true) => {
+  const { data, error, isLoading } = useSWR(
+    shouldFetch ? ROUTES.TECHNICIAN_TOOLS_CONFIRM : null,
+    fetcher
+  );
+  return {
+    techToolStatus: data?.data,
+    techToolStatusError: error,
+    isLoadingTechToolStatus: isLoading
+  };
+};
+
+export const useGetAuxPendingTools = (fetcher, shouldFetch = true) => {
+  const { data, error, isLoading } = useSWR(
+    shouldFetch ? ROUTES.TECHNICIAN_TOOLS_AUX_PENDING : null,
+    fetcher,
+    { refreshInterval: 30000 }
+  );
+  return {
+    auxPendingData: data?.data,
+    auxPendingError: error,
+    isLoadingAuxPending: isLoading
+  };
+};

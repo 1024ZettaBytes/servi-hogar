@@ -11,6 +11,7 @@ export interface IUser extends Document {
   endM: number;
   tecPay: number;
   auxActionTimestamps?: Date[];
+  toolsVerificationPending: boolean;
 }
 
 const UserSchema = new Schema<IUser>({
@@ -54,6 +55,10 @@ const UserSchema = new Schema<IUser>({
   auxActionTimestamps: {
     type: [Date],
     default: []
+  },
+  toolsVerificationPending: {
+    type: Boolean,
+    default: false
   }
 });
 UserSchema.methods.encryptPassword = async (psw) => {

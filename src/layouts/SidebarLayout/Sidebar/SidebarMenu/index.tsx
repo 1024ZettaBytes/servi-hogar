@@ -783,6 +783,22 @@ function SidebarMenu({ userRole }) {
                     </ListItem>
 
                     <ListItem component="div">
+                      <NextLink href="/herramientas" passHref>
+                        <Button
+                          className={
+                            currentRoute === '/herramientas' ? 'active' : ''
+                          }
+                          disableRipple
+                          component="a"
+                          onClick={closeSidebar}
+                          startIcon={<BuildIcon />}
+                        >
+                          Herramientas
+                        </Button>
+                      </NextLink>
+                    </ListItem>
+
+                    <ListItem component="div">
                       <NextLink
                         href={
                           userRole === 'SUB' ? '/reportes/semanal' : '/reportes'

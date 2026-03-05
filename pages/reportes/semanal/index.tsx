@@ -206,6 +206,22 @@ function DayReport({ session }) {
                       )}
                     </Grid>
                     <Grid item lg={6}>
+                      <RegistersReportTable
+                        header="VENTAS"
+                        colorStyle={paymentStyle}
+                        totalData={reportData?.sales?.totalData}
+                        list={reportData?.sales?.days}
+                      />
+                    </Grid>
+                    <Grid item lg={6}>
+                      <ActivityReportTable
+                        header="VUELTAS DE COBRANZA"
+                        colorStyle={extraTripStyle}
+                        totalData={reportData?.collectionVisits?.totalData}
+                        list={reportData?.collectionVisits?.days}
+                      />
+                    </Grid>
+                    <Grid item lg={6}>
                       {!onlyChanges && (
                         <RegistersReportTable
                           header="DEPOSITOS"

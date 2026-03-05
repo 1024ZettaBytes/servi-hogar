@@ -16,26 +16,35 @@ import {
   FormControl,
   MenuItem,
   Alert,
+  FormControlLabel,
+  Checkbox,
 } from "@mui/material";
 import { LoadingButton } from "@mui/lab";
 import { saveUser } from "../../../lib/client/usersFetch";
 function AddUserModal(props) {
-  const { handleOnClose, open, rolesList } = props;
+  const { handleOnClose, open, rolesList, tecList = [] } = props;
   const [isLoading, setIsLoading] = useState(false);
   const [hasError, setHasError] = useState({ error: false, msg: "" });
-  const [selectedRole, setSelectedRole] = useState<string>(null );
+  const [selectedRole, setSelectedRole] = useState<string>(null);
+  const [isReplacement, setIsReplacement] = useState(false);
+  const [replacedTecId, setReplacedTecId] = useState<string>(null);
 
+  const isTecRole = selectedRole === "TEC";
 
   async function submitHandler(event) {
     event.preventDefault();
     setIsLoading(true);
     setHasError({ error: false, msg: "" });
-    const result = await saveUser({
+    const userData: any = {
       id: event.target.id.value,
       name: event.target.name.value,
       password: event.target.password.value,
       role: selectedRole,
-    });
+    };
+    if (isTecRole && isReplacement && replacedTecId) {
+      userData.replacedTechnicianId = replacedTecId;
+    }
+    const result = await saveUser(userData);
     setIsLoading(false);
     if (!result.error) {
       handleSavedCustomer(result.msg);
@@ -173,6 +182,62 @@ function AddUserModal(props) {
                   </Select>
                 </FormControl>
               </Grid>
+              {isTecRole && (
+                <>
+                  <Grid item lg={12}>
+                    <FormControlLabel
+                      control={
+                        <Checkbox
+                          checked={isReplacement}
+                          onChange={(e) => {
+                            setIsReplacement(e.target.checked);
+                            if (!e.target.checked) setReplacedTecId(null);
+                          }}
+                        />
+                      }
+                      label="¿Reemplaza a otro técnico?"
+                    />
+                  </Grid>
+                  {isReplacement && (
+                    <Grid item lg={12}>
+                      <FormControl fullWidth>
+                        <InputLabel id="replace-tec-label">
+                          Técnico a reemplazar
+                        </InputLabel>
+                        <Select
+                          labelId="replace-tec-label"
+                          id="replaceTec"
+                          name="replaceTec"
+                          label="Técnico a reemplazar"
+                          required
+                          value={replacedTecId || ""}
+                          onChange={(event) =>
+                            setReplacedTecId(event.target.value)
+                          }
+                        >
+                          {tecList.map((tec) => (
+                            <MenuItem key={tec._id} value={tec._id}>
+                              {tec.name}
+                            </MenuItem>
+                          ))}
+                        </Select>
+                      </FormControl>
+                      {isReplacement && replacedTecId && (
+                        <Alert severity="info" sx={{ mt: 1 }}>
+                          Las herramientas del técnico seleccionado se asignarán
+                          automáticamente al nuevo técnico. Quedará pendiente la
+                          verificación con foto por parte de los auxiliares.
+                          <strong>
+                            {" "}
+                            Todos los auxiliares serán bloqueados hasta que se
+                            realice la verificación.
+                          </strong>
+                        </Alert>
+                      )}
+                    </Grid>
+                  )}
+                </>
+              )}
               <Grid item lg={12}>
                 {hasError.error ? (
                   <Grid item>
@@ -223,6 +288,7 @@ AddUserModal.propTypes = {
   handleOnClose: PropTypes.func.isRequired,
   open: PropTypes.bool.isRequired,
   rolesList: PropTypes.array.isRequired,
+  tecList: PropTypes.array,
 };
 
 export default AddUserModal;

@@ -370,4 +370,19 @@ export const formatReceiptNumber = (number: number, totalLength: number = 6): st
   return `SH-${number.toString().padStart(totalLength, '0')}`;
 }
 
+export const getWeeksFromPayment = (payment) => {
+  if (typeof payment?.weeksToPay === 'number' && payment.weeksToPay > 0) {
+    return payment.weeksToPay;
+  }
+
+  const desc = payment?.description?.toLowerCase() || '';
+
+  if (desc.includes('semana')) {
+    const match = desc.match(/\d+/);
+    return match ? parseInt(match[0], 10) : null;
+  }
+
+  return null;
+};
+
 export default useDeviceType;

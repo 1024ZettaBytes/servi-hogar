@@ -4,6 +4,7 @@ import { Role } from "../../../lib/models/Role";
 import { User } from "../../../lib/models/User";
 import { connectToDatabase, isConnected } from "../../../lib/db";
 import { SUPER_USERS } from "./authUtils";
+import { technicianHasTools } from "../../../lib/data/TechnicianTools";
 
 Role.init();
 export default NextAuth({
@@ -67,6 +68,13 @@ export default NextAuth({
         const isValid = await user.matchPassword(credentials.password);
         if (!isValid) {
           throw new Error("Usuario y/o contraseña incorrectos");
+        }
+        // Check if TEC user has tools assigned
+        if (user?.role?.id === 'TEC') {
+          const hasTools = await technicianHasTools(user._id);
+          if (!hasTools) {
+            throw new Error("No puedes iniciar sesión hasta que se te asignen herramientas. Contacta a Oficina.");
+          }
         }
         return { id: user._id, name:user.name, role: user?.role?.id};
       },

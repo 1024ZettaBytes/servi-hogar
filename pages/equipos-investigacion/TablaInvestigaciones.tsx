@@ -25,10 +25,13 @@ import { getFetcher, useGetInvestigations } from 'pages/api/useRequest';
 import ResolveInvestigationModal from '../../src/components/ResolveInvestigationModal';
 import { ROUTES } from 'lib/consts/API_URL_CONST';
 import { mutate } from 'swr';
-import { Button } from '@mui/material';
+import { Button, Dialog, DialogTitle, DialogContent, DialogContentText, DialogActions } from '@mui/material';
+import { useSnackbar } from 'notistack';
+import { markMachineLostReq } from 'lib/client/pickupsFetch';
 
 interface TablaInvestigacionesProps {
   userRole: string;
+  isSuperUser?: boolean;
   className?: string;
 }
 
@@ -52,7 +55,7 @@ const getInvestigationTimeColor = (date: string | Date) => {
   return diffInHours >= 24 ? 'error.main' : 'warning.main';
 };
 
-const TablaInvestigaciones: FC<TablaInvestigacionesProps> = ({ userRole }) => {
+const TablaInvestigaciones: FC<TablaInvestigacionesProps> = ({ userRole, isSuperUser }) => {
   const [page, setPage] = useState(0);
   const [limit, setLimit] = useState(30);
   const [searchTerm, setSearchTerm] = useState(null);
@@ -60,6 +63,10 @@ const TablaInvestigaciones: FC<TablaInvestigacionesProps> = ({ userRole }) => {
 
   const [isResolveModalOpen, setIsResolveModalOpen] = useState(false);
   const [selectedPickup, setSelectedPickup] = useState(null);
+  const [isLostDialogOpen, setIsLostDialogOpen] = useState(false);
+  const [lostPickup, setLostPickup] = useState(null);
+  const [isLostLoading, setIsLostLoading] = useState(false);
+  const { enqueueSnackbar } = useSnackbar();
 
   const handleResolveConfirm = () => {
     mutate(
@@ -67,6 +74,38 @@ const TablaInvestigaciones: FC<TablaInvestigacionesProps> = ({ userRole }) => {
       undefined,
       { revalidate: true }
     );
+  };
+
+  const handleMarkLost = async () => {
+    if (!lostPickup) return;
+    setIsLostLoading(true);
+    try {
+      const result = await markMachineLostReq(lostPickup._id);
+      if (!result.error) {
+        enqueueSnackbar(result.msg, {
+          variant: 'success',
+          anchorOrigin: { vertical: 'top', horizontal: 'center' },
+          autoHideDuration: 2000
+        });
+        handleResolveConfirm();
+      } else {
+        enqueueSnackbar(result.msg, {
+          variant: 'error',
+          anchorOrigin: { vertical: 'top', horizontal: 'center' },
+          autoHideDuration: 3000
+        });
+      }
+    } catch (e: any) {
+      enqueueSnackbar(e.message || 'Error inesperado', {
+        variant: 'error',
+        anchorOrigin: { vertical: 'top', horizontal: 'center' },
+        autoHideDuration: 3000
+      });
+    } finally {
+      setIsLostLoading(false);
+      setIsLostDialogOpen(false);
+      setLostPickup(null);
+    }
   };
 
   const { investigations, investigationsError } = useGetInvestigations(
@@ -209,17 +248,32 @@ const TablaInvestigaciones: FC<TablaInvestigacionesProps> = ({ userRole }) => {
                         </Typography>
                       </TableCell>
                       <TableCell align="center">
-                        <Button
-                          variant="contained"
-                          color="primary"
-                          size="small"
-                          onClick={() => {
-                            setSelectedPickup(pickup);
-                            setIsResolveModalOpen(true);
-                          }}
-                        >
-                          Resolver
-                        </Button>
+                        <Box sx={{ display: 'flex', gap: 1, justifyContent: 'center' }}>
+                          <Button
+                            variant="contained"
+                            color="primary"
+                            size="small"
+                            onClick={() => {
+                              setSelectedPickup(pickup);
+                              setIsResolveModalOpen(true);
+                            }}
+                          >
+                            Resolver
+                          </Button>
+                          {isSuperUser && (
+                            <Button
+                              variant="contained"
+                              color="error"
+                              size="small"
+                              onClick={() => {
+                                setLostPickup(pickup);
+                                setIsLostDialogOpen(true);
+                              }}
+                            >
+                              No encontrado
+                            </Button>
+                          )}
+                        </Box>
                       </TableCell>
                     </TableRow>
                   );
@@ -250,6 +304,43 @@ const TablaInvestigaciones: FC<TablaInvestigacionesProps> = ({ userRole }) => {
               userRole={userRole}
             />
           )}
+          <Dialog
+            open={isLostDialogOpen}
+            onClose={() => {
+              if (!isLostLoading) {
+                setIsLostDialogOpen(false);
+                setLostPickup(null);
+              }
+            }}
+          >
+            <DialogTitle>Marcar equipo como perdido</DialogTitle>
+            <DialogContent>
+              <DialogContentText>
+                ¿Estás seguro de que deseas marcar el equipo{' '}
+                <b>#{lostPickup?.machine?.machineNum || 'N/A'}</b> como{' '}
+                <b>perdido</b>? Esta acción cambiará su estado a PERDIDA.
+              </DialogContentText>
+            </DialogContent>
+            <DialogActions>
+              <Button
+                onClick={() => {
+                  setIsLostDialogOpen(false);
+                  setLostPickup(null);
+                }}
+                disabled={isLostLoading}
+              >
+                Cancelar
+              </Button>
+              <Button
+                variant="contained"
+                color="error"
+                onClick={handleMarkLost}
+                disabled={isLostLoading}
+              >
+                {isLostLoading ? 'Procesando...' : 'Confirmar'}
+              </Button>
+            </DialogActions>
+          </Dialog>
         </Card>
       )}
     </Grid>
