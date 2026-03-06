@@ -39,7 +39,7 @@ interface TablaPendingSalesProps {
   salesList: any[];
   onUpdate: () => void;
   onAssignClick: (sale: any) => void;
-  onWhatsAppClick?: (sale: any) => void;
+  onWhatsAppClick?: (sale: any, type: string) => void;
 }
 
 const compareStringsForFilter = (keyWord: string, field: string) => {
@@ -339,7 +339,7 @@ const TablaPendingSales: FC<TablaPendingSalesProps> = ({
                             }}
                             color="inherit"
                             size="small"
-                            onClick={() => onWhatsAppClick(sale)}
+                            onClick={() => onWhatsAppClick(sale, 'delivery') }
                           >
                             <WhatsAppIcon fontSize="small" />
                           </IconButton>

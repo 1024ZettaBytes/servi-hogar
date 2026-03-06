@@ -135,9 +135,9 @@ function Ventas({ session }) {
     }
   };
 
-  const handleWhatsAppClick = (sale) => {
+  const handleWhatsAppClick = (sale, type = 'sale') => {
     setSelectedSale(sale);
-    setFormatText(getFormatForSale(sale));
+    setFormatText(getFormatForSale(sale, type));
     setFormatIsOpen(true);
   };
 
@@ -241,6 +241,7 @@ function Ventas({ session }) {
                         <TablaRecoleccionesVentasPendientes
                           userRole={session.user.role}
                           pickupList={pendingPickupsList}
+                          onWhatsAppClick={handleWhatsAppClick}
                         />
                       </Card>
                     </Grid>
@@ -254,6 +255,7 @@ function Ventas({ session }) {
                         salesList={salesList}
                         onUpdate={mutateSales}
                         onPaymentClick={handlePaymentClick}
+                        onWhatsAppClick={handleWhatsAppClick}
                       />
                     </Card>
                   </Grid>

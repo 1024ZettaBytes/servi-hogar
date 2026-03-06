@@ -11,13 +11,17 @@ import {
   Chip,
   IconButton,
   Tooltip,
-  Box
+  Box,
+  useTheme
 } from '@mui/material';
 import { format } from 'date-fns';
 import es from 'date-fns/locale/es';
 import Label from '@/components/Label';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import PersonAddAlt1Icon from '@mui/icons-material/PersonAddAlt1';
+import ImageSearchIcon from '@mui/icons-material/ImageSearch';
+import ImagesModal from '@/components/ImagesModal';
+import WhatsAppIcon from '@mui/icons-material/WhatsApp';
 import { useSnackbar } from 'notistack';
 import { completeSalePickup, assignSalePickup } from '../../lib/client/salePickupsFetch';
 import GenericModal from '@/components/GenericModal';
@@ -26,6 +30,7 @@ import AssignPickupOperatorModal from '@/components/AssignPickupOperatorModal';
 interface TablaRecoleccionesVentasPendientesProps {
   userRole: string;
   pickupList: any[];
+  onWhatsAppClick?: (sale: any, type: string) => void;
 }
 
 const statusMap = {
@@ -40,11 +45,15 @@ const getStatusLabel = (status: string): JSX.Element => {
 
 const TablaRecoleccionesVentasPendientes: FC<TablaRecoleccionesVentasPendientesProps> = ({
   userRole,
-  pickupList
+  pickupList,
+  onWhatsAppClick
 }) => {
+  const theme = useTheme();
   const { enqueueSnackbar } = useSnackbar();
   const [completeModalOpen, setCompleteModalOpen] = useState(false);
   const [operatorModalOpen, setOperatorModalOpen] = useState(false);
+  const [openImages, setOpenImages] = useState<boolean>(false);
+  const [selectedImages, setSelectedImages] = useState<any>(null);
   const [selectedPickup, setSelectedPickup] = useState<any>(null);
   const [isCompleting, setIsCompleting] = useState(false);
   const [isAssigning, setIsAssigning] = useState(false);
@@ -57,6 +66,11 @@ const TablaRecoleccionesVentasPendientes: FC<TablaRecoleccionesVentasPendientesP
   const handleCompleteClick = (pickup: any) => {
     setSelectedPickup(pickup);
     setCompleteModalOpen(true);
+  };
+
+  const handleOnCloseImages = () => {
+    setOpenImages(false);
+    setSelectedImages(null);
   };
 
   const handleOperatorClose = async (saved: boolean, operatorId: string = null) => {
@@ -140,6 +154,7 @@ const TablaRecoleccionesVentasPendientes: FC<TablaRecoleccionesVentasPendientesP
               <TableCell>Dirección</TableCell>
               <TableCell>Operador asignado</TableCell>
               <TableCell align="center">Estado</TableCell>
+              <TableCell align="center">Fotos</TableCell>
               <TableCell align="center">Acciones</TableCell>
             </TableRow>
           </TableHead>
@@ -211,6 +226,32 @@ const TablaRecoleccionesVentasPendientes: FC<TablaRecoleccionesVentasPendientesP
                     {getStatusLabel(pickup.status)}
                   </TableCell>
                   <TableCell align="center">
+                    {pickup.sale?.delivery?.imagesUrl ? (
+                      <Tooltip title="Ver fotos" arrow>
+                        <IconButton
+                          onClick={() => {
+                            const { _id, ...images } = pickup.sale.delivery.imagesUrl;
+                            setSelectedImages(images);
+                            setOpenImages(true);
+                          }}
+                          sx={{
+                            '&:hover': {
+                              background: theme.colors.primary.lighter
+                            },
+                            color: theme.palette.primary.main
+                          }}
+                          size="small"
+                        >
+                          <ImageSearchIcon fontSize="small" />
+                        </IconButton>
+                      </Tooltip>
+                    ) : (
+                      <Typography variant="body2" color="text.secondary">
+                        N/A
+                      </Typography>
+                    )}
+                  </TableCell>
+                  <TableCell align="center">
                     <Box sx={{ display: 'flex', gap: 0.5, justifyContent: 'center' }}>
                       {pickup.status === 'ESPERA' && (userRole === 'ADMIN' || userRole === 'AUX') && (
                         <Tooltip title="Asignar operador">
@@ -236,6 +277,22 @@ const TablaRecoleccionesVentasPendientes: FC<TablaRecoleccionesVentasPendientesP
                           </IconButton>
                         </Tooltip>
                       )}
+                      {onWhatsAppClick && (
+                      <Tooltip title="Ver formato WhatsApp">
+                        <IconButton
+                          size="small"
+                          sx={{
+                            '&:hover': {
+                              background: '#e8f5e9'
+                            },
+                            color: '#25D366'
+                          }}
+                          onClick={() => onWhatsAppClick(pickup.sale, 'pickup')}
+                        >
+                          <WhatsAppIcon fontSize="small" />
+                        </IconButton>
+                      </Tooltip>
+                    )}
                     </Box>
                   </TableCell>
                 </TableRow>
@@ -251,6 +308,16 @@ const TablaRecoleccionesVentasPendientes: FC<TablaRecoleccionesVentasPendientesP
           handleOnClose={handleOperatorClose}
           pickup={selectedPickup}
           isAssigning={isAssigning}
+        />
+      )}
+
+      {openImages && selectedImages && (
+        <ImagesModal
+          open={openImages}
+          imagesObj={selectedImages}
+          title="Fotos de la entrega"
+          text=""
+          onClose={handleOnCloseImages}
         />
       )}
 
