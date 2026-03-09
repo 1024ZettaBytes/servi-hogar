@@ -8,6 +8,7 @@ import PageTitleWrapper from '@/components/PageTitleWrapper';
 import { Container, Grid } from '@mui/material';
 import Footer from '@/components/Footer';
 import TablaRecolectadas from './TablaRecolectadas';
+import TablaRecolectadasVentas from './TablaRecolectadasVentas';
 import NextBreadcrumbs from '@/components/Shared/BreadCrums';
 
 function RecolectadasPage({ session }) {
@@ -33,6 +34,9 @@ function RecolectadasPage({ session }) {
         >
             <Grid item xs={12}>
                 <TablaRecolectadas userRole={user?.role} />
+            </Grid>
+            <Grid item xs={12}>
+                <TablaRecolectadasVentas userRole={user?.role} />
             </Grid>
         </Grid>
       </Container>

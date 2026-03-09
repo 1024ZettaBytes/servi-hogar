@@ -238,7 +238,7 @@ const TablaVueltasOperador: FC<TablaVueltasOperadorProps> = ({
 
   const paginatedTasks = applyPagination(tasksList, page, limit);
 
-  const getTypeColor = (type: string) => {
+  const getTypeColor = (type: string, isCancellation?: boolean) => {
     switch (type) {
       case 'ENTREGA':
         return 'primary';
@@ -249,7 +249,7 @@ const TablaVueltasOperador: FC<TablaVueltasOperadorProps> = ({
       case 'COBRANZA':
         return 'info';
       case 'RECOLECCION_VENTA':
-        return 'error';
+        return isCancellation ? 'warning' : 'error';
       case 'VUELTA_EXTRA':
         return 'secondary';
       default:
@@ -320,7 +320,9 @@ const TablaVueltasOperador: FC<TablaVueltasOperadorProps> = ({
               const isExtraTrip = task.type === 'VUELTA_EXTRA';
               const typeLabel =
                 task.type === 'RECOLECCION_VENTA'
-                  ? 'RECOLECCIÓN GARANTÍA'
+                  ? task.isCancellation
+                    ? 'RECOLECCIÓN CANCELACIÓN'
+                    : 'RECOLECCIÓN GARANTÍA'
                   : task.type === 'VUELTA_EXTRA'
                   ? 'VUELTA EXTRA'
                   : task.type;
@@ -374,7 +376,7 @@ const TablaVueltasOperador: FC<TablaVueltasOperadorProps> = ({
                     <Box display="flex" alignItems="center" gap={1}>
                       <Chip
                         label={typeLabel}
-                        color={getTypeColor(task.type)}
+                        color={getTypeColor(task.type, task.isCancellation)}
                         size="small"
                       />
                       {isPriority && (

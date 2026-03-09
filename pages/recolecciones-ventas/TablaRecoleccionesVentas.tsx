@@ -128,7 +128,7 @@ const TablaRecoleccionesVentas: FC<TablaRecoleccionesVentasProps> = ({
     if (!pendingPickups || pendingPickups.length === 0) {
       return (
         <TableRow>
-          <TableCell colSpan={8} align="center">
+          <TableCell colSpan={9} align="center">
             <Typography variant="subtitle1" color="text.secondary">
               No hay recolecciones pendientes
             </Typography>
@@ -147,6 +147,13 @@ const TablaRecoleccionesVentas: FC<TablaRecoleccionesVentasProps> = ({
             <Typography variant="body2" fontWeight="bold">
               #{pickup.totalNumber}
             </Typography>
+          </TableCell>
+          <TableCell>
+            <Chip
+              label={pickup.isCancellation ? 'Cancelación' : 'Garantía'}
+              size="small"
+              color={pickup.isCancellation ? 'error' : 'warning'}
+            />
           </TableCell>
           <TableCell>
             <Typography variant="body2">
@@ -195,28 +202,28 @@ const TablaRecoleccionesVentas: FC<TablaRecoleccionesVentasProps> = ({
           <TableCell align="center">
             <Box sx={{ display: 'flex', gap: 0.5 }}>
               {pickup.status === 'ESPERA' && userRole !== 'OPE' && (
-                <>
-                  <Tooltip title="Asignar operador">
-                    <IconButton
-                      size="small"
-                      color="primary"
-                      onClick={() => handleAssignOperator(pickup)}
-                      disabled={isAssigning}
-                    >
-                      <PersonAddAlt1Icon fontSize="small" />
-                    </IconButton>
-                  </Tooltip>
-                  <Tooltip title="Cancelar">
-                    <IconButton
-                      size="small"
-                      color="error"
-                      onClick={() => handleCancelPickup(pickup)}
-                      disabled={isCancelling}
-                    >
-                      <CancelIcon fontSize="small" />
-                    </IconButton>
-                  </Tooltip>
-                </>
+                <Tooltip title="Asignar operador">
+                  <IconButton
+                    size="small"
+                    color="primary"
+                    onClick={() => handleAssignOperator(pickup)}
+                    disabled={isAssigning}
+                  >
+                    <PersonAddAlt1Icon fontSize="small" />
+                  </IconButton>
+                </Tooltip>
+              )}
+              {['ESPERA', 'ASIGNADA'].includes(pickup.status) && userRole !== 'OPE' && (
+                <Tooltip title="Cancelar">
+                  <IconButton
+                    size="small"
+                    color="error"
+                    onClick={() => handleCancelPickup(pickup)}
+                    disabled={isCancelling}
+                  >
+                    <CancelIcon fontSize="small" />
+                  </IconButton>
+                </Tooltip>
               )}
             </Box>
           </TableCell>
@@ -229,7 +236,7 @@ const TablaRecoleccionesVentas: FC<TablaRecoleccionesVentasProps> = ({
     if (!pastPickups?.list || pastPickups.list.length === 0) {
       return (
         <TableRow>
-          <TableCell colSpan={8} align="center">
+          <TableCell colSpan={9} align="center">
             <Typography variant="subtitle1" color="text.secondary">
               No hay historial de recolecciones
             </Typography>
@@ -248,6 +255,13 @@ const TablaRecoleccionesVentas: FC<TablaRecoleccionesVentasProps> = ({
             <Typography variant="body2" fontWeight="bold">
               #{pickup.totalNumber}
             </Typography>
+          </TableCell>
+          <TableCell>
+            <Chip
+              label={pickup.isCancellation ? 'Cancelación' : 'Garantía'}
+              size="small"
+              color={pickup.isCancellation ? 'error' : 'warning'}
+            />
           </TableCell>
           <TableCell>
             <Typography variant="body2">
@@ -301,8 +315,8 @@ const TablaRecoleccionesVentas: FC<TablaRecoleccionesVentasProps> = ({
   return (
     <Card>
       <CardHeader
-        title="Recolecciones de Garantía"
-        subheader="Gestión de recolecciones de equipos vendidos con fallas"
+        title="Recolecciones de Ventas"
+        subheader="Gestión de recolecciones de equipos vendidos"
       />
       
       <Tabs
@@ -324,6 +338,7 @@ const TablaRecoleccionesVentas: FC<TablaRecoleccionesVentasProps> = ({
           <TableHead>
             <TableRow>
               <TableCell>No.</TableCell>
+              <TableCell>Tipo</TableCell>
               <TableCell>Fecha</TableCell>
               <TableCell>Cliente</TableCell>
               <TableCell>Máquina</TableCell>

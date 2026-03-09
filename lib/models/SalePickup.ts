@@ -6,6 +6,7 @@ export interface ISalePickup extends Document {
   sale: Schema.Types.ObjectId;
   machine: Schema.Types.ObjectId;
   status: string; // ESPERA, ASIGNADA, COMPLETADA, CANCELADA
+  isCancellation: boolean;
   reason: string;
   takenAt: Date;
   takenBy: Schema.Types.ObjectId;
@@ -47,6 +48,7 @@ const SalePickupSchema = new Schema<ISalePickup>({
     enum: ['ESPERA', 'ASIGNADA', 'COMPLETADA', 'CANCELADA'],
     default: 'ESPERA'
   },
+  isCancellation: { type: Boolean, default: false },
   reason: { type: String, required: true },
   takenAt: { type: Date, default: null },
   takenBy: {

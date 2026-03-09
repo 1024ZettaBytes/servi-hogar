@@ -27,7 +27,7 @@ import Paper from '@mui/material/Paper';
 import { getFetcher, useGetSalePickupById } from '../api/useRequest';
 import NextBreadcrumbs from '@/components/Shared/BreadCrums';
 import { LoadingButton } from '@mui/lab';
-import { completeSalePickup } from 'lib/client/salePickupsFetch';
+import { completeSalePickup, completeCancellationPickup } from 'lib/client/salePickupsFetch';
 import { useRouter } from 'next/router';
 import React from 'react';
 import { MuiFileInput } from 'mui-file-input';
@@ -47,7 +47,7 @@ function RecoleccionVentaPendiente({ session }) {
     front: false,
     tag: false
   });
-  
+  const isCancellation = salePickup?.isCancellation === true;
   const paths = ['Inicio', 'Recolecciones ventas pendientes', `${salePickup?.sale?.saleNum}`];
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
   
@@ -81,9 +81,9 @@ function RecoleccionVentaPendiente({ session }) {
     event.preventDefault();
     setHasErrorSubmitting({ error: false, msg: '' });
     setIsSubmitting(true);
-    const result = await completeSalePickup(attached, {
-      pickupId
-    });
+    const result = isCancellation
+      ? await completeCancellationPickup(attached, { pickupId })
+      : await completeSalePickup(attached, { pickupId });
     setIsSubmitting(false);
     if (!result.error) {
       // Update session to get latest user data (including isBlocked status)
@@ -156,10 +156,10 @@ function RecoleccionVentaPendiente({ session }) {
   return (
     <>
       <Head>
-        <title>Completar recolección garantía</title>
+        <title>{isCancellation ? 'Completar recolección cancelación' : 'Completar recolección garantía'}</title>
       </Head>
       <PageTitleWrapper>
-        <PageHeader title={'Completar recolección garantía'} sutitle={''} />
+        <PageHeader title={isCancellation ? 'Completar recolección por cancelación' : 'Completar recolección garantía'} sutitle={''} />
         <NextBreadcrumbs
           paths={paths}
           lastLoaded={!salePickupByIdError && salePickup}
@@ -338,7 +338,9 @@ function RecoleccionVentaPendiente({ session }) {
                   {activeStep === steps.length && (
                     <Paper square elevation={0} sx={{ p: 3 }}>
                       <Alert severity="success">
-                        La recolección fue completada exitosamente. Se ha creado automáticamente un registro de reparación para el técnico.
+                        {isCancellation
+                          ? 'La recolección por cancelación fue completada exitosamente. La venta ha sido cancelada.'
+                          : 'La recolección fue completada exitosamente. Se ha creado automáticamente un registro de reparación para el técnico.'}
                       </Alert>
                       <NextLink href="/vueltas-operador">
                         <Button sx={{ mt: 1, mr: 1 }}>

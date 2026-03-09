@@ -31,11 +31,13 @@ import PaymentIcon from '@mui/icons-material/Payment';
 import ImageSearchIcon from '@mui/icons-material/ImageSearch';
 import BuildCircleIcon from '@mui/icons-material/BuildCircle';
 import WhatsAppIcon from '@mui/icons-material/WhatsApp';
+import CancelIcon from '@mui/icons-material/Cancel';
 import { formatTZDate, setDateToInitial } from 'lib/client/utils';
 import * as str from 'string';
 import { useRouter } from 'next/router';
 import ImagesModal from '@/components/ImagesModal';
 import ScheduleSalePickupModal from '@/components/ScheduleSalePickupModal';
+import CancelActiveSaleModal from '@/components/CancelActiveSaleModal';
 import { useSnackbar } from 'notistack';
 
 interface TablaSalesProps {
@@ -121,6 +123,10 @@ const getStatusLabel = (status: string) => {
     CANCELADA: {
       text: 'Cancelada',
       color: 'error'
+    },
+    EN_CANCELACION: {
+      text: 'En Cancelación',
+      color: 'warning'
     }
   };
 
@@ -150,7 +156,7 @@ const getDaysUntilPayment = (nextPaymentDate: Date | null) => {
   return diffDays;
 };
 
-const TablaVentas: FC<TablaSalesProps> = ({ salesList, onPaymentClick, onWhatsAppClick }) => {
+const TablaVentas: FC<TablaSalesProps> = ({ userRole, salesList, onPaymentClick, onWhatsAppClick }) => {
   const theme = useTheme();
   const router = useRouter();
   const { enqueueSnackbar } = useSnackbar();
@@ -164,6 +170,8 @@ const TablaVentas: FC<TablaSalesProps> = ({ salesList, onPaymentClick, onWhatsAp
   const [saleForCollection, setSaleForCollection] = useState<any>(null);
   const [openPickupModal, setOpenPickupModal] = useState<boolean>(false);
   const [selectedSaleForPickup, setSelectedSaleForPickup] = useState<any>(null);
+  const [openCancelModal, setOpenCancelModal] = useState<boolean>(false);
+  const [selectedSaleForCancel, setSelectedSaleForCancel] = useState<any>(null);
 
   const handleOnCloseImages = () => {
     setOpenImages(false);
@@ -173,6 +181,26 @@ const TablaVentas: FC<TablaSalesProps> = ({ salesList, onPaymentClick, onWhatsAp
   const handlePickupClick = (sale: any) => {
     setSelectedSaleForPickup(sale);
     setOpenPickupModal(true);
+  };
+
+  const handleCancelSaleClick = (sale: any) => {
+    setSelectedSaleForCancel(sale);
+    setOpenCancelModal(true);
+  };
+
+  const handleCloseCancelModal = (saved: boolean, successMessage?: string) => {
+    setOpenCancelModal(false);
+    setSelectedSaleForCancel(null);
+    if (saved && successMessage) {
+      enqueueSnackbar(successMessage, {
+        variant: 'success',
+        anchorOrigin: {
+          vertical: 'top',
+          horizontal: 'center'
+        },
+        autoHideDuration: 2000
+      });
+    }
   };
 
   const handleClosePickupModal = (saved: boolean, successMessage?: string) => {
@@ -408,6 +436,16 @@ const TablaVentas: FC<TablaSalesProps> = ({ salesList, onPaymentClick, onWhatsAp
                           />
                         </Tooltip>
                       )}
+                        {sale.status === "EN_CANCELACION" && (
+                        <Tooltip
+                          title="Recolección de cancelación en proceso"
+                          arrow
+                        >
+                          <InfoOutlinedIcon 
+                            fontSize="small" 
+                          />
+                        </Tooltip>
+                      )}
                     </TableCell>
                     <TableCell align="center">
                       {sale.nextPaymentDate ? (
@@ -625,6 +663,23 @@ const TablaVentas: FC<TablaSalesProps> = ({ salesList, onPaymentClick, onWhatsAp
                             </IconButton>
                           </Tooltip>
                         )}
+                        {sale.status === 'ACTIVA' && (userRole === 'ADMIN' || userRole === 'AUX') && (
+                          <Tooltip title="Cancelar venta" arrow>
+                            <IconButton
+                              sx={{
+                                '&:hover': {
+                                  background: theme.colors.error.lighter
+                                },
+                                color: theme.palette.error.main
+                              }}
+                              color="inherit"
+                              size="small"
+                              onClick={() => handleCancelSaleClick(sale)}
+                            >
+                              <CancelIcon fontSize="small" />
+                            </IconButton>
+                          </Tooltip>
+                        )}
                       </Box>
                     </TableCell>
                   </TableRow>
@@ -675,6 +730,13 @@ const TablaVentas: FC<TablaSalesProps> = ({ salesList, onPaymentClick, onWhatsAp
           open={openPickupModal}
           handleOnClose={handleClosePickupModal}
           preSelectedSale={selectedSaleForPickup}
+        />
+      )}
+      {openCancelModal && selectedSaleForCancel && (
+        <CancelActiveSaleModal
+          open={openCancelModal}
+          handleOnClose={handleCloseCancelModal}
+          sale={selectedSaleForCancel}
         />
       )}
     </>

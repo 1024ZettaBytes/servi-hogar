@@ -20,12 +20,14 @@ import Label from '@/components/Label';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import PersonAddAlt1Icon from '@mui/icons-material/PersonAddAlt1';
 import ImageSearchIcon from '@mui/icons-material/ImageSearch';
+import CancelIcon from '@mui/icons-material/Cancel';
 import ImagesModal from '@/components/ImagesModal';
 import WhatsAppIcon from '@mui/icons-material/WhatsApp';
 import { useSnackbar } from 'notistack';
-import { completeSalePickup, assignSalePickup } from '../../lib/client/salePickupsFetch';
+import { completeSalePickup, assignSalePickup, cancelSalePickup } from '../../lib/client/salePickupsFetch';
 import GenericModal from '@/components/GenericModal';
 import AssignPickupOperatorModal from '@/components/AssignPickupOperatorModal';
+import { useRouter } from 'next/router';
 
 interface TablaRecoleccionesVentasPendientesProps {
   userRole: string;
@@ -50,13 +52,16 @@ const TablaRecoleccionesVentasPendientes: FC<TablaRecoleccionesVentasPendientesP
 }) => {
   const theme = useTheme();
   const { enqueueSnackbar } = useSnackbar();
+  const router = useRouter();
   const [completeModalOpen, setCompleteModalOpen] = useState(false);
   const [operatorModalOpen, setOperatorModalOpen] = useState(false);
+  const [cancelModalOpen, setCancelModalOpen] = useState(false);
   const [openImages, setOpenImages] = useState<boolean>(false);
   const [selectedImages, setSelectedImages] = useState<any>(null);
   const [selectedPickup, setSelectedPickup] = useState<any>(null);
   const [isCompleting, setIsCompleting] = useState(false);
   const [isAssigning, setIsAssigning] = useState(false);
+  const [isCancelling, setIsCancelling] = useState(false);
 
   const handleAssignOperator = (pickup: any) => {
     setSelectedPickup(pickup);
@@ -64,8 +69,41 @@ const TablaRecoleccionesVentasPendientes: FC<TablaRecoleccionesVentasPendientesP
   };
 
   const handleCompleteClick = (pickup: any) => {
+    if (pickup.isCancellation) {
+      router.push(`/recolecciones-ventas-pendientes/${pickup._id}`);
+      return;
+    }
     setSelectedPickup(pickup);
     setCompleteModalOpen(true);
+  };
+
+  const handleCancelPickup = (pickup: any) => {
+    setSelectedPickup(pickup);
+    setCancelModalOpen(true);
+  };
+
+  const handleCancelConfirm = async (reason: string) => {
+    if (selectedPickup) {
+      setIsCancelling(true);
+      const result = await cancelSalePickup(selectedPickup._id, reason);
+      setIsCancelling(false);
+
+      if (!result.error) {
+        enqueueSnackbar(result.msg, {
+          variant: 'success',
+          anchorOrigin: { vertical: 'top', horizontal: 'center' },
+          autoHideDuration: 2000
+        });
+        setCancelModalOpen(false);
+        setSelectedPickup(null);
+      } else {
+        enqueueSnackbar(result.msg, {
+          variant: 'error',
+          anchorOrigin: { vertical: 'top', horizontal: 'center' },
+          autoHideDuration: 3000
+        });
+      }
+    }
   };
 
   const handleOnCloseImages = () => {
@@ -139,7 +177,7 @@ const TablaRecoleccionesVentasPendientes: FC<TablaRecoleccionesVentasPendientesP
   return (
     <>
       <CardHeader
-        title="Recolecciones de Garantía Asignadas"
+        title="Recolecciones de Ventas Asignadas"
         subheader={`${pickupList.length} recolección(es) pendiente(s)`}
       />
       <TableContainer>
@@ -147,6 +185,7 @@ const TablaRecoleccionesVentasPendientes: FC<TablaRecoleccionesVentasPendientesP
           <TableHead>
             <TableRow>
               <TableCell>No.</TableCell>
+              <TableCell>Tipo</TableCell>
               <TableCell>Fecha</TableCell>
               <TableCell>Cliente</TableCell>
               <TableCell>Máquina</TableCell>
@@ -170,6 +209,13 @@ const TablaRecoleccionesVentasPendientes: FC<TablaRecoleccionesVentasPendientesP
                     <Typography variant="body2" fontWeight="bold">
                       #{pickup.totalNumber}
                     </Typography>
+                  </TableCell>
+                  <TableCell>
+                    <Chip
+                      label={pickup.isCancellation ? 'Cancelación' : 'Garantía'}
+                      size="small"
+                      color={pickup.isCancellation ? 'error' : 'warning'}
+                    />
                   </TableCell>
                   <TableCell>
                     <Typography variant="body2">
@@ -277,6 +323,18 @@ const TablaRecoleccionesVentasPendientes: FC<TablaRecoleccionesVentasPendientesP
                           </IconButton>
                         </Tooltip>
                       )}
+                      {['ESPERA', 'ASIGNADA'].includes(pickup.status) && (userRole === 'ADMIN' || userRole === 'AUX') && (
+                        <Tooltip title="Cancelar recolección">
+                          <IconButton
+                            size="small"
+                            color="error"
+                            onClick={() => handleCancelPickup(pickup)}
+                            disabled={isCancelling}
+                          >
+                            <CancelIcon fontSize="small" />
+                          </IconButton>
+                        </Tooltip>
+                      )}
                       {onWhatsAppClick && (
                       <Tooltip title="Ver formato WhatsApp">
                         <IconButton
@@ -331,6 +389,21 @@ const TablaRecoleccionesVentasPendientes: FC<TablaRecoleccionesVentasPendientesP
           onAccept={handleCompleteConfirm}
           onCancel={() => {
             setCompleteModalOpen(false);
+            setSelectedPickup(null);
+          }}
+        />
+      )}
+
+      {cancelModalOpen && selectedPickup && (
+        <GenericModal
+          title="Cancelar Recolección"
+          text={`¿Está seguro que desea cancelar la recolección para ${selectedPickup.sale?.customer?.name}?`}
+          open={cancelModalOpen}
+          requiredReason={true}
+          isLoading={isCancelling}
+          onAccept={handleCancelConfirm}
+          onCancel={() => {
+            setCancelModalOpen(false);
             setSelectedPickup(null);
           }}
         />
