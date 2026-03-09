@@ -30,6 +30,7 @@ import SearchIcon from '@mui/icons-material/Search';
 import PaymentIcon from '@mui/icons-material/Payment';
 import ImageSearchIcon from '@mui/icons-material/ImageSearch';
 import BuildCircleIcon from '@mui/icons-material/BuildCircle';
+import WhatsAppIcon from '@mui/icons-material/WhatsApp';
 import { formatTZDate, setDateToInitial } from 'lib/client/utils';
 import * as str from 'string';
 import { useRouter } from 'next/router';
@@ -43,6 +44,7 @@ interface TablaSalesProps {
   salesList: any[];
   onUpdate: () => void;
   onPaymentClick: (sale: any) => void;
+  onWhatsAppClick?: (sale: any, type: string) => void;
 }
 
 const compareStringsForFilter = (keyWord: string, field: string) => {
@@ -148,7 +150,7 @@ const getDaysUntilPayment = (nextPaymentDate: Date | null) => {
   return diffDays;
 };
 
-const TablaVentas: FC<TablaSalesProps> = ({ salesList, onPaymentClick }) => {
+const TablaVentas: FC<TablaSalesProps> = ({ salesList, onPaymentClick, onWhatsAppClick }) => {
   const theme = useTheme();
   const router = useRouter();
   const { enqueueSnackbar } = useSnackbar();
@@ -605,6 +607,22 @@ const TablaVentas: FC<TablaSalesProps> = ({ salesList, onPaymentClick }) => {
                                 <RequestQuoteIcon fontSize="small" />
                               </IconButton>
                             </span>
+                          </Tooltip>
+                        )}
+                        {onWhatsAppClick && (
+                          <Tooltip title="Ver formato WhatsApp" arrow>
+                            <IconButton
+                              sx={{
+                                '&:hover': {
+                                  background: theme.colors.success.lighter
+                                },
+                                color: theme.colors.success.main
+                              }}
+                              size="small"
+                              onClick={() => onWhatsAppClick(sale, 'sale')}
+                            >
+                              <WhatsAppIcon fontSize="small" />
+                            </IconButton>
                           </Tooltip>
                         )}
                       </Box>
