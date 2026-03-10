@@ -57,7 +57,7 @@ const SaleSchema = new Schema<ISale>({
   isPaid: { type: Boolean, default: false },
   status: {
     type: String,
-    enum: ['ACTIVA', 'PAGADA', 'CANCELADA'],
+    enum: ['ACTIVA', 'PAGADA', 'CANCELADA', 'EN_CANCELACION'],
     default: 'ACTIVA'
   },
   collectionVisits: [

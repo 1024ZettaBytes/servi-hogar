@@ -602,6 +602,18 @@ export const useGetCollectedMachines = (fetcher) => {
   };
 };
 
+export const useGetCollectedSalesMachines = (fetcher) => {
+  const { data, error, isLoading } = useSWR(
+    ROUTES.COLLECTED_SALES_MACHINES_API,
+    fetcher
+  );
+  return {
+    collectedSalesMachines: data?.data,
+    collectedSalesMachinesError: error,
+    isLoadingCollectedSalesMachines: isLoading
+  };
+};
+
 export const useGetTechnicianTools = (fetcher) => {
   const { data, error, isLoading } = useSWR(
     ROUTES.ALL_TECHNICIAN_TOOLS,
