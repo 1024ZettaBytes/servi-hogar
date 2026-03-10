@@ -663,7 +663,7 @@ const TablaVentas: FC<TablaSalesProps> = ({ userRole, salesList, onPaymentClick,
                             </IconButton>
                           </Tooltip>
                         )}
-                        {sale.status === 'ACTIVA' && (userRole === 'ADMIN' || userRole === 'AUX') && (
+                        {sale.status === 'ACTIVA' && (userRole === 'ADMIN') && (
                           <Tooltip title="Cancelar venta" arrow>
                             <IconButton
                               sx={{
