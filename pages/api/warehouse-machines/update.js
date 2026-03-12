@@ -1,4 +1,4 @@
-import { updateSalesMachineData } from '../../../lib/data/SalesMachines';
+import { updateWarehouseMachineData } from '../../../lib/data/WarehouseMachines';
 import { validateUserPermissions, getUserId } from '../auth/authUtils';
 
 export default async function handler(req, res) {
@@ -7,13 +7,13 @@ export default async function handler(req, res) {
     const userId = await getUserId(req);
     if (req.method === 'PUT') {
       try {
-        const result = await updateSalesMachineData({ 
-          ...req.body, 
-          lastUpdatedBy: userId 
+        const result = await updateWarehouseMachineData({
+          ...req.body,
+          lastUpdatedBy: userId
         });
-        return res.status(200).json({ 
-          result, 
-          msg: 'Equipo de venta actualizado exitosamente' 
+        return res.status(200).json({
+          result,
+          msg: 'Máquina de almacén actualizada exitosamente'
         });
       } catch (error) {
         console.error(error);

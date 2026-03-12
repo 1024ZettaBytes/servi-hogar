@@ -312,6 +312,9 @@ const TablaCambiosPendientes: FC<TablaCambiosPendientesProps> = ({
                       >
                         {change?.rent?.machine?.machineNum}
                       </Typography>
+                      {change?.isReplacement && (
+                        <Label color="warning">Reemplazo</Label>
+                      )}
                     </TableCell>
                     <TableCell align="center">
                       <Typography

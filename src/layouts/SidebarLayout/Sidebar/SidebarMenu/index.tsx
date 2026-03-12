@@ -149,9 +149,9 @@ const SubMenuWrapper = styled(Box)(
                 background: ${theme.colors.alpha.trueWhite[100]};
                 opacity: 0;
                 transition: ${theme.transitions.create([
-    'transform',
-    'opacity'
-  ])};
+                  'transform',
+                  'opacity'
+                ])};
                 width: 6px;
                 height: 6px;
                 transform: scale(0);
@@ -279,7 +279,7 @@ function SidebarMenu({ userRole }) {
                     <Button
                       className={
                         !currentRoute.includes('/rentas-') &&
-                          currentRoute.includes('/rentas')
+                        currentRoute.includes('/rentas')
                           ? 'active'
                           : ''
                       }
@@ -538,21 +538,24 @@ function SidebarMenu({ userRole }) {
                       </NextLink>
                     </ListItem>
                     {userRole === 'ADMIN' && (
-                    <ListItem component="div">
-                      <NextLink href="/equipos-investigacion" passHref>
-                        <Button
-                          className={
-                            currentRoute.includes('/equipos-investigacion') ? 'active' : ''
-                          }
-                          disableRipple
-                          component="a"
-                          onClick={closeSidebar}
-                          startIcon={<SearchIcon />}
-                        >
-                          En Investigación
-                        </Button>
-                      </NextLink>
-                    </ListItem>)}
+                      <ListItem component="div">
+                        <NextLink href="/equipos-investigacion" passHref>
+                          <Button
+                            className={
+                              currentRoute.includes('/equipos-investigacion')
+                                ? 'active'
+                                : ''
+                            }
+                            disableRipple
+                            component="a"
+                            onClick={closeSidebar}
+                            startIcon={<SearchIcon />}
+                          >
+                            En Investigación
+                          </Button>
+                        </NextLink>
+                      </ListItem>
+                    )}
                   </List>
                 </SubMenuWrapper>
               </List>
@@ -600,6 +603,23 @@ function SidebarMenu({ userRole }) {
                     </Button>
                   </NextLink>
                 </ListItem>
+                {(userRole === 'ADMIN' || userRole === 'AUX') && (
+                  <ListItem component="div">
+                    <NextLink href="/almacen" passHref>
+                      <Button
+                        className={
+                          currentRoute.includes('/almacen') ? 'active' : ''
+                        }
+                        disableRipple
+                        component="a"
+                        onClick={closeSidebar}
+                        startIcon={<InventoryIcon />}
+                      >
+                        Almacén
+                      </Button>
+                    </NextLink>
+                  </ListItem>
+                )}
               </List>
             </SubMenuWrapper>
           </List>
@@ -716,8 +736,8 @@ function SidebarMenu({ userRole }) {
                         <Button
                           className={
                             currentRoute.includes('/equipos') &&
-                              !currentRoute.includes('/equipos-venta') &&
-                              !currentRoute.includes('/reportes')
+                            !currentRoute.includes('/equipos-venta') &&
+                            !currentRoute.includes('/reportes')
                               ? 'active'
                               : ''
                           }

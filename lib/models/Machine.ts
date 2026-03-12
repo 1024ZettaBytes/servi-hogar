@@ -21,6 +21,8 @@ export interface IMachine extends Document {
   evidencesUrls: [String];
   warranty: Date;
   active: boolean;
+  fromWarehouseMachine: Schema.Types.ObjectId;
+  wasReplaced: boolean;
 }
 
 const MachineSchema = new Schema<IMachine>({
@@ -58,7 +60,13 @@ const MachineSchema = new Schema<IMachine>({
   partner: { type: Schema.Types.ObjectId, default: null, ref: 'partners' },
   evidencesUrls: { type: [String], default: [] },
   warranty: { type: Date, default: null },
-  active: { type: 'boolean', default: true }
+  active: { type: 'boolean', default: true },
+  fromWarehouseMachine: {
+    type: Schema.Types.ObjectId,
+    default: null,
+    ref: 'warehouse_machines'
+  },
+  wasReplaced: { type: Boolean, default: false }
 });
 
 export const Machine: Model<IMachine> =

@@ -650,3 +650,49 @@ export const useGetAuxPendingTools = (fetcher, shouldFetch = true) => {
     isLoadingAuxPending: isLoading
   };
 };
+
+// Warehouse Machines
+export const useGetWarehouseMachines = (fetcher, status = null, fields = null) => {
+  let url = status
+    ? `${ROUTES.ALL_WAREHOUSE_MACHINES_API}?status=${status}`
+    : ROUTES.ALL_WAREHOUSE_MACHINES_API;
+  if (fields) url += `&fields=${fields}`;
+  const { data, error, isLoading } = useSWR(url, fetcher);
+  return {
+    warehouseMachines: data?.data,
+    warehouseMachinesError: error,
+    isLoadingWarehouseMachines: isLoading
+  };
+};
+
+export const useGetWarehouseMachineById = (fetcher, id) => {
+  const { data, error } = useSWR(
+    id ? ROUTES.WAREHOUSE_MACHINE_BY_ID_API.replace(':id', id) : null,
+    fetcher
+  );
+  return { warehouseMachine: data?.data, warehouseMachineError: error };
+};
+
+export const useGetWarehouseSummary = (fetcher) => {
+  const { data, error, isLoading } = useSWR(
+    ROUTES.WAREHOUSE_MACHINES_SUMMARY_API,
+    fetcher
+  );
+  return {
+    warehouseSummary: data?.data,
+    warehouseSummaryError: error,
+    isLoadingWarehouseSummary: isLoading
+  };
+};
+
+export const useGetWarehouseConditioning = (fetcher) => {
+  const { data, error, isLoading } = useSWR(
+    ROUTES.WAREHOUSE_CONDITIONING_API,
+    fetcher
+  );
+  return {
+    conditioningList: data?.data,
+    conditioningError: error,
+    isLoadingConditioning: isLoading
+  };
+};
