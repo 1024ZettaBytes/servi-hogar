@@ -12,7 +12,9 @@ import {
   FormControlLabel,
   Radio,
   Divider,
-  Alert
+  Alert,
+  TextField,
+  MenuItem
 } from '@mui/material';
 import { LoadingButton } from '@mui/lab';
 
@@ -22,8 +24,9 @@ interface BajarEquipoModalProps {
   pickupImages: any;
   isLoading: boolean;
   onClose: () => void;
-  onConfirm: (arrived: boolean) => void;
+  onConfirm: (arrived: boolean, warehouseId?: string) => void;
   userRole: string;
+  warehousesList?: any[];
 }
 
 const BajarEquipoModal: FC<BajarEquipoModalProps> = ({
@@ -33,18 +36,20 @@ const BajarEquipoModal: FC<BajarEquipoModalProps> = ({
   isLoading,
   onClose,
   onConfirm,
-  userRole
+  userRole,
+  warehousesList
 }) => {
   const [arrived, setArrived] = useState<string>('');
   const [hasMissingParts, setHasMissingParts] = useState<string>('');
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
+  const [selectedWarehouse, setSelectedWarehouse] = useState<string>('');
   const allowSaveOnMissingParts = ['ADMIN', 'AUX'].includes(userRole);
   const isReplaced = machine?.wasReplaced === true;
 
   const handleSubmit = () => {
-    // For replaced machines, always send arrived=true (going to almacén)
+    // For replaced machines, always send arrived=true with selected warehouse
     if (isReplaced) {
-      onConfirm(true);
+      onConfirm(true, selectedWarehouse);
       return;
     }
     // All validations passed - call parent handler
@@ -55,6 +60,7 @@ const BajarEquipoModal: FC<BajarEquipoModalProps> = ({
     setArrived('');
     setHasMissingParts('');
     setCurrentImageIndex(0);
+    setSelectedWarehouse('');
     onClose();
   };
 
@@ -81,7 +87,7 @@ const BajarEquipoModal: FC<BajarEquipoModalProps> = ({
     (arrived === 'no' || (arrived === 'yes' && hasMissingParts !== ''));
   const machineArrived = arrived === 'yes';
 
-  const canSave = isReplaced ? true : (optionsWereSelected && (machineArrived
+  const canSave = isReplaced ? !!selectedWarehouse : (optionsWereSelected && (machineArrived
     ? hasMissingParts === 'no' ||
       (hasMissingParts === 'yes' && allowSaveOnMissingParts)
     : userRole === 'ADMIN'));
@@ -97,9 +103,25 @@ const BajarEquipoModal: FC<BajarEquipoModalProps> = ({
                 Equipo reemplazado
               </Typography>
               <Typography variant="body2">
-                Este equipo fue reemplazado por una máquina de almacén. Al confirmar, se ingresará al almacén como equipo de repuesta.
+                Este equipo fue reemplazado por una máquina de almacén. Seleccione la ubicación donde se ingresará.
               </Typography>
             </Alert>
+          )}
+          {/* Warehouse picker for replaced machines */}
+          {isReplaced && (
+            <TextField
+              select
+              fullWidth
+              label="Ubicación (Bodega)"
+              value={selectedWarehouse}
+              onChange={(e) => setSelectedWarehouse(e.target.value)}
+            >
+              {warehousesList?.map((wh) => (
+                <MenuItem key={wh._id} value={wh._id}>
+                  {wh.name}
+                </MenuItem>
+              ))}
+            </TextField>
           )}
           {/* Images Section */}
           {images.length > 0 && (

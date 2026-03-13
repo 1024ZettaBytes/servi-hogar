@@ -16,7 +16,7 @@ import {
   Chip
 } from '@mui/material';
 import DownloadIcon from '@mui/icons-material/Download';
-import { useGetCollectedMachines, getFetcher } from '../api/useRequest';
+import { useGetCollectedMachines, useGetAllWarehousesOverview, getFetcher } from '../api/useRequest';
 import { formatTZDate } from 'lib/client/utils';
 import BajarEquipoModal from '@/components/BajarEquipoModal';
 import { receiveEquipment } from 'lib/client/machinesFetch';
@@ -39,6 +39,7 @@ const TablaRecolectadas: FC<RecolectadasTableProps> = ({ userRole }) => {
   const [isReceiving, setIsReceiving] = useState(false);
 
   const { collectedMachines, isLoadingCollectedMachines } = useGetCollectedMachines(getFetcher);
+  const { warehousesList } = useGetAllWarehousesOverview(getFetcher);
 
   const handlePageChange = (event: any, newPage: number): void => {
     event?.preventDefault();
@@ -59,9 +60,9 @@ const TablaRecolectadas: FC<RecolectadasTableProps> = ({ userRole }) => {
     setSelectedMachine(null);
   };
 
-  const handleConfirmReceive = async (arrived: boolean) => {
+  const handleConfirmReceive = async (arrived: boolean, warehouseId?: string) => {
     setIsReceiving(true);
-    const result = await receiveEquipment(selectedMachine._id, arrived);
+    const result = await receiveEquipment(selectedMachine._id, arrived, warehouseId);
     setIsReceiving(false);
 
     enqueueSnackbar(result.msg, {
@@ -225,6 +226,7 @@ const TablaRecolectadas: FC<RecolectadasTableProps> = ({ userRole }) => {
           onClose={handleCloseModal}
           onConfirm={handleConfirmReceive}
           userRole={userRole}
+          warehousesList={warehousesList}
         />
       )}
     </>

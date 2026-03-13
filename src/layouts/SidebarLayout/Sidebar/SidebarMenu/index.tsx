@@ -376,6 +376,23 @@ function SidebarMenu({ userRole }) {
                       </Button>
                     </NextLink>
                   </ListItem>
+                  <ListItem component="div">
+                    <NextLink href="/almacen/registrar-compra" passHref>
+                      <Button
+                        className={
+                          currentRoute.includes('/almacen/registrar-compra')
+                            ? 'active'
+                            : ''
+                        }
+                        disableRipple
+                        component="a"
+                        onClick={closeSidebar}
+                        startIcon={<ShoppingBagIcon />}
+                      >
+                        Registrar Compra
+                      </Button>
+                    </NextLink>
+                  </ListItem>
                 </List>
               </SubMenuWrapper>
             </List>
