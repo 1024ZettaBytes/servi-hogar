@@ -41,10 +41,15 @@ import {
   WAREHOUSE_MACHINE_STATUS_LABELS
 } from '../../lib/consts/OBJ_CONTS';
 import GenericModal from '@/components/GenericModal';
-import { deleteWarehouseMachine, dismantleWarehouseMachine, moveToSale } from '../../lib/client/warehouseMachinesFetch';
+import {
+  deleteWarehouseMachine,
+  dismantleWarehouseMachine,
+  moveToSale
+} from '../../lib/client/warehouseMachinesFetch';
 
 interface TablaAlmacenProps {
   userRole: string;
+  isSuperUser?: boolean;
   machinesList: any[];
   onUpdate: () => void;
   tabFilter?: string;
@@ -103,6 +108,7 @@ const applyPagination = (list: any[], page: number, limit: number): any[] => {
 
 const TablaAlmacen: FC<TablaAlmacenProps> = ({
   userRole,
+  isSuperUser,
   machinesList,
   onUpdate,
   tabFilter,
@@ -217,7 +223,8 @@ const TablaAlmacen: FC<TablaAlmacenProps> = ({
     }
   };
 
-  const showOriginFilter = ['ALMACENADA', 'ACONDICIONADA'].includes(tabFilter) || !tabFilter;
+  const showOriginFilter =
+    ['ALMACENADA', 'ACONDICIONADA'].includes(tabFilter) || !tabFilter;
 
   return (
     <Card>
@@ -325,39 +332,44 @@ const TablaAlmacen: FC<TablaAlmacenProps> = ({
                   {['ADMIN', 'AUX'].includes(userRole) &&
                     machine.status === 'ALMACENADA' && (
                       <>
-                      <Tooltip title="Asignar técnico" arrow>
-                        <IconButton
-                          sx={{
-                            '&:hover': {
-                              background: theme.colors.warning.lighter
-                            },
-                            color: theme.palette.warning.main
-                          }}
-                          color="inherit"
-                          size="small"
-                          onClick={() => onAssignTech && onAssignTech(machine)}
-                        >
-                          <BuildIcon fontSize="small" />
-                        </IconButton>
-                      </Tooltip>
-                      <Tooltip title="Desmantelar" arrow>
-                        <IconButton
-                          sx={{
-                            '&:hover': {
-                              background: theme.colors.error.lighter
-                            },
-                            color: theme.palette.error.dark
-                          }}
-                          color="inherit"
-                          size="small"
-                          onClick={() => {
-                            setMachineToDismantle(machine);
-                            setDismantleModalOpen(true);
-                          }}
-                        >
-                          <DeconstructIcon fontSize="small" />
-                        </IconButton>
-                      </Tooltip>
+                        <Tooltip title="Asignar técnico" arrow>
+                          <IconButton
+                            sx={{
+                              '&:hover': {
+                                background: theme.colors.warning.lighter
+                              },
+                              color: theme.palette.warning.main
+                            }}
+                            color="inherit"
+                            size="small"
+                            onClick={() =>
+                              onAssignTech && onAssignTech(machine)
+                            }
+                          >
+                            <BuildIcon fontSize="small" />
+                          </IconButton>
+                        </Tooltip>
+                        {isSuperUser && (
+                          <Tooltip title="Desmantelar" arrow>
+                            <IconButton
+                              sx={{
+                                '&:hover': {
+                                  background: theme.colors.error.lighter
+                                },
+                                color: theme.palette.error.dark
+                              }}
+                              color="inherit"
+                              size="small"
+                              onClick={() => {
+                                setMachineToDismantle(machine);
+                                setDismantleModalOpen(true);
+                              }}
+                            >
+                              <DeconstructIcon fontSize="small" />
+                            </IconButton>
+                          </Tooltip>
+                        )}
+                        {/*
                       <Tooltip title="Eliminar" arrow>
                         <IconButton
                           sx={{
@@ -375,63 +387,66 @@ const TablaAlmacen: FC<TablaAlmacenProps> = ({
                         >
                           <DeleteTwoToneIcon fontSize="small" />
                         </IconButton>
-                      </Tooltip>
+                      </Tooltip> */}
                       </>
                     )}
                   {['ADMIN', 'AUX'].includes(userRole) &&
                     machine.status === 'ACONDICIONADA' && (
                       <>
-                      <Tooltip title="Cargar a vehículo" arrow>
-                        <IconButton
-                          sx={{
-                            '&:hover': {
-                              background: theme.colors.info.lighter
-                            },
-                            color: theme.palette.info.main
-                          }}
-                          color="inherit"
-                          size="small"
-                          onClick={() => onLoadToVehicle && onLoadToVehicle(machine)}
-                        >
-                          <LocalShippingIcon fontSize="small" />
-                        </IconButton>
-                      </Tooltip>
-                      <Tooltip title="Pasar a venta" arrow>
-                        <IconButton
-                          sx={{
-                            '&:hover': {
-                              background: theme.colors.success.lighter
-                            },
-                            color: theme.palette.success.main
-                          }}
-                          color="inherit"
-                          size="small"
-                          onClick={() => {
-                            setMachineToSale(machine);
-                            setSaleModalOpen(true);
-                          }}
-                        >
-                          <ShoppingBagIcon fontSize="small" />
-                        </IconButton>
-                      </Tooltip>
-                      <Tooltip title="Desmantelar" arrow>
-                        <IconButton
-                          sx={{
-                            '&:hover': {
-                              background: theme.colors.error.lighter
-                            },
-                            color: theme.palette.error.dark
-                          }}
-                          color="inherit"
-                          size="small"
-                          onClick={() => {
-                            setMachineToDismantle(machine);
-                            setDismantleModalOpen(true);
-                          }}
-                        >
-                          <DeconstructIcon fontSize="small" />
-                        </IconButton>
-                      </Tooltip>
+                        <Tooltip title="Cargar a vehículo" arrow>
+                          <IconButton
+                            sx={{
+                              '&:hover': {
+                                background: theme.colors.info.lighter
+                              },
+                              color: theme.palette.info.main
+                            }}
+                            color="inherit"
+                            size="small"
+                            onClick={() =>
+                              onLoadToVehicle && onLoadToVehicle(machine)
+                            }
+                          >
+                            <LocalShippingIcon fontSize="small" />
+                          </IconButton>
+                        </Tooltip>
+                        <Tooltip title="Pasar a venta" arrow>
+                          <IconButton
+                            sx={{
+                              '&:hover': {
+                                background: theme.colors.success.lighter
+                              },
+                              color: theme.palette.success.main
+                            }}
+                            color="inherit"
+                            size="small"
+                            onClick={() => {
+                              setMachineToSale(machine);
+                              setSaleModalOpen(true);
+                            }}
+                          >
+                            <ShoppingBagIcon fontSize="small" />
+                          </IconButton>
+                        </Tooltip>
+                            {isSuperUser && (
+                        <Tooltip title="Desmantelar" arrow>
+                          <IconButton
+                            sx={{
+                              '&:hover': {
+                                background: theme.colors.error.lighter
+                              },
+                              color: theme.palette.error.dark
+                            }}
+                            color="inherit"
+                            size="small"
+                            onClick={() => {
+                              setMachineToDismantle(machine);
+                              setDismantleModalOpen(true);
+                            }}
+                          >
+                            <DeconstructIcon fontSize="small" />
+                          </IconButton>
+                        </Tooltip>)}
                       </>
                     )}
                 </TableCell>
@@ -500,6 +515,7 @@ const TablaAlmacen: FC<TablaAlmacenProps> = ({
 
 TablaAlmacen.propTypes = {
   userRole: PropTypes.string.isRequired,
+  isSuperUser: PropTypes.bool,
   machinesList: PropTypes.array.isRequired,
   onUpdate: PropTypes.func.isRequired,
   tabFilter: PropTypes.string,

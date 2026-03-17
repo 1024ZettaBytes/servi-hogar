@@ -80,7 +80,7 @@ async function unlockUserAPI(req, res) {
 }
 
 async function handler(req, res) {
-  const validRole = await validateUserPermissions(req, res, ['ADMIN']);
+  const validRole = await validateUserPermissions(req, res, ['ADMIN', 'AUX']);
   if (validRole)
     switch (req.method) {
       case 'GET':

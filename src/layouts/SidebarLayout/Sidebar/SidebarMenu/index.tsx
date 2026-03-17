@@ -13,6 +13,7 @@ import {
 import NextLink from 'next/link';
 import { SidebarContext } from 'src/contexts/SidebarContext';
 
+import WarehouseIcon from '@mui/icons-material/Warehouse';
 import AddBusinessIcon from '@mui/icons-material/AddBusiness';
 import ReceiptLongIcon from '@mui/icons-material/ReceiptLong';
 import HomeIcon from '@mui/icons-material/Home';
@@ -579,7 +580,7 @@ function SidebarMenu({ userRole }) {
             )}
           </>
         )}
-        {['ADMIN', 'TEC'].includes(userRole) && (
+        {['ADMIN', 'TEC', 'AUX'].includes(userRole) && (
           <List
             component="div"
             subheader={
@@ -630,7 +631,7 @@ function SidebarMenu({ userRole }) {
                         disableRipple
                         component="a"
                         onClick={closeSidebar}
-                        startIcon={<InventoryIcon />}
+                        startIcon={<WarehouseIcon />}
                       >
                         Almacén
                       </Button>

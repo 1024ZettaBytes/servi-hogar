@@ -131,7 +131,7 @@ function ResumenAlmacen({ summary }) {
       </Box>
       <Grid container spacing={2}>
         {cards.map((card) => (
-          <Grid xs={12} sm={6} md={4} lg={2} item key={card.label}>
+          <Grid xs={12} sm={6} md={4} lg={3} item key={card.label}>
             <Card sx={{ px: 1, height: 'auto' }}>
               <CardContent>
                 <Grid

@@ -178,6 +178,7 @@ function Almacen({ session }) {
             ) : (
               <TablaAlmacen
                 userRole={user?.role}
+                isSuperUser={user?.isSuperUser || false}
                 machinesList={warehouseMachines || []}
                 onUpdate={() => {}}
                 tabFilter={statusForTab}
