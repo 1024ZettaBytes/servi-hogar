@@ -4,6 +4,7 @@ export interface IPaymentAccount extends Document {
   count: number;
   bank: string;
   number: string;
+  active: boolean;
   type: 'CARD' | 'CLABE' | 'ACCOUNT';
 }
 
@@ -11,6 +12,7 @@ const PaymentAccountSchema = new Schema<IPaymentAccount>({
   count: { type: Number, required: true },
   bank: { type: String, required: true },
   number: { type: String, required: true },
+  active: { type: Boolean, default: true },
   type: {
     type: String,
     required: true,
