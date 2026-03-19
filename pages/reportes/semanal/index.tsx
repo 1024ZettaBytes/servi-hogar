@@ -48,6 +48,9 @@ const customerStyle = { ...headerStyle, backgroundColor: '#F4F189' };
 const paymentStyle = { ...headerStyle, backgroundColor: '#89C3F4' };
 const bonusStyle = { ...headerStyle, backgroundColor: '#C7C6BC' };
 const extraTripStyle = { ...headerStyle, backgroundColor: '#B39DDB' };
+const warehouseStyle = { ...headerStyle, backgroundColor: '#81C784' };
+const conditioningStyle = { ...headerStyle, backgroundColor: '#4DD0E1' };
+
 function DayReport({ session }) {
   const { user } = session;
   const userRole = user.role;
@@ -241,6 +244,46 @@ function DayReport({ session }) {
                           type='PAYMENT'
                         />
                       )}
+                    </Grid>
+                    <Grid item lg={6}>
+                      <RegistersReportTable
+                        header="ALMACÉN (NUEVAS)"
+                        colorStyle={warehouseStyle}
+                        totalData={reportData?.warehouseNew?.totalData}
+                        list={reportData?.warehouseNew?.days}
+                      />
+                    </Grid>
+                    <Grid item lg={6}>
+                      <RegistersReportTable
+                        header="COMPRAS EN CALLE"
+                        colorStyle={warehouseStyle}
+                        totalData={reportData?.warehouseStreet?.totalData}
+                        list={reportData?.warehouseStreet?.days}
+                      />
+                    </Grid>
+                    <Grid item lg={6}>
+                      <RegistersReportTable
+                        header="REEMPLAZADAS"
+                        colorStyle={warehouseStyle}
+                        totalData={reportData?.warehouseReplaced?.totalData}
+                        list={reportData?.warehouseReplaced?.days}
+                      />
+                    </Grid>
+                    <Grid item lg={6}>
+                      <RegistersReportTable
+                        header="DESMANTELADAS"
+                        colorStyle={warehouseStyle}
+                        totalData={reportData?.warehouseDismantled?.totalData}
+                        list={reportData?.warehouseDismantled?.days}
+                      />
+                    </Grid>
+                    <Grid item lg={6}>
+                      <RegistersReportTable
+                        header="REACONDICIONAMIENTOS"
+                        colorStyle={conditioningStyle}
+                        totalData={reportData?.conditioning?.totalData}
+                        list={reportData?.conditioning?.days}
+                      />
                     </Grid>
                     <Grid item lg={6}>
                       {!onlyChanges && (
