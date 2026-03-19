@@ -11,7 +11,6 @@ import WarehouseIcon from '@mui/icons-material/Warehouse';
 import BuildIcon from '@mui/icons-material/Build';
 import DeleteIcon from '@mui/icons-material/Delete';
 import LocalShippingIcon from '@mui/icons-material/LocalShipping';
-import ShoppingBagIcon from '@mui/icons-material/ShoppingBag';
 import SwapHorizIcon from '@mui/icons-material/SwapHoriz';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 
@@ -66,7 +65,6 @@ function ResumenAlmacen({ summary }) {
   const enAcondicionamiento = getCountByStatus('EN_ACONDICIONAMIENTO');
   const acondicionadas = getCountByStatus('ACONDICIONADA');
   const desmanteladas = getCountByStatus('DESMANTELADA');
-  const listaVenta = getCountByStatus('LISTA_VENTA');
   const asignadaRenta = getCountByStatus('ASIGNADA_RENTA');
 
   const cards = [
@@ -98,12 +96,6 @@ function ResumenAlmacen({ summary }) {
       count: enAcondicionamiento,
       icon: <BuildIcon />,
       AvatarComponent: AvatarWrapperWarning
-    },
-    {
-      label: 'Listas para venta',
-      count: listaVenta,
-      icon: <ShoppingBagIcon />,
-      AvatarComponent: AvatarWrapperSuccess
     },
     {
       label: 'Asignadas a renta',

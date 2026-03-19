@@ -40,7 +40,6 @@ const WarehouseMachineSchema = new Schema<IWarehouseMachine>({
       'EN_VEHICULO',
       'EN_ACONDICIONAMIENTO',
       'ACONDICIONADA',
-      'LISTA_VENTA',
       'DESMANTELADA',
       'ASIGNADA_RENTA',
       'CONVERTIDA_VENTA'

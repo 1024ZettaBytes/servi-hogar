@@ -85,9 +85,6 @@ const getStatusChip = (status: string) => {
     case 'ACONDICIONADA':
       color = 'success';
       break;
-    case 'LISTA_VENTA':
-      color = 'success';
-      break;
     case 'DESMANTELADA':
       color = 'error';
       break;

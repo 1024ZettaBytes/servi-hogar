@@ -112,6 +112,8 @@ function Equipos({ session }) {
                     onMaintenance={machinesSummary.MANTE}
                     lost={machinesSummary?.PERDIDA }
                     total={machinesSummary?.total}
+                    stored={machinesSummary?.ALMACEN}
+                    forSale={machinesSummary?.VENTA}
                   />
                 </Grid>
               )}
