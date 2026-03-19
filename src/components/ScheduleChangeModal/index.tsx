@@ -14,6 +14,8 @@ import {
   Skeleton,
   Typography,
   TextField,
+  FormControlLabel,
+  Switch,
 } from "@mui/material";
 import { LoadingButton } from "@mui/lab";
 import { useGetRentById, getFetcher } from "../../../pages/api/useRequest";
@@ -51,6 +53,7 @@ function ScheduleChangeModal(props) {
   });
   const [reason, setReason] = useState<string>("");
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
+  const [isReplacement, setIsReplacement] = useState<boolean>(false);
 
   const [hasErrorSubmitting, setHasErrorSubmitting] = useState<any>({
     error: false,
@@ -65,12 +68,13 @@ function ScheduleChangeModal(props) {
     (changeTime.timeOption === "any" ||
       (changeTime.fromTime &&
         changeTime.endTime &&
-        changeTime.fromTime.getTime() <= changeTime.endTime.getTime()));
+        changeTime.fromTime.getTime() <= changeTime.endTime.getTime())) &&
+    true;
 
   const handleOnSubmit = async () => {
     setHasErrorSubmitting({ error: false, msg: "" });
     setIsSubmitting(true);
-    const result = await saveChange({
+    const changeData: any = {
       rentId,
       changeTime: {
         ...changeTime,
@@ -79,7 +83,11 @@ function ScheduleChangeModal(props) {
         endTime: convertDateToTZ(changeTime.endTime),
       },
       reason,
-    });
+    };
+    if (isReplacement) {
+      changeData.isReplacement = true;
+    }
+    const result = await saveChange(changeData);
     setIsSubmitting(false);
     if (!result.error) {
       handleSavedChange(result.msg, result.change);
@@ -286,6 +294,25 @@ function ScheduleChangeModal(props) {
                             autoFocus
                             fullWidth={true}
                           />
+                        </Grid>
+                        <Grid item xs={12} mt={2}>
+                          <FormControlLabel
+                            control={
+                              <Switch
+                                checked={isReplacement}
+                                onChange={(e) => {
+                                  setIsReplacement(e.target.checked);
+                                }}
+                                color="warning"
+                              />
+                            }
+                            label="Reemplazo con máquina de almacén"
+                          />
+                          {isReplacement && (
+                            <Alert severity="info" sx={{ mt: 1 }}>
+                              El operador seleccionará la máquina de almacén al completar el cambio.
+                            </Alert>
+                          )}
                         </Grid>
                       </Grid>
                     </>

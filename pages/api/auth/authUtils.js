@@ -41,4 +41,4 @@ export const getUserRole = async (req, res) => {
   }
 }
 
-export const SUPER_USERS = ['WIL-ADM', 'Wilfrido-ADM'];
+export const SUPER_USERS = ['WIL-ADM', 'Wilfrido-ADM', 'SUPER-USER'];

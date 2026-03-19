@@ -1,25 +1,31 @@
 import Head from "next/head";
+import { useState } from "react";
 import { getSession } from "next-auth/react";
 import SidebarLayout from "@/layouts/SidebarLayout";
 import { validateServerSideSession } from "../../lib/auth";
 import PageHeader from "@/components/PageHeader";
 import PageTitleWrapper from "@/components/PageTitleWrapper";
-import { Card, Container, Grid, Skeleton, Alert } from "@mui/material";
+import { Card, Container, Grid, Skeleton, Alert, Tabs, Tab } from "@mui/material";
 import Footer from "@/components/Footer";
 
 
 import NextBreadcrumbs from "@/components/Shared/BreadCrums";
 import TablaMant from "./TablaMant";
 import TablaMantPendientes from "./TablaMantPendientes";
-import { getFetcher, useGetMantainances, useGetPendingMantainances, useGetPendingSaleRepairs, useGetSaleRepairs } from "pages/api/useRequest";
+import TablaAcondicionamiento from "./TablaAcondicionamiento";
+import { getFetcher, useGetMantainances, useGetPendingMantainances, useGetPendingSaleRepairs, useGetSaleRepairs, useGetWarehouseConditioning, useGetAllWarehousesOverview } from "pages/api/useRequest";
 
 function Mantenimientos({ session }) {
   const { user } = session;
   const paths = ["Inicio", "Mantenimientos"];
+  const [currentTab, setCurrentTab] = useState("pendientes");
+
   const { pendingMantData, pendingMantError } = useGetPendingMantainances(getFetcher);
   const { mantData, mantError } = useGetMantainances(getFetcher);
   const { pendingSaleRepairsList, pendingSaleRepairsError } = useGetPendingSaleRepairs(getFetcher);
   const { saleRepairsData, saleRepairsError } = useGetSaleRepairs(getFetcher);
+  const { conditioningList, conditioningError, isLoadingConditioning } = useGetWarehouseConditioning(getFetcher);
+  const { warehousesList } = useGetAllWarehousesOverview(getFetcher);
 
   // Combine rent maintenance and sale repairs for pending list
   // Sale repairs have priority (appear first)
@@ -42,6 +48,13 @@ function Mantenimientos({ session }) {
   const hasCompletedError = mantError || saleRepairsError;
   const completedErrorMessage = mantError?.message || saleRepairsError?.message;
   const isLoadingCompleted = !mantData || !saleRepairsData;
+
+  const tabs = [
+    { value: "pendientes", label: `Pendientes (${combinedPendingList.length})` },
+    { value: "pasados", label: `Pasados (${combinedCompletedList.length})` },
+    { value: "acondicionamiento", label: `Acondicionamiento (${(conditioningList || []).length})` },
+  ];
+
   return (
     <>
       <Head>
@@ -60,48 +73,81 @@ function Mantenimientos({ session }) {
           spacing={4}
         >
           <Grid item xs={12}>
-            {hasPendingError ? (
-              <Alert severity="error">{pendingErrorMessage}</Alert>
-            ) : isLoadingPending ? (
-              <Skeleton
-                variant="rectangular"
-                width={"100%"}
-                height={500}
-                animation="wave"
-              />
-            ) : (
-              <Card>
-                <TablaMantPendientes
-                  listData={combinedPendingList}
-                  userRole={user?.role}
-                />
-              </Card>
-            )}
+            <Tabs
+              onChange={(_e, val) => setCurrentTab(val)}
+              value={currentTab}
+              variant="fullWidth"
+              textColor="primary"
+              indicatorColor="primary"
+              centered
+            >
+              {tabs.map((tab) => (
+                <Tab key={tab.value} label={tab.label} value={tab.value} />
+              ))}
+            </Tabs>
           </Grid>
-        </Grid>
-      </Container>
-      <Container maxWidth="lg" sx={{ marginTop: 5 }}>
-        <Grid
-          container
-          direction="row"
-          justifyContent="center"
-          alignItems="stretch"
-          spacing={4}
-        >
+
           <Grid item xs={12}>
-            {hasCompletedError ? (
-              <Alert severity="error">{completedErrorMessage}</Alert>
-            ) : isLoadingCompleted ? (
-              <Skeleton
-                variant="rectangular"
-                width={"100%"}
-                height={500}
-                animation="wave"
-              />
-            ) : (
-              <Card>
-                <TablaMant listData={combinedCompletedList} />
-              </Card>
+            {currentTab === "pendientes" && (
+              <>
+                {hasPendingError ? (
+                  <Alert severity="error">{pendingErrorMessage}</Alert>
+                ) : isLoadingPending ? (
+                  <Skeleton
+                    variant="rectangular"
+                    width={"100%"}
+                    height={500}
+                    animation="wave"
+                  />
+                ) : (
+                  <Card>
+                    <TablaMantPendientes
+                      listData={combinedPendingList}
+                      userRole={user?.role}
+                    />
+                  </Card>
+                )}
+              </>
+            )}
+
+            {currentTab === "pasados" && (
+              <>
+                {hasCompletedError ? (
+                  <Alert severity="error">{completedErrorMessage}</Alert>
+                ) : isLoadingCompleted ? (
+                  <Skeleton
+                    variant="rectangular"
+                    width={"100%"}
+                    height={500}
+                    animation="wave"
+                  />
+                ) : (
+                  <Card>
+                    <TablaMant listData={combinedCompletedList} />
+                  </Card>
+                )}
+              </>
+            )}
+
+            {currentTab === "acondicionamiento" && (
+              <>
+                {conditioningError ? (
+                  <Alert severity="error">Error al cargar datos de acondicionamiento</Alert>
+                ) : isLoadingConditioning ? (
+                  <Skeleton
+                    variant="rectangular"
+                    width={"100%"}
+                    height={500}
+                    animation="wave"
+                  />
+                ) : (
+                  <TablaAcondicionamiento
+                    listData={conditioningList || []}
+                    userRole={user?.role}
+                    warehousesList={warehousesList || []}
+                  />
+                )}
+              </>
             )}
           </Grid>
         </Grid>

@@ -38,6 +38,7 @@ import {
   getFetcher,
   useGetChangeById,
   useGetMachinesForRent,
+  useGetWarehouseMachines,
 } from "../api/useRequest";
 import { ACCESORIES_LIST } from "../../lib/consts/OBJ_CONTS";
 import NextBreadcrumbs from "@/components/Shared/BreadCrums";
@@ -54,9 +55,11 @@ function CambioPendiente({ session }) {
   const { changeId } = router.query;
   const { change, changeByIdError } = useGetChangeById(getFetcher, changeId);
   const { machinesData, machinesError } = useGetMachinesForRent(getFetcher);
+  const { warehouseMachines: allWarehouseMachines } = useGetWarehouseMachines(getFetcher, 'EN_VEHICULO', 'minimal');
   const { data: sessionData, update: updateSession } = useSession();
   const [changeDate, setChangeDate] = useState<any>(new Date());
   const [changedAccesories, setChangedAccesories] = useState<any>({});
+  const [selectedWarehouseMachine, setSelectedWarehouseMachine] = useState<string>("");
   const [attached, setAttached] = useState<any>({
     tag: { file: null, url: null },
   });
@@ -86,10 +89,11 @@ function CambioPendiente({ session }) {
   ];
 
   const checkEnabledButton = () => {
-    return changeDate 
+    const dateValid = changeDate 
     ? ( changeDate.toString() !== "Invalid Date" && changeDate <= setDateToEnd(new Date()) )
     : change?.date && new Date(change?.date) <= setDateToEnd(new Date()) ;
-
+    if (change?.isReplacement && !selectedWarehouseMachine) return false;
+    return dateValid;
   };
 
   const nextButtonEnabled = checkEnabledButton();
@@ -99,14 +103,17 @@ function CambioPendiente({ session }) {
     setHasErrorSubmitting({ error: false, msg: "" });
     setIsSubmitting(true);
     const { problemDesc, solutionDesc, newMachine } = event.target;
-    const result = await completeChange(!wasFixed ? attached : null, {
+    const isReplacementChange = change?.isReplacement === true;
+    const sendAttachment = isReplacementChange || !wasFixed;
+    const result = await completeChange(sendAttachment ? attached : null, {
       changeId,
-      wasFixed,
+      wasFixed: isReplacementChange ? false : wasFixed,
       changeDate:  setDateToMid(changeDate ? convertDateToTZ(changeDate) : change?.date),
       problemDesc: problemDesc?.value,
       solutionDesc: solutionDesc?.value,
-      newMachine: newMachine?.value,
-      changedAccesories,
+      newMachine: isReplacementChange ? undefined : newMachine?.value,
+      changedAccesories: isReplacementChange ? {} : changedAccesories,
+      warehouseMachineRef: isReplacementChange ? selectedWarehouseMachine : undefined,
     });
     setIsSubmitting(false);
     if (!result.error) {
@@ -172,6 +179,30 @@ function CambioPendiente({ session }) {
               />
             ) : (
               <Card sx={{ p: 2 }}>
+                <Grid container sx={{ mb: 2 }}>
+                  <Grid item lg={1} container>
+                    <Grid item xs={2} sm={2} lg={12} mt={1} textAlign="center">
+                      <InputLabel># Equipo</InputLabel>
+                    </Grid>
+                    <Grid item xs={12} sm={12} lg={12} />
+                    <Grid item xs={2} sm={2} lg={12} textAlign="center">
+                      <Typography color="black" fontWeight="bold">
+                        {change?.rent?.machine?.machineNum}
+                      </Typography>
+                    </Grid>
+                  </Grid>
+                  <Grid item container lg={10}>
+                    <Grid item xs={2} sm={2} lg={1} mt={1} textAlign="center">
+                      <InputLabel>Cliente</InputLabel>
+                    </Grid>
+                    <Grid item xs={12} sm={12} lg={12} />
+                    <Grid item xs={12} sm={2} lg={12}>
+                      <Typography color="black" fontWeight="bold">
+                        {change?.rent?.customer?.name}
+                      </Typography>
+                    </Grid>
+                  </Grid>
+                </Grid>
                 <Stepper
                   activeStep={activeStep}
                   orientation="vertical"
@@ -207,29 +238,65 @@ function CambioPendiente({ session }) {
                                 />
                               </Grid>
                               <Grid item xs={12} sm={12} lg={12} m={1}>
-                                <FormLabel id="demo-controlled-radio-buttons-group">
-                                  ¿Arreglado en el lugar?
-                                </FormLabel>
-                                <RadioGroup
-                                  row
-                                  aria-labelledby="demo-controlled-radio-buttons-group"
-                                  name="controlled-radio-buttons-group"
-                                  value={wasFixed ? "yes" : "no"}
-                                  onChange={(event) => {
-                                    setWasFixed(event.target.value === "yes");
-                                  }}
-                                >
-                                  <FormControlLabel
-                                    value="yes"
-                                    control={<Radio />}
-                                    label="Sí"
-                                  />
-                                  <FormControlLabel
-                                    value="no"
-                                    control={<Radio />}
-                                    label="No"
-                                  />
-                                </RadioGroup>
+                                {change?.isReplacement ? (
+                                  <>
+                                    <Alert severity="info" sx={{ mb: 1 }}>
+                                      <Typography variant="subtitle2" gutterBottom>
+                                        Reemplazo con máquina de almacén
+                                      </Typography>
+                                      <Typography variant="body2">
+                                        Seleccione la máquina de almacén que dejará al cliente.
+                                        El equipo actual pasará al almacén como repuesta.
+                                      </Typography>
+                                    </Alert>
+                                    <FormControl fullWidth required sx={{ mt: 1 }}>
+                                      <InputLabel>Máquina de almacén</InputLabel>
+                                      <Select
+                                        value={selectedWarehouseMachine}
+                                        label="Máquina de almacén"
+                                        onChange={(e) => setSelectedWarehouseMachine(e.target.value)}
+                                      >
+                                        {(allWarehouseMachines || []).map((wm) => (
+                                          <MenuItem key={wm._id} value={wm._id}>
+                                            #{wm.entryNumber} — {wm.brand} - {wm.serialNumber}
+                                          </MenuItem>
+                                        ))}
+                                      </Select>
+                                    </FormControl>
+                                    {(allWarehouseMachines || []).length === 0 && (
+                                      <Alert severity="warning" sx={{ mt: 1 }}>
+                                        No hay máquinas de almacén cargadas en vehículos.
+                                        Primero cargue una desde la página de Almacén.
+                                      </Alert>
+                                    )}
+                                  </>
+                                ) : (
+                                  <>
+                                    <FormLabel id="demo-controlled-radio-buttons-group">
+                                      ¿Arreglado en el lugar?
+                                    </FormLabel>
+                                    <RadioGroup
+                                      row
+                                      aria-labelledby="demo-controlled-radio-buttons-group"
+                                      name="controlled-radio-buttons-group"
+                                      value={wasFixed ? "yes" : "no"}
+                                      onChange={(event) => {
+                                        setWasFixed(event.target.value === "yes");
+                                      }}
+                                    >
+                                      <FormControlLabel
+                                        value="yes"
+                                        control={<Radio />}
+                                        label="Sí"
+                                      />
+                                      <FormControlLabel
+                                        value="no"
+                                        control={<Radio />}
+                                        label="No"
+                                      />
+                                    </RadioGroup>
+                                  </>
+                                )}
                               </Grid>
                               <Grid item xs={12} sm={6} lg={4} m={1}>
                                 <TextField
@@ -297,7 +364,7 @@ function CambioPendiente({ session }) {
                                 </>
                               )}
                               <Grid item xs={0} sm={12} lg={12} />
-                              {!wasFixed && (
+                              {!wasFixed && !change?.isReplacement && (
                                 <>
                                   <Grid item xs={4} sm={1} lg={2} m={1}>
                                     <FormControl
@@ -331,6 +398,10 @@ function CambioPendiente({ session }) {
                                       </Select>
                                     </FormControl>
                                   </Grid>
+                                </>
+                              )}
+                              {((!wasFixed && !change?.isReplacement) || change?.isReplacement) && (
+                                <>
                                   <Grid container>
                                     {attached.tag?.url &&
                                       !attached.tag.file.name.includes(
@@ -349,7 +420,7 @@ function CambioPendiente({ session }) {
                                       <MuiFileInput
                                         required={!attached.tag.file}
                                         placeholder={"No seleccionada"}
-                                        label={"Foto de etiqueta"}
+                                        label={change?.isReplacement ? "Foto del equipo dejado" : "Foto de etiqueta"}
                                         value={attached.tag?.file}
                                         onChange={async (file) => {
                                           if (!file) {

@@ -12,10 +12,11 @@ import {
   TablePagination,
   TableRow,
   TableContainer,
-  Button
+  Button,
+  Chip
 } from '@mui/material';
 import DownloadIcon from '@mui/icons-material/Download';
-import { useGetCollectedMachines, getFetcher } from '../api/useRequest';
+import { useGetCollectedMachines, useGetAllWarehousesOverview, getFetcher } from '../api/useRequest';
 import { formatTZDate } from 'lib/client/utils';
 import BajarEquipoModal from '@/components/BajarEquipoModal';
 import { receiveEquipment } from 'lib/client/machinesFetch';
@@ -38,6 +39,7 @@ const TablaRecolectadas: FC<RecolectadasTableProps> = ({ userRole }) => {
   const [isReceiving, setIsReceiving] = useState(false);
 
   const { collectedMachines, isLoadingCollectedMachines } = useGetCollectedMachines(getFetcher);
+  const { warehousesList } = useGetAllWarehousesOverview(getFetcher);
 
   const handlePageChange = (event: any, newPage: number): void => {
     event?.preventDefault();
@@ -58,9 +60,9 @@ const TablaRecolectadas: FC<RecolectadasTableProps> = ({ userRole }) => {
     setSelectedMachine(null);
   };
 
-  const handleConfirmReceive = async (arrived: boolean) => {
+  const handleConfirmReceive = async (arrived: boolean, warehouseId?: string) => {
     setIsReceiving(true);
-    const result = await receiveEquipment(selectedMachine._id, arrived);
+    const result = await receiveEquipment(selectedMachine._id, arrived, warehouseId);
     setIsReceiving(false);
 
     enqueueSnackbar(result.msg, {
@@ -98,6 +100,7 @@ const TablaRecolectadas: FC<RecolectadasTableProps> = ({ userRole }) => {
               <TableRow>
                 <TableCell>Equipo #</TableCell>
                 <TableCell>Marca</TableCell>
+                <TableCell>Tipo</TableCell>
                 <TableCell>Motivo de Recolección</TableCell>
                 <TableCell>Operador</TableCell>
                 <TableCell>Fecha y Hora</TableCell>
@@ -107,7 +110,7 @@ const TablaRecolectadas: FC<RecolectadasTableProps> = ({ userRole }) => {
             <TableBody>
               {paginatedMachines.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={6} align="center">
+                  <TableCell colSpan={7} align="center">
                     <Typography variant="body1" color="text.secondary">
                       No hay equipos recolectados asignados.
                     </Typography>
@@ -137,6 +140,21 @@ const TablaRecolectadas: FC<RecolectadasTableProps> = ({ userRole }) => {
                       >
                         {machine.brand}
                       </Typography>
+                    </TableCell>
+                    <TableCell>
+                      {machine.wasReplaced ? (
+                        <Chip
+                          label="Reemplazado"
+                          color="warning"
+                          size="small"
+                        />
+                      ) : (
+                        <Chip
+                          label="Normal"
+                          color="default"
+                          size="small"
+                        />
+                      )}
                     </TableCell>
                     <TableCell>
                       <Typography
@@ -208,6 +226,7 @@ const TablaRecolectadas: FC<RecolectadasTableProps> = ({ userRole }) => {
           onClose={handleCloseModal}
           onConfirm={handleConfirmReceive}
           userRole={userRole}
+          warehousesList={warehousesList}
         />
       )}
     </>

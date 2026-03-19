@@ -18,6 +18,8 @@ import EventAvailableIcon from "@mui/icons-material/EventAvailable";
 import HourglassEmptyIcon from "@mui/icons-material/HourglassEmpty";
 import BuildIcon from "@mui/icons-material/Build";
 import MapIcon from "@mui/icons-material/Map";
+import WarehouseIcon from "@mui/icons-material/Warehouse";
+import StorefrontIcon from "@mui/icons-material/Storefront";
 import NextLink from "next/link";
 
 const AvatarWrapperSuccess = styled(Avatar)(
@@ -47,6 +49,8 @@ function ResumenEquipos({
   onMaintenance,
   lost,
   total,
+  stored,
+  forSale,
 }) {
   return (
     <>
@@ -340,6 +344,145 @@ function ResumenEquipos({
                     En investigación
                   </Typography>
                 </Grid>
+              </Grid>
+            </CardContent>
+          </Card>
+        </Grid>
+        <Grid xs={12} sm={6} md={3} item>
+          <Card
+            sx={{
+              px: 1,
+              height: "auto",
+              overflowY: "auto",
+            }}
+          >
+            <CardContent>
+              <Grid
+                container
+                alignItems="center"
+                justifyItems="center"
+                textAlign={{ lg: "center" }}
+              >
+                <Grid item lg={2} md={2} xs={2}>
+                  <AvatarWrapperWarning>
+                    <WarehouseIcon />
+                  </AvatarWrapperWarning>
+                </Grid>
+                <Grid item lg={3} md={2} xs={2}>
+                  <Typography variant="h3" gutterBottom noWrap>
+                    {stored?.total}
+                  </Typography>
+                </Grid>
+                <Grid item lg={7} md={8} xs={8}>
+                  <Typography variant="subtitle2" noWrap textAlign="left">
+                    Almacenadas
+                  </Typography>
+                </Grid>
+                {stored?.byWarehouse?.length > 0 && (
+                  <Grid item lg={12} md={12} xs={12}>
+                    <Typography variant="subtitle2" sx={{ mt: 1 }}>
+                      Por almacén:
+                    </Typography>
+                    <List dense>
+                      {stored.byWarehouse.map((warehouse) => (
+                        <ListItem disablePadding key={warehouse?.id}>
+                          <ListItemText
+                            primary={`- ${warehouse?.name}: ${warehouse?.total}`}
+                          />
+                        </ListItem>
+                      ))}
+                    </List>
+                  </Grid>
+                )}
+                {stored?.byVehicle?.length > 0 && (
+                  <Grid item lg={12} md={12} xs={12}>
+                    <Typography variant="subtitle2" sx={{ mt: 1 }}>
+                      En vehículos:
+                    </Typography>
+                    <List dense>
+                      {stored.byVehicle.map((vehicle) => (
+                        <ListItem disablePadding key={vehicle?.id}>
+                          <ListItemText
+                            primary={`- ${vehicle?.name}: ${vehicle?.total}`}
+                          />
+                        </ListItem>
+                      ))}
+                    </List>
+                  </Grid>
+                )}
+              </Grid>
+            </CardContent>
+          </Card>
+        </Grid>
+        <Grid xs={12} sm={6} md={3} item>
+          <Card
+            sx={{
+              px: 1,
+              height: "auto",
+              overflowY: "auto",
+            }}
+          >
+            <CardContent>
+              <Grid
+                container
+                alignItems="center"
+                justifyItems="center"
+                textAlign={{ lg: "center" }}
+              >
+                <Grid item lg={2} md={2} xs={2}>
+                  <AvatarWrapperSuccess>
+                    <StorefrontIcon />
+                  </AvatarWrapperSuccess>
+                </Grid>
+                <Grid item lg={3} md={2} xs={2}>
+                  <Typography variant="h3" gutterBottom noWrap>
+                    {forSale?.total}
+                  </Typography>
+                </Grid>
+                <Grid item lg={7} md={8} xs={8}>
+                  <Typography variant="subtitle2" noWrap textAlign="left">
+                    Listas para venta
+                  </Typography>
+                </Grid>
+                {forSale?.byWarehouse?.length > 0 && (
+                  <Grid item lg={12} md={12} xs={12}>
+                    <Typography variant="subtitle2" sx={{ mt: 1 }}>
+                      Por almacén:
+                    </Typography>
+                    <List dense>
+                      {forSale.byWarehouse.map((warehouse) => (
+                        <ListItem disablePadding key={warehouse?.id}>
+                          <ListItemText
+                            primary={`- ${warehouse?.name}: ${warehouse?.total}`}
+                          />
+                        </ListItem>
+                      ))}
+                    </List>
+                  </Grid>
+                )}
+                {forSale?.byVehicle?.length > 0 && (
+                  <Grid item lg={12} md={12} xs={12}>
+                    <Typography variant="subtitle2" sx={{ mt: 1 }}>
+                      En vehículos:
+                    </Typography>
+                    <List dense>
+                      {forSale.byVehicle.map((vehicle) => (
+                        <ListItem disablePadding key={vehicle?.id}>
+                          <ListItemText
+                            primary={`- ${vehicle?.name}: ${vehicle?.total}`}
+                          />
+                        </ListItem>
+                      ))}
+                    </List>
+                  </Grid>
+                )}
+                {forSale?.noLocation > 0 && (
+                  <Grid item lg={12} md={12} xs={12}>
+                    <Typography variant="subtitle2" sx={{ mt: 1 }}>
+                      {`Sin ubicación: ${forSale.noLocation}`}
+                    </Typography>
+                  </Grid>
+                )}
               </Grid>
             </CardContent>
           </Card>

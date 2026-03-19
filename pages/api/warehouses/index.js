@@ -16,7 +16,7 @@ async function getWarehousesOverviewAPI(req, res) {
 }
 
 async function handler(req, res) {
-  const validRole = await validateUserPermissions(req, res, ["ADMIN", "AUX", "OPE"]);
+  const validRole = await validateUserPermissions(req, res, ["ADMIN", "AUX", "OPE", 'TEC']);
   if (validRole)
     switch (req.method) {
       case "GET":

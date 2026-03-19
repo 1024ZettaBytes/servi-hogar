@@ -28,6 +28,7 @@ export interface IRentChange extends Document {
   updatedAt: Date;
   createdBy: Schema.Types.ObjectId;
   lastUpdatedBy: Schema.Types.ObjectId;
+  isReplacement: boolean;
 }
 
 const RentChangeSchema = new Schema<IRentChange>({
@@ -68,7 +69,8 @@ const RentChangeSchema = new Schema<IRentChange>({
   operator: { type: Schema.Types.ObjectId, default: null, ref: 'users' },
   updatedAt: { type: Date, required: true },
   createdBy: { type: Schema.Types.ObjectId, default: null, ref: 'users' },
-  lastUpdatedBy: { type: Schema.Types.ObjectId, required: true, ref: 'users' }
+  lastUpdatedBy: { type: Schema.Types.ObjectId, required: true, ref: 'users' },
+  isReplacement: { type: 'boolean', default: false },
 });
 
 export const RentChange: Model<IRentChange> =
