@@ -455,35 +455,84 @@ function CustomerInfoTab({
                     </Grid>
                     <Grid item xs={3} sm={6} md={6} mt={1} textAlign={{ sm: 'right' }}>
                       <Box pr={2} pb={2}>
-                        Plan Oro:
+                        Plan:
                       </Box>
                     </Grid>
                     <Grid item xs={9} sm={6} md={6} mt={1}>
                       <Box sx={{ maxWidth: { xs: 'auto', sm: 300 } }}>
                         {customer ? (
                           !isEditing.info || role !== 'ADMIN' ? (
-                            customer?.isPlanOro ? (
+                            <>
+                            {customer?.isPlanOro ? (
                               <Label color="warning">
                                 <b>Plan Oro Activo</b>
                               </Label>
+                            ) : customer?.isPlan99 ? (
+                              <Label color="info">
+                                <b>Plan 99 Activo</b>
+                              </Label>
                             ) : (
-                              <Text color="black">No</Text>
-                            )
+                              <Text color="black">Sin plan</Text>
+                            )}
+                            {customer?.hadPlan99Overdue && (
+                              <Alert severity="warning" sx={{ mt: 1 }}>
+                                Este cliente ya tuvo Plan 99 anteriormente.
+                              </Alert>
+                            )}
+                            </>
                           ) : (
-                            <FormControlLabel
-                              control={
-                                <Checkbox
-                                  checked={customerToEdit?.isPlanOro || false}
+                            <>
+                              <FormControlLabel
+                                control={
+                                  <Checkbox
+                                    checked={customerToEdit?.isPlanOro || customerToEdit?.isPlan99 || false}
+                                    onChange={(e) => {
+                                      if (!e.target.checked) {
+                                        setCustomerToEdit({
+                                          ...customerToEdit,
+                                          isPlanOro: false,
+                                          isPlan99: false
+                                        });
+                                      } else {
+                                        setCustomerToEdit({
+                                          ...customerToEdit,
+                                          isPlanOro: true,
+                                          isPlan99: false
+                                        });
+                                      }
+                                    }}
+                                  />
+                                }
+                                label="Aplicar Plan"
+                              />
+                              {(customerToEdit?.isPlanOro || customerToEdit?.isPlan99) && (
+                                <RadioGroup
+                                  row
+                                  value={customerToEdit?.isPlanOro ? 'ORO' : '99'}
                                   onChange={(e) => {
                                     setCustomerToEdit({
                                       ...customerToEdit,
-                                      isPlanOro: e.target.checked
+                                      isPlanOro: e.target.value === 'ORO',
+                                      isPlan99: e.target.value === '99'
                                     });
                                   }}
-                                />
-                              }
-                              label="Activar Plan Oro ($499/mes)"
-                            />
+                                >
+                                  <FormControlLabel value="ORO" control={<Radio />} label="Plan Oro ($499/mes)" />
+                                  <FormControlLabel
+                                    value="99"
+                                    control={<Radio />}
+                                    label="Plan 99 ($99/sem)"
+                                    disabled={customer?.hadPlan99Overdue && role !== 'ADMIN'}
+                                  />
+                                </RadioGroup>
+                              )}
+                              {customer?.hadPlan99Overdue && (
+                                <Alert severity="warning" sx={{ mt: 1 }}>
+                                  Este cliente ya tuvo Plan 99 anteriormente.
+                                  {role !== 'ADMIN' ? ' Solo un administrador puede reactivarlo.' : ''}
+                                </Alert>
+                              )}
+                            </>
                           )
                         ) : (
                           <Skeleton

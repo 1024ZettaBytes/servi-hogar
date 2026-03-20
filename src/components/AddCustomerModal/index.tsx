@@ -36,7 +36,8 @@ function AddCustomerModal(props) {
   const [wasReferred, setWasReferred] = useState(false);
   const [selectedHowFound, setSelectedHowFound] = useState();
   const [referredBy, setReferredBy] = useState();
-  const [isPlanOro, setIsPlanOro] = useState(false);
+  const [hasPlan, setHasPlan] = useState(false);
+  const [selectedPlan, setSelectedPlan] = useState('ORO');
 
   function handleCitySelection(city) {
     setSelectedCity(city);
@@ -72,7 +73,8 @@ function AddCustomerModal(props) {
       nameRef: event.target.nameRef.value,
       telRef: event.target.telRef.value,
       maps: event.target.maps.value,
-      isPlanOro: isPlanOro,
+      isPlanOro: hasPlan && selectedPlan === 'ORO',
+      isPlan99: hasPlan && selectedPlan === '99',
     });
     setIsLoading(false);
     if (!result.error) {
@@ -198,12 +200,22 @@ function AddCustomerModal(props) {
                 <FormControlLabel
                   control={
                     <Checkbox
-                      checked={isPlanOro}
-                      onChange={(e) => setIsPlanOro(e.target.checked)}
+                      checked={hasPlan}
+                      onChange={(e) => setHasPlan(e.target.checked)}
                     />
                   }
-                  label="Plan Oro ($499/mes - 4 semanas)"
+                  label="Aplicar Plan"
                 />
+                {hasPlan && (
+                  <RadioGroup
+                    row
+                    value={selectedPlan}
+                    onChange={(e) => setSelectedPlan(e.target.value)}
+                  >
+                    <FormControlLabel value="ORO" control={<Radio />} label="Plan Oro ($499/mes - 4 semanas)" />
+                    <FormControlLabel value="99" control={<Radio />} label="Plan 99 ($99/semana)" />
+                  </RadioGroup>
+                )}
               </Grid>
               <Grid item lg={12}>
                 <Typography

@@ -11,7 +11,7 @@ import {
   import { FC } from "react";
   import PropTypes from "prop-types";
   import numeral from "numeral";
-  import { PLAN_ORO } from "lib/consts/OBJ_CONTS";
+  import { PLAN_ORO, PLAN_99 } from "lib/consts/OBJ_CONTS";
   interface RentPeriodExtendProps {
     className?: string;
     label: string;
@@ -21,6 +21,8 @@ import {
     lateFee: number;
     freeWeeks?: any;
     isPlanOro?: boolean;
+    isPlan99?: boolean;
+    planOverdue?: boolean;
     onChangePeriod: Function;
   }
   const RentPeriodExtend: FC<RentPeriodExtendProps> = ({
@@ -31,11 +33,17 @@ import {
     selectedWeeks,
     useFreeWeeks,
     lateFee,
-    isPlanOro = false
+    isPlanOro = false,
+    isPlan99 = false,
+    planOverdue = false
   }) => {
+    const hasPlan = isPlanOro || isPlan99;
     const totalPrice = () => {
       if (isPlanOro) {
         return PLAN_ORO.PRICE + lateFee;
+      }
+      if (isPlan99) {
+        return PLAN_99.PRICE + lateFee;
       }
       const weeksToPay =
       !useFreeWeeks ? (selectedWeeks) : (
@@ -47,6 +55,16 @@ import {
     return (
       <>
         <Grid container p={1} spacing={1}>
+          {planOverdue && (
+            <Grid item lg={12} mb={2}>
+              <Alert severity="warning">
+                <Typography variant="body2">
+                  <strong>Atención:</strong> Este cliente tiene un plan activo pero está atrasado en su pago. 
+                  Se cobrará el precio regular. Solo un administrador puede aplicar el precio de plan con atraso.
+                </Typography>
+              </Alert>
+            </Grid>
+          )}
           {isPlanOro && (
             <Grid item lg={12} mb={2}>
               <Alert 
@@ -64,6 +82,23 @@ import {
               </Alert>
             </Grid>
           )}
+          {isPlan99 && (
+            <Grid item lg={12} mb={2}>
+              <Alert 
+                severity="info" 
+                icon={<StarIcon sx={{ color: '#1976d2' }} />}
+                sx={{ 
+                  backgroundColor: '#E3F2FD',
+                  border: '1px solid #1976d2'
+                }}
+              >
+                <Typography variant="body2">
+                  <strong>Plan 99:</strong> Este cliente tiene un plan semanal. 
+                  Solo puede extender exactamente {PLAN_99.WEEKS} semana por ${PLAN_99.PRICE}.
+                </Typography>
+              </Alert>
+            </Grid>
+          )}
           <Grid item lg={2}>
           <TextField
                 label={label}
@@ -71,21 +106,21 @@ import {
                 value={selectedWeeks}
                 variant="outlined"
                 size="small"
-                disabled={isPlanOro}
+                disabled={hasPlan}
                 InputProps={{
                   endAdornment: (
                     <InputAdornment position="start">semana(s)</InputAdornment>
                   ),
                   inputProps: {
-                    min: isPlanOro ? PLAN_ORO.WEEKS : 1,
-                    max: isPlanOro ? PLAN_ORO.WEEKS : undefined,
+                    min: hasPlan ? selectedWeeks : 1,
+                    max: hasPlan ? selectedWeeks : undefined,
                     style: { textAlign: "center" },
                   },
                 }}
                 onChange={(event)=>{onChangePeriod("selectedWeeks", Number(event.target.value))}}
               />
           </Grid>
-          {freeWeeks > 0 && !isPlanOro && (
+          {freeWeeks > 0 && !hasPlan && (
             <Grid item lg={3}>
               <FormControlLabel
                 control={<Checkbox checked={useFreeWeeks} onChange={(event)=>{onChangePeriod("useFreeWeeks", event.target.checked)}}/>}
@@ -98,6 +133,8 @@ import {
             <Typography color="text.secondary" sx={{ pb: 1 }}>
               {isPlanOro ? (
                 <>Precio Plan Oro (4 semanas): {numeral(PLAN_ORO.PRICE).format(`$${PLAN_ORO.PRICE}0,0.00`)}</>
+              ) : isPlan99 ? (
+                <>Precio Plan 99 (1 semana): {numeral(PLAN_99.PRICE).format(`$${PLAN_99.PRICE}0,0.00`)}</>
               ) : (
                 <>Precio por semana: {numeral(weekPrice).format(`$${weekPrice}0,0.00`)}</>
               )}
@@ -126,6 +163,8 @@ import {
     weekPrice: PropTypes.number.isRequired,
     freeWeeks: PropTypes.number,
     isPlanOro: PropTypes.bool,
+    isPlan99: PropTypes.bool,
+    planOverdue: PropTypes.bool,
     onChangePeriod: PropTypes.func.isRequired,
   };
   

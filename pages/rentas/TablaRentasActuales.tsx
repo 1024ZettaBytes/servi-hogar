@@ -133,6 +133,9 @@ const customerFilter = (rentList: any[], customerTypeFilter: string): any[] => {
     if (customerTypeFilter === 'ORO') {
       return rent?.customer?.isPlanOro;
     }
+    if (customerTypeFilter === '99') {
+      return rent?.customer?.isPlan99;
+    }
     return true;
   });
 };
@@ -307,6 +310,7 @@ const TablaRentasActuales: FC<TablaRentasActualesProps> = ({
                 >
                   <MenuItem value={'TODOS'}>TODOS</MenuItem>
                   <MenuItem value={'ORO'}>Plan Oro</MenuItem>
+                  <MenuItem value={'99'}>Plan 99</MenuItem>
                 </Select>
               </FormControl>
               <TextField
@@ -400,6 +404,17 @@ const TablaRentasActuales: FC<TablaRentasActualesProps> = ({
                               noWrap
                             >
                               {' (Oro)'}
+                            </Typography>
+                          )}
+                          {rent?.customer?.isPlan99 && (
+                            <Typography
+                              variant="caption"
+                              fontWeight="bold"
+                              color="#1976d2"
+                              gutterBottom
+                              noWrap
+                            >
+                              {' (99)'}
                             </Typography>
                           )}
                         </a>
