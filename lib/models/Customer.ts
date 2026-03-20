@@ -23,6 +23,8 @@ export interface ICustomer extends Document {
   totalRentWeeks: Number;
   maxPayDays: Number;
   isPlanOro: boolean;
+  isPlan99: boolean;
+  hadPlan99Overdue: boolean;
   createdAt: Date;
   updatedAt: Date;
   lastUpdatedBy: Schema.Types.ObjectId;
@@ -77,6 +79,8 @@ const CustomerSchema = new Schema<ICustomer>({
   lastUpdatedBy: { type: Schema.Types.ObjectId, required: true, ref: 'users' },
   maxPayDays: { type: Number, default: 7 },
   isPlanOro: { type: 'boolean', default: false },
+  isPlan99: { type: 'boolean', default: false },
+  hadPlan99Overdue: { type: 'boolean', default: false },
   active: { type: 'boolean', default: true }
 });
 export const Customer: Model<ICustomer> =

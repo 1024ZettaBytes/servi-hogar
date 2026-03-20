@@ -5,7 +5,7 @@ import { recordAuxActionAndCheckBlocking } from "../../../lib/data/Users";
 
 async function extendRentAPI(req, res, userId, userRole) {
   try{
-   await extendRentData({...req.body, lastUpdatedBy: userId});
+   await extendRentData({...req.body, lastUpdatedBy: userId, userRole});
    
    // If AUX user, record action and check blocking
    let wasBlocked = false;
