@@ -61,7 +61,7 @@ function ExtendRentModal(props) {
   const hasPlan = isPlanOro || isPlan99;
 
   // Check if rent is overdue
-  const isOverdue = rent?.remaining < 0;
+  const isOverdue = rent?.remaining < -1; // Consider overdue if 2 or more days late;
 
   // For plan customers, override the selected weeks
   const adminForcePlan = forcePlanPricing && userRole === 'ADMIN' && isOverdue && hasPlan;
