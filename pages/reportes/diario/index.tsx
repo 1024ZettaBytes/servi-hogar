@@ -52,6 +52,9 @@ const paymentStyle = { ...headerStyle, backgroundColor: '#A580EE' };
 const externalPaymentStyle = { ...headerStyle, backgroundColor: '#89C3F4' };
 const salesPaymentStyle = { ...headerStyle, backgroundColor: '#708FE5' };
 const bonusStyle = { ...headerStyle, backgroundColor: '#C7C6BC' };
+const warehouseStyle = { ...headerStyle, backgroundColor: '#81C784' };
+const conditioningStyle = { ...headerStyle, backgroundColor: '#4DD0E1' };
+
 function DayReport() {
   const [selectedDate, setSelectedDate] = useState<Date>(
     convertDateToLocal(new Date())
@@ -491,6 +494,106 @@ function DayReport() {
                             </Typography>
                           </TableCell>
                         </TableRow>
+                        <TableRow>
+                          <TableCell align="center" style={warehouseStyle}>
+                            <Typography
+                              variant="body1"
+                              fontWeight="bold"
+                              color="text.primary"
+                              gutterBottom
+                              noWrap
+                            >
+                              Alamacén (Nuevas)
+                            </Typography>
+                          </TableCell>
+                          <TableCell align="center" style={cellStyle}>
+                            {reportData?.warehouse?.newMachines?.dayTotal}
+                          </TableCell>
+                          <TableCell align="center" style={cellStyle}>
+                            {reportData?.warehouse?.newMachines?.monthTotal}
+                          </TableCell>
+                        </TableRow>
+
+                        <TableRow>
+                          <TableCell align="center" style={warehouseStyle}>
+                            <Typography
+                              variant="body1"
+                              fontWeight="bold"
+                              color="text.primary"
+                              gutterBottom
+                              noWrap
+                            >
+                              Compras en calle
+                            </Typography>
+                          </TableCell>
+                          <TableCell align="center" style={cellStyle}>
+                            {reportData?.warehouse?.streetMachines?.dayTotal}
+                          </TableCell>
+                          <TableCell align="center" style={cellStyle}>
+                            {reportData?.warehouse?.streetMachines?.monthTotal}
+                          </TableCell>
+                        </TableRow>
+
+                        <TableRow>
+                          <TableCell align="center" style={warehouseStyle}>
+                            <Typography
+                              variant="body1"
+                              fontWeight="bold"
+                              color="text.primary"
+                              gutterBottom
+                              noWrap
+                            >
+                              Reemplazadas 
+                            </Typography>
+                          </TableCell>
+                          <TableCell align="center" style={cellStyle}>
+                            {reportData?.warehouse?.replacements?.dayTotal}
+                          </TableCell>
+                          <TableCell align="center" style={cellStyle}>
+                            {reportData?.warehouse?.replacements?.monthTotal}
+                          </TableCell>
+                        </TableRow>
+
+                        <TableRow>
+                          <TableCell align="center" style={warehouseStyle}>
+                            <Typography
+                              variant="body1"
+                              fontWeight="bold"
+                              color="text.primary"
+                              gutterBottom
+                              noWrap
+                            >
+                              Desmanteladas
+                            </Typography>
+                          </TableCell>
+                          <TableCell align="center" style={cellStyle}>
+                            {reportData?.warehouse?.dismantled?.dayTotal}
+                          </TableCell>
+                          <TableCell align="center" style={cellStyle}>
+                            {reportData?.warehouse?.dismantled?.monthTotal}
+                          </TableCell>
+                        </TableRow>
+
+                        <TableRow>
+                          <TableCell align="center" style={conditioningStyle}>
+                            <Typography
+                              variant="body1"
+                              fontWeight="bold"
+                              color="text.primary"
+                              gutterBottom
+                              noWrap
+                            >
+                              Reacondiciondas 
+                            </Typography>
+                          </TableCell>
+                          <TableCell align="center" style={cellStyle}>
+                            {reportData?.warehouse?.conditioned?.dayTotal}
+                          </TableCell>
+                          <TableCell align="center" style={cellStyle}>
+                            {reportData?.warehouse?.conditioned?.monthTotal}
+                          </TableCell>
+                        </TableRow>
+
                         <TableRow>
                           <TableCell align="center" style={bonusStyle}>
                             <Typography
