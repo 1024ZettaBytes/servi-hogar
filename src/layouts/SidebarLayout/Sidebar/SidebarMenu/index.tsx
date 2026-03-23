@@ -324,6 +324,7 @@ function SidebarMenu({ userRole }) {
                     </NextLink>
                   </ListItem>
                   {['ADMIN', 'AUX'].includes(userRole) && (
+                    <>
                     <ListItem component="div">
                       <NextLink href="/equipos-venta" passHref>
                         <Button
@@ -341,6 +342,24 @@ function SidebarMenu({ userRole }) {
                         </Button>
                       </NextLink>
                     </ListItem>
+                    <ListItem component="div">
+                      <NextLink href="/ventas/pagos" passHref>
+                        <Button
+                          className={
+                            currentRoute.includes('/ventas/pagos')
+                              ? 'active'
+                              : ''
+                          }
+                          disableRipple
+                          component="a"
+                          onClick={closeSidebar}
+                          startIcon={<PaidIcon />}
+                        >
+                          Pagos
+                        </Button>
+                      </NextLink>
+                    </ListItem>
+                    </>
                   )}
                 </List>
               </SubMenuWrapper>

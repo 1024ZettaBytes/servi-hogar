@@ -28,7 +28,7 @@ const SalePaymentSchema = new Schema<ISalePayment>({
     enum: ['TRANSFER', 'DEP', 'CASH', 'CASH_OFFICE'],
     required: true
   },
-  paymentAccount: { type: Schema.Types.ObjectId, ref: 'paymentAccounts', default: null },
+  paymentAccount: { type: Schema.Types.ObjectId, ref: 'payment_accounts', default: null },
   isCashSettlement: { type: Boolean, default: false },
   createdBy: { type: Schema.Types.ObjectId, required: true, ref: 'users' },
   createdAt: { type: Date, required: true }
