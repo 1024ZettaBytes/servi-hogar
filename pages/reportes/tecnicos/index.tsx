@@ -291,11 +291,14 @@ function TechniciansReport({ session }) {
                               <Typography variant="h6" fontWeight="bold">
                                 {techReport.technician.name}
                               </Typography>
-                              <Chip
-                                label={`Rango: ${techReport.technician.range}`}
-                                color="primary"
-                                size="small"
-                              />
+                              {techReport.technician.startM >= 0 &&
+                              techReport.technician.range !== '-1 - -1' && (
+                                <Chip
+                                  label={`Rango: ${techReport.technician.range}`}
+                                  color="primary"
+                                  size="small"
+                                />
+                              )}
                               <Chip
                                 label={`${techReport.totalMachines} cambios`}
                                 color="warning"
@@ -305,6 +308,12 @@ function TechniciansReport({ session }) {
                                 label={`${techReport.totalMaintenances} mantenimientos`}
                                 color="success"
                                 size="small"
+                              />
+                              <Chip
+                                label={`${techReport.conditioningCount} reacondicionadas`}
+                                color="success"
+                                size="small"
+                                variant="outlined"
                               />
                               <Chip
                                 label={`Total: $${techReport.totalPayment.toFixed(2)}`}
@@ -333,6 +342,20 @@ function TechniciansReport({ session }) {
                                     </Typography>
                                     <Typography variant="caption" color="text.secondary">
                                       {techReport.payableMaintenances} × ${techReport.technician.tecPay}
+                                    </Typography>
+                                  </Card>
+                                </Grid>
+                                <Grid item xs={12} sm={6} md={2.4}>
+                                  {/* Conditioning payment */}
+                                  <Card sx={{ p: 2, backgroundColor: '#e0f2f1' }}>
+                                    <Typography variant="subtitle2" color="text.secondary">
+                                      Reacondicionadas
+                                    </Typography>
+                                    <Typography variant="h5" fontWeight="bold">
+                                      ${techReport.conditioningPayment?.toFixed(2) || '0.00'}
+                                    </Typography>
+                                    <Typography variant="caption" color="text.secondary">
+                                      {techReport.conditioningCount || 0} × $200
                                     </Typography>
                                   </Card>
                                 </Grid>
