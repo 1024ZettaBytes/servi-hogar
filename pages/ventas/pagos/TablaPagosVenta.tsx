@@ -1,0 +1,339 @@
+import { FC, useState } from 'react';
+import numeral from 'numeral';
+import {
+  Tooltip,
+  Divider,
+  Box,
+  Card,
+  IconButton,
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TablePagination,
+  TableRow,
+  TableContainer,
+  Typography,
+  useTheme,
+  CardHeader,
+  TextField,
+  InputAdornment,
+  Grid,
+  Alert,
+  Skeleton,
+  Chip
+} from '@mui/material';
+
+import ImageSearchIcon from '@mui/icons-material/ImageSearch';
+import ReceiptIcon from '@mui/icons-material/Receipt';
+import SearchIcon from '@mui/icons-material/Search';
+import { capitalizeFirstLetter, formatTZDate } from 'lib/client/utils';
+import { PAYMENT_METHODS } from '../../../lib/consts/OBJ_CONTS';
+import { getFetcher, useGetSalePayments } from 'pages/api/useRequest';
+import PaymentReceipt from 'src/components/PaymentReceipt';
+
+interface TablaPagosVentaProps {
+  className?: string;
+}
+
+const TablaPagosVenta: FC<TablaPagosVentaProps> = () => {
+  const [page, setPage] = useState(0);
+  const [limit, setLimit] = useState(30);
+  const [searchTerm, setSearchTerm] = useState(null);
+  const [searchText, setSearchText] = useState(null);
+  const [selectedReceipt, setSelectedReceipt] = useState(null);
+  const [showReceipt, setShowReceipt] = useState(false);
+
+  const { salePayments, salePaymentsError } = useGetSalePayments(
+    getFetcher,
+    limit,
+    page + 1,
+    searchTerm
+  );
+  const generalError = salePaymentsError;
+  const completeData = salePayments;
+
+  const handlePageChange = (_event, newPage) => {
+    setPage(newPage);
+  };
+  const handleLimitChange = (event) => {
+    setLimit(parseInt(event.target.value));
+  };
+
+  const theme = useTheme();
+  return (
+    <Grid item xs={12}>
+      {generalError ? (
+        <Alert severity="error">
+          {salePaymentsError?.message}
+        </Alert>
+      ) : !completeData ? (
+        <Skeleton
+          variant="rectangular"
+          width={"100%"}
+          height={500}
+          animation="wave"
+        />
+      ) : (
+        <Card>
+          <Card>
+            <CardHeader
+              action={
+                <Box width={200}>
+                  <TextField
+                    size="small"
+                    helperText="Escriba y presione ENTER"
+                    id="input-search-sale-payment"
+                    label="Buscar"
+                    value={searchText}
+                    onChange={(event) => {
+                      setSearchText(event.target.value);
+                    }}
+                    onKeyDown={(ev) => {
+                      if (ev.key === "Enter") {
+                        ev.preventDefault();
+                        setSearchTerm(searchText);
+                      }
+                    }}
+                    InputProps={{
+                      startAdornment: (
+                        <InputAdornment position="start">
+                          <SearchIcon />
+                        </InputAdornment>
+                      )
+                    }}
+                    sx={{ marginTop: '20px' }}
+                  />
+                </Box>
+              }
+              sx={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                flexWrap: 'wrap'
+              }}
+              title=""
+            />
+            <Divider />
+            <TableContainer>
+              <Table>
+                <TableHead>
+                  <TableRow>
+                    <TableCell align="center"># Pago</TableCell>
+                    <TableCell align="center">Venta</TableCell>
+                    <TableCell align="center">Fecha</TableCell>
+                    <TableCell align="center">Cliente</TableCell>
+                    <TableCell align="center">Método</TableCell>
+                    <TableCell align="center">Cuenta</TableCell>
+                    <TableCell align="center">Comprobante</TableCell>
+                    <TableCell align="center">Recibo</TableCell>
+                    <TableCell align="center">Semanas</TableCell>
+                    <TableCell align="center">Importe</TableCell>
+                    <TableCell align="center">Estado</TableCell>
+                    <TableCell align="center">Usuario</TableCell>
+                  </TableRow>
+                </TableHead>
+                <TableBody>
+                  {salePayments?.list?.map((payment) => {
+                    const paymentLabel = payment.isCashSettlement
+                      ? 'Contado'
+                      : payment.paymentNumber
+                        ? `${payment.paymentNumber} de ${payment.sale?.totalWeeks || '?'}`
+                        : '-';
+
+                    return (
+                      <TableRow key={payment?._id}>
+                        <TableCell align="center">
+                          <Typography
+                            variant="body1"
+                            fontWeight="bold"
+                            color="text.primary"
+                            gutterBottom
+                            noWrap
+                          >
+                            {paymentLabel}
+                          </Typography>
+                        </TableCell>
+                        <TableCell align="center">
+                          <Typography
+                            variant="body1"
+                            fontWeight="bold"
+                            color="text.primary"
+                            gutterBottom
+                            noWrap
+                          >
+                            #{payment?.sale?.saleNum || '-'}
+                          </Typography>
+                        </TableCell>
+                        <TableCell align="center">
+                          <Typography
+                            variant="body1"
+                            fontWeight="bold"
+                            color="text.primary"
+                            gutterBottom
+                            noWrap
+                          >
+                            {capitalizeFirstLetter(
+                              formatTZDate(payment?.paymentDate, 'MMMM DD YYYY')
+                            )}
+                          </Typography>
+                        </TableCell>
+                        <TableCell align="center">
+                          <Typography
+                            variant="body1"
+                            fontWeight="bold"
+                            color="text.primary"
+                            gutterBottom
+                            noWrap
+                          >
+                            {payment?.sale?.customer?.name || 'N/A'}
+                          </Typography>
+                        </TableCell>
+                        <TableCell align="center">
+                          <Typography
+                            variant="body1"
+                            fontWeight="bold"
+                            color="text.primary"
+                            gutterBottom
+                            noWrap
+                          >
+                            {PAYMENT_METHODS[payment?.method] || 'N/A'}
+                          </Typography>
+                        </TableCell>
+                        <TableCell align="center">
+                          <Typography
+                            variant="body1"
+                            fontWeight="bold"
+                            color="text.primary"
+                            gutterBottom
+                            noWrap
+                          >
+                            {payment?.paymentAccount
+                              ? `${payment.paymentAccount.bank} ${payment.paymentAccount.count} (${payment.paymentAccount.number.slice(-4)})`
+                              : 'N/A'}
+                          </Typography>
+                        </TableCell>
+                        <TableCell align="center">
+                          {payment.imageUrl ? (
+                            <a
+                              href={payment.imageUrl}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                            >
+                              <Tooltip title="Ver comprobante" arrow>
+                                <IconButton
+                                  sx={{
+                                    '&:hover': {
+                                      background: theme.colors.primary.lighter
+                                    },
+                                    color: theme.palette.primary.main
+                                  }}
+                                  color="inherit"
+                                  size="small"
+                                >
+                                  <ImageSearchIcon fontSize="small" />
+                                </IconButton>
+                              </Tooltip>
+                            </a>
+                          ) : null}
+                        </TableCell>
+                        <TableCell align="center">
+                          {payment.receipt ? (
+                            <Tooltip title="Ver recibo" arrow>
+                              <IconButton
+                                sx={{
+                                  '&:hover': {
+                                    background: theme.colors.success.lighter
+                                  },
+                                  color: theme.palette.success.main
+                                }}
+                                color="inherit"
+                                size="small"
+                                onClick={() => {
+                                  setSelectedReceipt(payment.receipt);
+                                  setShowReceipt(true);
+                                }}
+                              >
+                                <ReceiptIcon fontSize="small" />
+                              </IconButton>
+                            </Tooltip>
+                          ) : null}
+                        </TableCell>
+                        <TableCell align="center">
+                          <Typography variant="body2" fontWeight="bold">
+                            {payment?.weeksCovered || '-'}
+                          </Typography>
+                        </TableCell>
+                        <TableCell align="center">
+                          <Typography variant="body2" color="green" noWrap>
+                            {numeral(payment?.amount).format(
+                              `$${payment.amount}0,0.00`
+                            )}
+                          </Typography>
+                        </TableCell>
+                        <TableCell align="center">
+                          <Chip
+                            label={
+                              payment?.sale?.status === 'PAGADA'
+                                ? 'Pagada'
+                                : payment?.sale?.status === 'CANCELADA'
+                                  ? 'Cancelada'
+                                  : 'Activa'
+                            }
+                            color={
+                              payment?.sale?.status === 'PAGADA'
+                                ? 'success'
+                                : payment?.sale?.status === 'CANCELADA'
+                                  ? 'error'
+                                  : 'info'
+                            }
+                            size="small"
+                          />
+                        </TableCell>
+                        <TableCell align="center">
+                          <Typography
+                            variant="body1"
+                            fontWeight="bold"
+                            color="text.primary"
+                            gutterBottom
+                          >
+                            {payment?.createdBy?.name || '-'}
+                          </Typography>
+                        </TableCell>
+                      </TableRow>
+                    );
+                  })}
+                </TableBody>
+              </Table>
+            </TableContainer>
+            <Box p={2}>
+              <TablePagination
+                component="div"
+                count={salePayments.total}
+                onPageChange={handlePageChange}
+                onRowsPerPageChange={handleLimitChange}
+                page={page}
+                rowsPerPage={limit}
+                rowsPerPageOptions={[5, 10, 25, 30]}
+              />
+            </Box>
+          </Card>
+        </Card>
+      )}
+
+      {/* Receipt Dialog */}
+      {showReceipt && (
+        <PaymentReceipt
+          receipt={selectedReceipt}
+          open={showReceipt}
+          onClose={() => {
+            setShowReceipt(false);
+            setSelectedReceipt(null);
+          }}
+        />
+      )}
+    </Grid>
+  );
+};
+
+export default TablaPagosVenta;

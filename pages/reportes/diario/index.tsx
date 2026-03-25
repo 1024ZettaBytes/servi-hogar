@@ -503,7 +503,7 @@ function DayReport() {
                               gutterBottom
                               noWrap
                             >
-                              Alamacén (Nuevas)
+                              Almacén (Nuevas)
                             </Typography>
                           </TableCell>
                           <TableCell align="center" style={cellStyle}>

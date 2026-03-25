@@ -419,6 +419,15 @@ export const useGetCompletedCollections = (fetcher, limit, page, date = null) =>
   return { completedCollectionsList: data?.data, completedCollectionsError: error };
 };
 
+// Sale Payments
+export const useGetSalePayments = (fetcher, limit, page, searchTerm = null) => {
+  const { data, error } = useSWR(
+    getPaginatedUrl(ROUTES.ALL_SALE_PAYMENTS_API, limit, page, searchTerm),
+    fetcher
+  );
+  return { salePayments: data?.data, salePaymentsError: error };
+};
+
 // Sale Pickups (Warranty Claims)
 export const useGetPendingSalePickups = (fetcher, detailed = true) => {
   const { data, error, isLoading } = useSWR(
