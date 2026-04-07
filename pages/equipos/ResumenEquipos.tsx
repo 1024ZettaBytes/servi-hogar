@@ -15,7 +15,6 @@ import SearchIcon from '@mui/icons-material/Search';
 import LocalShippingIcon from "@mui/icons-material/LocalShipping";
 import CurrencyExchangeIcon from "@mui/icons-material/CurrencyExchange";
 import EventAvailableIcon from "@mui/icons-material/EventAvailable";
-import HourglassEmptyIcon from "@mui/icons-material/HourglassEmpty";
 import BuildIcon from "@mui/icons-material/Build";
 import MapIcon from "@mui/icons-material/Map";
 import WarehouseIcon from "@mui/icons-material/Warehouse";
