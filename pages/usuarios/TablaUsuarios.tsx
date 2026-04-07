@@ -32,6 +32,8 @@ import SearchIcon from '@mui/icons-material/Search';
 import GenericModal from '@/components/GenericModal';
 import LocalLaundryServiceIcon from '@mui/icons-material/LocalLaundryService';
 import AssignMachineModal from '@/components/AssignMachineModal';
+import AccessTimeIcon from '@mui/icons-material/AccessTime';
+import AttendanceDetailModal from '@/components/AttendanceDetailModal';
 
 interface TablaUsuariosProps {
   className?: string;
@@ -87,6 +89,8 @@ const TablaUsuarios: FC<TablaUsuariosProps> = ({ userList }) => {
   const [updateModalIsOpen, setUpdateModalIsOpen] = useState(false);
   const [unlockModalIsOpen, setUnlockModalIsOpen] = useState(false);
   const [assignModalIsOpen, setAssignModalIsOpen] = useState(false);
+  const [attendanceModalIsOpen, setAttendanceModalIsOpen] = useState(false);
+  const [attendanceUser, setAttendanceUser] = useState<any>(null);
   const [isUpdating, setIsUpdating] = useState(false);
   const [isUnlocking, setIsUnlocking] = useState(false);
   const [userToUpdate, setUserToUpdate] = useState<any>(null);
@@ -276,6 +280,20 @@ const TablaUsuarios: FC<TablaUsuariosProps> = ({ userList }) => {
                     </TableCell>
 
                     <TableCell align="center">
+                      {!['ADMIN', 'PARTNER', 'SYSTEM'].includes(user.role?.id) && (
+                        <Tooltip title="Ver Asistencia" arrow>
+                          <IconButton
+                            onClick={() => {
+                              setAttendanceUser(user);
+                              setAttendanceModalIsOpen(true);
+                            }}
+                            color="primary"
+                            size="small"
+                          >
+                            <AccessTimeIcon fontSize="small" />
+                          </IconButton>
+                        </Tooltip>
+                      )}
                       {user.role?.id === 'TEC' && (
                         <Tooltip title={'Asignar Equipos'} arrow>
                           <IconButton
@@ -397,6 +415,16 @@ const TablaUsuarios: FC<TablaUsuariosProps> = ({ userList }) => {
           tecList={tecUsers}
           selectedTec={userToUpdate}
           handleOnClose={handleCloseAssign}
+        />
+      )}
+      {attendanceModalIsOpen && attendanceUser && (
+        <AttendanceDetailModal
+          open={attendanceModalIsOpen}
+          onClose={() => {
+            setAttendanceModalIsOpen(false);
+            setAttendanceUser(null);
+          }}
+          user={attendanceUser}
         />
       )}
     </>

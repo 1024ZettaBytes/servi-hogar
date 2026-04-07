@@ -13,6 +13,7 @@ import {
   useGetUsers,
   useGetRoles,
   useGetUserUnlocks,
+  useGetAllWarehousesOverview,
   getFetcher,
 } from "../api/useRequest";
 import { useSnackbar } from "notistack";
@@ -27,9 +28,10 @@ function Usuarios({}) {
   const { userList, userError } = useGetUsers(getFetcher);
   const { rolesList, rolesError } = useGetRoles(getFetcher);
   const { unlocksList, unlocksError } = useGetUserUnlocks(getFetcher);
+  const { warehousesList, warehousesError } = useGetAllWarehousesOverview(getFetcher);
   const [addModalIsOpen, setAddModalIsOpen] = useState(false);
-  const generalError = userError || rolesError || unlocksError;
-  const completeData = userList && rolesList && unlocksList;
+  const generalError = userError || rolesError || unlocksError || warehousesError;
+  const completeData = userList && rolesList && unlocksList && warehousesList;
 
   const handleClickOpen = () => {
     setAddModalIsOpen(true);
@@ -113,6 +115,7 @@ function Usuarios({}) {
           open={addModalIsOpen}
           handleOnClose={handleClose}
           rolesList={rolesList}
+          warehousesList={warehousesList}
           tecList={userList?.filter(
             (u) => u.role?.id === "TEC" && u.isActive
           ) || []}

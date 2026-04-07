@@ -70,6 +70,28 @@ function HeaderUserbox(props) {
     setOpen(false);
   };
 
+  const handleSignOut = async () => {
+    try {
+      let coordinates = null;
+      if (navigator.geolocation) {
+        coordinates = await new Promise<{ lat: number; lng: number } | null>((resolve) => {
+          navigator.geolocation.getCurrentPosition(
+            (pos) => resolve({ lat: pos.coords.latitude, lng: pos.coords.longitude }),
+            () => resolve(null),
+            { enableHighAccuracy: true, timeout: 5000, maximumAge: 0 }
+          );
+        });
+      }
+      navigator.sendBeacon(
+        '/api/attendance',
+        new Blob([JSON.stringify({ coordinates, _method: 'PUT' })], { type: 'application/json' })
+      );
+    } catch {
+      // No bloquear el cierre de sesión si falla el registro
+    }
+    signOut({ callbackUrl: '/' });
+  };
+
   return (
     <>
       <UserBoxButton color="secondary" ref={ref} onClick={handleOpen}>
@@ -113,7 +135,7 @@ function HeaderUserbox(props) {
         <Divider />
         <Box sx={{ m: 1 }}>
           <Button color="primary"
-          onClick={() => signOut({callbackUrl: '/'})}
+          onClick={handleSignOut}
           fullWidth>
             <LockOpenTwoToneIcon sx={{ mr: 1 }} />
             CERRAR SESIÓN

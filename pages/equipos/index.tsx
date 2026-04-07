@@ -1,37 +1,30 @@
-import Head from "next/head";
-import { getSession } from "next-auth/react";
-import { useState } from "react";
-import SidebarLayout from "@/layouts/SidebarLayout";
-import { validateServerSideSession } from "../../lib/auth";
-import PageHeader from "@/components/PageHeader";
-import PageTitleWrapper from "@/components/PageTitleWrapper";
-import {
-  Card,
-  Container,
-  Grid,
-  Skeleton,
-  Alert,
-} from "@mui/material";
-import Footer from "@/components/Footer";
-import AddMachineModal from "@/components/AddMachineModal";
-import TablaEquipos from "./TablaEquipos";
+import Head from 'next/head';
+import { getSession } from 'next-auth/react';
+import { useState } from 'react';
+import SidebarLayout from '@/layouts/SidebarLayout';
+import { validateServerSideSession } from '../../lib/auth';
+import PageHeader from '@/components/PageHeader';
+import PageTitleWrapper from '@/components/PageTitleWrapper';
+import { Card, Container, Grid, Skeleton, Alert } from '@mui/material';
+import Footer from '@/components/Footer';
+import AddMachineModal from '@/components/AddMachineModal';
+import TablaEquipos from './TablaEquipos';
 import {
   useGetAllMachines,
   getFetcher,
-  useGetMachinesStatus,
-} from "../api/useRequest";
-import { useSnackbar } from "notistack";
-import NextBreadcrumbs from "@/components/Shared/BreadCrums";
-import ResumenEquipos from "./ResumenEquipos";
-import AddTwoTone from "@mui/icons-material/AddTwoTone";
+  useGetMachinesStatus
+} from '../api/useRequest';
+import { useSnackbar } from 'notistack';
+import NextBreadcrumbs from '@/components/Shared/BreadCrums';
+import ResumenEquipos from './ResumenEquipos';
+import AddTwoTone from '@mui/icons-material/AddTwoTone';
 
 function Equipos({ session }) {
-  const paths = ["Inicio", "Equipos"];
+  const paths = ['Inicio', 'Equipos'];
   const { enqueueSnackbar } = useSnackbar();
   const { machinesData, machinesError } = useGetAllMachines(getFetcher);
-  const { machinesStatusList, machinesStatusError } = useGetMachinesStatus(
-    getFetcher
-  );
+  const { machinesStatusList, machinesStatusError } =
+    useGetMachinesStatus(getFetcher);
   const [modalIsOpen, setModalIsOpen] = useState(false);
   const machinesList = machinesData ? machinesData?.machinesList : null;
   const machinesSummary = machinesData ? machinesData?.machinesSummary : null;
@@ -42,21 +35,45 @@ function Equipos({ session }) {
   const handleClickOpen = () => {
     setModalIsOpen(true);
   };
-
+  const getOnlyActiveTotal = (summary) => {
+    if (!summary) return 0;
+    const { total, PERDIDA, INVES, MANTE, ESPE, LISTO } = summary;
+    const nonWarehouse = [
+      MANTE.byWarehouse,
+      ESPE.byWarehouse,
+      LISTO.byWarehouse
+    ].reduce(
+      (acc, ware) =>
+        acc +
+        ware.reduce(
+          (innerAcc, w) => {
+            return innerAcc + (w.name?.includes('Chica') ? w.total : 0);
+          },
+          0
+        ),
+      0
+    );
+    return total - (PERDIDA.total || 0) - (INVES.total || 0) - nonWarehouse;
+  };
   const handleClose = (addedCustomer, successMessage = null) => {
     setModalIsOpen(false);
     if (addedCustomer && successMessage) {
       enqueueSnackbar(successMessage, {
-        variant: "success",
+        variant: 'success',
         anchorOrigin: {
-          vertical: "top",
-          horizontal: "center",
+          vertical: 'top',
+          horizontal: 'center'
         },
-        autoHideDuration: 1500,
+        autoHideDuration: 1500
       });
     }
   };
-  const button = { text: "Agregar equipo", onClick: handleClickOpen, startIcon: <AddTwoTone/>, variant:"contained" };
+  const button = {
+    text: 'Agregar equipo',
+    onClick: handleClickOpen,
+    startIcon: <AddTwoTone />,
+    variant: 'contained'
+  };
   return (
     <>
       <Head>
@@ -64,8 +81,8 @@ function Equipos({ session }) {
       </Head>
       <PageTitleWrapper>
         <PageHeader
-          title={"Equipos"}
-          sutitle={""}
+          title={'Equipos'}
+          sutitle={''}
           button={!generalError && completeData ? button : null}
         />
         <NextBreadcrumbs paths={paths} lastLoaded={true} />
@@ -86,7 +103,7 @@ function Equipos({ session }) {
             ) : !completeData ? (
               <Skeleton
                 variant="rectangular"
-                width={"100%"}
+                width={'100%'}
                 height={500}
                 animation="wave"
               />
@@ -110,10 +127,11 @@ function Equipos({ session }) {
                     ready={machinesSummary.LISTO}
                     waiting={machinesSummary.ESPE}
                     onMaintenance={machinesSummary.MANTE}
-                    lost={machinesSummary?.PERDIDA }
+                    lost={machinesSummary?.PERDIDA}
                     total={machinesSummary?.total}
                     stored={machinesSummary?.ALMACEN}
                     forSale={machinesSummary?.VENTA}
+                    activeTotal={getOnlyActiveTotal(machinesSummary)}
                   />
                 </Grid>
               )}

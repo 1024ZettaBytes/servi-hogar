@@ -22,14 +22,17 @@ import {
 import { LoadingButton } from "@mui/lab";
 import { saveUser } from "../../../lib/client/usersFetch";
 function AddUserModal(props) {
-  const { handleOnClose, open, rolesList, tecList = [] } = props;
+  const { handleOnClose, open, rolesList, tecList = [], warehousesList = [] } = props;
   const [isLoading, setIsLoading] = useState(false);
   const [hasError, setHasError] = useState({ error: false, msg: "" });
   const [selectedRole, setSelectedRole] = useState<string>(null);
+  const [selectedWarehouse, setSelectedWarehouse] = useState<string>(null);
   const [isReplacement, setIsReplacement] = useState(false);
   const [replacedTecId, setReplacedTecId] = useState<string>(null);
 
   const isTecRole = selectedRole === "TEC";
+  const EXEMPT_ROLES = ['ADMIN', 'PARTNER', 'SYSTEM'];
+  const requiresWarehouse = selectedRole && !EXEMPT_ROLES.includes(selectedRole);
 
   async function submitHandler(event) {
     event.preventDefault();
@@ -41,6 +44,9 @@ function AddUserModal(props) {
       password: event.target.password.value,
       role: selectedRole,
     };
+    if (requiresWarehouse && selectedWarehouse) {
+      userData.warehouse = selectedWarehouse;
+    }
     if (isTecRole && isReplacement && replacedTecId) {
       userData.replacedTechnicianId = replacedTecId;
     }
@@ -182,6 +188,43 @@ function AddUserModal(props) {
                   </Select>
                 </FormControl>
               </Grid>
+              {requiresWarehouse && (
+                <>
+                  <Grid item lg={12}>
+                    <Typography
+                      variant="h5"
+                      component="h5"
+                      color="secondary"
+                      textAlign="left"
+                      fontWeight="bold"
+                    >
+                      Oficina / Almacén (para asistencia)
+                    </Typography>
+                  </Grid>
+                  <Grid item lg={12}>
+                    <FormControl fullWidth>
+                      <InputLabel id="warehouse-label"></InputLabel>
+                      <Select
+                        labelId="warehouse-label"
+                        id="warehouse"
+                        name="warehouse"
+                        label=""
+                        required
+                        value={selectedWarehouse || ""}
+                        onChange={(event) =>
+                          setSelectedWarehouse(event.target.value)
+                        }
+                      >
+                        {warehousesList.map((wh) => (
+                          <MenuItem key={wh._id} value={wh._id}>
+                            {wh.name}
+                          </MenuItem>
+                        ))}
+                      </Select>
+                    </FormControl>
+                  </Grid>
+                </>
+              )}
               {isTecRole && (
                 <>
                   <Grid item lg={12}>
@@ -288,6 +331,7 @@ AddUserModal.propTypes = {
   handleOnClose: PropTypes.func.isRequired,
   open: PropTypes.bool.isRequired,
   rolesList: PropTypes.array.isRequired,
+  warehousesList: PropTypes.array,
   tecList: PropTypes.array,
 };
 
