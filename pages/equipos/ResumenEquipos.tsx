@@ -225,54 +225,7 @@ function ResumenEquipos({
           <Card
             sx={{
               px: 1,
-              height: "150px",
-              overflowY: "auto",
-            }}
-          >
-            <CardContent>
-              <Grid
-                container
-                alignItems="center"
-                justifyItems="center"
-                textAlign={{ lg: "center" }}
-              >
-                <Grid item lg={2} md={2} xs={2}>
-                  <AvatarWrapperError>
-                    <HourglassEmptyIcon />
-                  </AvatarWrapperError>
-                </Grid>
-                <Grid item lg={3} md={2} xs={2}>
-                  <Typography variant="h3" gutterBottom noWrap>
-                    {waiting?.total}
-                  </Typography>
-                </Grid>
-                <Grid item lg={7} md={8} xs={8}>
-                  <Typography variant="subtitle2" noWrap textAlign="left">
-                    En espera
-                  </Typography>
-                </Grid>
-                {waiting?.byWarehouse?.length > 0 && (
-                  <Grid item lg={12} md={12} xs={12}>
-                    <List>
-                      {waiting?.byWarehouse.map((warehouse) => (
-                        <ListItem disablePadding key={warehouse?.id}>
-                          <ListItemText
-                            primary={`- ${warehouse?.name}: ${warehouse?.total}`}
-                          />
-                        </ListItem>
-                      ))}
-                    </List>
-                  </Grid>
-                )}
-              </Grid>
-            </CardContent>
-          </Card>
-        </Grid>
-        <Grid xs={12} sm={6} md={3} item>
-          <Card
-            sx={{
-              px: 1,
-              height: "150px",
+              height: "auto",
               overflowY: "auto",
             }}
           >
@@ -290,19 +243,38 @@ function ResumenEquipos({
                 </Grid>
                 <Grid item lg={3} md={2} xs={2}>
                   <Typography variant="h3" gutterBottom noWrap>
-                    {onMaintenance?.total}
+                    {(waiting?.total || 0) + (onMaintenance?.total || 0)}
                   </Typography>
                 </Grid>
                 <Grid item lg={7} md={8} xs={8}>
                   <Typography variant="subtitle2" noWrap textAlign="left">
-                    En mantenimiento
+                    Mant. Pendientes
                   </Typography>
                 </Grid>
+                {waiting?.byWarehouse?.length > 0 && (
+                  <Grid item lg={12} md={12} xs={12}>
+                    <Typography variant="subtitle2" sx={{ mt: 1 }}>
+                      En espera:
+                    </Typography>
+                    <List dense>
+                      {waiting.byWarehouse.map((warehouse) => (
+                        <ListItem disablePadding key={`w-${warehouse?.id}`}>
+                          <ListItemText
+                            primary={`- ${warehouse?.name}: ${warehouse?.total}`}
+                          />
+                        </ListItem>
+                      ))}
+                    </List>
+                  </Grid>
+                )}
                 {onMaintenance?.byWarehouse?.length > 0 && (
                   <Grid item lg={12} md={12} xs={12}>
-                    <List>
-                      {onMaintenance?.byWarehouse.map((warehouse) => (
-                        <ListItem disablePadding key={warehouse?.id}>
+                    <Typography variant="subtitle2" sx={{ mt: 1 }}>
+                      En mantenimiento:
+                    </Typography>
+                    <List dense>
+                      {onMaintenance.byWarehouse.map((warehouse) => (
+                        <ListItem disablePadding key={`m-${warehouse?.id}`}>
                           <ListItemText
                             primary={`- ${warehouse?.name}: ${warehouse?.total}`}
                           />
