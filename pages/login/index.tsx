@@ -31,6 +31,34 @@ function LoginForm() {
     };
   }, []);
 
+  async function getGeolocation(): Promise<{ lat: number; lng: number } | null> {
+    if (!navigator.geolocation) return null;
+    try {
+      const position = await new Promise<GeolocationPosition>((resolve, reject) => {
+        navigator.geolocation.getCurrentPosition(resolve, reject, {
+          enableHighAccuracy: true,
+          timeout: 10000,
+          maximumAge: 0
+        });
+      });
+      return { lat: position.coords.latitude, lng: position.coords.longitude };
+    } catch {
+      return null;
+    }
+  }
+
+  async function recordAttendanceLogin(coordinates: { lat: number; lng: number } | null) {
+    try {
+      await fetch("/api/attendance", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ coordinates }),
+      });
+    } catch {
+      // No bloquear el login si falla el registro de asistencia
+    }
+  }
+
   async function submitHandler(event) {
     event.preventDefault();
     if (!isMountedRef.current) return;
@@ -40,6 +68,8 @@ function LoginForm() {
 
     const enteredUser = userInputRef?.current?.value;
     const enteredPassword = passwordInputRef?.current?.value;
+
+    const coordinates = await getGeolocation();
 
     // optional: Add validation
     const result = await signIn("credentials", {
@@ -51,6 +81,7 @@ function LoginForm() {
     if (!isMountedRef.current) return;
 
     if (!result.error) {
+      await recordAttendanceLogin(coordinates);
       // set some auth state
       const url = (router.query?.returnUrl || "/").toString();
       // Use window.location to avoid race condition with auth page redirect

@@ -2,7 +2,7 @@ import {
   getMachineByIdData,
   updateMachineData
 } from '../../../lib/data/Machines';
-import { validateUserPermissions, getUserId } from '../auth/authUtils';
+import { validateUserPermissions, getUserId, getUserRole } from '../auth/authUtils';
 import formidable from 'formidable';
 export const config = {
   api: {
@@ -27,6 +27,7 @@ async function getMachineByIdAPI(req, res) {
 
 async function updateMachineAPI(req, res, userId) {
   try {
+    const userRole = await getUserRole(req, res);
     const form = new formidable.IncomingForm();
     form.multiples = true;
 
@@ -45,7 +46,7 @@ async function updateMachineAPI(req, res, userId) {
       });
     });
     const body = JSON.parse(fields?.body);
-    await updateMachineData({ ...body, files, lastUpdatedBy: userId });
+    await updateMachineData({ ...body, files, lastUpdatedBy: userId, userRole });
     res.status(200).json({ msg: '¡Equipo actualizado con éxito!' });
   } catch (e) {
     console.error(e);

@@ -51,6 +51,7 @@ function ResumenEquipos({
   total,
   stored,
   forSale,
+  activeTotal,
 }) {
   return (
     <>
@@ -512,6 +513,16 @@ function ResumenEquipos({
                 <Grid item lg={7} md={8} xs={8}>
                   <Typography variant="h3" noWrap>
                     {total}
+                  </Typography>
+                </Grid>
+                <Grid item lg={5} md={4} xs={4}>
+                  <Typography variant="h3" textAlign="center">
+                    ACTIVAS:
+                  </Typography>
+                </Grid>
+                <Grid item lg={7} md={8} xs={8}>
+                  <Typography variant="h3" noWrap>
+                    {activeTotal}
                   </Typography>
                 </Grid>
               </Grid>

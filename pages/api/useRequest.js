@@ -290,6 +290,14 @@ export const useGetRoles = (fetcher) => {
   return { rolesList: data?.data, rolesError: error };
 };
 
+// Attendance
+export const useGetAttendanceRecords = (fetcher, userId, startDate, endDate) => {
+  
+  const url = `${ROUTES.ATTENDANCE_RECORDS_API}?userId=${userId}&startDate=${formatTZDate(startDate, 'YYYY-MM-DD')}&endDate=${formatTZDate(endDate, 'YYYY-MM-DD')}`;
+  const { data, error } = useSWR(url, fetcher);
+  return { attendanceList: data?.data, attendanceError: error };
+};
+
 // Partners
 export const useGetPartners = (fetcher, detailed = false) => {
   const { data, error } = useSWR(

@@ -12,6 +12,7 @@ export interface IUser extends Document {
   tecPay: number;
   auxActionTimestamps?: Date[];
   toolsVerificationPending: boolean;
+  warehouse?: Schema.Types.ObjectId;
 }
 
 const UserSchema = new Schema<IUser>({
@@ -59,6 +60,11 @@ const UserSchema = new Schema<IUser>({
   toolsVerificationPending: {
     type: Boolean,
     default: false
+  },
+  warehouse: {
+    type: Schema.Types.ObjectId,
+    ref: 'warehouses',
+    default: null
   }
 });
 UserSchema.methods.encryptPassword = async (psw) => {
