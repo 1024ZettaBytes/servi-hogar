@@ -1,5 +1,6 @@
-import { validateUserPermissions, getUserId } from "../auth/authUtils";
+import { validateUserPermissions, getUserId, getUserRole } from "../auth/authUtils";
 import { savePaymentData, getPaymentsData } from "../../../lib/data/Payments";
+import { recordAuxActionAndCheckBlocking } from "../../../lib/data/Users";
 import formidable from "formidable";
 export const config = {
   api: {
@@ -23,7 +24,7 @@ async function getPaymentsAPI(req, res){
   }
   
 }
-async function savePaymentAPI(req, res, userId) {
+async function savePaymentAPI(req, res, userId, userRole) {
   try {
     const form = new formidable.IncomingForm();
     const { fields, files } = await new Promise(function (resolve, reject) {
@@ -47,9 +48,17 @@ async function savePaymentAPI(req, res, userId) {
       files: Object.keys(files).length > 0 ? files : null,
       lastUpdatedBy: userId,
     });
+    
+    // If AUX user, record action and check blocking
+    let wasBlocked = false;
+    if (userRole === 'AUX') {
+      wasBlocked = await recordAuxActionAndCheckBlocking(userId);
+    }
+    
     res.status(200).json({ 
       msg: "¡Pago guardado con éxito!", 
-      receipt: result
+      receipt: result,
+      wasBlocked
     });
   } catch (e) {
     console.error(e);
@@ -60,13 +69,14 @@ async function savePaymentAPI(req, res, userId) {
 async function handler(req, res) {
   const validRole = await validateUserPermissions(req, res, ["ADMIN", "AUX"]);
   const userId = await getUserId(req);
+  const userRole = await getUserRole(req);
   if (validRole)
     switch (req.method) {
       case "GET":
         await getPaymentsAPI(req, res);
         break;
       case "POST":
-        await savePaymentAPI(req, res, userId);
+        await savePaymentAPI(req, res, userId, userRole);
         break;
       case "PUT":
         break;
