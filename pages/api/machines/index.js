@@ -65,11 +65,28 @@ async function saveMachineAPI(req, res, userId) {
 
 async function deleteMachinesAPI(req, res, userId, userRole) {
   try {
-    if (userRole !== "ADMIN")
+    if (userRole !== "ADMIN") {
       res
         .status(403)
         .json({ errorMsg: "No tienes permisos para realizar esta acción" });
-    await deleteMachinesData({ arrayOfIds: req.body, lastUpdatedBy: userId });
+      return;
+    }
+
+    // Parse JSON body manually since bodyParser is disabled
+    const body = await new Promise((resolve, reject) => {
+      let data = '';
+      req.on('data', chunk => { data += chunk; });
+      req.on('end', () => {
+        try {
+          resolve(JSON.parse(data));
+        } catch (e) {
+          reject(new Error('Error al parsear el cuerpo de la solicitud'));
+        }
+      });
+      req.on('error', reject);
+    });
+
+    await deleteMachinesData({ arrayOfIds: body, lastUpdatedBy: userId });
     res.status(200).json({ msg: "¡Equipo(s) eliminados con éxito!" });
   } catch (e) {
     console.error(e);

@@ -44,8 +44,10 @@ import numeral from 'numeral';
 import { DesktopDatePicker } from '@mui/x-date-pickers';
 import { convertDateToTZ, dateDiffInDays, compressImage } from 'lib/client/utils';
 import PaymentReceipt from '../PaymentReceipt';
+import { useCheckBlocking } from 'src/hooks/useCheckBlocking';
 function AddPaymentModal(props) {
   const { customerId, handleOnClose, open, reason, amount, lateFee, lateFeeDays, weeksToPay } = props;
+  const { checkBlocking } = useCheckBlocking();
   const { customerList, customerError } = useGetAllCustomers(getFetcher, false);
   const { paymentAccounts } = useGetPaymentAccounts(getFetcher);
   const [selectedCustomer, setSelectedCustomer] = useState<any>(null);
@@ -115,6 +117,8 @@ function AddPaymentModal(props) {
     });
     setIsSubmitting(false);
     if (!result.error) {
+      // Check if user was blocked
+      await checkBlocking(result.wasBlocked);
       // Pass the receipt data from backend
       handleSavedPayment({
         receipt: result.receipt,
