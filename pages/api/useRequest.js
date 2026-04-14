@@ -86,6 +86,11 @@ export const useGetMachinesStatus = (fetcher) => {
   return { machinesStatusList: data?.data, machinesStatusError: error };
 };
 
+export const useGetMachinesForOperator = (fetcher) => {
+  const { data, error } = useSWR(ROUTES.READY_MACHINES_OPERATOR_API, fetcher);
+  return { operatorMachinesData: data?.data, operatorMachinesError: error };
+};
+
 export const useGetAllMachinesLocations = (fetcher) => {
   const { data, error } = useSWR(ROUTES.ALL_MACHINES_LOCATIONS_API, fetcher);
   return { machinesLocationData: data?.data, machinesLocationError: error };

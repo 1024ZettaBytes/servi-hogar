@@ -1,7 +1,6 @@
 import {
   capitalizeFirstLetter,
   formatTZDate,
-  isMobile,
   compressImage
 } from '../../../lib/client/utils';
 import {
@@ -144,11 +143,7 @@ const getIdOperation = (type: string) => (
 
 function MachineInfoTab({ role, machine, statusList }) {
   const disableEdit =
-    role !== 'ADMIN' &&
-    (!isMobile() ||
-      [MACHINE_STATUS_LIST.PERDIDA, MACHINE_STATUS_LIST.ESPE].includes(
-        machine?.status.id
-      ));
+    role !== 'ADMIN'
   const { enqueueSnackbar } = useSnackbar();
   const { warehousesList, warehousesError } =
     useGetAllWarehousesOverview(getFetcher);
@@ -173,12 +168,13 @@ function MachineInfoTab({ role, machine, statusList }) {
   /*const showMantWarning =
     originalStatus !== MACHINE_STATUS_LIST.ESPE &&
     machineToEdit?.status?.id === MACHINE_STATUS_LIST.ESPE;*/
-  const askForImage =
+  const askForImage = false;
+  /*
     originalStatus !== machineToEdit?.status?.id &&
     (originalStatus === MACHINE_STATUS_LIST.REC ||
       originalStatus === MACHINE_STATUS_LIST.VEHI ||
       (originalStatus === MACHINE_STATUS_LIST.LISTO &&
-        machineToEdit?.status?.id === MACHINE_STATUS_LIST.VEHI));
+        machineToEdit?.status?.id === MACHINE_STATUS_LIST.VEHI));*/
 
   const [isUpdating, setIsUpdating] = useState<any>({ info: false });
   const [hasErrorUpdating, setHasErrorUpdating] = useState<any>({

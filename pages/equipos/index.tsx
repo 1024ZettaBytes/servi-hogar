@@ -9,10 +9,13 @@ import { Card, Container, Grid, Skeleton, Alert } from '@mui/material';
 import Footer from '@/components/Footer';
 import AddMachineModal from '@/components/AddMachineModal';
 import TablaEquipos from './TablaEquipos';
+import TablaEquiposOperador from './TablaEquiposOperador';
 import {
   useGetAllMachines,
   getFetcher,
-  useGetMachinesStatus
+  useGetMachinesStatus,
+  useGetMachinesForOperator,
+  useGetAllWarehousesOverview
 } from '../api/useRequest';
 import { useSnackbar } from 'notistack';
 import NextBreadcrumbs from '@/components/Shared/BreadCrums';
@@ -22,15 +25,40 @@ import AddTwoTone from '@mui/icons-material/AddTwoTone';
 function Equipos({ session }) {
   const paths = ['Inicio', 'Equipos'];
   const { enqueueSnackbar } = useSnackbar();
-  const { machinesData, machinesError } = useGetAllMachines(getFetcher);
-  const { machinesStatusList, machinesStatusError } =
-    useGetMachinesStatus(getFetcher);
-  const [modalIsOpen, setModalIsOpen] = useState(false);
-  const machinesList = machinesData ? machinesData?.machinesList : null;
-  const machinesSummary = machinesData ? machinesData?.machinesSummary : null;
-  const generalError = machinesError || machinesStatusError;
-  const completeData = machinesList && machinesStatusList;
   const { user } = session;
+  const isOperator = user?.role === 'OPE';
+
+  // Admin/AUX data
+  const { machinesData, machinesError } = useGetAllMachines(
+    isOperator ? null : getFetcher
+  );
+  const { machinesStatusList, machinesStatusError } = useGetMachinesStatus(
+    isOperator ? null : getFetcher
+  );
+
+  // OPE data
+  const { operatorMachinesData, operatorMachinesError } = useGetMachinesForOperator(
+    isOperator ? getFetcher : null
+  );
+  const { warehousesList } = useGetAllWarehousesOverview(
+    isOperator ? getFetcher : null
+  );
+
+  const [modalIsOpen, setModalIsOpen] = useState(false);
+
+  // Derive data based on role
+  const machinesList = !isOperator && machinesData
+    ? machinesData?.machinesList
+    : null;
+  const machinesSummary =
+    !isOperator && machinesData ? machinesData?.machinesSummary : null;
+
+  const generalError = isOperator
+    ? operatorMachinesError
+    : machinesError || machinesStatusError;
+  const completeData = isOperator
+    ? operatorMachinesData
+    : machinesList && machinesStatusList;
 
   const handleClickOpen = () => {
     setModalIsOpen(true);
@@ -68,12 +96,14 @@ function Equipos({ session }) {
       });
     }
   };
-  const button = {
-    text: 'Agregar equipo',
-    onClick: handleClickOpen,
-    startIcon: <AddTwoTone />,
-    variant: 'contained'
-  };
+  const button = !isOperator
+    ? {
+        text: 'Agregar equipo',
+        onClick: handleClickOpen,
+        startIcon: <AddTwoTone />,
+        variant: 'contained'
+      }
+    : null;
   return (
     <>
       <Head>
@@ -98,7 +128,9 @@ function Equipos({ session }) {
           <Grid item xs={12}>
             {generalError ? (
               <Alert severity="error">
-                {machinesError?.message || machinesStatusError?.message}
+                {isOperator
+                  ? operatorMachinesError?.message
+                  : machinesError?.message || machinesStatusError?.message}
               </Alert>
             ) : !completeData ? (
               <Skeleton
@@ -106,6 +138,13 @@ function Equipos({ session }) {
                 width={'100%'}
                 height={500}
                 animation="wave"
+              />
+            ) : isOperator ? (
+              <TablaEquiposOperador
+                listoMachines={operatorMachinesData?.listoMachines || []}
+                vehiMachines={operatorMachinesData?.vehiMachines || []}
+                recMachines={operatorMachinesData?.recMachines || []}
+                warehousesList={warehousesList || []}
               />
             ) : (
               <Card>
@@ -116,7 +155,7 @@ function Equipos({ session }) {
               </Card>
             )}
           </Grid>
-          {!generalError && (
+          {!generalError && !isOperator && (
             <>
               <br />
               {completeData && machinesSummary && (
