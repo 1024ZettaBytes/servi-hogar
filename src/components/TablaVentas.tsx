@@ -32,6 +32,7 @@ import ImageSearchIcon from '@mui/icons-material/ImageSearch';
 import BuildCircleIcon from '@mui/icons-material/BuildCircle';
 import WhatsAppIcon from '@mui/icons-material/WhatsApp';
 import CancelIcon from '@mui/icons-material/Cancel';
+import EditIcon from '@mui/icons-material/Edit';
 import { formatTZDate, setDateToInitial } from 'lib/client/utils';
 import * as str from 'string';
 import { useRouter } from 'next/router';
@@ -39,6 +40,7 @@ import ImagesModal from '@/components/ImagesModal';
 import ScheduleSalePickupModal from '@/components/ScheduleSalePickupModal';
 import CancelActiveSaleModal from '@/components/CancelActiveSaleModal';
 import { useSnackbar } from 'notistack';
+import ModifySaleCreditModal from './ModifySaleCreditModal';
 
 interface TablaSalesProps {
   userRole: string;
@@ -172,6 +174,8 @@ const TablaVentas: FC<TablaSalesProps> = ({ userRole, salesList, onPaymentClick,
   const [selectedSaleForPickup, setSelectedSaleForPickup] = useState<any>(null);
   const [openCancelModal, setOpenCancelModal] = useState<boolean>(false);
   const [selectedSaleForCancel, setSelectedSaleForCancel] = useState<any>(null);
+  const [modifyModalOpen, setModifyModalOpen] = useState(false);
+  const [selectedSaleEdit, setSelectedSaleEdit] = useState(null);
 
   const handleOnCloseImages = () => {
     setOpenImages(false);
@@ -216,6 +220,26 @@ const TablaVentas: FC<TablaSalesProps> = ({ userRole, salesList, onPaymentClick,
         autoHideDuration: 2000
       });
     }
+  };
+
+  const handleCloseModifyModal = (saved: boolean, successMessage?: string) => {
+    setModifyModalOpen(false);
+    setSelectedSaleEdit(null);
+    if (saved && successMessage) {
+      enqueueSnackbar(successMessage, {
+        variant: 'success',
+        anchorOrigin: {
+          vertical: 'top',
+          horizontal: 'center'
+        },
+        autoHideDuration: 2000
+      });
+    }
+  };
+
+  const handleModifySaleClick = (sale) => {
+    setSelectedSaleEdit(sale);
+    setModifyModalOpen(true);
   };
 
   const handleSearchChange = (e: ChangeEvent<HTMLInputElement>): void => {
@@ -663,6 +687,24 @@ const TablaVentas: FC<TablaSalesProps> = ({ userRole, salesList, onPaymentClick,
                             </IconButton>
                           </Tooltip>
                         )}
+                        {sale.status === 'ACTIVA' &&
+                          sale.paidWeeks === 0 &&
+                          userRole === 'ADMIN' && (
+                            <Tooltip title="Modificar crédito de venta" arrow>
+                              <IconButton
+                                size="small"
+                                onClick={() => handleModifySaleClick(sale)}
+                                sx={{
+                                  color: theme.palette.info.main,
+                                  '&:hover': {
+                                    background: theme.colors.info.lighter
+                                  }
+                                }}
+                              >
+                                <EditIcon fontSize="small" />
+                              </IconButton>
+                            </Tooltip>
+                        )}
                         {sale.status === 'ACTIVA' && (userRole === 'ADMIN') && (
                           <Tooltip title="Cancelar venta" arrow>
                             <IconButton
@@ -737,6 +779,13 @@ const TablaVentas: FC<TablaSalesProps> = ({ userRole, salesList, onPaymentClick,
           open={openCancelModal}
           handleOnClose={handleCloseCancelModal}
           sale={selectedSaleForCancel}
+        />
+      )}
+      {modifyModalOpen && selectedSaleEdit && (
+        <ModifySaleCreditModal
+          open={modifyModalOpen}
+          sale={selectedSaleEdit}
+          handleOnClose={handleCloseModifyModal}
         />
       )}
     </>
