@@ -16,23 +16,15 @@ import { LoadingButton } from '@mui/lab';
 import { updateSaleCredit } from '../../../lib/client/salesFetch';
 
 function ModifySaleCreditModal({ open, sale, handleOnClose }) {
-  const [totalAmount, setTotalAmount] = useState('');
-  const [initialPayment, setInitialPayment] = useState('');
-  const [totalWeeks, setTotalWeeks] = useState('');
+  const [totalAmount, setTotalAmount] = useState(sale.totalAmount?.toString() || '');
+  const [initialPayment, setInitialPayment] = useState(sale.initialPayment?.toString() || '');
+  const [totalWeeks, setTotalWeeks] = useState(sale.totalWeeks?.toString() || '');
 
   const [weeklyPayment, setWeeklyPayment] = useState('0.00');
   const [remainingAmount, setRemainingAmount] = useState('0.00');
 
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState({ error: false, msg: '' });
-
-  useEffect(() => {
-    if (sale) {
-      setTotalAmount(sale.totalAmount?.toString() || '');
-      setInitialPayment(sale.initialPayment?.toString() || '');
-      setTotalWeeks(sale.totalWeeks?.toString() || '');
-    }
-  }, [sale]);
 
   useEffect(() => {
     const total = parseFloat(totalAmount);
