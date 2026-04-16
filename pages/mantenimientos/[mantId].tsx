@@ -1,6 +1,7 @@
 import { LoadingButton } from '@mui/lab';
 import {
   Alert,
+  Box,
   Button,
   Card,
   Container,
@@ -11,7 +12,7 @@ import {
 } from '@mui/material';
 import { getFetcher, useGetMantainenceById } from '../api/useRequest';
 import { useSnackbar } from 'notistack';
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import NextBreadcrumbs from '@/components/Shared/BreadCrums';
 import Head from 'next/head';
 import PageTitleWrapper from '@/components/PageTitleWrapper';
@@ -46,16 +47,66 @@ export default function ByMantId({ session }) {
   const [modalType, setModalType] = useState('');
   const [actionModalIsOpen, setActionModalIsOpen] = useState(false);
   const [currentAction, setCurrentAction] = useState(null);
+  
+  // Padlock verification state
+  const [verifySerial1, setVerifySerial1] = useState('');
+  const [verifySerial2, setVerifySerial2] = useState('');
+  const [padlockVerified, setPadlockVerified] = useState(false);
+  const [padlockMismatch, setPadlockMismatch] = useState(false);
+  
   const { mantData, mantByIdError, isLoadingMant } = useGetMantainenceById(
     getFetcher,
     mantId
   );
+
+  // Check if machine has existing padlocks
+  const hasPadlocks = useMemo(() => {
+    return mantData?.machine?.padlockSerial1 && mantData?.machine?.padlockSerial2;
+  }, [mantData]);
+
+  // Verify padlock serials match
+  const handleVerifyPadlocks = () => {
+    const stored1 = mantData?.machine?.padlockSerial1?.toUpperCase();
+    const stored2 = mantData?.machine?.padlockSerial2?.toUpperCase();
+    const input1 = verifySerial1.trim().toUpperCase();
+    const input2 = verifySerial2.trim().toUpperCase();
+    
+    // Check if both serials match (in any order)
+    const match1 = (input1 === stored1 && input2 === stored2);
+    const match2 = (input1 === stored2 && input2 === stored1);
+    
+    if (match1 || match2) {
+      setPadlockVerified(true);
+      setPadlockMismatch(false);
+      enqueueSnackbar('Candados verificados correctamente', {
+        variant: 'success',
+        anchorOrigin: { vertical: 'top', horizontal: 'center' },
+        autoHideDuration: 1500
+      });
+    } else {
+      setPadlockMismatch(true);
+      enqueueSnackbar('Los números de serie NO coinciden. Solo un administrador puede finalizar este mantenimiento.', {
+        variant: 'error',
+        anchorOrigin: { vertical: 'top', horizontal: 'center' },
+        autoHideDuration: 5000
+      });
+    }
+  };
+
+  // Check if user can finish maintenance
+  const canFinish = useMemo(() => {
+    if (!hasPadlocks) return true; // No padlocks registered, anyone can finish
+    if (padlockVerified) return true; // Padlocks verified correctly
+    if (isAdmin) return true; // Admin can always finish
+    return false; // Has padlocks but not verified, non-admin cannot finish
+  }, [hasPadlocks, padlockVerified, isAdmin]);
 
   const handleCloseRecordModal = (
     addedRecord = false,
     successMessage = null
   ) => {
     setRecordModalIsOpen(false);
+    setActionModalIsOpen(false);
     if (addedRecord && successMessage) {
       enqueueSnackbar(successMessage, {
         variant: 'success',
@@ -113,6 +164,57 @@ export default function ByMantId({ session }) {
                     {getStatusLabel(mantData?.status)}
                   </Grid>
                 )}
+                
+                {/* Padlock Verification Section - Only for pending maintenance */}
+                {!isLoadingMant && isInProgress && (
+                  <>
+                    {getSubHeader('Verificación de Candados', true, 4)}
+                    <Grid item xs={12}>
+                      {hasPadlocks ? (
+                        padlockVerified ? (
+                          <Alert severity="success" sx={{ mb: 2 }}>
+                            ✓ Candados verificados correctamente
+                          </Alert>
+                        ) : (
+                          <Box>
+                            <Alert severity="warning" sx={{ mb: 2 }}>
+                              Este equipo tiene candados registrados. Verifique los números de serie antes de continuar.
+                            </Alert>
+                            <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap', alignItems: 'center' }}>
+                              <TextField
+                                size="small"
+                                label="Serie candado 1"
+                                value={verifySerial1}
+                                onChange={(e) => setVerifySerial1(e.target.value.toUpperCase())}
+                                sx={{ width: 150 }}
+                              />
+                              <TextField
+                                size="small"
+                                label="Serie candado 2"
+                                value={verifySerial2}
+                                onChange={(e) => setVerifySerial2(e.target.value.toUpperCase())}
+                                sx={{ width: 150 }}
+                              />
+                              <Button
+                                variant="contained"
+                                size="small"
+                                disabled={!verifySerial1.trim() || !verifySerial2.trim()}
+                                onClick={handleVerifyPadlocks}
+                              >
+                                Verificar
+                              </Button>
+                            </Box>
+                          </Box>
+                        )
+                      ) : (
+                        <Alert severity="info" sx={{ mb: 2 }}>
+                          Este equipo no tiene candados registrados. Deberá ingresar los números de serie al finalizar el mantenimiento.
+                        </Alert>
+                      )}
+                    </Grid>
+                  </>
+                )}
+
                 {getSubHeader('Refacciones', true, 4)}
                 <Grid item container lg={8}>
                   {isLoadingMant ? (
@@ -206,7 +308,7 @@ export default function ByMantId({ session }) {
 
                     <LoadingButton
                       sx={{ marginLeft: 1 }}
-                      disabled={!description || description.trim().length <= 0}
+                      disabled={!description || description.trim().length <= 0 || !canFinish}
                       type="submit"
                       size="medium"
                       loading={false}
@@ -219,6 +321,13 @@ export default function ByMantId({ session }) {
                     >
                       Finalizar
                     </LoadingButton>
+                    {hasPadlocks && !padlockVerified && !isAdmin && (
+                      <Alert severity="error" sx={{ mt: 2 }}>
+                        {padlockMismatch 
+                          ? 'Los candados no coinciden. Solo un administrador puede finalizar este mantenimiento.'
+                          : 'Debe verificar los candados antes de finalizar el mantenimiento.'}
+                      </Alert>
+                    )}
                   </Grid>
                 </>
               )}
@@ -260,6 +369,10 @@ export default function ByMantId({ session }) {
           title="Finalizar mantenimiento"
           text={`Se marcará el servicio del equipo ${mantData.machine.machineNum} como completado.`}
           type="COMPLETED"
+          existingPadlocks={padlockVerified ? {
+            serial1: mantData.machine.padlockSerial1,
+            serial2: mantData.machine.padlockSerial2
+          } : null}
           onClose={handleCloseRecordModal}
           onSuccess={(addedRecord, message) => {
             handleCloseRecordModal(addedRecord, message);

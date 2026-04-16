@@ -6,7 +6,7 @@ import DialogContent from '@mui/material/DialogContent';
 import DialogContentText from '@mui/material/DialogContentText';
 import DialogTitle from '@mui/material/DialogTitle';
 import { LoadingButton } from '@mui/lab';
-import { Alert, TextField } from '@mui/material';
+import { Alert, Box, TextField, Typography } from '@mui/material';
 import { useState } from 'react';
 import {
   cancelMantainance,
@@ -23,28 +23,37 @@ export default function MantainanceActionModal({
   inputLabel = null,
   onClose,
   onSuccess,
-  type
+  type,
+  existingPadlocks = null // { serial1, serial2 } when padlocks already verified
 }) {
   const STATUS = {
     DONE: 'COMPLETED',
     CANCEL: 'CANCELED'
   };
   const [inputValue, setInputValue] = useState('');
+  const [padlockSerial1, setPadlockSerial1] = useState('');
+  const [padlockSerial2, setPadlockSerial2] = useState('');
   const [isSaving, setIsSaving] = useState(false);
   const [hasError, setHasError] = useState({ error: false, msg: '' });
+
+  const isCompleting = type === STATUS.DONE;
+  const hasExistingPadlocks = existingPadlocks?.serial1 && existingPadlocks?.serial2;
+  const padlocksValid = hasExistingPadlocks || (padlockSerial1.trim().length > 0 && padlockSerial2.trim().length > 0);
+
   const handleSubmit = async () => {
     setIsSaving(true);
     setHasError({ error: false, msg: '' });
-    const result =
-      type === STATUS.DONE
-        ? await completeMantainance({
-            mantainanceId,
-            description
-          })
-        : await cancelMantainance({
-            mantainanceId,
-            cancellationReason: inputValue
-          });
+    const result = isCompleting
+      ? await completeMantainance({
+          mantainanceId,
+          description,
+          padlockSerial1: hasExistingPadlocks ? existingPadlocks.serial1 : padlockSerial1.trim(),
+          padlockSerial2: hasExistingPadlocks ? existingPadlocks.serial2 : padlockSerial2.trim()
+        })
+      : await cancelMantainance({
+          mantainanceId,
+          cancellationReason: inputValue
+        });
     setIsSaving(false);
     if (!result.error) {
       onSuccess(true, result.msg);
@@ -59,6 +68,7 @@ export default function MantainanceActionModal({
         aria-labelledby="alert-dialog-title"
         aria-describedby="alert-dialog-description"
         maxWidth="xs"
+        fullWidth
       >
         <DialogTitle id="alert-dialog-title" fontSize={22} align="center">
           {title}
@@ -67,6 +77,46 @@ export default function MantainanceActionModal({
           <DialogContentText id="alert-dialog-description">
             {text}
           </DialogContentText>
+          {isCompleting && (
+            <Box sx={{ mt: 2 }}>
+              {hasExistingPadlocks ? (
+                <Alert severity="success">
+                  Candados verificados: {existingPadlocks.serial1} y {existingPadlocks.serial2}
+                </Alert>
+              ) : (
+                <>
+                  <Typography variant="subtitle2" fontWeight="bold" sx={{ mb: 1 }}>
+                    Ponga candados nuevos al equipo *
+                  </Typography>
+                  <TextField
+                    sx={{ mb: 1 }}
+                    disabled={isSaving}
+                    autoComplete="off"
+                    required
+                    label="Serie candado 1"
+                    size="small"
+                    value={padlockSerial1}
+                    onChange={(event) => {
+                      setPadlockSerial1(event.target.value.toUpperCase());
+                    }}
+                    fullWidth
+                  />
+                  <TextField
+                    disabled={isSaving}
+                    autoComplete="off"
+                    required
+                    label="Serie candado 2"
+                    size="small"
+                    value={padlockSerial2}
+                    onChange={(event) => {
+                      setPadlockSerial2(event.target.value.toUpperCase());
+                    }}
+                    fullWidth
+                  />
+                </>
+              )}
+            </Box>
+          )}
           {inputLabel && (
             <TextField
               sx={{ marginTop: 2 }}
@@ -97,9 +147,12 @@ export default function MantainanceActionModal({
             </Button>
           )}
           <LoadingButton
-            disabled={requiredInput && inputValue.trim().length <= 0}
+            disabled={
+              (requiredInput && inputValue.trim().length <= 0) ||
+              (isCompleting && !padlocksValid)
+            }
             loading={isSaving}
-            color={type === STATUS.DONE ? 'success' : 'error'}
+            color={isCompleting ? 'success' : 'error'}
             variant="contained"
             onClick={handleSubmit}
           >
