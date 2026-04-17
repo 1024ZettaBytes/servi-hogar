@@ -32,6 +32,7 @@ import BuildIcon from '@mui/icons-material/Build';
 import LocalShippingIcon from '@mui/icons-material/LocalShipping';
 import DeconstructIcon from '@mui/icons-material/ConstructionOutlined';
 import ShoppingBagIcon from '@mui/icons-material/ShoppingBag';
+import SwapHorizIcon from '@mui/icons-material/SwapHoriz';
 import { useSnackbar } from 'notistack';
 import { formatTZDate } from 'lib/client/utils';
 import {
@@ -54,6 +55,7 @@ interface TablaAlmacenProps {
   tabFilter?: string;
   onAssignTech?: (machine: any) => void;
   onLoadToVehicle?: (machine: any) => void;
+  onReplaceMachine?: (machine: any) => void;
 }
 
 const compareStringsForFilter = (keyWord: string, field: string) => {
@@ -94,6 +96,9 @@ const getStatusChip = (status: string) => {
     case 'CONVERTIDA_VENTA':
       color = 'success';
       break;
+    case 'DE_REEMPLAZO':
+      color = 'secondary';
+      break;
   }
   return <Chip label={label} color={color} size="small" />;
 };
@@ -109,7 +114,8 @@ const TablaAlmacen: FC<TablaAlmacenProps> = ({
   onUpdate,
   tabFilter,
   onAssignTech,
-  onLoadToVehicle
+  onLoadToVehicle,
+  onReplaceMachine
 }) => {
   const { enqueueSnackbar } = useSnackbar();
   const theme = useTheme();
@@ -389,7 +395,7 @@ const TablaAlmacen: FC<TablaAlmacenProps> = ({
                   {['ADMIN', 'AUX'].includes(userRole) &&
                     machine.status === 'ACONDICIONADA' && (
                       <>
-                        <Tooltip title="Cargar a vehículo" arrow>
+                        <Tooltip title="Cargar a vehículo para reemplazo en renta" arrow>
                           <IconButton
                             sx={{
                               '&:hover': {
@@ -404,6 +410,23 @@ const TablaAlmacen: FC<TablaAlmacenProps> = ({
                             }
                           >
                             <LocalShippingIcon fontSize="small" />
+                          </IconButton>
+                        </Tooltip>
+                        <Tooltip title="Reemplazar numerado" arrow>
+                          <IconButton
+                            sx={{
+                              '&:hover': {
+                                background: theme.colors.warning.lighter
+                              },
+                              color: theme.palette.warning.main
+                            }}
+                            color="inherit"
+                            size="small"
+                            onClick={() =>
+                              onReplaceMachine && onReplaceMachine(machine)
+                            }
+                          >
+                            <SwapHorizIcon fontSize="small" />
                           </IconButton>
                         </Tooltip>
                         <Tooltip title="Pasar a venta" arrow>
@@ -516,7 +539,8 @@ TablaAlmacen.propTypes = {
   onUpdate: PropTypes.func.isRequired,
   tabFilter: PropTypes.string,
   onAssignTech: PropTypes.func,
-  onLoadToVehicle: PropTypes.func
+  onLoadToVehicle: PropTypes.func,
+  onReplaceMachine: PropTypes.func
 };
 
 export default TablaAlmacen;
