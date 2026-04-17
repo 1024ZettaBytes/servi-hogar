@@ -156,7 +156,7 @@ const TablaEquiposOperador: FC<TablaEquiposOperadorProps> = ({
       });
     }
   };
-  const sortedListoMachines = getSortedListoMachines();
+  const sortedListoMachines = listoMachines ? getSortedListoMachines() : [];
   return (
     <>
       <Tabs value={tabValue} onChange={handleTabChange} variant={'fullWidth'}>
