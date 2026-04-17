@@ -26,7 +26,10 @@ import {
 } from '@mui/material';
 import LocalShippingIcon from '@mui/icons-material/LocalShipping';
 import WarehouseIcon from '@mui/icons-material/Warehouse';
-import { loadMachineToVehicle, returnMachineToWarehouse } from '../../lib/client/machinesFetch';
+import {
+  loadMachineToVehicle,
+  returnMachineToWarehouse
+} from '../../lib/client/machinesFetch';
 import { useSnackbar } from 'notistack';
 
 interface TablaEquiposOperadorProps {
@@ -34,6 +37,7 @@ interface TablaEquiposOperadorProps {
   vehiMachines: any[];
   recMachines: any[];
   warehousesList: any[];
+  nextMachine: number | null;
 }
 
 interface TabPanelProps {
@@ -55,14 +59,15 @@ const TablaEquiposOperador: FC<TablaEquiposOperadorProps> = ({
   listoMachines,
   vehiMachines,
   recMachines,
-  warehousesList
+  warehousesList,
+  nextMachine
 }) => {
   const { enqueueSnackbar } = useSnackbar();
   const [tabValue, setTabValue] = useState(0);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [selectedMachine, setSelectedMachine] = useState<any>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  
+
   // Return to warehouse dialog state
   const [returnDialogOpen, setReturnDialogOpen] = useState(false);
   const [machineToReturn, setMachineToReturn] = useState<any>(null);
@@ -104,6 +109,16 @@ const TablaEquiposOperador: FC<TablaEquiposOperadorProps> = ({
       });
     }
   };
+  const getSortedListoMachines = () => {
+    const nextMachineObj = listoMachines.find(
+      (m) => m.machineNum === nextMachine
+    );
+    if (!nextMachineObj) return listoMachines;
+    let newArray = [...listoMachines]
+      .filter((m) => m.machineNum !== nextMachine)
+    newArray.unshift(nextMachineObj);
+    return newArray;
+  };
 
   // Return to warehouse handlers
   const handleOpenReturnDialog = (machine: any) => {
@@ -141,54 +156,47 @@ const TablaEquiposOperador: FC<TablaEquiposOperadorProps> = ({
       });
     }
   };
+  const sortedListoMachines = getSortedListoMachines();
   return (
     <>
-        <Tabs
-          value={tabValue}
-          onChange={handleTabChange}
-          variant={'fullWidth'}
-        >
-          <Tab
-            label={
-              <Box display="flex" alignItems="center" gap={0.5}>
-                Bodega
-                <Chip label={listoMachines?.length} size="small" color="info" />
-              </Box>
-            }
-          />
-          <Tab
-            label={
-              <Box display="flex" alignItems="center" gap={0.5}>
-                Emplayados
-                <Chip
-                  label={vehiMachines?.length}
-                  size="small"
-                  color="success"
-                />
-              </Box>
-            }
-          />
-          <Tab
-            label={
-              <Box display="flex" alignItems="center" gap={0.5}>
-                Recolectados
-                <Chip
-                  label={recMachines?.length}
-                  size="small"
-                  color="warning"
-                />
-              </Box>
-            }
-          />
-        </Tabs>
+      <Tabs value={tabValue} onChange={handleTabChange} variant={'fullWidth'}>
+        <Tab
+          label={
+            <Box display="flex" alignItems="center" gap={0.5}>
+              Bodega
+              <Chip label={sortedListoMachines?.length} size="small" color="info" />
+            </Box>
+          }
+        />
+        <Tab
+          label={
+            <Box display="flex" alignItems="center" gap={0.5}>
+              Emplayados
+              <Chip label={vehiMachines?.length} size="small" color="success" />
+            </Box>
+          }
+        />
+        <Tab
+          label={
+            <Box display="flex" alignItems="center" gap={0.5}>
+              Recolectados
+              <Chip label={recMachines?.length} size="small" color="warning" />
+            </Box>
+          }
+        />
+      </Tabs>
+      <Alert severity="info" sx={{ m: 1 }}>
+        {nextMachine
+          ? `El siguiente equipo a cargar es el #${nextMachine}.`
+          : 'No se pudo determinar el siguiente equipo a cargar.'}
+      </Alert>
       <Card>
         <CardHeader title="Equipos" />
-        <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
-        </Box>
+        <Box sx={{ borderBottom: 1, borderColor: 'divider' }}></Box>
 
         {/* Tab: Listos */}
         <TabPanel value={tabValue} index={0}>
-          {listoMachines?.length === 0 ? (
+          {sortedListoMachines?.length === 0 ? (
             <Box p={2}>
               <Alert severity="info">No hay equipos listos disponibles.</Alert>
             </Box>
@@ -204,7 +212,7 @@ const TablaEquiposOperador: FC<TablaEquiposOperadorProps> = ({
                   </TableRow>
                 </TableHead>
                 <TableBody>
-                  {listoMachines?.map((machine) => (
+                  {sortedListoMachines?.map((machine) => (
                     <TableRow hover key={machine._id}>
                       <TableCell>
                         <Typography fontWeight="bold">
@@ -352,43 +360,50 @@ const TablaEquiposOperador: FC<TablaEquiposOperadorProps> = ({
       </Dialog>
 
       {/* Dialog para regresar equipo al almacén */}
-      {returnDialogOpen && <Dialog open={returnDialogOpen} onClose={handleCloseReturnDialog} maxWidth="xs" fullWidth>
-        <DialogTitle>Regresar equipo al almacén</DialogTitle>
-        <DialogContent>
-          <Typography sx={{ mb: 2 }}>
-            Seleccione el almacén al que desea regresar el equipo{' '}
-            <strong>#{machineToReturn?.machineNum}</strong>:
-          </Typography>
-          <FormControl fullWidth>
-            <InputLabel id="warehouse-select-label">Almacén</InputLabel>
-            <Select
-              labelId="warehouse-select-label"
-              value={selectedWarehouse}
-              label="Almacén"
-              onChange={(e) => setSelectedWarehouse(e.target.value as string)}
+      {returnDialogOpen && (
+        <Dialog
+          open={returnDialogOpen}
+          onClose={handleCloseReturnDialog}
+          maxWidth="xs"
+          fullWidth
+        >
+          <DialogTitle>Regresar equipo al almacén</DialogTitle>
+          <DialogContent>
+            <Typography sx={{ mb: 2 }}>
+              Seleccione el almacén al que desea regresar el equipo{' '}
+              <strong>#{machineToReturn?.machineNum}</strong>:
+            </Typography>
+            <FormControl fullWidth>
+              <InputLabel id="warehouse-select-label">Almacén</InputLabel>
+              <Select
+                labelId="warehouse-select-label"
+                value={selectedWarehouse}
+                label="Almacén"
+                onChange={(e) => setSelectedWarehouse(e.target.value as string)}
+              >
+                {warehousesList?.map((warehouse) => (
+                  <MenuItem key={warehouse._id} value={warehouse._id}>
+                    {warehouse.name}
+                  </MenuItem>
+                ))}
+              </Select>
+            </FormControl>
+          </DialogContent>
+          <DialogActions>
+            <Button onClick={handleCloseReturnDialog} disabled={isSubmitting}>
+              Cancelar
+            </Button>
+            <Button
+              variant="contained"
+              color="warning"
+              onClick={handleReturnToWarehouse}
+              disabled={isSubmitting || !selectedWarehouse}
             >
-              {warehousesList?.map((warehouse) => (
-                <MenuItem key={warehouse._id} value={warehouse._id}>
-                  {warehouse.name}
-                </MenuItem>
-              ))}
-            </Select>
-          </FormControl>
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={handleCloseReturnDialog} disabled={isSubmitting}>
-            Cancelar
-          </Button>
-          <Button
-            variant="contained"
-            color="warning"
-            onClick={handleReturnToWarehouse}
-            disabled={isSubmitting || !selectedWarehouse}
-          >
-            {isSubmitting ? 'Procesando...' : 'Regresar'}
-          </Button>
-        </DialogActions>
-      </Dialog>}
+              {isSubmitting ? 'Procesando...' : 'Regresar'}
+            </Button>
+          </DialogActions>
+        </Dialog>
+      )}
     </>
   );
 };

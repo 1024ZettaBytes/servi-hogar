@@ -145,6 +145,7 @@ function Equipos({ session }) {
                 vehiMachines={operatorMachinesData?.vehiMachines || []}
                 recMachines={operatorMachinesData?.recMachines || []}
                 warehousesList={warehousesList || []}
+                nextMachine={operatorMachinesData?.nextMachine || null}
               />
             ) : (
               <Card>
