@@ -94,7 +94,7 @@ const getStatusChip = (status: string) => {
       return (
         <Chip
           icon={<CheckCircleOutlineIcon />}
-          label="Listo"
+          label="Reparado de garantía"
           color="success"
           size="small"
           sx={{ fontWeight: 'bold' }}
