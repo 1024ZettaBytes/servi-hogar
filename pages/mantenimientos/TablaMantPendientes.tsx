@@ -103,7 +103,7 @@ const TablaMantPendientes: FC<TablaMantPendientesProps> = ({
 
   const theme = useTheme();
   const isAdmin = userRole === 'ADMIN';
-  const canComplete = isAdmin || !listData.some((m) => m.daysSinceCreate >= 3);
+  const canComplete = true; // isAdmin || !listData.some((m) => m.daysSinceCreate >= 3);
   return (
     <>
       <Card>
