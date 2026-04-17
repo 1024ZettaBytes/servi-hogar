@@ -88,11 +88,11 @@ const getStatusChip = (status: string) => {
           sx={{ fontWeight: 'bold' }}
         />
       );
-    case 'MANT_PENDIENTE':
+    case 'EN_REPARACION':
       return (
         <Chip
           icon={<BuildIcon />}
-          label="Mant. Pendiente"
+          label="En Reparación"
           color="warning"
           size="small"
           sx={{ fontWeight: 'bold' }}
@@ -152,12 +152,10 @@ function SalesMachineInfoTab({ salesMachine }) {
   const [warrantyDate, setWarrantyDate] = useState<Date>(salesMachine?.warranty ? convertDateToLocal(new Date(salesMachine.warranty)) : null);
   const [selectedStatus, setSelectedStatus] = useState(salesMachine?.status || 'DISPONIBLE');
 
-  // Allow editing if machine is DISPONIBLE, PENDIENTE, RECOLECTADA, MANT_PENDIENTE, or LISTO (in repair workflow)
+  // Allow editing if machine is DISPONIBLE, PENDIENTE, RECOLECTADA, EN_REPARACION, or LISTO (in repair workflow)
   // But not if it's VENDIDO and with customer
   const canEdit = salesMachine && 
-    (salesMachine.status === 'DISPONIBLE' || salesMachine.status === 'PENDIENTE' || 
-     salesMachine.status === 'RECOLECTADA' || salesMachine.status === 'MANT_PENDIENTE' || 
-     salesMachine.status === 'LISTO') && 
+    (salesMachine.status === 'DISPONIBLE') && 
     !(salesMachine.isSold && salesMachine.status === 'VENDIDO');
 
   const getLocationDisplay = () => {
@@ -395,7 +393,7 @@ function SalesMachineInfoTab({ salesMachine }) {
                   <Box sx={{ maxWidth: { xs: 'auto', sm: 400 } }}>
                     {isLoading ? (
                       <Skeleton variant="text" sx={{ fontSize: '1rem', width: '150px' }} />
-                    ) : !isEditing || salesMachine?.status === 'MANT_PENDIENTE' || salesMachine?.status === 'LISTO' ? (
+                    ) : !isEditing || salesMachine?.status === 'EN_REPARACION' || salesMachine?.status === 'LISTO' ? (
                       getStatusChip(salesMachine?.status)
                     ) : salesMachine?.status === 'RECOLECTADA' ? (
                       <FormControl fullWidth size="small">
@@ -406,7 +404,7 @@ function SalesMachineInfoTab({ salesMachine }) {
                           onChange={(e) => setSelectedStatus(e.target.value)}
                         >
                           <MenuItem value="RECOLECTADA">Recolectada</MenuItem>
-                          <MenuItem value="MANT_PENDIENTE">Mant. Pendiente</MenuItem>
+                          <MenuItem value="EN_REPARACION">En Reparación</MenuItem>
                         </Select>
                       </FormControl>
                     ) : (
@@ -426,7 +424,7 @@ function SalesMachineInfoTab({ salesMachine }) {
                       <Skeleton variant="text" sx={{ fontSize: '1rem', width: '150px' }} />
                     ) : !isEditing ? (
                       getLocationDisplay()
-                    ) : salesMachine?.status === 'MANT_PENDIENTE' ? (
+                    ) : salesMachine?.status === 'EN_REPARACION' ? (
                       getLocationDisplay()
                     ) : (
                       <Box>

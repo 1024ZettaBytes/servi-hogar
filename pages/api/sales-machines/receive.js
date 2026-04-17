@@ -11,7 +11,7 @@ export default async function handler(req, res) {
 
   try {
     const userId = await getUserId(req);
-    const { machineId, arrived = true } = req.body;
+    const { machineId, isRepair, arrived = true } = req.body;
 
     if (!machineId) {
       return res.status(400).json({ errorMsg: 'ID de equipo requerido' });
@@ -19,6 +19,7 @@ export default async function handler(req, res) {
 
     await receiveSalesMachineData({
       machineId,
+      isRepair,
       arrived,
       lastUpdatedBy: userId
     });

@@ -80,11 +80,11 @@ const getStatusChip = (status: string) => {
           sx={{ fontWeight: 'bold' }}
         />
       );
-    case 'MANT_PENDIENTE':
+    case 'EN_REPARACION':
       return (
         <Chip
           icon={<BuildIcon />}
-          label="Mant. Pendiente"
+          label="En Reparación"
           color="warning"
           size="small"
           sx={{ fontWeight: 'bold' }}

@@ -171,6 +171,7 @@ function Equipos({ session }) {
                     total={machinesSummary?.total}
                     stored={machinesSummary?.ALMACEN}
                     forSale={machinesSummary?.VENTA}
+                    onRepair={machinesSummary?.REPAIR}
                     activeTotal={getOnlyActiveTotal(machinesSummary)}
                   />
                 </Grid>
