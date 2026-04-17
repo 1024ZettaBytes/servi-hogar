@@ -303,8 +303,8 @@ function AddSaleModal(props) {
                         disabled={!!preSelectedMachine}
                         options={availableMachines}
                         getOptionLabel={(option) =>
-                          `#${option.machineNum} - ${option.brand} ${option.capacity || ''
-                          }`
+                          `#${option.machineNum} - ${option.brand} (${option.serialNumber
+                          })`
                         }
                         value={selectedMachine}
                         isOptionEqualToValue={(option, value) => option._id === value._id}

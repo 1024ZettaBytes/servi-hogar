@@ -17,7 +17,7 @@ import AddSalesMachineModal from "@/components/AddSalesMachineModal";
 import AddSaleModal from "@/components/AddSaleModal";
 import { useSnackbar } from "notistack";
 import NextBreadcrumbs from "@/components/Shared/BreadCrums";
-import AddTwoTone from "@mui/icons-material/AddTwoTone";
+//import AddTwoTone from "@mui/icons-material/AddTwoTone";
 import { getAllSalesMachines } from "../../lib/client/salesMachinesFetch";
 import TablaSalesMachines from "./TablaSalesMachines";
 
@@ -48,9 +48,9 @@ function EquiposVenta({ session }) {
     setLoading(false);
   };
 
-  const handleClickOpen = () => {
+  /*const handleClickOpen = () => {
     setModalIsOpen(true);
-  };
+  };*/
 
   const handleClose = (added, successMessage = null) => {
     setModalIsOpen(false);
@@ -88,12 +88,12 @@ function EquiposVenta({ session }) {
     }
   };
 
-  const button = { 
+  /*const button = { 
     text: "Agregar equipo de venta", 
     onClick: handleClickOpen, 
     startIcon: <AddTwoTone/>, 
     variant:"contained" 
-  };
+  };*/
 
   return (
     <>
@@ -104,7 +104,7 @@ function EquiposVenta({ session }) {
         <PageHeader
           title={"Equipos de Venta"}
           sutitle={"Administra los equipos disponibles para venta"}
-          button={!error && !loading ? button : null}
+          //button={!error && !loading ? button : null}
         />
         <NextBreadcrumbs paths={paths} lastLoaded={true} />
       </PageTitleWrapper>
