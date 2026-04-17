@@ -20,6 +20,7 @@ import AddTwoTone from '@mui/icons-material/AddTwoTone';
 import AddWarehouseMachineModal from '@/components/AddWarehouseMachineModal';
 import AssignTechnicianModal from '@/components/AssignTechnicianModal';
 import LoadToVehicleModal from '@/components/LoadToVehicleModal';
+import ReplaceMachineModal from '@/components/ReplaceMachineModal';
 import TablaAlmacen from './TablaAlmacen';
 import ResumenAlmacen from './ResumenAlmacen';
 import {
@@ -47,6 +48,8 @@ function Almacen({ session }) {
   const [machineToAssign, setMachineToAssign] = useState(null);
   const [loadVehicleModalOpen, setLoadVehicleModalOpen] = useState(false);
   const [machineToLoad, setMachineToLoad] = useState(null);
+  const [replaceModalOpen, setReplaceModalOpen] = useState(false);
+  const [machineToReplace, setMachineToReplace] = useState(null);
 
   // Fetch data based on current tab
   const statusForTab =
@@ -121,6 +124,23 @@ function Almacen({ session }) {
     }
   };
 
+  const handleOpenReplace = (machine) => {
+    setMachineToReplace(machine);
+    setReplaceModalOpen(true);
+  };
+
+  const handleCloseReplace = (replaced, msg = null) => {
+    setReplaceModalOpen(false);
+    setMachineToReplace(null);
+    if (msg) {
+      enqueueSnackbar(msg, {
+        variant: replaced ? 'success' : 'error',
+        anchorOrigin: { vertical: 'top', horizontal: 'center' },
+        autoHideDuration: 1500
+      });
+    }
+  };
+
   const button =
     ['ADMIN', 'AUX'].includes(user?.role) && !warehouseMachinesError
       ? {
@@ -184,6 +204,7 @@ function Almacen({ session }) {
                 tabFilter={statusForTab}
                 onAssignTech={handleOpenAssign}
                 onLoadToVehicle={handleOpenLoadVehicle}
+                onReplaceMachine={handleOpenReplace}
               />
             )}
           </Grid>
@@ -215,6 +236,13 @@ function Almacen({ session }) {
           open={loadVehicleModalOpen}
           handleOnClose={handleCloseLoadVehicle}
           machine={machineToLoad}
+        />
+      )}
+      {replaceModalOpen && machineToReplace && (
+        <ReplaceMachineModal
+          open={replaceModalOpen}
+          handleOnClose={handleCloseReplace}
+          machine={machineToReplace}
         />
       )}
       <Footer />

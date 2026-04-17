@@ -379,6 +379,26 @@ function SidebarMenu({ userRole }) {
             >
               <SubMenuWrapper>
                 <List component="div">
+                  {userRole === 'OPE' && (
+                    <ListItem component="div">
+                      <NextLink href="/equipos" passHref>
+                        <Button
+                          className={
+                            currentRoute === '/equipos' ||
+                            currentRoute.startsWith('/equipos/')
+                              ? 'active'
+                              : ''
+                          }
+                          disableRipple
+                          component="a"
+                          onClick={closeSidebar}
+                          startIcon={<LocalShippingIcon />}
+                        >
+                          Vehículo
+                        </Button>
+                      </NextLink>
+                    </ListItem>
+                  )}
                   <ListItem component="div">
                     <NextLink href="/vueltas-operador" passHref>
                       <Button

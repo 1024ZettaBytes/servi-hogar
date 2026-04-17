@@ -275,7 +275,7 @@ function AddSaleModal(props) {
                     control={
                       <Switch
                         checked={useExistingMachine}
-                        disabled={!!preSelectedMachine}
+                        disabled={true}
                         onChange={(e) => {
                           setUseExistingMachine(e.target.checked);
                           setSelectedMachine(null);

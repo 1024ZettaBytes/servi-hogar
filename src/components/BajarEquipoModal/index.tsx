@@ -14,7 +14,8 @@ import {
   Divider,
   Alert,
   TextField,
-  MenuItem
+  MenuItem,
+  Chip
 } from '@mui/material';
 import { LoadingButton } from '@mui/lab';
 
@@ -87,13 +88,29 @@ const BajarEquipoModal: FC<BajarEquipoModalProps> = ({
     (arrived === 'no' || (arrived === 'yes' && hasMissingParts !== ''));
   const machineArrived = arrived === 'yes';
 
-  const canSave = isReplaced ? !!selectedWarehouse : (optionsWereSelected && (machineArrived
-    ? hasMissingParts === 'no' ||
-      (hasMissingParts === 'yes' && allowSaveOnMissingParts)
-    : userRole === 'ADMIN'));
+  const canSave = isReplaced
+    ? !!selectedWarehouse
+    : optionsWereSelected &&
+      (machineArrived
+        ? hasMissingParts === 'no' ||
+          (hasMissingParts === 'yes' && allowSaveOnMissingParts)
+        : userRole === 'ADMIN');
   return (
     <Dialog open={open} onClose={handleClose} maxWidth="md" fullWidth>
-      <DialogTitle>Recepción de Equipo #{machine?.machineNum}</DialogTitle>
+      <DialogTitle>
+        Recepción de Equipo #{machine?.machineNum}
+        {!machine.isCancellation && (
+          <>
+          {` (${machine.serialNumber})`}
+          <Chip
+            label="GARANTÍA"
+            size="small"
+            color="warning"
+            sx={{ ml: 1, fontSize: '0.7rem' }}
+          />
+          </>
+        )}
+      </DialogTitle>
       <DialogContent>
         <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3, pt: 2 }}>
           {/* Replaced machine banner */}
@@ -103,7 +120,8 @@ const BajarEquipoModal: FC<BajarEquipoModalProps> = ({
                 Equipo reemplazado
               </Typography>
               <Typography variant="body2">
-                Este equipo fue reemplazado por una máquina de almacén. Seleccione la ubicación donde se ingresará.
+                Este equipo fue reemplazado por una máquina de almacén.
+                Seleccione la ubicación donde se ingresará.
               </Typography>
             </Alert>
           )}
@@ -223,7 +241,11 @@ const BajarEquipoModal: FC<BajarEquipoModalProps> = ({
                 <>
                   <Divider />
                   <Box>
-                    <Typography variant="subtitle1" fontWeight="bold" gutterBottom>
+                    <Typography
+                      variant="subtitle1"
+                      fontWeight="bold"
+                      gutterBottom
+                    >
                       ¿Le falta alguna pieza al equipo?
                     </Typography>
                     <FormControl component="fieldset">
@@ -279,8 +301,8 @@ const BajarEquipoModal: FC<BajarEquipoModalProps> = ({
           {isReplaced
             ? 'Ingresar a Almacén'
             : machineArrived
-              ? 'Ingresar a Bodega'
-              : 'Crear registro de seguimiento'}
+            ? 'Ingresar a Bodega'
+            : 'Crear registro de seguimiento'}
         </LoadingButton>
       </DialogActions>
     </Dialog>

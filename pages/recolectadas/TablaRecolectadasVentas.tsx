@@ -12,7 +12,8 @@ import {
   TablePagination,
   TableRow,
   TableContainer,
-  Button
+  Button,
+  Chip
 } from '@mui/material';
 import DownloadIcon from '@mui/icons-material/Download';
 import { useGetCollectedSalesMachines, getFetcher } from '../api/useRequest';
@@ -58,7 +59,7 @@ const TablaRecolectadasVentas: FC<RecolectadasVentasTableProps> = ({ userRole })
 
   const handleConfirmReceive = async (arrived: boolean) => {
     setIsReceiving(true);
-    const result = await receiveSalesMachine(selectedMachine._id, arrived);
+    const result = await receiveSalesMachine(selectedMachine._id, !(selectedMachine.isCancellation), arrived);
     setIsReceiving(false);
 
     enqueueSnackbar(result.msg, {
@@ -119,7 +120,7 @@ const TablaRecolectadasVentas: FC<RecolectadasVentasTableProps> = ({ userRole })
               ) : (
                 paginatedMachines.map((machine) => (
                   <TableRow hover key={machine._id}>
-                    <TableCell>
+                    <TableCell align='center'>
                       <Typography
                         variant="body1"
                         fontWeight="bold"
@@ -129,6 +130,14 @@ const TablaRecolectadasVentas: FC<RecolectadasVentasTableProps> = ({ userRole })
                       >
                         {machine.machineNum}
                       </Typography>
+                      { !(machine.isCancellation) && (
+                        <Chip 
+                          label="GARANTÍA" 
+                          size="small" 
+                          color="warning"
+                          sx={{ ml: 1, fontSize: '0.7rem' }}
+                        />
+                      )}
                     </TableCell>
                     <TableCell>
                       <Typography

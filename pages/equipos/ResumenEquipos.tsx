@@ -50,6 +50,7 @@ function ResumenEquipos({
   total,
   stored,
   forSale,
+  onRepair,
   activeTotal,
 }) {
   return (
@@ -453,6 +454,53 @@ function ResumenEquipos({
                     <Typography variant="subtitle2" sx={{ mt: 1 }}>
                       {`Sin ubicación: ${forSale.noLocation}`}
                     </Typography>
+                  </Grid>
+                )}
+              </Grid>
+            </CardContent>
+          </Card>
+        </Grid>
+                <Grid xs={12} sm={6} md={3} item>
+          <Card
+            sx={{
+              px: 1,
+              height: "auto",
+              overflowY: "auto",
+            }}
+          >
+            <CardContent>
+              <Grid
+                container
+                alignItems="center"
+                justifyItems="center"
+                textAlign={{ lg: "center" }}
+              >
+                <Grid item lg={2} md={2} xs={2}>
+                  <AvatarWrapperWarning>
+                    <BuildIcon />
+                  </AvatarWrapperWarning>
+                </Grid>
+                <Grid item lg={3} md={2} xs={2}>
+                  <Typography variant="h3" gutterBottom noWrap>
+                    {(onRepair?.total || 0)}
+                  </Typography>
+                </Grid>
+                <Grid item lg={7} md={8} xs={8}>
+                  <Typography variant="subtitle2" noWrap textAlign="left">
+                    En Reparación (Garantía)
+                  </Typography>
+                </Grid>
+                {onRepair?.byWarehouse?.length > 0 && (
+                  <Grid item lg={12} md={12} xs={12}>
+                    <List dense>
+                      {onRepair.byWarehouse.map((warehouse) => (
+                        <ListItem disablePadding key={`re-${warehouse?.id}`}>
+                          <ListItemText
+                            primary={`- ${warehouse?.name}: ${warehouse?.total}`}
+                          />
+                        </ListItem>
+                      ))}
+                    </List>
                   </Grid>
                 )}
               </Grid>

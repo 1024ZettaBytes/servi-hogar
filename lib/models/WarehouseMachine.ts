@@ -42,7 +42,8 @@ const WarehouseMachineSchema = new Schema<IWarehouseMachine>({
       'ACONDICIONADA',
       'DESMANTELADA',
       'ASIGNADA_RENTA',
-      'CONVERTIDA_VENTA'
+      'CONVERTIDA_VENTA',
+      'DE_REEMPLAZO'
     ],
     default: 'ALMACENADA'
   },

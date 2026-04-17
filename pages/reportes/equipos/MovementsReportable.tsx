@@ -20,7 +20,7 @@ const MovementsReportTable: React.FC<MovementsReportTableProps> = ({
   data,
 }) => {
   const getBackColor = (machine): string => {
-    if (!machine.exists) return "doesNotExists";
+    if (!machine || !machine.exists) return "doesNotExists";
     if (machine.onLittleWarehouse) return "onLittleWarehouse";
     if (machine.isLost) return "isLost";
     if (machine.hasMovements) return "hasMovements";
@@ -62,11 +62,11 @@ const MovementsReportTable: React.FC<MovementsReportTableProps> = ({
                 <TableRow key={i}>
                   {row.map((machine) => (
                     <TableCell
-                      key={"machine-" + machine.machineNum}
+                      key={"machine-" + machine?.machineNum}
                       align="center"
                       style={colorStyle?.machineStyle[getBackColor(machine)]}
                     >
-                      {machine.machineNum}
+                      {machine?.machineNum}
                     </TableCell>
                   ))}
                 </TableRow>
