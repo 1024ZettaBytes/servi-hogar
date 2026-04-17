@@ -23,8 +23,7 @@ export default function MantainanceActionModal({
   inputLabel = null,
   onClose,
   onSuccess,
-  type,
-  existingPadlocks = null // { serial1, serial2 } when padlocks already verified
+  type
 }) {
   const STATUS = {
     DONE: 'COMPLETED',
@@ -37,8 +36,7 @@ export default function MantainanceActionModal({
   const [hasError, setHasError] = useState({ error: false, msg: '' });
 
   const isCompleting = type === STATUS.DONE;
-  const hasExistingPadlocks = existingPadlocks?.serial1 && existingPadlocks?.serial2;
-  const padlocksValid = hasExistingPadlocks || (padlockSerial1.trim().length > 0 && padlockSerial2.trim().length > 0);
+  const padlocksValid =  (padlockSerial1.trim().length > 0 && padlockSerial2.trim().length > 0);
 
   const handleSubmit = async () => {
     setIsSaving(true);
@@ -47,8 +45,8 @@ export default function MantainanceActionModal({
       ? await completeMantainance({
           mantainanceId,
           description,
-          padlockSerial1: hasExistingPadlocks ? existingPadlocks.serial1 : padlockSerial1.trim(),
-          padlockSerial2: hasExistingPadlocks ? existingPadlocks.serial2 : padlockSerial2.trim()
+          padlockSerial1: padlockSerial1.trim(),
+          padlockSerial2: padlockSerial2.trim()
         })
       : await cancelMantainance({
           mantainanceId,
@@ -79,14 +77,9 @@ export default function MantainanceActionModal({
           </DialogContentText>
           {isCompleting && (
             <Box sx={{ mt: 2 }}>
-              {hasExistingPadlocks ? (
-                <Alert severity="success">
-                  Candados verificados: {existingPadlocks.serial1} y {existingPadlocks.serial2}
-                </Alert>
-              ) : (
-                <>
+                
                   <Typography variant="subtitle2" fontWeight="bold" sx={{ mb: 1 }}>
-                    Ponga candados nuevos al equipo *
+                    Indique los números de serie de los candados *
                   </Typography>
                   <TextField
                     sx={{ mb: 1 }}
@@ -113,8 +106,6 @@ export default function MantainanceActionModal({
                     }}
                     fullWidth
                   />
-                </>
-              )}
             </Box>
           )}
           {inputLabel && (

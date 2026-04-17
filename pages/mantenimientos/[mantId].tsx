@@ -369,10 +369,6 @@ export default function ByMantId({ session }) {
           title="Finalizar mantenimiento"
           text={`Se marcará el servicio del equipo ${mantData.machine.machineNum} como completado.`}
           type="COMPLETED"
-          existingPadlocks={padlockVerified ? {
-            serial1: mantData.machine.padlockSerial1,
-            serial2: mantData.machine.padlockSerial2
-          } : null}
           onClose={handleCloseRecordModal}
           onSuccess={(addedRecord, message) => {
             handleCloseRecordModal(addedRecord, message);
