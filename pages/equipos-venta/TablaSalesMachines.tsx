@@ -100,6 +100,16 @@ const getStatusChip = (status: string) => {
           sx={{ fontWeight: 'bold' }}
         />
       );
+    case 'EN_CAMBIO':
+      return (
+        <Chip
+          icon={<HourglassEmptyIcon />}
+          label="En Cambio"
+          color="warning"
+          size="small"
+          sx={{ fontWeight: 'bold' }}
+        />
+      );
     default:
       return (
         <Chip

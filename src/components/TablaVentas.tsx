@@ -30,6 +30,7 @@ import SearchIcon from '@mui/icons-material/Search';
 import PaymentIcon from '@mui/icons-material/Payment';
 import ImageSearchIcon from '@mui/icons-material/ImageSearch';
 import BuildCircleIcon from '@mui/icons-material/BuildCircle';
+import SwapHorizIcon from '@mui/icons-material/SwapHoriz';
 import WhatsAppIcon from '@mui/icons-material/WhatsApp';
 import CancelIcon from '@mui/icons-material/Cancel';
 import EditIcon from '@mui/icons-material/Edit';
@@ -38,6 +39,7 @@ import * as str from 'string';
 import { useRouter } from 'next/router';
 import ImagesModal from '@/components/ImagesModal';
 import ScheduleSalePickupModal from '@/components/ScheduleSalePickupModal';
+import ScheduleSaleChangeModal from '@/components/ScheduleSaleChangeModal';
 import CancelActiveSaleModal from '@/components/CancelActiveSaleModal';
 import { useSnackbar } from 'notistack';
 import ModifySaleCreditModal from './ModifySaleCreditModal';
@@ -174,6 +176,8 @@ const TablaVentas: FC<TablaSalesProps> = ({ userRole, salesList, onPaymentClick,
   const [selectedSaleForPickup, setSelectedSaleForPickup] = useState<any>(null);
   const [openCancelModal, setOpenCancelModal] = useState<boolean>(false);
   const [selectedSaleForCancel, setSelectedSaleForCancel] = useState<any>(null);
+  const [openChangeModal, setOpenChangeModal] = useState<boolean>(false);
+  const [selectedSaleForChange, setSelectedSaleForChange] = useState<any>(null);
   const [modifyModalOpen, setModifyModalOpen] = useState(false);
   const [selectedSaleEdit, setSelectedSaleEdit] = useState(null);
 
@@ -210,6 +214,26 @@ const TablaVentas: FC<TablaSalesProps> = ({ userRole, salesList, onPaymentClick,
   const handleClosePickupModal = (saved: boolean, successMessage?: string) => {
     setOpenPickupModal(false);
     setSelectedSaleForPickup(null);
+    if (saved && successMessage) {
+      enqueueSnackbar(successMessage, {
+        variant: 'success',
+        anchorOrigin: {
+          vertical: 'top',
+          horizontal: 'center'
+        },
+        autoHideDuration: 2000
+      });
+    }
+  };
+
+  const handleChangeClick = (sale: any) => {
+    setSelectedSaleForChange(sale);
+    setOpenChangeModal(true);
+  };
+
+  const handleCloseChangeModal = (saved: boolean, successMessage?: string) => {
+    setOpenChangeModal(false);
+    setSelectedSaleForChange(null);
     if (saved && successMessage) {
       enqueueSnackbar(successMessage, {
         variant: 'success',
@@ -637,6 +661,29 @@ const TablaVentas: FC<TablaSalesProps> = ({ userRole, salesList, onPaymentClick,
                             </span>
                           </Tooltip>
                         )}
+                        {sale.machine?.warranty && new Date(sale.machine.warranty) > new Date() && userRole === 'ADMIN' && (
+                          <Tooltip 
+                            title={sale.hasWarrantyProcess ? 'Ya tiene un proceso de garantía activo' : 'Agendar cambio por garantía'} 
+                            arrow
+                          >
+                            <span>
+                              <IconButton
+                                sx={{
+                                  '&:hover': {
+                                    background: !sale.hasWarrantyProcess ? theme.colors.info.lighter : 'transparent'
+                                  },
+                                  color: !sale.hasWarrantyProcess ? theme.palette.info.main : theme.palette.action.disabled
+                                }}
+                                color="inherit"
+                                size="small"
+                                onClick={() => !sale.hasWarrantyProcess && handleChangeClick(sale)}
+                                disabled={sale.hasWarrantyProcess}
+                              >
+                                <SwapHorizIcon fontSize="small" />
+                              </IconButton>
+                            </span>
+                          </Tooltip>
+                        )}
                         <Tooltip title="Ver detalles" arrow>
                           <IconButton
                             sx={{
@@ -772,6 +819,13 @@ const TablaVentas: FC<TablaSalesProps> = ({ userRole, salesList, onPaymentClick,
           open={openPickupModal}
           handleOnClose={handleClosePickupModal}
           preSelectedSale={selectedSaleForPickup}
+        />
+      )}
+      {openChangeModal && selectedSaleForChange && (
+        <ScheduleSaleChangeModal
+          open={openChangeModal}
+          handleOnClose={handleCloseChangeModal}
+          preSelectedSale={selectedSaleForChange}
         />
       )}
       {openCancelModal && selectedSaleForCancel && (

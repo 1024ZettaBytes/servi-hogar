@@ -21,6 +21,7 @@ import {
   useGetPendingPickups,
   useGetPendingSalePickups,
   useGetPendingChanges,
+  useGetPendingSaleChanges,
   useGetPendingCollections,
   useGetDeliveries,
   useGetPickups,
@@ -59,6 +60,7 @@ function VueltasOperador({ session }) {
     mutate('/api/sale-pickups/list/pending');
     mutate('/api/changes/list/pending');
     mutate('/api/sales/collections/pending');
+    mutate('/api/sales/changes/pending');
     mutate('/api/extra-trips/pending');
     // Trigger re-fetch of completed tasks for the selected date
     mutate(`/api/deliveries/list?limit=1000&page=1&date=${selectedDate.toISOString()}`);
@@ -80,6 +82,8 @@ function VueltasOperador({ session }) {
     useGetPendingChanges(getFetcher);
   const { pendingCollectionsList, pendingCollectionsError } = 
     useGetPendingCollections(getFetcher);
+  const { pendingSaleChangesList, pendingSaleChangesError } =
+    useGetPendingSaleChanges(getFetcher);
 
   // Fetch all tasks (including completed) - using high limit to get all for the day
   const { deliveriesList, deliveriesError } = useGetDeliveries(
@@ -126,10 +130,12 @@ function VueltasOperador({ session }) {
 
   const generalError =
     pendingDeliveriesError || pendingPickupsError || pendingSalePickupsError || pendingChangesError ||
+    pendingSaleChangesError ||
     deliveriesError || pickupsError || changesError || salePickupsError || pendingCollectionsError ||
     completedCollectionsError || pendingExtraTripsError || completedExtraTripsError;
   const completeData =
     pendingDeliveriesList && pendingPickupsList && pendingSalePickupsList && pendingChangesList &&
+    pendingSaleChangesList !== undefined &&
     deliveriesList && pickups && changes && salePickupsData && pendingCollectionsList && completedCollectionsList &&
     pendingExtraTripsList !== undefined && completedExtraTripsList !== undefined;
   
@@ -181,6 +187,16 @@ function VueltasOperador({ session }) {
           sector: item.sale?.customer?.currentResidence?.sector?.name,
           takenAt: item.createdAt,
           suburb: item.sale?.customer?.currentResidence?.suburb,
+        })),
+        // All pending sale changes (warranty exchanges)
+        ...(pendingSaleChangesList || []).map((item) => ({
+          ...item,
+          type: "CAMBIO_VENTA",
+          sector: item.sale?.customer?.currentResidence?.city?.sectors?.find(
+            (s) => s._id === item.sale?.customer?.currentResidence?.sector?._id
+          )?.name,
+          suburb: item.sale?.customer?.currentResidence?.suburb,
+          isPriority: true,
         })),
       ].sort((a, b) => {
         // Priority items (sale pickups) always first

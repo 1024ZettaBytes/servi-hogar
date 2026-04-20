@@ -19,6 +19,7 @@ import TablaVentas from "@/components/TablaVentas";
 import TablaPendingSales from "@/components/TablaPendingSales";
 import TablaCompletedSalesByOperator from "@/components/TablaCompletedSalesByOperator";
 import TablaRecoleccionesVentasPendientes from "../../pages/recolecciones-ventas-pendientes/TablaRecoleccionesVentasPendientes";
+import TablaCambiosVentasPendientes from "../../pages/cambios-ventas-pendientes/TablaCambiosVentasPendientes";
 import AssignOperatorModal from "@/components/AssignOperatorModal";
 import FormatModal from "@/components/FormatModal";
 import { useSnackbar } from "notistack";
@@ -51,6 +52,12 @@ function Ventas({ session }) {
     `${ROUTES.ALL_PENDING_SALE_PICKUPS_API}?detailed=true`,
     fetcher
   );
+
+  // Fetch pending warranty changes
+  const { data: pendingChangesData } = useSWR(
+    ROUTES.ALL_PENDING_SALE_CHANGES_API,
+    fetcher
+  );
   
   const [modalIsOpen, setModalIsOpen] = useState(false);
   const [paymentModalIsOpen, setPaymentModalIsOpen] = useState(false);
@@ -65,6 +72,7 @@ function Ventas({ session }) {
   const pendingSalesList = isOperator ? pendingData?.data?.pending : pendingData?.data;
   const completedSalesList = isOperator ? pendingData?.data?.completed : [];
   const pendingPickupsList = pendingPickupsData?.data || [];
+  const pendingChangesList = pendingChangesData?.data || [];
   const completeData = !!salesList && (isOperator ? !!(pendingSalesList && completedSalesList) : !!pendingSalesList);
 
   const handleClickOpen = () => {
@@ -242,6 +250,18 @@ function Ventas({ session }) {
                           userRole={session.user.role}
                           pickupList={pendingPickupsList}
                           onWhatsAppClick={handleWhatsAppClick}
+                        />
+                      </Card>
+                    </Grid>
+                  )}
+
+                  {/* Pending Warranty Changes Table */}
+                  {pendingChangesList && pendingChangesList.length > 0 && (
+                    <Grid item xs={12}>
+                      <Card>
+                        <TablaCambiosVentasPendientes
+                          userRole={session.user.role}
+                          changeList={pendingChangesList}
                         />
                       </Card>
                     </Grid>
