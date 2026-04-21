@@ -1,6 +1,12 @@
-import { validateUserPermissions, getUserId } from '../../../lib/auth';
-import { connectToDatabase, isConnected } from '../../../lib/db';
 import { sellRentMachineData } from '../../../lib/data/Rents';
+import formidable from 'formidable';
+import { getUserId, validateUserPermissions } from '../auth/authUtils';
+
+export const config = {
+  api: {
+    bodyParser: false,
+  },
+};
 
 export default async function handler(req, res) {
   switch (req.method) {
@@ -9,25 +15,44 @@ export default async function handler(req, res) {
       if (!validRole) return;
 
       const userId = await getUserId(req);
-      if (!isConnected()) await connectToDatabase();
-
-      const { rentId, cashPrice } = req.body;
-
-      if (!rentId) {
-        return res.status(400).json({ errorMsg: 'Se requiere el ID de la renta' });
-      }
-      if (!cashPrice || Number(cashPrice) <= 0) {
-        return res.status(400).json({ errorMsg: 'El precio de venta debe ser mayor a 0' });
-      }
 
       try {
-        const result = await sellRentMachineData({
-          rentId,
-          cashPrice: Number(cashPrice),
-          createdBy: userId
+        const form = formidable({ multiples: false });
+        
+        const [fields, files] = await new Promise((resolve, reject) => {
+          form.parse(req, (err, fields, files) => {
+            if (err) reject(err);
+            resolve([fields, files]);
+          });
         });
+
+        // Helper to get field value (formidable v3 may return arrays)
+        const getField = (key) => {
+          const val = fields[key];
+          if (Array.isArray(val)) return val[0];
+          return val;
+        };
+
+        const paymentImage = files.paymentImage?.[0] || files.paymentImage;
+
+        const saleData = {
+          rentId: getField('rentId'),
+          isUpfrontCashPayment: getField('isUpfrontCashPayment') === 'true',
+          cashPrice: getField('cashPrice') ? parseFloat(getField('cashPrice')) : null,
+          totalAmount: getField('totalAmount') ? parseFloat(getField('totalAmount')) : null,
+          initialPayment: getField('initialPayment') ? parseFloat(getField('initialPayment')) : null,
+          totalWeeks: getField('totalWeeks') ? parseInt(getField('totalWeeks')) : null,
+          paymentMethod: getField('paymentMethod') || null,
+          paymentAccountId: getField('paymentAccountId') || null,
+          paymentImagePath: paymentImage ? paymentImage.filepath : null,
+          paymentImageName: paymentImage ? paymentImage.originalFilename : null,
+          createdBy: userId
+        };
+
+        const result = await sellRentMachineData(saleData);
         return res.status(200).json({ data: result, msg: 'Máquina vendida exitosamente' });
       } catch (e) {
+        console.error(e);
         return res.status(400).json({ errorMsg: e.message });
       }
     }
