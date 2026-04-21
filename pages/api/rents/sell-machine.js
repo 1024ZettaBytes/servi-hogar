@@ -11,7 +11,7 @@ export const config = {
 export default async function handler(req, res) {
   switch (req.method) {
     case 'POST': {
-      const validRole = await validateUserPermissions(req, res, ['ADMIN']);
+      const validRole = await validateUserPermissions(req, res, ['ADMIN', 'AUX']);
       if (!validRole) return;
 
       const userId = await getUserId(req);
