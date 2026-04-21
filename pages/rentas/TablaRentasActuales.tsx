@@ -35,6 +35,7 @@ import SearchIcon from '@mui/icons-material/Search';
 import ChangeCircleIcon from '@mui/icons-material/ChangeCircle';
 import RedeemIcon from '@mui/icons-material/Redeem';
 import ReportProblemIcon from '@mui/icons-material/ReportProblem';
+import SellIcon from '@mui/icons-material/Sell';
 import ExtendRentModal from '../../src/components/ExtendRentModal';
 import ChangePayDayModal from '@/components/ChangePayDayModal';
 import SchedulePickupModal from '@/components/SchedulePickupModal';
@@ -44,6 +45,7 @@ import ScheduleChangeModal from '@/components/ScheduleChangeModal';
 import Label from '@/components/Label';
 import styles from '../tables.module.css';
 import BonusModal from '@/components/BonusModal';
+import SellRentMachineModal from '@/components/SellRentMachineModal';
 import { markWasSentPickup } from 'lib/client/pickupsFetch';
 import { markWasSentChange } from 'lib/client/changesFetch';
 import { getFetcher, useGetPrices } from 'pages/api/useRequest';
@@ -192,6 +194,7 @@ const TablaRentasActuales: FC<TablaRentasActualesProps> = ({
   const [pickupModalIsOpen, setPickupModalIsOpen] = useState(false);
   const [changeModalIsOpen, setChangeModalIsOpen] = useState(false);
   const [bonusModalIsOpen, setBonusModalIsOpen] = useState(false);
+  const [sellModalIsOpen, setSellModalIsOpen] = useState(false);
   const [formatIsOpen, setFormatIsOpen] = useState(false);
   const [createdPickup, setCreatedPickup] = useState<any>(null);
   const [createdChange, setCreatedChange] = useState<any>(null);
@@ -207,6 +210,7 @@ const TablaRentasActuales: FC<TablaRentasActualesProps> = ({
     setPickupModalIsOpen(false);
     setChangeModalIsOpen(false);
     setBonusModalIsOpen(false);
+    setSellModalIsOpen(false);
     if (wasSuccess && successMessage) {
       enqueueSnackbar(successMessage, {
         variant: 'success',
@@ -284,6 +288,11 @@ const TablaRentasActuales: FC<TablaRentasActualesProps> = ({
     setSelectedId(rent?._id);
     setSelectedRent(rent);
     setBonusModalIsOpen(true);
+  };
+
+  const handleOnSellClick = (rent: any) => {
+    setSelectedRent(rent);
+    setSellModalIsOpen(true);
   };
 
   const filteredRents = customerFilter(
@@ -605,6 +614,26 @@ const TablaRentasActuales: FC<TablaRentasActualesProps> = ({
                               </IconButton>
                             </span>
                           </Tooltip>
+                          {userRole === 'ADMIN' && (
+                            <Tooltip title="Vender máquina al cliente" arrow>
+                              <span>
+                                <IconButton
+                                  disabled={rent.status.id !== 'RENTADO'}
+                                  onClick={() => handleOnSellClick(rent)}
+                                  sx={{
+                                    '&:hover': {
+                                      background: theme.colors.warning.lighter
+                                    },
+                                    color: theme.palette.warning.dark
+                                  }}
+                                  color="inherit"
+                                  size="small"
+                                >
+                                  <SellIcon fontSize="small" />
+                                </IconButton>
+                              </span>
+                            </Tooltip>
+                          )}
                         </>
                       )}
                     </TableCell>
@@ -662,6 +691,13 @@ const TablaRentasActuales: FC<TablaRentasActualesProps> = ({
         <BonusModal
           open={bonusModalIsOpen}
           handleOnClose={handleCloseBonusModal}
+          rent={selectedRent}
+        />
+      )}
+      {sellModalIsOpen && selectedRent && (
+        <SellRentMachineModal
+          open={sellModalIsOpen}
+          handleOnClose={handleCloseModal}
           rent={selectedRent}
         />
       )}
