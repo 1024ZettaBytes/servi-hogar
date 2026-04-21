@@ -21,6 +21,15 @@ import WarehouseIcon from "@mui/icons-material/Warehouse";
 import StorefrontIcon from "@mui/icons-material/Storefront";
 import NextLink from "next/link";
 
+const saleStatuses = ['DISPONIBLE', 'PENDIENTE', 'LISTO', 'EN_REPARACION', 'EN_CAMBIO', 'RECOLECTADA'];
+const saleStatusLabels = {
+  DISPONIBLE: 'Disponibles para venta',
+  PENDIENTE: 'Entrega pendiente',
+  EN_REPARACION: 'En reparación',
+  LISTO: 'Reparada y lista',
+  EN_CAMBIO: 'En cambio por garantía',
+  RECOLECTADA: 'Recolectada'
+};
 const AvatarWrapperSuccess = styled(Avatar)(
   ({ theme }) => `
         background-color: ${theme.colors.success.lighter};
@@ -49,8 +58,7 @@ function ResumenEquipos({
   lost,
   total,
   stored,
-  forSale,
-  onRepair,
+  sale,
   activeTotal,
 }) {
   return (
@@ -409,21 +417,29 @@ function ResumenEquipos({
                 </Grid>
                 <Grid item lg={3} md={2} xs={2}>
                   <Typography variant="h3" gutterBottom noWrap>
-                    {forSale?.total}
+                    {sale?.total}
                   </Typography>
                 </Grid>
                 <Grid item lg={7} md={8} xs={8}>
                   <Typography variant="subtitle2" noWrap textAlign="left">
-                    Listas para venta
+                    DE VENTA
                   </Typography>
                 </Grid>
-                {forSale?.byWarehouse?.length > 0 && (
-                  <Grid item lg={12} md={12} xs={12}>
-                    <Typography variant="subtitle2" sx={{ mt: 1 }}>
-                      Por almacén:
+                {saleStatuses.map((status) => {
+                  const statusData = sale?.[status];
+                  if (statusData?.total > 0)  return (<>
+                  <Grid item lg={12} md={12} xs={12} textAlign="left">
+                    <Typography variant="overline" fontWeight="bold" sx={{ mt: 1 }}>
+                      {saleStatusLabels[status]+" (" + statusData.total + ")"}:
                     </Typography>
+                  </Grid>
+                {statusData?.byWarehouse?.length > 0 && (
+                    <Grid item lg={12} md={12} xs={12}>
+                      <Typography variant="subtitle2" sx={{ mt: 1 }}>
+                        Por bodega:
+                      </Typography>
                     <List dense>
-                      {forSale.byWarehouse.map((warehouse) => (
+                      {statusData.byWarehouse.map((warehouse) => (
                         <ListItem disablePadding key={warehouse?.id}>
                           <ListItemText
                             primary={`- ${warehouse?.name}: ${warehouse?.total}`}
@@ -433,13 +449,13 @@ function ResumenEquipos({
                     </List>
                   </Grid>
                 )}
-                {forSale?.byVehicle?.length > 0 && (
+                {statusData?.byVehicle?.length > 0 && (
                   <Grid item lg={12} md={12} xs={12}>
                     <Typography variant="subtitle2" sx={{ mt: 1 }}>
                       En vehículos:
                     </Typography>
                     <List dense>
-                      {forSale.byVehicle.map((vehicle) => (
+                      {statusData.byVehicle.map((vehicle) => (
                         <ListItem disablePadding key={vehicle?.id}>
                           <ListItemText
                             primary={`- ${vehicle?.name}: ${vehicle?.total}`}
@@ -449,60 +465,16 @@ function ResumenEquipos({
                     </List>
                   </Grid>
                 )}
-                {forSale?.noLocation > 0 && (
+                {statusData?.noLocation > 0 && (
                   <Grid item lg={12} md={12} xs={12}>
                     <Typography variant="subtitle2" sx={{ mt: 1 }}>
-                      {`Sin ubicación: ${forSale.noLocation}`}
+                      {`Sin ubicación: ${statusData.noLocation}`}
                     </Typography>
                   </Grid>
                 )}
-              </Grid>
-            </CardContent>
-          </Card>
-        </Grid>
-                <Grid xs={12} sm={6} md={3} item>
-          <Card
-            sx={{
-              px: 1,
-              height: "auto",
-              overflowY: "auto",
-            }}
-          >
-            <CardContent>
-              <Grid
-                container
-                alignItems="center"
-                justifyItems="center"
-                textAlign={{ lg: "center" }}
-              >
-                <Grid item lg={2} md={2} xs={2}>
-                  <AvatarWrapperWarning>
-                    <BuildIcon />
-                  </AvatarWrapperWarning>
-                </Grid>
-                <Grid item lg={3} md={2} xs={2}>
-                  <Typography variant="h3" gutterBottom noWrap>
-                    {(onRepair?.total || 0)}
-                  </Typography>
-                </Grid>
-                <Grid item lg={7} md={8} xs={8}>
-                  <Typography variant="subtitle2" noWrap textAlign="left">
-                    En Reparación (Garantía)
-                  </Typography>
-                </Grid>
-                {onRepair?.byWarehouse?.length > 0 && (
-                  <Grid item lg={12} md={12} xs={12}>
-                    <List dense>
-                      {onRepair.byWarehouse.map((warehouse) => (
-                        <ListItem disablePadding key={`re-${warehouse?.id}`}>
-                          <ListItemText
-                            primary={`- ${warehouse?.name}: ${warehouse?.total}`}
-                          />
-                        </ListItem>
-                      ))}
-                    </List>
-                  </Grid>
-                )}
+                </>)
+
+                })}
               </Grid>
             </CardContent>
           </Card>
