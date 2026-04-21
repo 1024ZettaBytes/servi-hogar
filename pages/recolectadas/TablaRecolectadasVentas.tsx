@@ -59,7 +59,8 @@ const TablaRecolectadasVentas: FC<RecolectadasVentasTableProps> = ({ userRole })
 
   const handleConfirmReceive = async (arrived: boolean) => {
     setIsReceiving(true);
-    const result = await receiveSalesMachine(selectedMachine._id, !(selectedMachine.isCancellation), arrived);
+    const isRepair = !(selectedMachine.isCancellation) && !(selectedMachine.isSaleChange);
+    const result = await receiveSalesMachine(selectedMachine._id, isRepair, arrived);
     setIsReceiving(false);
 
     enqueueSnackbar(result.msg, {
@@ -93,7 +94,7 @@ const TablaRecolectadasVentas: FC<RecolectadasVentasTableProps> = ({ userRole })
       <Card>
         <CardHeader
           title={'Equipos de Venta Recolectados'}
-          subheader="Equipos recolectados por cancelación de venta"
+          subheader="Equipos recolectados por garantía o cancelación de venta"
         />
         <Divider />
         <TableContainer>
@@ -130,9 +131,17 @@ const TablaRecolectadasVentas: FC<RecolectadasVentasTableProps> = ({ userRole })
                       >
                         {machine.machineNum}
                       </Typography>
-                      { !(machine.isCancellation) && (
+                      { !(machine.isCancellation) && !(machine.isSaleChange) && (
                         <Chip 
                           label="GARANTÍA" 
+                          size="small" 
+                          color="warning"
+                          sx={{ ml: 1, fontSize: '0.7rem' }}
+                        />
+                      )}
+                      { !(machine.isCancellation) && machine.isSaleChange && (
+                        <Chip 
+                          label="CAMBIO DE VENTA" 
                           size="small" 
                           color="warning"
                           sx={{ ml: 1, fontSize: '0.7rem' }}

@@ -102,7 +102,7 @@ const getStatusChip = (status: string) => {
       return (
         <Chip
           icon={<CheckCircleOutlineIcon />}
-          label="Listo"
+          label="Reparado de garantia"
           color="success"
           size="small"
           sx={{ fontWeight: 'bold' }}
@@ -155,7 +155,7 @@ function SalesMachineInfoTab({ salesMachine }) {
   // Allow editing if machine is DISPONIBLE, PENDIENTE, RECOLECTADA, EN_REPARACION, or LISTO (in repair workflow)
   // But not if it's VENDIDO and with customer
   const canEdit = salesMachine && 
-    (salesMachine.status === 'DISPONIBLE') && 
+    (salesMachine.status === 'DISPONIBLE' || salesMachine.status === 'LISTO') && 
     !(salesMachine.isSold && salesMachine.status === 'VENDIDO');
 
   const getLocationDisplay = () => {

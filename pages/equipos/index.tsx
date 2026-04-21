@@ -170,8 +170,7 @@ function Equipos({ session }) {
                     lost={machinesSummary?.PERDIDA}
                     total={machinesSummary?.total}
                     stored={machinesSummary?.ALMACEN}
-                    forSale={machinesSummary?.VENTA}
-                    onRepair={machinesSummary?.REPAIR}
+                    sale={machinesSummary?.SALE}
                     activeTotal={getOnlyActiveTotal(machinesSummary)}
                   />
                 </Grid>

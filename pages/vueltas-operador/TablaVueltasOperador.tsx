@@ -230,6 +230,9 @@ const TablaVueltasOperador: FC<TablaVueltasOperadorProps> = ({
       case 'CAMBIO':
         route = `/cambios-pendientes/${task._id}`;
         break;
+      case 'CAMBIO_VENTA':
+        route = `/cambios-ventas-pendientes/${task._id}`;
+        break;
     }
     if (route) {
       router.push(route);
@@ -250,6 +253,8 @@ const TablaVueltasOperador: FC<TablaVueltasOperadorProps> = ({
         return 'info';
       case 'RECOLECCION_VENTA':
         return isCancellation ? 'warning' : 'error';
+      case 'CAMBIO_VENTA':
+        return 'warning';
       case 'VUELTA_EXTRA':
         return 'secondary';
       default:
@@ -323,6 +328,8 @@ const TablaVueltasOperador: FC<TablaVueltasOperadorProps> = ({
                   ? task.isCancellation
                     ? 'RECOLECCIÓN CANCELACIÓN'
                     : 'RECOLECCIÓN GARANTÍA'
+                  : task.type === 'CAMBIO_VENTA'
+                  ? 'CAMBIO GARANTÍA'
                   : task.type === 'VUELTA_EXTRA'
                   ? 'VUELTA EXTRA'
                   : task.type;
@@ -577,9 +584,9 @@ const TablaVueltasOperador: FC<TablaVueltasOperadorProps> = ({
                       </TableCell>
                     </>
                   )}
-                  {!showTimeBetween && !isAdmin && (
+                  
                     <TableCell align="center">
-                      {isOperator && (
+                      {true && (
                         <Button
                           variant="contained"
                           color="primary"
@@ -592,7 +599,7 @@ const TablaVueltasOperador: FC<TablaVueltasOperadorProps> = ({
                         </Button>
                       )}
                     </TableCell>
-                  )}
+                  
                 </TableRow>
               );
             })}

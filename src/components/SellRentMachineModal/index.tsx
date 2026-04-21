@@ -1,7 +1,8 @@
 import PropTypes from 'prop-types';
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import Dialog from '@mui/material/Dialog';
 import {
+  Alert,
   Box,
   Button,
   Card,
@@ -9,53 +10,38 @@ import {
   CardHeader,
   CardMedia,
   Divider,
-  Grid,
-  TextField,
-  Alert,
-  Skeleton,
-  FormControlLabel,
-  Switch,
-  Autocomplete,
   FormControl,
+  FormControlLabel,
+  Grid,
+  IconButton,
   InputLabel,
-  Select,
   MenuItem,
-  Typography,
-  IconButton
+  Select,
+  Switch,
+  TextField,
+  Typography
 } from '@mui/material';
 import { LoadingButton } from '@mui/lab';
 import PhotoCamera from '@mui/icons-material/PhotoCamera';
 import DeleteIcon from '@mui/icons-material/Delete';
-import {
-  getFetcher,
-  useGetAllCustomers,
-  useGetPaymentAccounts
-} from '../../../pages/api/useRequest';
-import { saveSale } from '../../../lib/client/salesFetch';
-import { getAllSalesMachines } from '../../../lib/client/salesMachinesFetch';
+import { sellRentMachine } from '../../../lib/client/rentsFetch';
+import { getFetcher, useGetPaymentAccounts } from '../../../pages/api/useRequest';
 import { PAYMENT_METHODS } from '../../../lib/consts/OBJ_CONTS';
 import { compressImage } from '../../../lib/client/utils';
 import PaymentReceipt from '../PaymentReceipt';
 
-function AddSaleModal(props) {
-  const { handleOnClose, open, preSelectedMachine } = props;
-  const { customerList, customerError } = useGetAllCustomers(getFetcher, false);
+function SellRentMachineModal({ open, handleOnClose, rent }) {
   const { paymentAccounts } = useGetPaymentAccounts(getFetcher);
-
+  
   const [isLoading, setIsLoading] = useState(false);
   const [hasError, setHasError] = useState({ error: false, msg: '' });
-  const [useExistingMachine, setUseExistingMachine] = useState(true);
-  const [selectedMachine, setSelectedMachine] = useState(null);
-  const [selectedCustomer, setSelectedCustomer] = useState(null);
-  const [serialNumber, setSerialNumber] = useState('');
-  const [cashPrice, setCashPrice] = useState('');
-  const [totalAmount, setTotalAmount] = useState('');
-  const [initialPayment, setInitialPayment] = useState('');
-  const [totalWeeks, setTotalWeeks] = useState('');
-  const [salesMachines, setSalesMachines] = useState([]);
-  const [salesMachinesError, setSalesMachinesError] = useState(null);
-  const [salesMachinesLoading, setSalesMachinesLoading] = useState(true);
-
+  
+  // Price fields
+  const [cashPrice, setCashPrice] = useState<string>('');
+  const [totalAmount, setTotalAmount] = useState<string>('');
+  const [initialPayment, setInitialPayment] = useState<string>('');
+  const [totalWeeks, setTotalWeeks] = useState<string>('');
+  
   // Upfront cash payment states
   const [isUpfrontCashPayment, setIsUpfrontCashPayment] = useState(false);
   const [paymentMethod, setPaymentMethod] = useState('');
@@ -65,43 +51,19 @@ function AddSaleModal(props) {
   const [receipt, setReceipt] = useState<any>(null);
   const [showReceipt, setShowReceipt] = useState(false);
 
-  // Fetch sales machines on mount
-  useEffect(() => {
-    async function fetchSalesMachines() {
-      setSalesMachinesLoading(true);
-      const result = await getAllSalesMachines(false);
-      if (!result.error) {
-        setSalesMachines(result.salesMachinesList || []);
-      } else {
-        setSalesMachinesError(result.msg);
-      }
-      setSalesMachinesLoading(false);
-    }
-    if (open) {
-      fetchSalesMachines();
-    }
-  }, [open]);
-
-  useEffect(() => {
-    if (open && preSelectedMachine) {
-      setUseExistingMachine(true);
-      setSelectedMachine(preSelectedMachine);
-    }
-  }, [open, preSelectedMachine]);
-
-  // Get available sales machines (active ones that are not sold)
-  const availableMachines = salesMachines.filter(
-    (machine) => machine.active && !machine.isSold
-  );
-
+  const machineName = rent?.machine?.machineNum
+    ? `Equipo #${rent.machine.machineNum}`
+    : 'el equipo';
+  const customerName = rent?.customer?.name || 'el cliente';
+  
   const requiresImage = paymentMethod === 'TRANSFER' || paymentMethod === 'DEP';
-
+  
   const weeklyPayment =
     totalWeeks && totalAmount && initialPayment
       ? (
-        (parseFloat(totalAmount) - parseFloat(initialPayment)) /
-        parseFloat(totalWeeks)
-      ).toFixed(2)
+          (parseFloat(totalAmount) - parseFloat(initialPayment)) /
+          parseFloat(totalWeeks)
+        ).toFixed(2)
       : '0.00';
 
   const handleImageUpload = async (event) => {
@@ -144,18 +106,7 @@ function AddSaleModal(props) {
     setIsLoading(true);
     setHasError({ error: false, msg: '' });
 
-    if (useExistingMachine && !selectedMachine) {
-      setHasError({ error: true, msg: 'Debe seleccionar un equipo' });
-      setIsLoading(false);
-      return;
-    }
-
-    if (!useExistingMachine && !serialNumber.trim()) {
-      setHasError({ error: true, msg: 'Debe ingresar un número de serie' });
-      setIsLoading(false);
-      return;
-    }
-
+    // Validation
     if (isUpfrontCashPayment) {
       if (!cashPrice || parseFloat(cashPrice) <= 0) {
         setHasError({ error: true, msg: 'Debe ingresar el precio de contado' });
@@ -177,15 +128,33 @@ function AddSaleModal(props) {
         setIsLoading(false);
         return;
       }
+    } else {
+      if (!totalAmount || parseFloat(totalAmount) <= 0) {
+        setHasError({ error: true, msg: 'Debe ingresar el precio a crédito' });
+        setIsLoading(false);
+        return;
+      }
+      if (!initialPayment || parseFloat(initialPayment) < 0) {
+        setHasError({ error: true, msg: 'Debe ingresar el pago inicial (enganche)' });
+        setIsLoading(false);
+        return;
+      }
+      if (parseFloat(initialPayment) > parseFloat(totalAmount)) {
+        setHasError({ error: true, msg: 'El pago inicial no puede ser mayor al precio a crédito' });
+        setIsLoading(false);
+        return;
+      }
+      if (!totalWeeks || parseInt(totalWeeks) <= 0) {
+        setHasError({ error: true, msg: 'Debe ingresar el número de semanas' });
+        setIsLoading(false);
+        return;
+      }
     }
 
     const formData = new FormData();
-    formData.append('machineId', useExistingMachine ? (selectedMachine?._id || '') : '');
-    formData.append('serialNumber', useExistingMachine ? '' : serialNumber);
-    formData.append('customerId', selectedCustomer?.id || '');
-    formData.append('saleDate', new Date().toISOString());
-    formData.append('cashPrice', cashPrice || '');
+    formData.append('rentId', rent._id);
     formData.append('isUpfrontCashPayment', isUpfrontCashPayment ? 'true' : 'false');
+    formData.append('cashPrice', cashPrice || '');
 
     if (isUpfrontCashPayment) {
       formData.append('paymentMethod', paymentMethod);
@@ -201,29 +170,23 @@ function AddSaleModal(props) {
       formData.append('totalWeeks', totalWeeks);
     }
 
-    const result = await saveSale(formData);
+    const result = await sellRentMachine(formData);
 
     setIsLoading(false);
     if (!result.error) {
-      // If there's a receipt from upfront payment, show it
       if (result.data?.receipt) {
         setReceipt(result.data.receipt);
         setShowReceipt(true);
       } else {
-        handleSavedSale(result.msg, result.data);
+        handleOnClose(true, result.msg);
       }
     } else {
-      handleErrorOnSave(result.msg);
+      setHasError({ error: true, msg: result.msg });
     }
   }
 
   const handleClose = () => {
     setHasError({ error: false, msg: '' });
-    setIsLoading(false);
-    setUseExistingMachine(true);
-    setSelectedMachine(null);
-    setSelectedCustomer(null);
-    setSerialNumber('');
     setCashPrice('');
     setTotalAmount('');
     setInitialPayment('');
@@ -238,11 +201,8 @@ function AddSaleModal(props) {
     setPaymentImagePreview(null);
     setReceipt(null);
     setShowReceipt(false);
+    setIsLoading(false);
     handleOnClose(false);
-  };
-
-  const handleSavedSale = (successMessage, saleData) => {
-    handleOnClose(true, successMessage, saleData);
   };
 
   const handleCloseReceipt = () => {
@@ -251,127 +211,32 @@ function AddSaleModal(props) {
     handleOnClose(true, 'Venta registrada con éxito');
   };
 
-  const handleErrorOnSave = (msg) => {
-    setHasError({ error: true, msg });
-  };
-
   return (
     <>
-      <Dialog open={open} fullWidth={true} maxWidth="xs" scroll={'body'}>
+      <Dialog open={open} fullWidth maxWidth="xs" scroll="body">
         <Card>
-          <CardHeader title="Registrar Nueva Venta" />
+          <CardHeader title="Vender máquina rentada" />
           <Divider />
           <CardContent>
             <Box component="form" onSubmit={submitHandler}>
-              <Grid
-                container
-                direction="column"
-                justifyContent="center"
-                spacing={2}
-                maxWidth="xs"
-              >
-                <Grid item lg={12}>
-                  <FormControlLabel
-                    control={
-                      <Switch
-                        checked={useExistingMachine}
-                        disabled={true}
-                        onChange={(e) => {
-                          setUseExistingMachine(e.target.checked);
-                          setSelectedMachine(null);
-                          setSerialNumber('');
-                        }}
-                      />
-                    }
-                    label="Usar equipo existente"
-                  />
-                </Grid>
-
-                {useExistingMachine ? (
-                  <Grid item lg={12}>
-                    {salesMachinesError ? (
-                      <Alert severity="error">{salesMachinesError}</Alert>
-                    ) : salesMachinesLoading ? (
-                      <Skeleton
-                        variant="rectangular"
-                        width={'100%'}
-                        height={56}
-                        animation="wave"
-                      />
-                    ) : (
-                      <Autocomplete
-                        disabled={!!preSelectedMachine}
-                        options={availableMachines}
-                        getOptionLabel={(option) =>
-                          `#${option.machineNum} - ${option.brand} (${option.serialNumber
-                          })`
-                        }
-                        value={selectedMachine}
-                        isOptionEqualToValue={(option, value) => option._id === value._id}
-                        onChange={(_event, newValue) => {
-                          setSelectedMachine(newValue);
-                        }}
-                        renderInput={(params) => (
-                          <TextField
-                            {...params}
-                            label="Seleccionar Equipo de Venta"
-                            required
-                          />
-                        )}
-                      />
-                    )}
-                  </Grid>
-                ) : (
-                  <Grid item lg={12}>
-                    <TextField
-                      autoComplete="off"
-                      required
-                      id="serialNumber"
-                      name="serialNumber"
-                      label="Número de Serie"
-                      fullWidth={true}
-                      value={serialNumber}
-                      onChange={(e) => setSerialNumber(e.target.value)}
-                    />
-                  </Grid>
-                )}
-
-                <Grid item lg={12}>
-                  {customerError ? (
-                    <Alert severity="error">{customerError?.message}</Alert>
-                  ) : !customerList ? (
-                    <Skeleton
-                      variant="rectangular"
-                      width={'100%'}
-                      height={56}
-                      animation="wave"
-                    />
-                  ) : (
-                    <Autocomplete
-                      disablePortal
-                      options={customerList.map((customer) => {
-                        return {
-                          label: `${customer.name} (${customer.cell})`,
-                          id: customer._id
-                        };
-                      })}
-                      value={selectedCustomer}
-                      onChange={(_event, newValue) => {
-                        setSelectedCustomer(newValue);
-                      }}
-                      isOptionEqualToValue={(option: any, value: any) =>
-                        option.id === value.id
-                      }
-                      renderInput={(params) => (
-                        <TextField {...params} label="Cliente (opcional)" />
-                      )}
-                    />
-                  )}
+              <Grid container spacing={2}>
+                <Grid item xs={12}>
+                  <Alert severity="warning">
+                    Al confirmar:
+                    <ul style={{ margin: '4px 0 0 0', paddingLeft: 18 }}>
+                      <li>
+                        Se creará un registro de venta para <strong>{customerName}</strong>.
+                      </li>
+                      <li>
+                        <strong>{machineName}</strong> será desactivado del inventario de renta.
+                      </li>
+                      <li>La renta actual quedará como finalizada.</li>
+                    </ul>
+                  </Alert>
                 </Grid>
 
                 {/* Upfront Cash Payment Switch */}
-                <Grid item lg={12}>
-                  <Divider sx={{ mb: 1 }} />
+                <Grid item xs={12}>
                   <FormControlLabel
                     control={
                       <Switch
@@ -391,39 +256,33 @@ function AddSaleModal(props) {
                   />
                 </Grid>
 
-                {/* Cash Price - shown always but required when upfront */}
-                <Grid item lg={12}>
+                {/* Cash Price - shown always but required only when upfront */}
+                <Grid item xs={12}>
                   <TextField
-                    type="number"
-                    autoComplete="off"
-                    id="cashPrice"
-                    name="cashPrice"
                     label="Precio de Contado ($)"
-                    fullWidth={true}
-                    required={isUpfrontCashPayment}
+                    type="number"
+                    fullWidth
                     value={cashPrice}
+                    required={isUpfrontCashPayment}
                     onChange={(e) => setCashPrice(e.target.value)}
                     inputProps={{ min: 0, step: 0.01 }}
                     helperText={
                       isUpfrontCashPayment
                         ? 'Monto que el cliente pagará de contado'
-                        : 'Precio si el cliente paga en los primeros 30 días'
+                        : 'Precio si el cliente paga en los primeros 30 días (opcional)'
                     }
                   />
                 </Grid>
 
                 {/* Upfront Payment Info */}
                 {isUpfrontCashPayment && cashPrice && (
-                  <Grid item lg={12}>
+                  <Grid item xs={12}>
                     <Alert severity="success">
                       <Typography variant="body2">
                         <strong>La venta se registrará como PAGADA</strong>
                       </Typography>
                       <Typography variant="body2">
                         Monto: <strong>${parseFloat(cashPrice).toFixed(2)}</strong>
-                      </Typography>
-                      <Typography variant="body2">
-                        La entrega quedará pendiente de asignación.
                       </Typography>
                     </Alert>
                   </Grid>
@@ -432,7 +291,7 @@ function AddSaleModal(props) {
                 {/* Payment Method - only for upfront cash payment */}
                 {isUpfrontCashPayment && (
                   <>
-                    <Grid item lg={12}>
+                    <Grid item xs={12}>
                       <FormControl fullWidth required>
                         <InputLabel id="payment-method-label">Método de Pago</InputLabel>
                         <Select
@@ -459,7 +318,7 @@ function AddSaleModal(props) {
 
                     {/* Payment Account - only for TRANSFER/DEP */}
                     {requiresImage && (
-                      <Grid item lg={12}>
+                      <Grid item xs={12}>
                         <FormControl fullWidth required>
                           <InputLabel id="payment-account-label">Cuenta</InputLabel>
                           <Select
@@ -486,7 +345,7 @@ function AddSaleModal(props) {
 
                     {/* Payment Image - only for TRANSFER/DEP */}
                     {requiresImage && (
-                      <Grid item lg={12}>
+                      <Grid item xs={12}>
                         <Typography variant="subtitle2" gutterBottom>
                           Foto del comprobante de pago *
                         </Typography>
@@ -533,7 +392,7 @@ function AddSaleModal(props) {
                 {/* Credit fields - hidden when upfront cash payment */}
                 {!isUpfrontCashPayment && (
                   <>
-                    <Grid item lg={12}>
+                    <Grid item xs={12}>
                       <TextField
                         type="number"
                         autoComplete="off"
@@ -541,29 +400,29 @@ function AddSaleModal(props) {
                         id="totalAmount"
                         name="totalAmount"
                         label="Precio a Crédito ($)"
-                        fullWidth={true}
+                        fullWidth
                         value={totalAmount}
                         onChange={(e) => setTotalAmount(e.target.value)}
                         inputProps={{ min: 0, step: 0.01 }}
                       />
                     </Grid>
 
-                    <Grid item lg={12}>
+                    <Grid item xs={12}>
                       <TextField
                         type="number"
                         autoComplete="off"
                         required
                         id="initialPayment"
                         name="initialPayment"
-                        label="Pago Inicial ($)"
-                        fullWidth={true}
+                        label="Pago Inicial / Enganche ($)"
+                        fullWidth
                         value={initialPayment}
                         onChange={(e) => setInitialPayment(e.target.value)}
                         inputProps={{ min: 0, step: 0.01 }}
                       />
                     </Grid>
 
-                    <Grid item lg={12}>
+                    <Grid item xs={12}>
                       <TextField
                         type="number"
                         autoComplete="off"
@@ -571,7 +430,7 @@ function AddSaleModal(props) {
                         id="totalWeeks"
                         name="totalWeeks"
                         label="Número de Semanas"
-                        fullWidth={true}
+                        fullWidth
                         value={totalWeeks}
                         onChange={(e) => setTotalWeeks(e.target.value)}
                         inputProps={{ min: 1, step: 1 }}
@@ -579,7 +438,7 @@ function AddSaleModal(props) {
                     </Grid>
 
                     {totalWeeks && totalAmount && initialPayment && (
-                      <Grid item lg={12}>
+                      <Grid item xs={12}>
                         <Alert severity="info">
                           Pago semanal: <strong>${weeklyPayment}</strong>
                           <br />
@@ -597,33 +456,32 @@ function AddSaleModal(props) {
                 )}
 
                 {hasError.error && (
-                  <Grid item lg={12}>
+                  <Grid item xs={12}>
                     <Alert severity="error">{hasError.msg}</Alert>
                   </Grid>
                 )}
 
-                <Grid
-                  item
-                  container
-                  direction="row"
-                  justifyContent="center"
-                  lg={12}
-                  spacing={2}
-                >
-                  <Grid item>
-                    <Button onClick={handleClose} color="error">
-                      Cancelar
-                    </Button>
-                  </Grid>
-                  <Grid item>
-                    <LoadingButton
-                      loading={isLoading}
-                      type="submit"
-                      variant="contained"
-                      color={isUpfrontCashPayment ? 'success' : 'primary'}
-                    >
-                      {isUpfrontCashPayment ? 'Registrar y Pagar' : 'Guardar'}
-                    </LoadingButton>
+                <Grid item xs={12}>
+                  <Grid container direction="row" justifyContent="flex-end" spacing={2}>
+                    <Grid item>
+                      <Button
+                        variant="outlined"
+                        onClick={handleClose}
+                        disabled={isLoading}
+                      >
+                        Cancelar
+                      </Button>
+                    </Grid>
+                    <Grid item>
+                      <LoadingButton
+                        type="submit"
+                        loading={isLoading}
+                        variant="contained"
+                        color={isUpfrontCashPayment ? 'success' : 'warning'}
+                      >
+                        {isUpfrontCashPayment ? 'Registrar y Pagar' : 'Confirmar venta'}
+                      </LoadingButton>
+                    </Grid>
                   </Grid>
                 </Grid>
               </Grid>
@@ -644,10 +502,10 @@ function AddSaleModal(props) {
   );
 }
 
-AddSaleModal.propTypes = {
-  open: PropTypes.bool.isRequired,
+SellRentMachineModal.propTypes = {
   handleOnClose: PropTypes.func.isRequired,
-  preSelectedMachine: PropTypes.object
+  open: PropTypes.bool.isRequired,
+  rent: PropTypes.object.isRequired
 };
 
-export default AddSaleModal;
+export default SellRentMachineModal;

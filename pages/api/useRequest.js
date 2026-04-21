@@ -485,6 +485,31 @@ export const useGetSalePickupById = (fetcher, id) => {
   };
 };
 
+// Sale Changes (Warranty Exchanges)
+export const useGetPendingSaleChanges = (fetcher) => {
+  const { data, error, isLoading } = useSWR(
+    ROUTES.ALL_PENDING_SALE_CHANGES_API,
+    fetcher
+  );
+  return {
+    pendingSaleChangesList: data?.data,
+    pendingSaleChangesError: error,
+    isLoadingSaleChanges: isLoading
+  };
+};
+
+export const useGetSaleChangeById = (fetcher, id) => {
+  const { data, error, isLoading } = useSWR(
+    id ? ROUTES.SALE_CHANGE_BY_ID_API.replace(':id', id) : null,
+    fetcher
+  );
+  return {
+    saleChange: data?.data,
+    saleChangeByIdError: error,
+    isLoadingSaleChange: isLoading
+  };
+};
+
 // Sale Repairs
 export const useGetPendingSaleRepairs = (fetcher) => {
   const { data, error, isLoading } = useSWR(

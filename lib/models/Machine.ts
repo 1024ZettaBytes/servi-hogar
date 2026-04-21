@@ -23,6 +23,7 @@ export interface IMachine extends Document {
   active: boolean;
   fromWarehouseMachine: Schema.Types.ObjectId;
   wasReplaced: boolean;
+  wasSold: boolean;
   padlockSerial1: string;
   padlockSerial2: string;
 }
@@ -69,6 +70,7 @@ const MachineSchema = new Schema<IMachine>({
     ref: 'warehouse_machines'
   },
   wasReplaced: { type: Boolean, default: false },
+  wasSold: { type: Boolean, default: false },
   padlockSerial1: { type: String, default: null },
   padlockSerial2: { type: String, default: null }
 });

@@ -27,7 +27,7 @@ const WarehouseMachineSchema = new Schema<IWarehouseMachine>({
   entryNumber: { type: Number, required: true },
   origin: {
     type: String,
-    enum: ['NUEVA', 'REPUESTA', 'COMPRA_CALLE'],
+    enum: ['NUEVA', 'REPUESTA', 'COMPRA_CALLE', 'CAMBIO_VENTA'],
     required: true
   },
   brand: { type: String, required: true },
