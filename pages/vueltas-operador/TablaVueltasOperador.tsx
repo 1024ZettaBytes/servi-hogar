@@ -586,7 +586,7 @@ const TablaVueltasOperador: FC<TablaVueltasOperadorProps> = ({
                   )}
                   
                     <TableCell align="center">
-                      {true && (
+                      {isOperator && !showTimeBetween && (
                         <Button
                           variant="contained"
                           color="primary"
