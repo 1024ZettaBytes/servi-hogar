@@ -180,7 +180,7 @@ function RecoleccionVentaPendiente({ session }) {
                   Usuario Bloqueado
                 </Typography>
                 <Typography>
-                  Tu cuenta ha sido bloqueada por exceder el tiempo permitido entre vueltas (más de 35 minutos). 
+                  Tu cuenta ha sido bloqueada por exceder el tiempo permitido entre vueltas (más de 45 minutos). 
                   Por favor contacta al administrador para resolver esta situación.
                 </Typography>
               </Alert>

@@ -614,7 +614,6 @@ const TablaRentasActuales: FC<TablaRentasActualesProps> = ({
                               </IconButton>
                             </span>
                           </Tooltip>
-                          {userRole === 'ADMIN' && (
                             <Tooltip title="Vender máquina al cliente" arrow>
                               <span>
                                 <IconButton
@@ -633,7 +632,6 @@ const TablaRentasActuales: FC<TablaRentasActualesProps> = ({
                                 </IconButton>
                               </span>
                             </Tooltip>
-                          )}
                         </>
                       )}
                     </TableCell>

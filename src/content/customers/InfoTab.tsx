@@ -175,13 +175,14 @@ function CustomerInfoTab({
   const getInfoTextField = (
     field: string,
     minLength: number,
-    maxLength: number
+    maxLength: number,
+    required: boolean = true
   ) => (
     <TextField
       fullWidth
       inputProps={{ minLength, maxLength }}
       autoComplete="off"
-      required
+      required={required}
       id={field}
       name={field}
       variant="outlined"
@@ -316,7 +317,7 @@ function CustomerInfoTab({
                           !isEditing.info || role !== 'ADMIN' ? (
                             <Text color="black">{customer?.email}</Text>
                           ) : (
-                            getInfoTextField('email', 0, 100)
+                            getInfoTextField('email', 0, 100, false)
                           )
                         ) : (
                           <Skeleton
@@ -585,6 +586,49 @@ function CustomerInfoTab({
                         />
                       )}
                     </Grid>
+                    <Grid item xs={3} sm={6} md={6} mt={1} textAlign={{ sm: 'right' }}>
+                      <Box pr={2} pb={2}>
+                        Saldo:
+                      </Box>
+                    </Grid>
+                    <Grid item xs={9} sm={6} md={6} mt={1}>
+                      <Box sx={{ maxWidth: { xs: 'auto', sm: 100 } }}>
+                        {customer ? (
+                          !isEditing.info || role !== 'ADMIN' ? (
+                            <Text color={customer.balance < 0 ? 'error' : 'black'}>{`$${numeral(
+                            customer.balance
+                          ).format(`${customer.balance}0,0.00`)}`}</Text>
+                          ) : (
+                            <TextField
+                              id="balance"
+                              name="balance"
+                              size='small'
+                              type="number"
+                              InputProps={{
+                                startAdornment: <InputAdornment position="start">$</InputAdornment>,
+                                inputProps: {
+                                  min: 0,
+                                  step: 1
+                                }
+                              }}
+                              value={customerToEdit?.balance || 0}
+                              onChange={(e) => {
+                                setCustomerToEdit({
+                                  ...customerToEdit,
+                                  balance: e.target.value
+                                });
+                              }}
+                            />
+                          )
+                        ) : (
+                          <Skeleton
+                            variant="text"
+                            sx={{ fontSize: '1rem', width: '100px' }}
+                          />
+                        )}
+                      </Box>
+                    </Grid>
+                    
                     {isEditing.info && customerToEdit?.howFound === 'referred' && (
                       <>
                         <Grid
