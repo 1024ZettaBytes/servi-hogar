@@ -3,6 +3,13 @@ import {
     updateCustomerData
   } from "../../../lib/data/Customers";
   import {validateUserPermissions, getUserId} from "../auth/authUtils";
+  export const config = {
+  api: {
+    bodyParser: {
+      sizeLimit: '2mb',
+    }
+  },
+};
   async function getCustomerByIdAPI(req, res) {
     const { customerId } = req.query;
     try {
