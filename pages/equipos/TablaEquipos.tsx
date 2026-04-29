@@ -156,7 +156,7 @@ const TablaEquipos: FC<TablaEquiposProps> = ({ userRole, machinesList }) => {
     );
   };
   const machineCanBeConvertedToSale = (machineStatus) => {
-    return machineStatus === MACHINE_STATUS_LIST.LISTO && userRole === 'ADMIN';
+    return machineStatus === MACHINE_STATUS_LIST.LISTO;
   }
   const canSelectAll =
     machinesList.length > 0 &&
