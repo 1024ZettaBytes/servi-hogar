@@ -573,7 +573,7 @@ const TablaVueltasOperador: FC<TablaVueltasOperadorProps> = ({
                         {timeBetween !== null && nextTask ? (
                           <Chip
                             label={timeBetween + ' min.'}
-                            color={timeBetween > 30 ? 'error' : 'success'}
+                            color={timeBetween > 45 ? 'error' : 'success'}
                             size="small"
                           />
                         ) : (
