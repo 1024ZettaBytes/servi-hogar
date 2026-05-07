@@ -74,6 +74,7 @@ interface TablaMantPendientesProps {
   className?: string;
   listData: any[];
   userRole: string;
+  isBlocked?: boolean;
 }
 
 const applyPagination = (
@@ -86,7 +87,8 @@ const applyPagination = (
 
 const TablaMantPendientes: FC<TablaMantPendientesProps> = ({
   listData,
-  userRole
+  userRole,
+  isBlocked = false
 }) => {
   const [page, setPage] = useState<number>(0);
   const [limit, setLimit] = useState<number>(30);
@@ -103,7 +105,7 @@ const TablaMantPendientes: FC<TablaMantPendientesProps> = ({
 
   const theme = useTheme();
   const isAdmin = userRole === 'ADMIN';
-  const canComplete = isAdmin || !listData.some((m) => m.daysSinceCreate >= 3);
+  const canComplete = !isBlocked && (isAdmin || !listData.some((m) => m.daysSinceCreate >= 3));
   return (
     <>
       <Card>

@@ -20,6 +20,7 @@ export interface ISalesMachine extends Document {
   warehouseRef: Schema.Types.ObjectId;
   currentWarehouse: Schema.Types.ObjectId;
   currentVehicle: Schema.Types.ObjectId;
+  latestTecCond: Schema.Types.ObjectId;
 }
 
 const SalesMachineSchema = new Schema<ISalesMachine>({
@@ -60,6 +61,11 @@ const SalesMachineSchema = new Schema<ISalesMachine>({
     type: Schema.Types.ObjectId,
     default: null,
     ref: 'vehicles'
+  },
+  latestTecCond: {
+    type: Schema.Types.ObjectId,
+    default: null,
+    ref: 'users'
   }
 });
 
