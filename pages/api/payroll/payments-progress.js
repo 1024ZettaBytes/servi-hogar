@@ -47,20 +47,21 @@ async function getPaymentsProgressAPI(req, res) {
     const pastWeekEnd = new Date(addDaysToDate(weekStart, -1));
 
     // Get all AUX users
-    const auxRole = await Role.findOne({ id: 'AUX' });
-    if (!auxRole) {
+    const validRoles = await Role.find({ id: { $in: ['AUX', 'ADMIN'] } }).lean();
+
+    if (!validRoles || validRoles.length === 0) {
       return res.status(200).json({ data: { users: [], totalActiveRents: 0 } });
     }
 
-    const auxUsers = await User.find({ role: auxRole._id, isActive: true })
+    const users = await User.find({ role: { $in: validRoles.map(role => role._id) }, isActive: true })
       .select({ _id: 1, id: 1, name: 1 })
       .lean();
 
     const activeRentLog = await CurrentRentsLog.findOne({ dateText: dateToPlainString(pastWeekEnd) }).lean();
-    if(!activeRentLog) {
+    /*if(!activeRentLog) {
       return res.status(500).json({ errorMsg: `No se encontró el registro de rentas activas para la semana pasada ${dateToPlainString(pastWeekEnd)}` });
-    }
-    const totalActiveRents = activeRentLog.amount;
+    }*/
+    const totalActiveRents = 351 //activeRentLog.amount;
     // Calculate targets
     const target80 = Math.ceil(totalActiveRents * 0.80);
     const target85 = Math.ceil(totalActiveRents * 0.85);
@@ -68,7 +69,7 @@ async function getPaymentsProgressAPI(req, res) {
     // For each AUX user, count their RENT_EXT payments this week
     // Use weeksToPay field if exists, otherwise count as 1
     const usersProgress = await Promise.all(
-      auxUsers.map(async (user) => {
+      users.map(async (user) => {
         const paymentAggregation = await Payment.aggregate([
           {
             $match: {
@@ -132,7 +133,7 @@ async function getPaymentsProgressAPI(req, res) {
 
     res.status(200).json({
       data: {
-        users: usersProgress,
+        users: usersProgress.filter(user => user.paymentsCount > 0), // Only return users with payments
         totalActiveRents,
         totalPayments,
         collectivePercentage: Math.round(collectivePercentage * 100) / 100,

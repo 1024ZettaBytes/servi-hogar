@@ -25,12 +25,14 @@ import {
 import { deleteMachines } from '../../lib/client/machinesFetch';
 import { useSnackbar } from 'notistack';
 import VisibilityIcon from '@mui/icons-material/Visibility';
+import ShoppingCartCheckoutIcon from '@mui/icons-material/ShoppingCartCheckout';
 import DeleteTwoToneIcon from '@mui/icons-material/DeleteTwoTone';
 import BulkTableActions from '../../src/components/BulkTableActions';
 import SearchIcon from '@mui/icons-material/Search';
 import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
 import NextLink from 'next/link';
 import GenericModal from '@/components/GenericModal';
+import ConvertToSaleMachineModal from '@/components/ConvertToSaleMachineModal';
 import { capitalizeFirstLetter, formatTZDate } from 'lib/client/utils';
 import { MACHINE_STATUS_LIST } from '../../lib/consts/OBJ_CONTS';
 interface TablaEquiposProps {
@@ -141,6 +143,8 @@ const TablaEquipos: FC<TablaEquiposProps> = ({ userRole, machinesList }) => {
   const [page, setPage] = useState<number>(0);
   const [limit, setLimit] = useState<number>(10);
   const [filter, setFilter] = useState<string>('');
+  const [convertModalIsOpen, setConvertModalIsOpen] = useState(false);
+  const [machineToConvert, setMachineToConvert] = useState<{ _id: string; machineNum: number } | null>(null);
   const userCanDelete = ['ADMIN', 'AUX', 'OPE'].includes(userRole);
   const machineCanBeDeleted = (machineIsActive, machineStatus) => {
     return (
@@ -151,6 +155,9 @@ const TablaEquipos: FC<TablaEquiposProps> = ({ userRole, machinesList }) => {
       machineStatus !== MACHINE_STATUS_LIST.VEHI
     );
   };
+  const machineCanBeConvertedToSale = (machineStatus) => {
+    return machineStatus === MACHINE_STATUS_LIST.LISTO;
+  }
   const canSelectAll =
     machinesList.length > 0 &&
     machinesList.every((machine) =>
@@ -192,6 +199,24 @@ const TablaEquipos: FC<TablaEquiposProps> = ({ userRole, machinesList }) => {
   const handleOnDeleteClick = (machines: string[]) => {
     setMachinesToDelete(machines);
     setDeleteModalIsOpen(true);
+  };
+  const handleOnConvertClick = (machineId: string, machineNum: number) => {
+    setMachineToConvert({ _id: machineId, machineNum });
+    setConvertModalIsOpen(true);
+  };
+  const handleConvertModalClose = (converted: boolean, successMessage?: string) => {
+    setConvertModalIsOpen(false);
+    setMachineToConvert(null);
+    if (converted && successMessage) {
+      enqueueSnackbar(successMessage, {
+        variant: 'success',
+        anchorOrigin: {
+          vertical: 'top',
+          horizontal: 'center'
+        },
+        autoHideDuration: 2000
+      });
+    }
   };
   const handleOnConfirmDelete = async () => {
     setIsDeleting(true);
@@ -466,6 +491,22 @@ const TablaEquipos: FC<TablaEquiposProps> = ({ userRole, machinesList }) => {
                           </IconButton>
                         </Tooltip>
                       </NextLink>
+                      { machineCanBeConvertedToSale(machine?.status?.id) &&
+                        <Tooltip title="Convertir a Equipo de Venta" arrow>
+                          <IconButton
+                            onClick={() => handleOnConvertClick(machine._id, machine.machineNum)}
+                            sx={{
+                              '&:hover': {
+                                background: theme.colors.success.lighter
+                              },
+                              color: theme.palette.success.main
+                            }}
+                            color="inherit"
+                            size="small"
+                          >
+                            <ShoppingCartCheckoutIcon fontSize="small" />
+                          </IconButton>
+                        </Tooltip>}
                       {machineCanBeDeleted(
                         machine?.active,
                         machine?.status?.id
@@ -505,6 +546,15 @@ const TablaEquipos: FC<TablaEquiposProps> = ({ userRole, machinesList }) => {
           />
         </Box>
       </Card>
+
+      {machineToConvert && convertModalIsOpen && (
+        <ConvertToSaleMachineModal
+          open={convertModalIsOpen}
+          handleOnClose={handleConvertModalClose}
+          machineId={machineToConvert._id}
+          machineNum={machineToConvert.machineNum}
+        />
+      )}
 
       <GenericModal
         open={deleteModalIsOpen}

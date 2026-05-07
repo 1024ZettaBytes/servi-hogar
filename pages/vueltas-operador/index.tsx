@@ -482,7 +482,7 @@ function VueltasOperador({ session }) {
                 {allCompletedTasks.length > 0 && (
                   <Box sx={{ mt: 2, textAlign: "right" }}>
                     <Typography variant="caption" color="error">
-                      BLOQUEA SISTEMA POR TARDAR MAS DE 30 MINUTOS ENTRE VUELTAS
+                      BLOQUEA SISTEMA POR TARDAR MAS DE 45 MINUTOS ENTRE VUELTAS
                     </Typography>
                   </Box>
                 )}

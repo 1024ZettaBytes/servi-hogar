@@ -13,7 +13,7 @@ import NextBreadcrumbs from "@/components/Shared/BreadCrums";
 import TablaMant from "./TablaMant";
 import TablaMantPendientes from "./TablaMantPendientes";
 import TablaAcondicionamiento from "./TablaAcondicionamiento";
-import { getFetcher, useGetMantainances, useGetPendingMantainances, useGetPendingSaleRepairs, useGetSaleRepairs, useGetWarehouseConditioning, useGetAllWarehousesOverview } from "pages/api/useRequest";
+import { getFetcher, useGetMantainances, useGetPendingMantainances, useGetPendingSaleRepairs, useGetSaleRepairs, useGetWarehouseConditioning, useGetAllWarehousesOverview, useGetCollectedMachines } from "pages/api/useRequest";
 
 function Mantenimientos({ session }) {
   const { user } = session;
@@ -26,6 +26,12 @@ function Mantenimientos({ session }) {
   const { saleRepairsData, saleRepairsError } = useGetSaleRepairs(getFetcher);
   const { conditioningList, conditioningError, isLoadingConditioning } = useGetWarehouseConditioning(getFetcher);
   const { warehousesList } = useGetAllWarehousesOverview(getFetcher);
+
+  const isTec = user?.role === 'TEC';
+  const { collectedMachines } = useGetCollectedMachines(isTec ? getFetcher : null);
+  const hasOverdueCollected = isTec && Array.isArray(collectedMachines) && collectedMachines.some(
+    (m) => m.collectionDate && (Date.now() - new Date(m.collectionDate).getTime()) > 24 * 60 * 60 * 1000
+  );
 
   // Combine rent maintenance and sale repairs for pending list
   // Sale repairs have priority (appear first)
@@ -87,6 +93,14 @@ function Mantenimientos({ session }) {
             </Tabs>
           </Grid>
 
+          {hasOverdueCollected && (
+            <Grid item xs={12}>
+              <Alert severity="warning">
+                Hay máquinas recolectadas sin bajar desde hace más de 1 día. Debes bajarlas para poder realizar mantenimientos (Ve a la sección de 'Recolectadas' del menú).
+              </Alert>
+            </Grid>
+          )}
+
           <Grid item xs={12}>
             {currentTab === "pendientes" && (
               <>
@@ -104,6 +118,7 @@ function Mantenimientos({ session }) {
                     <TablaMantPendientes
                       listData={combinedPendingList}
                       userRole={user?.role}
+                      isBlocked={hasOverdueCollected}
                     />
                   </Card>
                 )}
