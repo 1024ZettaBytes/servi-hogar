@@ -260,6 +260,14 @@ function SaleDetail() {
                           {sale.createdBy?.name || 'N/A'}
                         </Typography>
                       </Grid>
+                      <Grid item xs={6}>
+                        <Typography variant="caption" color="text.secondary">
+                          Ultimo mantenimiento
+                        </Typography>
+                        <Typography variant="body2">
+                          {sale.machine?.latestTecCond?.name || 'N/A'}
+                        </Typography>
+                      </Grid>
                     </Grid>
                   </Box>
                 </Card>

@@ -524,9 +524,7 @@ const TablaVentas: FC<TablaSalesProps> = ({ userRole, salesList, onPaymentClick,
                                   noWrap
                                   sx={{ cursor: 'pointer' }}
                                 >
-                                  {missedPayments} pago
-                                  {missedPayments !== 1 ? 's' : ''} atrasado
-                                  {missedPayments !== 1 ? 's' : ''} ⚠️
+                                  {missedPayments} semana(s) de atraso
                                 </Typography>
                               </Tooltip>
                             );
