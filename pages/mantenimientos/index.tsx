@@ -29,8 +29,21 @@ function Mantenimientos({ session }) {
 
   const isTec = user?.role === 'TEC';
   const { collectedMachines } = useGetCollectedMachines(isTec ? getFetcher : null);
+
+  // Returns the deadline 24 weekday-hours after `from`, skipping Saturday and Sunday
+  const getWeekdayDeadline = (from: Date): Date => {
+    const deadline = new Date(from);
+    let hoursToAdd = 24;
+    while (hoursToAdd > 0) {
+      deadline.setTime(deadline.getTime() + 60 * 60 * 1000);
+      const day = deadline.getDay();
+      if (day !== 0 && day !== 6) hoursToAdd--;
+    }
+    return deadline;
+  };
+
   const hasOverdueCollected = isTec && Array.isArray(collectedMachines) && collectedMachines.some(
-    (m) => m.collectionDate && (Date.now() - new Date(m.collectionDate).getTime()) > 24 * 60 * 60 * 1000
+    (m) => m.collectionDate && new Date() > getWeekdayDeadline(new Date(m.collectionDate))
   );
 
   // Combine rent maintenance and sale repairs for pending list
