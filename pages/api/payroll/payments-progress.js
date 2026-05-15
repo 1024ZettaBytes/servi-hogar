@@ -61,7 +61,7 @@ async function getPaymentsProgressAPI(req, res) {
     /*if(!activeRentLog) {
       return res.status(500).json({ errorMsg: `No se encontró el registro de rentas activas para la semana pasada ${dateToPlainString(pastWeekEnd)}` });
     }*/
-    const totalActiveRents = 351 //activeRentLog.amount;
+    const totalActiveRents = activeRentLog.amount;
     // Calculate targets
     const target80 = Math.ceil(totalActiveRents * 0.80);
     const target85 = Math.ceil(totalActiveRents * 0.85);
