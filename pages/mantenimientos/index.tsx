@@ -5,7 +5,8 @@ import SidebarLayout from "@/layouts/SidebarLayout";
 import { validateServerSideSession } from "../../lib/auth";
 import PageHeader from "@/components/PageHeader";
 import PageTitleWrapper from "@/components/PageTitleWrapper";
-import { Card, Container, Grid, Skeleton, Alert, Tabs, Tab } from "@mui/material";
+import { Card, Container, Grid, Skeleton, Alert, Tabs, Tab, Chip, Box, Typography, CircularProgress } from "@mui/material";
+import LocalShippingIcon from "@mui/icons-material/LocalShipping";
 import Footer from "@/components/Footer";
 
 
@@ -13,7 +14,7 @@ import NextBreadcrumbs from "@/components/Shared/BreadCrums";
 import TablaMant from "./TablaMant";
 import TablaMantPendientes from "./TablaMantPendientes";
 import TablaAcondicionamiento from "./TablaAcondicionamiento";
-import { getFetcher, useGetMantainances, useGetPendingMantainances, useGetPendingSaleRepairs, useGetSaleRepairs, useGetWarehouseConditioning, useGetAllWarehousesOverview, useGetCollectedMachines } from "pages/api/useRequest";
+import { getFetcher, useGetMantainances, useGetPendingMantainances, useGetPendingSaleRepairs, useGetSaleRepairs, useGetWarehouseConditioning, useGetAllWarehousesOverview, useGetCollectedMachines, useGetNextMachinesToLoad } from "pages/api/useRequest";
 
 function Mantenimientos({ session }) {
   const { user } = session;
@@ -29,7 +30,8 @@ function Mantenimientos({ session }) {
 
   const isTec = user?.role === 'TEC';
   const { collectedMachines } = useGetCollectedMachines(isTec ? getFetcher : null);
-
+  const { nextMachinesToLoad, isLoadingNextMachinesToLoad } = useGetNextMachinesToLoad(getFetcher, true);
+console.log("Next machines to load:", nextMachinesToLoad);
   // Returns the deadline 24 weekday-hours after `from`, skipping Saturday and Sunday
   const getWeekdayDeadline = (from: Date): Date => {
     const deadline = new Date(from);
@@ -91,6 +93,36 @@ function Mantenimientos({ session }) {
           alignItems="stretch"
           spacing={4}
         >
+          <Grid item xs={12}>
+            <Alert
+              severity={nextMachinesToLoad?.length ? "info" : "success"}
+              icon={<LocalShippingIcon fontSize="inherit" />}
+            >
+              <Typography variant="subtitle2" gutterBottom>
+                Equipos listos para subir{!isLoadingNextMachinesToLoad && nextMachinesToLoad?.length ? ` (${nextMachinesToLoad.length})` : ""}
+              </Typography>
+              {isLoadingNextMachinesToLoad ? (
+                <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+                  <CircularProgress size={16} />
+                  <Typography variant="body2">Cargando...</Typography>
+                </Box>
+              ) : nextMachinesToLoad?.length ? (
+                <Box sx={{ display: "flex", flexWrap: "wrap", gap: 0.5, mt: 0.5 }}>
+                  {nextMachinesToLoad.map((m) => (
+                    <Chip
+                      key={m._id}
+                      label={`#${m.machineNum}`}
+                      size="small"
+                      color="primary"
+                      variant="outlined"
+                    />
+                  ))}
+                </Box>
+              ) : (
+                <Typography variant="body2">No hay equipos para subir</Typography>
+              )}
+            </Alert>
+          </Grid>
           <Grid item xs={12}>
             <Tabs
               onChange={(_e, val) => setCurrentTab(val)}
