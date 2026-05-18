@@ -4,8 +4,6 @@ import {
   Skeleton,
   Alert,
   Card,
-  CardHeader,
-  Divider,
   Typography,
   Table,
   TableBody,
@@ -40,7 +38,7 @@ interface TechnicianPayrollTabProps {
   userId: string;
 }
 
-function TechnicianPayrollTab({ weekStart, weekEnd, userRole, userId }: TechnicianPayrollTabProps) {
+function TechnicianPayrollTab({ weekStart, weekEnd, userRole }: TechnicianPayrollTabProps) {
   const { enqueueSnackbar } = useSnackbar();
   const [updatingBonus, setUpdatingBonus] = useState<string | null>(null);
   const [expandedFailures, setExpandedFailures] = useState<Record<string, boolean>>({});
