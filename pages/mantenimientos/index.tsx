@@ -31,7 +31,6 @@ function Mantenimientos({ session }) {
   const isTec = user?.role === 'TEC';
   const { collectedMachines } = useGetCollectedMachines(isTec ? getFetcher : null);
   const { nextMachinesToLoad, isLoadingNextMachinesToLoad } = useGetNextMachinesToLoad(getFetcher, true);
-console.log("Next machines to load:", nextMachinesToLoad);
   // Returns the deadline 24 weekday-hours after `from`, skipping Saturday and Sunday
   const getWeekdayDeadline = (from: Date): Date => {
     const deadline = new Date(from);

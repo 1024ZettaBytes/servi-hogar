@@ -39,7 +39,7 @@ async function getNextMachinesToLoadAPI(req, res) {
   }
 }
 async function handler(req, res) {
-  const validRole = await validateUserPermissions(req, res, ["OPE", "TEC", "ADMIN"]);
+  const validRole = await validateUserPermissions(req, res, ["OPE", "TEC", "ADMIN", "AUX"]);
   if (!validRole) return;
   const userId = await getUserId(req);
   switch (req.method) {
