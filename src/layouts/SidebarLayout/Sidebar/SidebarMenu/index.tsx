@@ -762,7 +762,7 @@ function SidebarMenu({ userRole }) {
             </List>
           </SubMenuWrapper>
                   </List>*/}
-        {['ADMIN', 'AUX', 'SUB', 'TEC'].includes(userRole) ? (
+        {['ADMIN', 'AUX', 'SUB', 'TEC', 'OPE'].includes(userRole) ? (
           <List
             component="div"
             subheader={
@@ -929,7 +929,7 @@ function SidebarMenu({ userRole }) {
                     </NextLink>
                   </ListItem>
                 )}
-                {['ADMIN', 'AUX'].includes(userRole) && (
+                {['ADMIN', 'AUX', 'TEC', 'OPE'].includes(userRole) && (
                   <ListItem component="div">
                     <NextLink href="/nomina" passHref>
                       <Button

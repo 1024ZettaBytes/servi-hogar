@@ -612,6 +612,18 @@ export const useGetPaymentsProgress = (fetcher, weekStartStr) => {
   };
 };
 
+export const useGetOperatorsPayroll = (fetcher, dateStr) => {
+  const url = dateStr
+    ? `${ROUTES.PAYROLL_OPERATORS}?date=${dateStr}`
+    : null;
+  const { data, error, isLoading } = useSWR(url, fetcher);
+  return {
+    operatorsPayrollData: data?.data,
+    operatorsPayrollError: error,
+    isLoadingOperatorsPayroll: isLoading
+  };
+};
+
 // Extra Trips
 export const useGetPendingExtraTrips = (fetcher) => {
   const { data, error, isLoading } = useSWR(
@@ -741,5 +753,15 @@ export const useGetWarehouseConditioning = (fetcher) => {
     conditioningList: data?.data,
     conditioningError: error,
     isLoadingConditioning: isLoading
+  };
+};
+
+export const useGetNextMachinesToLoad = (fetcher, all=false) => {
+  const url = `${ROUTES.LOAD_MACHINE_TO_VEHICLE_API}?all=${all}`;
+  const { data, error, isLoading } = useSWR(url, fetcher);
+  return {
+    nextMachinesToLoad: data?.machines,
+    nextMachinesToLoadError: error,
+    isLoadingNextMachinesToLoad: isLoading
   };
 };

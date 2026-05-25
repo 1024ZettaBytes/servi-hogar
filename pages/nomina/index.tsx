@@ -5,13 +5,17 @@ import SidebarLayout from '@/layouts/SidebarLayout';
 import { validateServerSideSession } from '../../lib/auth';
 import PayrollCard from '@/components/PayrollCard';
 import PaymentsProgressCard from '@/components/PaymentsProgressCard';
+import TechnicianPayrollTab from '@/components/TechnicianPayrollTab';
+import OperatorPayrollTab from '@/components/OperatorPayrollTab';
 import {
   Container,
   Grid,
   Box,
   IconButton,
   Button,
-  Typography
+  Typography,
+  Tabs,
+  Tab
 } from '@mui/material';
 import NavigateBeforeIcon from '@mui/icons-material/NavigateBefore';
 import NavigateNextIcon from '@mui/icons-material/NavigateNext';
@@ -26,12 +30,30 @@ import {
 import PageTitleWrapper from '@/components/PageTitleWrapper';
 import PageHeader from '@/components/PageHeader';
 
+const TAB_CONFIG = {
+  oficina: { label: 'Oficina', roles: ['ADMIN', 'AUX'] },
+  tecnicos: { label: 'Técnicos', roles: ['ADMIN', 'TEC'] },
+  ruta: { label: 'Ruta', roles: ['ADMIN', 'OPE'] }
+};
+
+function getDefaultTab(userRole: string): string {
+  if (['AUX'].includes(userRole)) return 'oficina';
+  if (userRole === 'TEC') return 'tecnicos';
+  if (userRole === 'OPE') return 'ruta';
+  return 'oficina'; // ADMIN defaults to oficina
+}
+
+function getVisibleTabs(userRole: string) {
+  return Object.entries(TAB_CONFIG)
+    .filter(([, config]) => config.roles.includes(userRole))
+    .map(([value, config]) => ({ value, label: config.label }));
+}
+
 function Payroll({ session }) {
   const { user } = session;
   const userRole = user?.role;
-  const showPayrollCard = ['AUX', 'ADMIN'].includes(userRole);
 
-  // Shared week state
+  const [currentTab, setCurrentTab] = useState(getDefaultTab(userRole));
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [collectionBonus, setCollectionBonus] = useState(0);
 
@@ -48,71 +70,102 @@ function Payroll({ session }) {
   const goToNextWeek = () => setSelectedDate(addDaysToDate(selectedDate, 7));
   const goToCurrentWeek = () => setSelectedDate(new Date());
 
+  const visibleTabs = getVisibleTabs(userRole);
+
   return (
     <>
-      <>
-        <Head>
-          <title>Servi Hogar | Nómina</title>
-        </Head>
-        <PageTitleWrapper>
-          <PageHeader
-            title={'Nómina Semanal | Oficina'}
-          />
-        </PageTitleWrapper>
-        {showPayrollCard && (
-          <Container maxWidth="lg" sx={{ mb: 3 }}>
-            {/* Week Selector */}
-            <Box
-              display="flex"
-              alignItems="center"
-              justifyContent="center"
-              gap={1}
-              mt={3}
-              mb={2}
+      <Head>
+        <title>Servi Hogar | Nómina</title>
+      </Head>
+      <PageTitleWrapper>
+        <PageHeader title={'Nómina Semanal'} />
+      </PageTitleWrapper>
+      <Container maxWidth="lg" sx={{ mb: 3 }}>
+        {/* Week Selector */}
+        <Box
+          display="flex"
+          alignItems="center"
+          justifyContent="center"
+          gap={1}
+          mt={3}
+          mb={2}
+        >
+          <IconButton onClick={goToPreviousWeek}>
+            <NavigateBeforeIcon />
+          </IconButton>
+          <Typography variant="h5" fontWeight="bold">
+            {formatTZDate(weekStart, 'ddd DD MMM')} -{' '}
+            {formatTZDate(weekEnd, 'ddd DD MMM YYYY')}
+          </Typography>
+          <IconButton onClick={goToNextWeek}>
+            <NavigateNextIcon />
+          </IconButton>
+          {!isCurrentWeek && (
+            <Button
+              size="small"
+              variant="outlined"
+              onClick={goToCurrentWeek}
             >
-              <IconButton onClick={goToPreviousWeek}>
-                <NavigateBeforeIcon />
-              </IconButton>
-              <Typography variant="h5" fontWeight="bold">
-                {formatTZDate(weekStart, 'ddd DD MMM')} -{' '}
-                {formatTZDate(weekEnd, 'ddd DD MMM YYYY')}
-              </Typography>
-              <IconButton onClick={goToNextWeek}>
-                <NavigateNextIcon />
-              </IconButton>
-              {!isCurrentWeek && (
-                <Button
-                  size="small"
-                  variant="outlined"
-                  onClick={goToCurrentWeek}
-                >
-                  Semana actual
-                </Button>
-              )}
-            </Box>
+              Semana actual
+            </Button>
+          )}
+        </Box>
 
-            <Grid container spacing={3}>
-              {/* Payments Progress Card */}
-              <Grid item xs={12}>
-                <PaymentsProgressCard
-                  weekStartStr={weekStartStr}
-                  onBonusChange={setCollectionBonus}
-                />
-              </Grid>
-
-              {/* Payroll Card */}
-              <Grid item xs={12} lg={8}>
-                <PayrollCard
-                  userRole={userRole}
-                  currentUserId={user?.id}
-                  weekStartStr={weekStartStr}
-                  collectionBonus={collectionBonus}
-                />
-              </Grid>
-            </Grid>
-          </Container>
+        {/* Tabs - only show if more than one tab visible */}
+        {visibleTabs.length > 1 && (
+          <Tabs
+            onChange={(_e, val) => setCurrentTab(val)}
+            value={currentTab}
+            variant="fullWidth"
+            textColor="primary"
+            indicatorColor="primary"
+            centered
+            sx={{ mb: 3 }}
+          >
+            {visibleTabs.map((tab) => (
+              <Tab key={tab.value} label={tab.label} value={tab.value} />
+            ))}
+          </Tabs>
         )}
-      </>
+
+        {/* Tab: Oficina */}
+        {currentTab === 'oficina' && (
+          <Grid container spacing={3}>
+            <Grid item xs={12}>
+              <PaymentsProgressCard
+                weekStartStr={weekStartStr}
+                onBonusChange={setCollectionBonus}
+              />
+            </Grid>
+            <Grid item xs={12} lg={8}>
+              <PayrollCard
+                userRole={userRole}
+                currentUserId={user?.id}
+                weekStartStr={weekStartStr}
+                collectionBonus={collectionBonus}
+              />
+            </Grid>
+          </Grid>
+        )}
+
+        {/* Tab: Técnicos */}
+        {currentTab === 'tecnicos' && (
+          <TechnicianPayrollTab
+            weekStart={weekStart}
+            weekEnd={weekEnd}
+            userRole={userRole}
+            userId={user?.id}
+          />
+        )}
+
+        {/* Tab: Ruta */}
+        {currentTab === 'ruta' && (
+          <OperatorPayrollTab
+            weekStartStr={weekStartStr}
+            userRole={userRole}
+          />
+        )}
+      </Container>
       <Footer />
     </>
   );
