@@ -22,10 +22,11 @@ import {
   TextField,
   InputAdornment
 } from '@mui/material';
-import { deleteMachines } from '../../lib/client/machinesFetch';
+import { deleteMachines, dismantleRentalMachine } from '../../lib/client/machinesFetch';
 import { useSnackbar } from 'notistack';
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import ShoppingCartCheckoutIcon from '@mui/icons-material/ShoppingCartCheckout';
+import HandymanIcon from '@mui/icons-material/Handyman';
 import DeleteTwoToneIcon from '@mui/icons-material/DeleteTwoTone';
 import BulkTableActions from '../../src/components/BulkTableActions';
 import SearchIcon from '@mui/icons-material/Search';
@@ -145,6 +146,9 @@ const TablaEquipos: FC<TablaEquiposProps> = ({ userRole, machinesList }) => {
   const [filter, setFilter] = useState<string>('');
   const [convertModalIsOpen, setConvertModalIsOpen] = useState(false);
   const [machineToConvert, setMachineToConvert] = useState<{ _id: string; machineNum: number } | null>(null);
+  const [dismantleModalIsOpen, setDismantleModalIsOpen] = useState(false);
+  const [machineToDismantle, setMachineToDismantle] = useState<{ _id: string; machineNum: number } | null>(null);
+  const [isDismantling, setIsDismantling] = useState(false);
   const userCanDelete = ['ADMIN', 'AUX', 'OPE'].includes(userRole);
   const machineCanBeDeleted = (machineIsActive, machineStatus) => {
     return (
@@ -157,6 +161,9 @@ const TablaEquipos: FC<TablaEquiposProps> = ({ userRole, machinesList }) => {
   };
   const machineCanBeConvertedToSale = (machineStatus) => {
     return machineStatus === MACHINE_STATUS_LIST.LISTO;
+  }
+  const machineCanBedismantled = (machineStatus: string) => {
+    return userRole === 'ADMIN' && machineStatus === MACHINE_STATUS_LIST.LISTO;
   }
   const canSelectAll =
     machinesList.length > 0 &&
@@ -217,6 +224,22 @@ const TablaEquipos: FC<TablaEquiposProps> = ({ userRole, machinesList }) => {
         autoHideDuration: 2000
       });
     }
+  };
+  const handleOnDismantleClick = (machineId: string, machineNum: number) => {
+    setMachineToDismantle({ _id: machineId, machineNum });
+    setDismantleModalIsOpen(true);
+  };
+  const handleOnConfirmDismantle = async () => {
+    setIsDismantling(true);
+    const result = await dismantleRentalMachine(machineToDismantle._id);
+    setIsDismantling(false);
+    setDismantleModalIsOpen(false);
+    setMachineToDismantle(null);
+    enqueueSnackbar(result.msg, {
+      variant: !result.error ? 'success' : 'error',
+      anchorOrigin: { vertical: 'top', horizontal: 'center' },
+      autoHideDuration: 2000
+    });
   };
   const handleOnConfirmDelete = async () => {
     setIsDeleting(true);
@@ -507,6 +530,22 @@ const TablaEquipos: FC<TablaEquiposProps> = ({ userRole, machinesList }) => {
                             <ShoppingCartCheckoutIcon fontSize="small" />
                           </IconButton>
                         </Tooltip>}
+                      { machineCanBedismantled(machine?.status?.id) &&
+                        <Tooltip title="Desmantelar Equipo" arrow>
+                          <IconButton
+                            onClick={() => handleOnDismantleClick(machine._id, machine.machineNum)}
+                            sx={{
+                              '&:hover': {
+                                background: theme.colors.warning.lighter
+                              },
+                              color: theme.palette.warning.main
+                            }}
+                            color="inherit"
+                            size="small"
+                          >
+                            <HandymanIcon fontSize="small" />
+                          </IconButton>
+                        </Tooltip>}
                       {machineCanBeDeleted(
                         machine?.active,
                         machine?.status?.id
@@ -555,6 +594,19 @@ const TablaEquipos: FC<TablaEquiposProps> = ({ userRole, machinesList }) => {
           machineNum={machineToConvert.machineNum}
         />
       )}
+
+      <GenericModal
+        open={dismantleModalIsOpen}
+        title="Desmantelar Equipo"
+        requiredReason={false}
+        text={`¿Está seguro de desmantelar el equipo #${machineToDismantle?.machineNum}? El equipo quedará inactivo y con estatus DESMANTELADO. Esta acción es irreversible.`}
+        isLoading={isDismantling}
+        onAccept={handleOnConfirmDismantle}
+        onCancel={() => {
+          setDismantleModalIsOpen(false);
+          setMachineToDismantle(null);
+        }}
+      />
 
       <GenericModal
         open={deleteModalIsOpen}
