@@ -5,8 +5,9 @@ import SidebarLayout from "@/layouts/SidebarLayout";
 import { validateServerSideSession } from "../../lib/auth";
 import PageHeader from "@/components/PageHeader";
 import PageTitleWrapper from "@/components/PageTitleWrapper";
-import { Card, Container, Grid, Skeleton, Alert, Tabs, Tab, Chip, Box, Typography, CircularProgress } from "@mui/material";
+import { Card, Container, Grid, Skeleton, Alert, Tabs, Tab, Chip, Box, Typography, CircularProgress, Button, Table, TableBody, TableCell, TableContainer, TableHead, TableRow } from "@mui/material";
 import LocalShippingIcon from "@mui/icons-material/LocalShipping";
+import DownloadIcon from "@mui/icons-material/Download";
 import Footer from "@/components/Footer";
 
 
@@ -14,12 +15,16 @@ import NextBreadcrumbs from "@/components/Shared/BreadCrums";
 import TablaMant from "./TablaMant";
 import TablaMantPendientes from "./TablaMantPendientes";
 import TablaAcondicionamiento from "./TablaAcondicionamiento";
-import { getFetcher, useGetMantainances, useGetPendingMantainances, useGetPendingSaleRepairs, useGetSaleRepairs, useGetWarehouseConditioning, useGetAllWarehousesOverview, useGetCollectedMachines, useGetNextMachinesToLoad } from "pages/api/useRequest";
+import { getFetcher, useGetMantainances, useGetPendingMantainances, useGetPendingSaleRepairs, useGetSaleRepairs, useGetWarehouseConditioning, useGetAllWarehousesOverview, useGetCollectedMachines, useGetNextMachinesToLoad, useGetStaleMachinesOnVehicle } from "pages/api/useRequest";
+import { unloadStaleMachine } from "../../lib/client/machinesFetch";
+import { useSnackbar } from "notistack";
 
 function Mantenimientos({ session }) {
   const { user } = session;
   const paths = ["Inicio", "Mantenimientos"];
   const [currentTab, setCurrentTab] = useState("pendientes");
+  const [unloadingId, setUnloadingId] = useState<string | null>(null);
+  const { enqueueSnackbar } = useSnackbar();
 
   const { pendingMantData, pendingMantError } = useGetPendingMantainances(getFetcher);
   const { mantData, mantError } = useGetMantainances(getFetcher);
@@ -30,6 +35,7 @@ function Mantenimientos({ session }) {
 
   const isTec = user?.role === 'TEC';
   const { collectedMachines } = useGetCollectedMachines(isTec ? getFetcher : null);
+  const { staleMachines } = useGetStaleMachinesOnVehicle(getFetcher);
   const { nextMachinesToLoad, isLoadingNextMachinesToLoad } = useGetNextMachinesToLoad(getFetcher, true);
   // Returns the deadline 24 weekday-hours after `from`, skipping Saturday and Sunday
   const getWeekdayDeadline = (from: Date): Date => {
@@ -46,6 +52,17 @@ function Mantenimientos({ session }) {
   const hasOverdueCollected = isTec && Array.isArray(collectedMachines) && collectedMachines.some(
     (m) => m.collectionDate && new Date() > getWeekdayDeadline(new Date(m.collectionDate))
   );
+
+  const handleUnloadMachine = async (machineId: string) => {
+    setUnloadingId(machineId);
+    const result = await unloadStaleMachine({ machineId });
+    if (result.error) {
+      enqueueSnackbar(result.msg, { variant: "error" });
+    } else {
+      enqueueSnackbar(result.msg, { variant: "success" });
+    }
+    setUnloadingId(null);
+  };
 
   // Combine rent maintenance and sale repairs for pending list
   // Sale repairs have priority (appear first)
@@ -122,6 +139,53 @@ function Mantenimientos({ session }) {
               )}
             </Alert>
           </Grid>
+          {staleMachines?.length > 0 && (
+            <Grid item xs={12}>
+              <Card>
+                <Box sx={{ p: 2 }}>
+                  <Typography variant="subtitle1" gutterBottom color="warning.main">
+                    <DownloadIcon sx={{ verticalAlign: 'middle', mr: 0.5 }} fontSize="small" />
+                    Equipos sobrantes para bajar ({staleMachines.length})
+                  </Typography>
+                  <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
+                    Estos equipos llevan más de 24 horas hábiles emplayados sin ser rentados. Deben bajarse a bodega.
+                  </Typography>
+                  <TableContainer>
+                    <Table size="small">
+                      <TableHead>
+                        <TableRow>
+                          <TableCell>#Equipo</TableCell>
+                          <TableCell>Marca</TableCell>
+                          <TableCell>Vehículo</TableCell>
+                          <TableCell align="right">Acción</TableCell>
+                        </TableRow>
+                      </TableHead>
+                      <TableBody>
+                        {staleMachines.map((machine) => (
+                          <TableRow key={machine._id}>
+                            <TableCell>{machine.machineNum}</TableCell>
+                            <TableCell>{machine.brand}</TableCell>
+                            <TableCell>{machine.currentVehicle?.operator?.name || 'Sin operador'}</TableCell>
+                            <TableCell align="right">
+                              <Button
+                                size="small"
+                                variant="contained"
+                                color="warning"
+                                disabled={unloadingId === machine._id}
+                                onClick={() => handleUnloadMachine(machine._id)}
+                              >
+                                {unloadingId === machine._id ? 'Bajando...' : 'Bajar'}
+                              </Button>
+                            </TableCell>
+                          </TableRow>
+                        ))}
+                      </TableBody>
+                    </Table>
+                  </TableContainer>
+                </Box>
+              </Card>
+            </Grid>
+          )}
           <Grid item xs={12}>
             <Tabs
               onChange={(_e, val) => setCurrentTab(val)}

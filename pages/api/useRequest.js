@@ -765,3 +765,15 @@ export const useGetNextMachinesToLoad = (fetcher, all=false) => {
     isLoadingNextMachinesToLoad: isLoading
   };
 };
+
+export const useGetStaleMachinesOnVehicle = (fetcher) => {
+  const { data, error, isLoading } = useSWR(
+    ROUTES.STALE_MACHINES_ON_VEHICLE_API,
+    fetcher
+  );
+  return {
+    staleMachines: data?.data,
+    staleMachinesError: error,
+    isLoadingStaleMachines: isLoading
+  };
+};
