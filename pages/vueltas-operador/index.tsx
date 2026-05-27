@@ -272,9 +272,16 @@ function VueltasOperador({ session }) {
     : [];
 
   // Calculate statistics
-  const totalAssigned = allPendingTasks.length + allCompletedTasks.length;
-  const completed = allCompletedTasks.length;
-  const pending = allPendingTasks.length;
+  const pendingExtraTripsCount = pendingExtraTripsList?.length || 0;
+  const completedExtraTripsCount = completedExtraTripsList?.length || 0;
+
+  const totalAssigned =
+    allPendingTasks.length +
+    allCompletedTasks.length +
+    pendingExtraTripsCount +
+    completedExtraTripsCount;
+  const completed = allCompletedTasks.length + completedExtraTripsCount;
+  const pending = allPendingTasks.length + pendingExtraTripsCount;
 
   const earningsPerTask = 25;
   const totalEarnings = completed * earningsPerTask;
