@@ -30,6 +30,8 @@ import {
   useGetCompletedCollections,
   useGetPendingExtraTrips,
   useGetCompletedExtraTrips,
+  useGetPendingSaleDeliveries,
+  useGetCompletedSaleDeliveries,
   getFetcher,
 } from "../api/useRequest";
 import TablaVueltasOperador from "./TablaVueltasOperador";
@@ -69,6 +71,8 @@ function VueltasOperador({ session }) {
     mutate(`/api/sale-pickups/list?page=1&limit=1000&date=${formatTZDate(selectedDate, "YYYY-MM-DD")}`);
     mutate(`/api/sales/collections/completed?limit=1000&page=1&date=${formatTZDate(selectedDate, "YYYY-MM-DD")}`);
     mutate(`/api/extra-trips/completed?date=${formatTZDate(selectedDate, "YYYY-MM-DD")}`);
+    mutate(`/api/sales/deliveries/pending`);
+    mutate(`/api/sales/deliveries/completed?date=${formatTZDate(selectedDate, "YYYY-MM-DD")}`);
   };
   
   // Fetch pending tasks
@@ -128,16 +132,25 @@ function VueltasOperador({ session }) {
     formatTZDate(selectedDate, "YYYY-MM-DD")
   );
 
+  // Fetch sale deliveries (ENTREGA type - initial + repair return)
+  const { pendingSaleDeliveriesList, pendingSaleDeliveriesError } = useGetPendingSaleDeliveries(getFetcher);
+  const { completedSaleDeliveriesData, completedSaleDeliveriesError } = useGetCompletedSaleDeliveries(
+    getFetcher,
+    formatTZDate(selectedDate, "YYYY-MM-DD")
+  );
+
   const generalError =
     pendingDeliveriesError || pendingPickupsError || pendingSalePickupsError || pendingChangesError ||
     pendingSaleChangesError ||
     deliveriesError || pickupsError || changesError || salePickupsError || pendingCollectionsError ||
-    completedCollectionsError || pendingExtraTripsError || completedExtraTripsError;
+    completedCollectionsError || pendingExtraTripsError || completedExtraTripsError ||
+    pendingSaleDeliveriesError || completedSaleDeliveriesError;
   const completeData =
     pendingDeliveriesList && pendingPickupsList && pendingSalePickupsList && pendingChangesList &&
     pendingSaleChangesList !== undefined &&
     deliveriesList && pickups && changes && salePickupsData && pendingCollectionsList && completedCollectionsList &&
-    pendingExtraTripsList !== undefined && completedExtraTripsList !== undefined;
+    pendingExtraTripsList !== undefined && completedExtraTripsList !== undefined &&
+    pendingSaleDeliveriesList !== undefined && completedSaleDeliveriesData !== undefined;
   
   const isBlocked = currentUser?.isBlocked === true;
 
@@ -197,6 +210,16 @@ function VueltasOperador({ session }) {
           )?.name,
           suburb: item.sale?.customer?.currentResidence?.suburb,
           isPriority: true,
+        })),
+        // Pending sale deliveries (initial delivery + repair returns)
+        ...(pendingSaleDeliveriesList || []).map((item) => ({
+          ...item,
+          type: "ENTREGA_VENTA",
+          sector: item.sale?.customer?.currentResidence?.sector?.name,
+          suburb: item.sale?.customer?.currentResidence?.suburb,
+          isPriority: item.isRepairReturn === true,
+          operator: item.assignedTo,
+          takenAt: item.assignedAt || item.createdAt,
         })),
       ].sort((a, b) => {
         // Priority items (sale pickups) always first
@@ -262,6 +285,15 @@ function VueltasOperador({ session }) {
           operator: item.completedBy,
           takenAt: item.createdAt
         })),
+        // Completed sale deliveries (initial + repair return) for the selected date
+        ...((completedSaleDeliveriesData?.list || []).map((item) => ({
+          ...item,
+          type: "ENTREGA_VENTA",
+          sector: item.sale?.customer?.currentResidence?.sector?.name,
+          finishedAt: item.completedAt,
+          operator: item.completedBy,
+          takenAt: item.assignedAt || item.createdAt,
+        }))),
       ].sort((a, b) => {
         // Sort by finishedAt - most recent first (descending order)
         // Handle cases where finishedAt might be null/undefined

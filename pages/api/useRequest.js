@@ -498,6 +498,24 @@ export const useGetPendingSaleChanges = (fetcher) => {
   };
 };
 
+export const useGetPendingSaleDeliveries = (fetcher) => {
+  const { data, error } = useSWR(ROUTES.PENDING_SALE_DELIVERIES_API, fetcher);
+  return {
+    pendingSaleDeliveriesList: data?.data,
+    pendingSaleDeliveriesError: error
+  };
+};
+
+export const useGetCompletedSaleDeliveries = (fetcher, date = null) => {
+  let url = ROUTES.COMPLETED_SALE_DELIVERIES_API;
+  if (date) url += `?date=${date}`;
+  const { data, error } = useSWR(url, fetcher);
+  return {
+    completedSaleDeliveriesData: data?.data,
+    completedSaleDeliveriesError: error
+  };
+};
+
 export const useGetSaleChangeById = (fetcher, id) => {
   const { data, error, isLoading } = useSWR(
     id ? ROUTES.SALE_CHANGE_BY_ID_API.replace(':id', id) : null,

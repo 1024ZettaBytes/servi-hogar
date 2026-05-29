@@ -118,7 +118,7 @@ async function handler(req, res) {
       });
       
       console.log('✅ Sale delivery completed successfully');
-      res.status(200).json({ msg: 'Entrega completada con éxito!', data: result });
+      res.status(200).json({ msg: 'Entrega completada con éxito!', data: result, wasBlocked: result.wasBlocked });
     } catch (e) {
       console.error('❌ Error in complete-delivery API');
       console.error('Error name:', e.name);

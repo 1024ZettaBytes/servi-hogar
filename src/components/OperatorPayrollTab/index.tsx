@@ -121,6 +121,7 @@ function OperatorPayrollTab({ weekStartStr, userRole }: OperatorPayrollTabProps)
                   { label: 'Recolecciones', count: op.pickups },
                   { label: 'Cambios', count: op.changes },
                   { label: 'Recolecciones Venta', count: op.salePickups },
+                  { label: 'Entregas Venta', count: op.saleDeliveries },
                   { label: 'Vueltas Extra', count: op.extraTrips },
                 ].filter(r => r.count > 0).map((row) => (
                   <TableRow key={row.label}>
