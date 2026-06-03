@@ -36,6 +36,7 @@ import StepLabel from '@mui/material/StepLabel';
 import Stepper from '@mui/material/Stepper';
 import { DesktopDatePicker } from '@mui/x-date-pickers';
 import { completeSaleDelivery } from 'lib/client/salesFetch';
+import { useCheckBlocking } from 'src/hooks/useCheckBlocking';
 import { getSession } from 'next-auth/react';
 import Head from 'next/head';
 import NextLink from 'next/link';
@@ -76,6 +77,7 @@ function CompletarVenta() {
   const [deliveryDate, setDeliveryDate] = useState<any>(new Date());
   const [openConfirmModal, setOpenConfirmModal] = useState(false);
   const [pendingSaleData, setPendingSaleData] = useState(null);
+  const { checkBlocking } = useCheckBlocking();
   const [isGettingLocation, setIsGettingLocation] = useState<boolean>(false);
   const [isOk, setIsOk] = useState<any>({
     info: true,
@@ -291,6 +293,7 @@ function CompletarVenta() {
     setIsSubmitting(false);
     if (!result.error) {
       setActiveStep((prev) => prev + 1);
+      await checkBlocking(result.wasBlocked);
     } else {
       setHasErrorSubmitting({ error: true, msg: result.msg });
     }

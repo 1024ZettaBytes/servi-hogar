@@ -221,6 +221,11 @@ const TablaVueltasOperador: FC<TablaVueltasOperadorProps> = ({
       case 'ENTREGA':
         route = `/entregas-pendientes/${task._id}`;
         break;
+      case 'ENTREGA_VENTA':
+        route = task.isRepairReturn
+          ? `/entregas-reparacion-venta/${task.sale?._id || task.sale}`
+          : `/ventas-pendientes/${task.sale?._id || task.sale}`;
+        break;
       case 'RECOLECCION':
         route = `/recolecciones-pendientes/${task._id}`;
         break;
@@ -244,6 +249,8 @@ const TablaVueltasOperador: FC<TablaVueltasOperadorProps> = ({
   const getTypeColor = (type: string, isCancellation?: boolean) => {
     switch (type) {
       case 'ENTREGA':
+        return 'primary';
+      case 'ENTREGA_VENTA':
         return 'primary';
       case 'CAMBIO':
         return 'warning';
@@ -330,6 +337,10 @@ const TablaVueltasOperador: FC<TablaVueltasOperadorProps> = ({
                     : 'RECOLECCIÓN GARANTÍA'
                   : task.type === 'CAMBIO_VENTA'
                   ? 'CAMBIO GARANTÍA'
+                  : task.type === 'ENTREGA_VENTA'
+                  ? task.isRepairReturn
+                    ? 'ENTREGA REPARACIÓN'
+                    : 'ENTREGA VENTA'
                   : task.type === 'VUELTA_EXTRA'
                   ? 'VUELTA EXTRA'
                   : task.type;

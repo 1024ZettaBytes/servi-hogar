@@ -35,7 +35,8 @@ async function completeSaleRepairAPI(req, res, userId) {
 
 async function cancelSaleRepairAPI(req, res, userId) {
   try {
-    await cancelSaleRepairData({ ...req.body, lastUpdatedBy: userId });
+    const { repairId } = req.query;
+    await cancelSaleRepairData({ ...req.body, repairId, lastUpdatedBy: userId });
     res.status(200).json({ msg: 'La reparación ha sido cancelada.' });
   } catch (e) {
     console.error(e);

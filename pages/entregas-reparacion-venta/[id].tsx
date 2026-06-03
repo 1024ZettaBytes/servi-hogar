@@ -23,6 +23,7 @@ import {
 import Button from '@mui/material/Button';
 import { DesktopDatePicker } from '@mui/x-date-pickers';
 import { completeRepairReturnDelivery } from 'lib/client/salesFetch';
+import { useCheckBlocking } from 'src/hooks/useCheckBlocking';
 import { getSession } from 'next-auth/react';
 import Head from 'next/head';
 import NextLink from 'next/link';
@@ -67,6 +68,7 @@ function CompletarEntregaReparacion() {
   const [isCompleted, setIsCompleted] = useState<boolean>(false);
   const [openConfirmModal, setOpenConfirmModal] = useState(false);
   const [pendingDeliveryData, setPendingDeliveryData] = useState(null);
+  const { checkBlocking } = useCheckBlocking();
 
   async function handleImageSelection(imageFile) {
     // Handle file removal
@@ -135,6 +137,7 @@ function CompletarEntregaReparacion() {
 
     if (!result.error) {
       setIsCompleted(true);
+      await checkBlocking(result.wasBlocked);
     } else {
       setHasErrorSubmitting({ error: true, msg: result.msg });
     }

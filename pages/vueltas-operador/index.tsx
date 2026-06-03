@@ -22,6 +22,7 @@ import {
   useGetPendingSalePickups,
   useGetPendingChanges,
   useGetPendingSaleChanges,
+  useGetCompletedSaleChanges,
   useGetPendingCollections,
   useGetDeliveries,
   useGetPickups,
@@ -30,6 +31,8 @@ import {
   useGetCompletedCollections,
   useGetPendingExtraTrips,
   useGetCompletedExtraTrips,
+  useGetPendingSaleDeliveries,
+  useGetCompletedSaleDeliveries,
   getFetcher,
 } from "../api/useRequest";
 import TablaVueltasOperador from "./TablaVueltasOperador";
@@ -61,6 +64,7 @@ function VueltasOperador({ session }) {
     mutate('/api/changes/list/pending');
     mutate('/api/sales/collections/pending');
     mutate('/api/sales/changes/pending');
+    mutate(`/api/sales/changes/completed?date=${formatTZDate(selectedDate, "YYYY-MM-DD")}`);
     mutate('/api/extra-trips/pending');
     // Trigger re-fetch of completed tasks for the selected date
     mutate(`/api/deliveries/list?limit=1000&page=1&date=${selectedDate.toISOString()}`);
@@ -69,6 +73,8 @@ function VueltasOperador({ session }) {
     mutate(`/api/sale-pickups/list?page=1&limit=1000&date=${formatTZDate(selectedDate, "YYYY-MM-DD")}`);
     mutate(`/api/sales/collections/completed?limit=1000&page=1&date=${formatTZDate(selectedDate, "YYYY-MM-DD")}`);
     mutate(`/api/extra-trips/completed?date=${formatTZDate(selectedDate, "YYYY-MM-DD")}`);
+    mutate(`/api/sales/deliveries/pending`);
+    mutate(`/api/sales/deliveries/completed?date=${formatTZDate(selectedDate, "YYYY-MM-DD")}`);
   };
   
   // Fetch pending tasks
@@ -84,6 +90,8 @@ function VueltasOperador({ session }) {
     useGetPendingCollections(getFetcher);
   const { pendingSaleChangesList, pendingSaleChangesError } =
     useGetPendingSaleChanges(getFetcher);
+  const { completedSaleChangesList, completedSaleChangesError } =
+    useGetCompletedSaleChanges(getFetcher, formatTZDate(selectedDate, "YYYY-MM-DD"));
 
   // Fetch all tasks (including completed) - using high limit to get all for the day
   const { deliveriesList, deliveriesError } = useGetDeliveries(
@@ -128,16 +136,27 @@ function VueltasOperador({ session }) {
     formatTZDate(selectedDate, "YYYY-MM-DD")
   );
 
+  // Fetch sale deliveries (ENTREGA type - initial + repair return)
+  const { pendingSaleDeliveriesList, pendingSaleDeliveriesError } = useGetPendingSaleDeliveries(getFetcher);
+  const { completedSaleDeliveriesData, completedSaleDeliveriesError } = useGetCompletedSaleDeliveries(
+    getFetcher,
+    formatTZDate(selectedDate, "YYYY-MM-DD")
+  );
+
   const generalError =
     pendingDeliveriesError || pendingPickupsError || pendingSalePickupsError || pendingChangesError ||
     pendingSaleChangesError ||
+    completedSaleChangesError ||
     deliveriesError || pickupsError || changesError || salePickupsError || pendingCollectionsError ||
-    completedCollectionsError || pendingExtraTripsError || completedExtraTripsError;
+    completedCollectionsError || pendingExtraTripsError || completedExtraTripsError ||
+    pendingSaleDeliveriesError || completedSaleDeliveriesError;
   const completeData =
     pendingDeliveriesList && pendingPickupsList && pendingSalePickupsList && pendingChangesList &&
     pendingSaleChangesList !== undefined &&
+    completedSaleChangesList !== undefined &&
     deliveriesList && pickups && changes && salePickupsData && pendingCollectionsList && completedCollectionsList &&
-    pendingExtraTripsList !== undefined && completedExtraTripsList !== undefined;
+    pendingExtraTripsList !== undefined && completedExtraTripsList !== undefined &&
+    pendingSaleDeliveriesList !== undefined && completedSaleDeliveriesData !== undefined;
   
   const isBlocked = currentUser?.isBlocked === true;
 
@@ -197,6 +216,16 @@ function VueltasOperador({ session }) {
           )?.name,
           suburb: item.sale?.customer?.currentResidence?.suburb,
           isPriority: true,
+        })),
+        // Pending sale deliveries (initial delivery + repair returns)
+        ...(pendingSaleDeliveriesList || []).map((item) => ({
+          ...item,
+          type: "ENTREGA_VENTA",
+          sector: item.sale?.customer?.currentResidence?.sector?.name,
+          suburb: item.sale?.customer?.currentResidence?.suburb,
+          isPriority: item.isRepairReturn === true,
+          operator: item.assignedTo,
+          takenAt: item.assignedAt || item.createdAt,
         })),
       ].sort((a, b) => {
         // Priority items (sale pickups) always first
@@ -262,6 +291,22 @@ function VueltasOperador({ session }) {
           operator: item.completedBy,
           takenAt: item.createdAt
         })),
+        // Completed sale deliveries (initial + repair return) for the selected date
+        ...((completedSaleDeliveriesData?.list || []).map((item) => ({
+          ...item,
+          type: "ENTREGA_VENTA",
+          sector: item.sale?.customer?.currentResidence?.sector?.name,
+          finishedAt: item.completedAt,
+          operator: item.completedBy,
+          takenAt: item.assignedAt || item.createdAt,
+        }))),
+        // Completed sale changes (warranty exchanges) for the selected date
+        ...((completedSaleChangesList || []).map((item) => ({
+          ...item,
+          type: "CAMBIO_VENTA",
+          sector: item.sale?.customer?.currentResidence?.sector?.name,
+          suburb: item.sale?.customer?.currentResidence?.suburb,
+        }))),
       ].sort((a, b) => {
         // Sort by finishedAt - most recent first (descending order)
         // Handle cases where finishedAt might be null/undefined
@@ -272,9 +317,16 @@ function VueltasOperador({ session }) {
     : [];
 
   // Calculate statistics
-  const totalAssigned = allPendingTasks.length + allCompletedTasks.length;
-  const completed = allCompletedTasks.length;
-  const pending = allPendingTasks.length;
+  const pendingExtraTripsCount = pendingExtraTripsList?.length || 0;
+  const completedExtraTripsCount = completedExtraTripsList?.length || 0;
+
+  const totalAssigned =
+    allPendingTasks.length +
+    allCompletedTasks.length +
+    pendingExtraTripsCount +
+    completedExtraTripsCount;
+  const completed = allCompletedTasks.length + completedExtraTripsCount;
+  const pending = allPendingTasks.length + pendingExtraTripsCount;
 
   const earningsPerTask = 25;
   const totalEarnings = completed * earningsPerTask;

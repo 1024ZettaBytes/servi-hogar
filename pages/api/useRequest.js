@@ -498,6 +498,34 @@ export const useGetPendingSaleChanges = (fetcher) => {
   };
 };
 
+export const useGetPendingSaleDeliveries = (fetcher) => {
+  const { data, error } = useSWR(ROUTES.PENDING_SALE_DELIVERIES_API, fetcher);
+  return {
+    pendingSaleDeliveriesList: data?.data,
+    pendingSaleDeliveriesError: error
+  };
+};
+
+export const useGetCompletedSaleDeliveries = (fetcher, date = null) => {
+  let url = ROUTES.COMPLETED_SALE_DELIVERIES_API;
+  if (date) url += `?date=${date}`;
+  const { data, error } = useSWR(url, fetcher);
+  return {
+    completedSaleDeliveriesData: data?.data,
+    completedSaleDeliveriesError: error
+  };
+};
+
+export const useGetCompletedSaleChanges = (fetcher, date = null) => {
+  let url = ROUTES.ALL_COMPLETED_SALE_CHANGES_API;
+  if (date) url += `?date=${date}`;
+  const { data, error } = useSWR(url, fetcher);
+  return {
+    completedSaleChangesList: data?.data,
+    completedSaleChangesError: error
+  };
+};
+
 export const useGetSaleChangeById = (fetcher, id) => {
   const { data, error, isLoading } = useSWR(
     id ? ROUTES.SALE_CHANGE_BY_ID_API.replace(':id', id) : null,
@@ -763,5 +791,17 @@ export const useGetNextMachinesToLoad = (fetcher, all=false) => {
     nextMachinesToLoad: data?.machines,
     nextMachinesToLoadError: error,
     isLoadingNextMachinesToLoad: isLoading
+  };
+};
+
+export const useGetStaleMachinesOnVehicle = (fetcher) => {
+  const { data, error, isLoading } = useSWR(
+    ROUTES.STALE_MACHINES_ON_VEHICLE_API,
+    fetcher
+  );
+  return {
+    staleMachines: data?.data,
+    staleMachinesError: error,
+    isLoadingStaleMachines: isLoading
   };
 };

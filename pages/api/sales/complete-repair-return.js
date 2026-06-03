@@ -11,7 +11,7 @@ export const config = {
 };
 
 async function handler(req, res) {
-  const validRole = await validateUserPermissions(req, res, ['OPE']);
+  const validRole = await validateUserPermissions(req, res, ['OPE', 'ADMIN']);
   const userId = await getUserId(req);
   
   if (validRole && req.method === 'POST') {
@@ -81,7 +81,7 @@ async function handler(req, res) {
       });
       
       console.log('✅ Repair return delivery completed successfully');
-      res.status(200).json({ msg: 'Entrega de reparación completada con éxito!', data: result });
+      res.status(200).json({ msg: 'Entrega de reparación completada con éxito!', data: result, wasBlocked: result.wasBlocked });
     } catch (e) {
       console.error('❌ Error in complete-repair-return API');
       console.error('Error name:', e.name);
