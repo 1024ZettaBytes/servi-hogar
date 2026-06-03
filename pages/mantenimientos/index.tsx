@@ -18,6 +18,7 @@ import TablaAcondicionamiento from "./TablaAcondicionamiento";
 import { getFetcher, useGetMantainances, useGetPendingMantainances, useGetPendingSaleRepairs, useGetSaleRepairs, useGetWarehouseConditioning, useGetAllWarehousesOverview, useGetCollectedMachines, useGetNextMachinesToLoad, useGetStaleMachinesOnVehicle } from "pages/api/useRequest";
 import { unloadStaleMachine } from "../../lib/client/machinesFetch";
 import { useSnackbar } from "notistack";
+import { formatTZDate } from "lib/client/utils";
 
 function Mantenimientos({ session }) {
   const { user } = session;
@@ -52,6 +53,8 @@ function Mantenimientos({ session }) {
   const hasOverdueCollected = isTec && Array.isArray(collectedMachines) && collectedMachines.some(
     (m) => m.collectionDate && new Date() > getWeekdayDeadline(new Date(m.collectionDate))
   );
+
+  const hasStaleMachines = Array.isArray(staleMachines) && staleMachines.length > 0;
 
   const handleUnloadMachine = async (machineId: string) => {
     setUnloadingId(machineId);
@@ -139,7 +142,7 @@ function Mantenimientos({ session }) {
               )}
             </Alert>
           </Grid>
-          {staleMachines?.length > 0 && (
+          {hasStaleMachines && (
             <Grid item xs={12}>
               <Card>
                 <Box sx={{ p: 2 }}>
@@ -157,6 +160,7 @@ function Mantenimientos({ session }) {
                           <TableCell>#Equipo</TableCell>
                           <TableCell>Marca</TableCell>
                           <TableCell>Vehículo</TableCell>
+                          <TableCell>Ult. Act</TableCell>
                           <TableCell align="right">Acción</TableCell>
                         </TableRow>
                       </TableHead>
@@ -166,6 +170,7 @@ function Mantenimientos({ session }) {
                             <TableCell>{machine.machineNum}</TableCell>
                             <TableCell>{machine.brand}</TableCell>
                             <TableCell>{machine.currentVehicle?.operator?.name || 'Sin operador'}</TableCell>
+                            <TableCell>{formatTZDate(machine.updatedAt, "ddd HH:mm")}</TableCell>
                             <TableCell align="right">
                               <Button
                                 size="small"
@@ -226,7 +231,7 @@ function Mantenimientos({ session }) {
                     <TablaMantPendientes
                       listData={combinedPendingList}
                       userRole={user?.role}
-                      isBlocked={hasOverdueCollected}
+                      isBlocked={hasOverdueCollected || (isTec && hasStaleMachines)}
                     />
                   </Card>
                 )}
