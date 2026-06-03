@@ -516,6 +516,16 @@ export const useGetCompletedSaleDeliveries = (fetcher, date = null) => {
   };
 };
 
+export const useGetCompletedSaleChanges = (fetcher, date = null) => {
+  let url = ROUTES.ALL_COMPLETED_SALE_CHANGES_API;
+  if (date) url += `?date=${date}`;
+  const { data, error } = useSWR(url, fetcher);
+  return {
+    completedSaleChangesList: data?.data,
+    completedSaleChangesError: error
+  };
+};
+
 export const useGetSaleChangeById = (fetcher, id) => {
   const { data, error, isLoading } = useSWR(
     id ? ROUTES.SALE_CHANGE_BY_ID_API.replace(':id', id) : null,

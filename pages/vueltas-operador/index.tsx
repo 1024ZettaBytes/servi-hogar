@@ -22,6 +22,7 @@ import {
   useGetPendingSalePickups,
   useGetPendingChanges,
   useGetPendingSaleChanges,
+  useGetCompletedSaleChanges,
   useGetPendingCollections,
   useGetDeliveries,
   useGetPickups,
@@ -63,6 +64,7 @@ function VueltasOperador({ session }) {
     mutate('/api/changes/list/pending');
     mutate('/api/sales/collections/pending');
     mutate('/api/sales/changes/pending');
+    mutate(`/api/sales/changes/completed?date=${formatTZDate(selectedDate, "YYYY-MM-DD")}`);
     mutate('/api/extra-trips/pending');
     // Trigger re-fetch of completed tasks for the selected date
     mutate(`/api/deliveries/list?limit=1000&page=1&date=${selectedDate.toISOString()}`);
@@ -88,6 +90,8 @@ function VueltasOperador({ session }) {
     useGetPendingCollections(getFetcher);
   const { pendingSaleChangesList, pendingSaleChangesError } =
     useGetPendingSaleChanges(getFetcher);
+  const { completedSaleChangesList, completedSaleChangesError } =
+    useGetCompletedSaleChanges(getFetcher, formatTZDate(selectedDate, "YYYY-MM-DD"));
 
   // Fetch all tasks (including completed) - using high limit to get all for the day
   const { deliveriesList, deliveriesError } = useGetDeliveries(
@@ -142,12 +146,14 @@ function VueltasOperador({ session }) {
   const generalError =
     pendingDeliveriesError || pendingPickupsError || pendingSalePickupsError || pendingChangesError ||
     pendingSaleChangesError ||
+    completedSaleChangesError ||
     deliveriesError || pickupsError || changesError || salePickupsError || pendingCollectionsError ||
     completedCollectionsError || pendingExtraTripsError || completedExtraTripsError ||
     pendingSaleDeliveriesError || completedSaleDeliveriesError;
   const completeData =
     pendingDeliveriesList && pendingPickupsList && pendingSalePickupsList && pendingChangesList &&
     pendingSaleChangesList !== undefined &&
+    completedSaleChangesList !== undefined &&
     deliveriesList && pickups && changes && salePickupsData && pendingCollectionsList && completedCollectionsList &&
     pendingExtraTripsList !== undefined && completedExtraTripsList !== undefined &&
     pendingSaleDeliveriesList !== undefined && completedSaleDeliveriesData !== undefined;
@@ -293,6 +299,13 @@ function VueltasOperador({ session }) {
           finishedAt: item.completedAt,
           operator: item.completedBy,
           takenAt: item.assignedAt || item.createdAt,
+        }))),
+        // Completed sale changes (warranty exchanges) for the selected date
+        ...((completedSaleChangesList || []).map((item) => ({
+          ...item,
+          type: "CAMBIO_VENTA",
+          sector: item.sale?.customer?.currentResidence?.sector?.name,
+          suburb: item.sale?.customer?.currentResidence?.suburb,
         }))),
       ].sort((a, b) => {
         // Sort by finishedAt - most recent first (descending order)
