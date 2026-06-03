@@ -1,9 +1,9 @@
 import { getStaleMachinesOnVehicles, unloadStaleMachineByTechnician } from "../../../lib/data/Machines";
-import { validateUserPermissions, getUserId } from "../auth/authUtils";
+import { validateUserPermissions, getUserId, getUserRole } from "../auth/authUtils";
 
-async function getStaleMachinesAPI(req, res) {
+async function getStaleMachinesAPI(req, res, userId, userRole) {
   try {
-    const machines = await getStaleMachinesOnVehicles();
+    const machines = await getStaleMachinesOnVehicles(userId, userRole);
     res.status(200).json({ data: machines });
   } catch (e) {
     console.error(e);
@@ -41,9 +41,10 @@ async function handler(req, res) {
   const validRole = await validateUserPermissions(req, res, ["TEC", "ADMIN", "AUX"]);
   if (!validRole) return;
   const userId = await getUserId(req);
+  const userRole = await getUserRole(req);
   switch (req.method) {
     case "GET":
-      await getStaleMachinesAPI(req, res);
+      await getStaleMachinesAPI(req, res, userId, userRole);
       break;
     case "POST":
       await unloadStaleMachineAPI(req, res, userId);
