@@ -44,7 +44,7 @@ const SalesMachineSchema = new Schema<ISalesMachine>({
   },
   origin: {
     type: String,
-    enum: ['DIRECTA', 'NUEVA', 'REACONDICIONADA'],
+    enum: ['DIRECTA', 'NUEVA', 'REACONDICIONADA' , 'NUMERADA', "RENTADA"],
     default: 'DIRECTA'
   },
   warehouseRef: {
