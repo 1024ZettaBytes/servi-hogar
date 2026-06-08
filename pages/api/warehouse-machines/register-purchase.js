@@ -34,12 +34,21 @@ export default async function handler(req, res) {
         });
       });
 
+      // Office staff (non-operators) must specify the operator whose vehicle
+      // received the equipment; operators always use their own vehicle.
+      if (role !== 'OPE' && !fields.operatorId) {
+        return res.status(400).json({
+          error: 'Debe seleccionar el operador (chofer) en cuyo vehículo se subió el equipo'
+        });
+      }
+
       const result = await registerStreetPurchaseData({
         brand: fields.brand,
         serialNumber: fields.serialNumber,
         cost: fields.cost ? Number(fields.cost) : 0,
         files,
-        purchasedBy: userId
+        purchasedBy: userId,
+        operatorId: fields.operatorId || null
       });
       return res.status(200).json({
         result,

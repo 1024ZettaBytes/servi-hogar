@@ -15,7 +15,11 @@ import {
   Box,
   TextField,
   Button,
-  Alert
+  Alert,
+  FormControl,
+  InputLabel,
+  Select,
+  MenuItem
 } from '@mui/material';
 import { LoadingButton } from '@mui/lab';
 import Footer from '@/components/Footer';
@@ -23,19 +27,27 @@ import { useSnackbar } from 'notistack';
 import NextBreadcrumbs from '@/components/Shared/BreadCrums';
 import { registerStreetPurchase } from '../../../lib/client/warehouseMachinesFetch';
 import { compressImage } from '../../../lib/client/utils';
+import { getFetcher, useGetOperators } from '../../../pages/api/useRequest';
 
 const PHOTO_LABELS = ['Frente', 'Tablero', 'Etiqueta', 'Debajo'];
 
-function RegistrarCompra(_props) {
+function RegistrarCompra({ session }) {
   const paths = ['Inicio', 'Almacén', 'Registrar Compra'];
   const { enqueueSnackbar } = useSnackbar();
+
+  const isOperator = session?.user?.role === 'OPE';
 
   const [isLoading, setIsLoading] = useState(false);
   const [hasError, setHasError] = useState({ error: false, msg: '' });
   const [brand, setBrand] = useState('');
   const [serialNumber, setSerialNumber] = useState('');
   const [cost, setCost] = useState('');
+  const [operatorId, setOperatorId] = useState('');
   const [photos, setPhotos] = useState([null, null, null, null]);
+
+  // Office staff (non-operators) must pick the operator (chofer) whose vehicle
+  // received the equipment. Operators always use their own vehicle.
+  const { operatorsList } = useGetOperators(isOperator ? () => null : getFetcher);
 
   const handlePhotoChange = async (index, e) => {
     if (e.target.files && e.target.files[0]) {
@@ -64,10 +76,20 @@ function RegistrarCompra(_props) {
       return;
     }
 
+    if (!isOperator && !operatorId) {
+      setHasError({
+        error: true,
+        msg: 'Por favor seleccione el operador (chofer) en cuyo vehículo se subió el equipo'
+      });
+      setIsLoading(false);
+      return;
+    }
+
     const formData = new FormData();
     formData.append('brand', brand);
     formData.append('serialNumber', serialNumber);
     formData.append('cost', cost);
+    if (!isOperator && operatorId) formData.append('operatorId', operatorId);
     photos.forEach((photo, i) => {
       if (photo) formData.append(`photo${i + 1}`, photo);
     });
@@ -85,6 +107,7 @@ function RegistrarCompra(_props) {
       setBrand('');
       setSerialNumber('');
       setCost('');
+      setOperatorId('');
       setPhotos([null, null, null, null]);
     } else {
       setHasError({ error: true, msg: result.msg });
@@ -99,7 +122,7 @@ function RegistrarCompra(_props) {
       <PageTitleWrapper>
         <PageHeader
           title={'Registrar Compra en Calle'}
-          sutitle={'Registrar una máquina comprada por el operador'}
+          sutitle={'Registrar una máquina comprada en calle'}
         />
         <NextBreadcrumbs paths={paths} lastLoaded={true} />
       </PageTitleWrapper>
@@ -159,6 +182,29 @@ function RegistrarCompra(_props) {
                       />
                     </Grid>
 
+                    {!isOperator && (
+                      <Grid item>
+                        <FormControl fullWidth required>
+                          <InputLabel id="operator-label">
+                            Operador (chofer)
+                          </InputLabel>
+                          <Select
+                            labelId="operator-label"
+                            id="operatorId"
+                            label="Operador (chofer)"
+                            value={operatorId}
+                            onChange={(e) => setOperatorId(e.target.value)}
+                          >
+                            {(operatorsList || []).map((op) => (
+                              <MenuItem key={op._id} value={op._id}>
+                                {op.name}
+                              </MenuItem>
+                            ))}
+                          </Select>
+                        </FormControl>
+                      </Grid>
+                    )}
+
                     {PHOTO_LABELS.map((label, index) => (
                       <Grid item key={index}>
                         <Button
@@ -169,7 +215,7 @@ function RegistrarCompra(_props) {
                         >
                           {photos[index]
                             ? `${label}: ${photos[index].name}`
-                            : `Foto ${label} *`}
+                            : `Foto ${label ==="Etiqueta" ? "No. Serie" : label} *`}
                           <input
                             type="file"
                             hidden
