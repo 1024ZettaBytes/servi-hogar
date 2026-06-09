@@ -164,6 +164,27 @@ export default function ByMantId({ session }) {
                     {getStatusLabel(mantData?.status)}
                   </Grid>
                 )}
+
+                {/* Operator skip reason - rework reported by a chofer */}
+                {!isLoadingMant && mantData?.fromOperatorSkip && (
+                  <Grid item xs={12}>
+                    <Alert severity="error" sx={{ mt: 2 }}>
+                      <Typography variant="body2" fontWeight="bold">
+                        Reporte de chofer — ajuste sin costo de mantenimiento
+                      </Typography>
+                      <Typography variant="body2">
+                        Motivo: {mantData?.operatorSkipReason || 'No especificado'}
+                        {mantData?.skippedBy?.name
+                          ? ` — Reportado por ${mantData.skippedBy.name}`
+                          : ''}
+                      </Typography>
+                      <Typography variant="body2">
+                        Realice el ajuste y finalice para devolver el equipo a la
+                        cola. Este registro no cuenta como mantenimiento pagado.
+                      </Typography>
+                    </Alert>
+                  </Grid>
+                )}
                 
                 {/* Padlock Verification Section - Only for pending maintenance */}
                 {!isLoadingMant && isInProgress && (

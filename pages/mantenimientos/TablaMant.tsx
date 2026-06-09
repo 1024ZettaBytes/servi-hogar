@@ -15,6 +15,7 @@ import {
   Typography,
   Chip
 } from '@mui/material';
+import ReportProblemIcon from '@mui/icons-material/ReportProblem';
 import { formatTZDate } from 'lib/client/utils';
 import { getStatusLabel } from './TablaMantPendientes';
 
@@ -80,10 +81,20 @@ const TablaMant: FC<TablaMantProps> = ({ listData }) => {
                     <TableCell align="center">
                       <Typography fontWeight="bold">{mant?.machine?.machineNum}</Typography>
                       {isSaleRepair && (
-                        <Chip 
-                          label="Venta" 
-                          size="small" 
+                        <Chip
+                          label="Venta"
+                          size="small"
                           color="info"
+                          sx={{ ml: 1, fontSize: '0.7rem' }}
+                        />
+                      )}
+                      {mant?.fromOperatorSkip && (
+                        <Chip
+                          icon={<ReportProblemIcon fontSize="small" />}
+                          label="Reporte chofer"
+                          size="small"
+                          color="error"
+                          variant="outlined"
                           sx={{ ml: 1, fontSize: '0.7rem' }}
                         />
                       )}
