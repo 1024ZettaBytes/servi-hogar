@@ -312,18 +312,26 @@ const TablaAlmacen: FC<TablaAlmacenProps> = ({
                 <TableCell>{getOriginChip(machine.origin)}</TableCell>
                 <TableCell>{getStatusChip(machine.status)}</TableCell>
                 <TableCell>
-                  {machine.entryPhotos?.length > 0 && (
-                    <AvatarGroup max={4}>
-                      {machine.entryPhotos.map((url, i) => (
-                        <Avatar
-                          key={i}
-                          src={url}
-                          sx={{ width: 32, height: 32, cursor: 'pointer' }}
-                          onClick={() => window.open(url, '_blank')}
-                        />
-                      ))}
-                    </AvatarGroup>
-                  )}
+                  {(() => {
+                    // Show conditioning photos once the machine has been
+                    // conditioned; fall back to the original entry photos.
+                    const displayPhotos =
+                      machine.conditioningPhotos?.length > 0
+                        ? machine.conditioningPhotos
+                        : machine.entryPhotos;
+                    return displayPhotos?.length > 0 ? (
+                      <AvatarGroup max={4}>
+                        {displayPhotos.map((url, i) => (
+                          <Avatar
+                            key={i}
+                            src={url}
+                            sx={{ width: 32, height: 32, cursor: 'pointer' }}
+                            onClick={() => window.open(url, '_blank')}
+                          />
+                        ))}
+                      </AvatarGroup>
+                    ) : null;
+                  })()}
                 </TableCell>
                 <TableCell>
                   <Typography variant="body2" color="text.secondary" noWrap>
