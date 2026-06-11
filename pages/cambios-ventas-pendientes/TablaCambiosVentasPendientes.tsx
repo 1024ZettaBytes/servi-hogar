@@ -17,9 +17,11 @@ import { format } from 'date-fns';
 import es from 'date-fns/locale/es';
 import Label from '@/components/Label';
 import CancelIcon from '@mui/icons-material/Cancel';
+import SwapHorizIcon from '@mui/icons-material/SwapHoriz';
 import { useSnackbar } from 'notistack';
 import { cancelSaleChange } from '../../lib/client/saleChangesFetch';
 import GenericModal from '@/components/GenericModal';
+import ReassignVueltaModal from '@/components/ReassignVueltaModal';
 
 interface TablaCambiosVentasPendientesProps {
   userRole: string;
@@ -44,6 +46,9 @@ const TablaCambiosVentasPendientes: FC<TablaCambiosVentasPendientesProps> = ({
   const [cancelModalOpen, setCancelModalOpen] = useState(false);
   const [selectedChange, setSelectedChange] = useState<any>(null);
   const [isCancelling, setIsCancelling] = useState(false);
+  const [changeToReassign, setChangeToReassign] = useState<any>(null);
+
+  const isManager = userRole === 'ADMIN' || userRole === 'AUX';
 
   const handleCancelChange = (change: any) => {
     setSelectedChange(change);
@@ -169,17 +174,33 @@ const TablaCambiosVentasPendientes: FC<TablaCambiosVentasPendientesProps> = ({
                   <TableCell align="center">
                     <Box sx={{ display: 'flex', gap: 0.5, justifyContent: 'center' }}>
                       {['ESPERA', 'ASIGNADA'].includes(change.status) &&
-                        (userRole === 'ADMIN' || userRole === 'AUX') && (
-                          <Tooltip title="Cancelar cambio">
-                            <IconButton
-                              size="small"
-                              color="error"
-                              onClick={() => handleCancelChange(change)}
-                              disabled={isCancelling}
-                            >
-                              <CancelIcon fontSize="small" />
-                            </IconButton>
-                          </Tooltip>
+                        isManager && (
+                          <>
+                            <Tooltip title="Reasignar operador">
+                              <IconButton
+                                size="small"
+                                color="secondary"
+                                onClick={() =>
+                                  setChangeToReassign({
+                                    ...change,
+                                    type: 'CAMBIO_VENTA'
+                                  })
+                                }
+                              >
+                                <SwapHorizIcon fontSize="small" />
+                              </IconButton>
+                            </Tooltip>
+                            <Tooltip title="Cancelar cambio">
+                              <IconButton
+                                size="small"
+                                color="error"
+                                onClick={() => handleCancelChange(change)}
+                                disabled={isCancelling}
+                              >
+                                <CancelIcon fontSize="small" />
+                              </IconButton>
+                            </Tooltip>
+                          </>
                         )}
                     </Box>
                   </TableCell>
@@ -189,6 +210,23 @@ const TablaCambiosVentasPendientes: FC<TablaCambiosVentasPendientesProps> = ({
           </TableBody>
         </Table>
       </TableContainer>
+
+      {changeToReassign && (
+        <ReassignVueltaModal
+          open={!!changeToReassign}
+          task={changeToReassign}
+          handleOnClose={(saved, msg) => {
+            setChangeToReassign(null);
+            if (saved) {
+              enqueueSnackbar(msg || 'Cambio reasignado', {
+                variant: 'success',
+                anchorOrigin: { vertical: 'top', horizontal: 'center' },
+                autoHideDuration: 2000
+              });
+            }
+          }}
+        />
+      )}
 
       {cancelModalOpen && selectedChange && (
         <GenericModal
