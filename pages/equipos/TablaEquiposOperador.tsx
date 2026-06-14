@@ -22,15 +22,24 @@ import {
   FormControl,
   InputLabel,
   Select,
-  MenuItem
+  MenuItem,
+  TextField
 } from '@mui/material';
 import LocalShippingIcon from '@mui/icons-material/LocalShipping';
 import WarehouseIcon from '@mui/icons-material/Warehouse';
+import ReportProblemIcon from '@mui/icons-material/ReportProblem';
 import {
   loadMachineToVehicle,
-  returnMachineToWarehouse
+  returnMachineToWarehouse,
+  skipMachine
 } from '../../lib/client/machinesFetch';
 import { useSnackbar } from 'notistack';
+
+const COMMON_SKIP_REASONS = [
+  'Faldón suelto',
+  'Tirando aceite',
+  'Tablero quebrado'
+];
 
 interface TablaEquiposOperadorProps {
   listoMachines: any[];
@@ -72,6 +81,11 @@ const TablaEquiposOperador: FC<TablaEquiposOperadorProps> = ({
   const [returnDialogOpen, setReturnDialogOpen] = useState(false);
   const [machineToReturn, setMachineToReturn] = useState<any>(null);
   const [selectedWarehouse, setSelectedWarehouse] = useState<string>('');
+
+  // Skip (report defective) dialog state
+  const [skipDialogOpen, setSkipDialogOpen] = useState(false);
+  const [machineToSkip, setMachineToSkip] = useState<any>(null);
+  const [skipReason, setSkipReason] = useState<string>('');
 
   const handleTabChange = (_event: React.SyntheticEvent, newValue: number) => {
     setTabValue(newValue);
@@ -156,6 +170,43 @@ const TablaEquiposOperador: FC<TablaEquiposOperadorProps> = ({
       });
     }
   };
+  // Skip (report defective) handlers
+  const handleOpenSkipDialog = (machine: any) => {
+    setMachineToSkip(machine);
+    setSkipReason('');
+    setSkipDialogOpen(true);
+  };
+
+  const handleCloseSkipDialog = () => {
+    setSkipDialogOpen(false);
+    setMachineToSkip(null);
+    setSkipReason('');
+  };
+
+  const handleSkipMachine = async () => {
+    if (!machineToSkip || !skipReason.trim()) return;
+    setIsSubmitting(true);
+    const result = await skipMachine({
+      machineId: machineToSkip._id,
+      reason: skipReason.trim()
+    });
+    setIsSubmitting(false);
+    if (!result.error) {
+      enqueueSnackbar(result.msg, {
+        variant: 'success',
+        anchorOrigin: { vertical: 'top', horizontal: 'center' },
+        autoHideDuration: 1500
+      });
+      handleCloseSkipDialog();
+    } else {
+      enqueueSnackbar(result.msg, {
+        variant: 'error',
+        anchorOrigin: { vertical: 'top', horizontal: 'center' },
+        autoHideDuration: 3000
+      });
+    }
+  };
+
   const sortedListoMachines = listoMachines ? getSortedListoMachines() : [];
   return (
     <>
@@ -224,15 +275,33 @@ const TablaEquiposOperador: FC<TablaEquiposOperadorProps> = ({
                         {machine.currentWarehouse?.name || '-'}
                       </TableCell>
                       <TableCell align="right">
-                        <Button
-                          variant="contained"
-                          size="small"
-                          color="primary"
-                          startIcon={<LocalShippingIcon />}
-                          onClick={() => handleOpenDialog(machine)}
+                        <Box
+                          display="flex"
+                          gap={1}
+                          justifyContent="flex-end"
+                          flexWrap="wrap"
                         >
-                          Subir
-                        </Button>
+                          <Button
+                            variant="contained"
+                            size="small"
+                            color="primary"
+                            startIcon={<LocalShippingIcon />}
+                            onClick={() => handleOpenDialog(machine)}
+                          >
+                            Subir
+                          </Button>
+                          {machine.machineNum === nextMachine && (
+                            <Button
+                              variant="outlined"
+                              size="small"
+                              color="error"
+                              startIcon={<ReportProblemIcon />}
+                              onClick={() => handleOpenSkipDialog(machine)}
+                            >
+                              Reportar
+                            </Button>
+                          )}
+                        </Box>
                       </TableCell>
                     </TableRow>
                   ))}
@@ -400,6 +469,58 @@ const TablaEquiposOperador: FC<TablaEquiposOperadorProps> = ({
               disabled={isSubmitting || !selectedWarehouse}
             >
               {isSubmitting ? 'Procesando...' : 'Regresar'}
+            </Button>
+          </DialogActions>
+        </Dialog>
+      )}
+
+      {/* Dialog para reportar equipo defectuoso (saltar) */}
+      {skipDialogOpen && (
+        <Dialog
+          open={skipDialogOpen}
+          onClose={handleCloseSkipDialog}
+          maxWidth="xs"
+          fullWidth
+        >
+          <DialogTitle>Reportar equipo defectuoso</DialogTitle>
+          <DialogContent>
+            <Alert severity="warning" sx={{ mb: 2 }}>
+              El equipo <strong>#{machineToSkip?.machineNum}</strong> se enviará
+              a revisión con el técnico y podrá continuar subiendo los demás.
+              Indique el motivo por el que no se lo lleva.
+            </Alert>
+            <Box display="flex" gap={1} flexWrap="wrap" sx={{ mb: 2 }}>
+              {COMMON_SKIP_REASONS.map((reason) => (
+                <Chip
+                  key={reason}
+                  label={reason}
+                  color={skipReason === reason ? 'primary' : 'default'}
+                  variant={skipReason === reason ? 'filled' : 'outlined'}
+                  onClick={() => setSkipReason(reason)}
+                />
+              ))}
+            </Box>
+            <TextField
+              fullWidth
+              multiline
+              rows={3}
+              label="Motivo"
+              placeholder="Ej. lavadora con faldón suelto"
+              value={skipReason}
+              onChange={(e) => setSkipReason(e.target.value)}
+            />
+          </DialogContent>
+          <DialogActions>
+            <Button onClick={handleCloseSkipDialog} disabled={isSubmitting}>
+              Cancelar
+            </Button>
+            <Button
+              variant="contained"
+              color="error"
+              onClick={handleSkipMachine}
+              disabled={isSubmitting || !skipReason.trim()}
+            >
+              {isSubmitting ? 'Enviando...' : 'Reportar'}
             </Button>
           </DialogActions>
         </Dialog>

@@ -118,7 +118,8 @@ export default function PayrollCard({ userRole, currentUserId, weekStartStr, col
       perceptions += config.punctualityBonusAmount || 0;
     }
     perceptions += calculated?.salesCommission || 0;
-    
+    perceptions += calculated?.streetPurchaseCommission || 0;
+
     // Collection bonus (passed from parent) - only if enabled for this user
     if (config.collectionBonusEnabled !== false) {
       perceptions += collectionBonus;
@@ -370,6 +371,63 @@ export default function PayrollCard({ userRole, currentUserId, weekStartStr, col
                                     primary={
                                       <Typography variant="caption" color="text.secondary">
                                         #{sale.saleNum} - {sale.customerName}
+                                      </Typography>
+                                    }
+                                  />
+                                </ListItem>
+                              ))}
+                            </List>
+                          </AccordionDetails>
+                        )}
+                      </Accordion>
+                    </TableCell>
+                  </TableRow>
+
+                  {/* Street Purchase Commission */}
+                  <TableRow>
+                    <TableCell sx={{ border: 'none', py: 0.5 }} colSpan={2}>
+                      <Accordion
+                        disableGutters
+                        elevation={0}
+                        sx={{
+                          backgroundColor: 'transparent',
+                          '&:before': { display: 'none' },
+                          '& .MuiAccordionSummary-root': {
+                            minHeight: 'auto',
+                            p: 0
+                          },
+                          '& .MuiAccordionSummary-content': {
+                            m: 0
+                          }
+                        }}
+                      >
+                        <AccordionSummary
+                          expandIcon={
+                            (payrollData.calculated?.streetPurchaseCount || 0) > 0 ? (
+                              <ExpandMoreIcon fontSize="small" />
+                            ) : null
+                          }
+                          sx={{ cursor: (payrollData.calculated?.streetPurchaseCount || 0) > 0 ? 'pointer' : 'default' }}
+                        >
+                          <Box display="flex" justifyContent="space-between" width="100%" pr={1}>
+                            <Typography variant="body2">
+                              COMPRAS EN CALLE ({payrollData.calculated?.streetPurchaseCount || 0} × $200)
+                            </Typography>
+                            <Typography variant="body2">
+                              $ {numeral(payrollData.calculated?.streetPurchaseCommission || 0).format('0,0.00')}
+                            </Typography>
+                          </Box>
+                        </AccordionSummary>
+                        {(payrollData.calculated?.streetPurchaseList?.length > 0) && (
+                          <AccordionDetails sx={{ p: 0, pl: 2 }}>
+                            <List dense disablePadding>
+                              {payrollData.calculated.streetPurchaseList.map((purchase, idx) => (
+                                <ListItem key={idx} disablePadding sx={{ py: 0.25 }}>
+                                  <ListItemText
+                                    primary={
+                                      <Typography variant="caption" color="text.secondary">
+                                        #{purchase.entryNumber} - {purchase.brand}
+                                        {purchase.serialNumber ? ` (Serie: ${purchase.serialNumber})` : ''}
                                       </Typography>
                                     }
                                   />

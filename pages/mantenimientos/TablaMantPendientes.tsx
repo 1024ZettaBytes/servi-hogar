@@ -19,6 +19,7 @@ import {
   Typography
 } from '@mui/material';
 import NotificationImportantIcon from '@mui/icons-material/NotificationImportant';
+import ReportProblemIcon from '@mui/icons-material/ReportProblem';
 
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import DoNotDisturbOnOutlinedIcon from '@mui/icons-material/DoNotDisturbOnOutlined';
@@ -152,10 +153,20 @@ const TablaMantPendientes: FC<TablaMantPendientesProps> = ({
                         {mant?.machine?.machineNum}
                       </Typography>
                       {isSaleRepair && (
-                        <Chip 
-                          label="Venta" 
-                          size="small" 
+                        <Chip
+                          label="Venta"
+                          size="small"
                           color="info"
+                          sx={{ ml: 1, fontSize: '0.7rem' }}
+                        />
+                      )}
+                      {mant?.fromOperatorSkip && (
+                        <Chip
+                          icon={<ReportProblemIcon fontSize="small" />}
+                          label="Reporte chofer"
+                          size="small"
+                          color="error"
+                          variant="outlined"
                           sx={{ ml: 1, fontSize: '0.7rem' }}
                         />
                       )}

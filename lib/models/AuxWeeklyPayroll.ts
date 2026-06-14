@@ -21,6 +21,8 @@ export interface IAuxWeeklyPayroll extends Document {
   extraPerceptions: IExtraItem[];
   salesCount: number;
   salesCommission: number;
+  streetPurchaseCount: number;
+  streetPurchaseCommission: number;
   notes: string;
   createdAt: Date;
   updatedAt: Date;
@@ -63,6 +65,14 @@ const AuxWeeklyPayrollSchema = new Schema<IAuxWeeklyPayroll>({
     default: 0
   },
   salesCommission: {
+    type: Number,
+    default: 0
+  },
+  streetPurchaseCount: {
+    type: Number,
+    default: 0
+  },
+  streetPurchaseCommission: {
     type: Number,
     default: 0
   },

@@ -32,6 +32,8 @@ import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
 import CompleteCollectionModal from '@/components/CompleteCollectionModal';
 import CompleteExtraTripModal from '@/components/CompleteExtraTripModal';
 import FormatModal from '@/components/FormatModal';
+import ReassignVueltaModal from '@/components/ReassignVueltaModal';
+import SwapHorizIcon from '@mui/icons-material/SwapHoriz';
 import { completeCollectionVisit } from '../../lib/client/salesFetch';
 import { formatTZDate } from 'lib/client/utils';
 import { useRouter } from 'next/router';
@@ -93,7 +95,9 @@ const TablaVueltasOperador: FC<TablaVueltasOperadorProps> = ({
   } | null>(null);
 
   const isAdmin = userRole === 'ADMIN';
+  const isManager = userRole === 'ADMIN' || userRole === 'AUX';
   const isOperator = userRole === 'OPE';
+  const [taskToReassign, setTaskToReassign] = useState<any>(null);
   const { prices } = useGetPrices(getFetcher);
 
   const { enqueueSnackbar } = useSnackbar();
@@ -296,7 +300,7 @@ const TablaVueltasOperador: FC<TablaVueltasOperadorProps> = ({
               <TableCell>CLIENTE</TableCell>
               {!showTimeBetween && <TableCell align='center'>SECTOR</TableCell>}
               <TableCell>TELÉFONO</TableCell>
-              {isAdmin && <TableCell>OPERADOR</TableCell>}
+              {isManager && <TableCell>OPERADOR</TableCell>}
               <TableCell>HORA ASIGNACIÓN</TableCell>
               <TableCell align="center">FOTOS</TableCell>
               <TableCell align="center">UBICACIÓN</TableCell>
@@ -307,7 +311,7 @@ const TablaVueltasOperador: FC<TablaVueltasOperadorProps> = ({
                   <TableCell align="center">TIEMPO ENTRE VUELTAS</TableCell>
                 </>
               )}
-              {!showTimeBetween && !isAdmin && (
+              {!showTimeBetween && (isOperator || isManager) && (
                 <TableCell align="center">ACCIÓN</TableCell>
               )}
             </TableRow>
@@ -467,7 +471,7 @@ const TablaVueltasOperador: FC<TablaVueltasOperadorProps> = ({
                       {cellPhone || 'N/A'}
                     </Typography>
                   </TableCell>
-                  {isAdmin && (
+                  {isManager && (
                     <TableCell>
                       <Typography
                         variant="body1"
@@ -476,7 +480,9 @@ const TablaVueltasOperador: FC<TablaVueltasOperadorProps> = ({
                         gutterBottom
                         noWrap
                       >
-                        {task.operator?.name || 'Sin asignar'}
+                        {task.operator?.name ||
+                          task.assignedTo?.name ||
+                          'Sin asignar'}
                       </Typography>
                     </TableCell>
                   )}
@@ -609,6 +615,17 @@ const TablaVueltasOperador: FC<TablaVueltasOperadorProps> = ({
                           Completar
                         </Button>
                       )}
+                      {isManager && !showTimeBetween && (
+                        <Button
+                          variant="outlined"
+                          color="secondary"
+                          size="small"
+                          startIcon={<SwapHorizIcon />}
+                          onClick={() => setTaskToReassign(task)}
+                        >
+                          Reasignar
+                        </Button>
+                      )}
                     </TableCell>
                   
                 </TableRow>
@@ -628,6 +645,25 @@ const TablaVueltasOperador: FC<TablaVueltasOperadorProps> = ({
           rowsPerPageOptions={[5, 10, 25, 30]}
         />
       </Box>
+
+      {/* Reassign Dialog (ADMIN/AUX) */}
+      {taskToReassign && (
+        <ReassignVueltaModal
+          open={!!taskToReassign}
+          task={taskToReassign}
+          handleOnClose={(saved, msg) => {
+            setTaskToReassign(null);
+            if (saved) {
+              enqueueSnackbar(msg || 'Vuelta reasignada', {
+                variant: 'success',
+                anchorOrigin: { vertical: 'top', horizontal: 'center' },
+                autoHideDuration: 2000
+              });
+              onRefresh();
+            }
+          }}
+        />
+      )}
 
       {/* Images Dialog */}
       <Dialog

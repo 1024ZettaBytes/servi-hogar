@@ -170,7 +170,7 @@ function Mantenimientos({ session }) {
                             <TableCell>{machine.machineNum}</TableCell>
                             <TableCell>{machine.brand}</TableCell>
                             <TableCell>{machine.currentVehicle?.operator?.name || 'Sin operador'}</TableCell>
-                            <TableCell>{formatTZDate(machine.updatedAt, "ddd HH:mm")}</TableCell>
+                            <TableCell>{formatTZDate(machine.updatedAt, "DD MMM HH:mm")}</TableCell>
                             <TableCell align="right">
                               <Button
                                 size="small"
