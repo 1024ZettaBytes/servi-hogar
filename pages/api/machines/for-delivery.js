@@ -1,9 +1,11 @@
 import { getMachinesForRentData } from "../../../lib/data/Machines";
-import { validateUserPermissions } from "../auth/authUtils";
+import { validateUserPermissions, getUserId, getUserRole } from "../auth/authUtils";
 
 async function getMachinesForRentAPI(req, res) {
   try {
-    const machinesForRent = await getMachinesForRentData();
+    const userId = await getUserId(req);
+    const userRole = await getUserRole(req);
+    const machinesForRent = await getMachinesForRentData(userId, userRole);
     res.status(200).json({ data: machinesForRent });
   } catch (e) {
     console.error(e);
