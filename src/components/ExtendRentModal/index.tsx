@@ -32,13 +32,10 @@ import numeral from "numeral";
 import { useSnackbar } from "notistack";
 import { ROUTES } from "lib/consts/API_URL_CONST";
 import { useCheckBlocking } from "src/hooks/useCheckBlocking";
-import { useSession } from "next-auth/react";
 function ExtendRentModal(props) {
   const { enqueueSnackbar } = useSnackbar();
   const { checkBlocking } = useCheckBlocking();
-  const { data: session } = useSession();
-  const userRole = session?.user?.role;
-  const { rentId, handleOnClose, open } = props;
+  const { rentId, handleOnClose, open, userRole } = props;
   const { rent, rentByIdError } = useGetRentById(getFetcher, rentId);
   const [rentPeriod, setRentPeriod] = useState({
     selectedWeeks: 1,
@@ -520,6 +517,7 @@ ExtendRentModal.propTypes = {
   handleOnClose: PropTypes.func.isRequired,
   open: PropTypes.bool.isRequired,
   rentId: PropTypes.string.isRequired,
+  userRole: PropTypes.string.isRequired,
 };
 
 export default ExtendRentModal;

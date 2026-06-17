@@ -662,6 +662,7 @@ const TablaRentasActuales: FC<TablaRentasActualesProps> = ({
           open={extendModalIsOpen}
           handleOnClose={handleCloseModal}
           rentId={selectedId}
+          userRole={userRole}
         />
       )}
       {changeModalIsOpen && (
