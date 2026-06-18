@@ -27,6 +27,10 @@ export interface IMachine extends Document {
   wasDismantled: boolean;
   padlockSerial1: string;
   padlockSerial2: string;
+  pendingReturnConfirmation: boolean;
+  returnRequestedAt: Date;
+  returnRequestedBy: Schema.Types.ObjectId;
+  returnWarehouse: Schema.Types.ObjectId;
 }
 
 const MachineSchema = new Schema<IMachine>({
@@ -74,7 +78,17 @@ const MachineSchema = new Schema<IMachine>({
   wasSold: { type: Boolean, default: false },
   wasDismantled: { type: Boolean, default: false },
   padlockSerial1: { type: String, default: null },
-  padlockSerial2: { type: String, default: null }
+  padlockSerial2: { type: String, default: null },
+  // Operator reported the emplayed machine was returned to a warehouse; the
+  // assigned technician must confirm receipt before it becomes LISTO.
+  pendingReturnConfirmation: { type: Boolean, default: false },
+  returnRequestedAt: { type: Date, default: null },
+  returnRequestedBy: { type: Schema.Types.ObjectId, default: null, ref: 'users' },
+  returnWarehouse: {
+    type: Schema.Types.ObjectId,
+    default: null,
+    ref: 'warehouses'
+  }
 });
 
 export const Machine: Model<IMachine> =

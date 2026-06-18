@@ -15,8 +15,8 @@ import NextBreadcrumbs from "@/components/Shared/BreadCrums";
 import TablaMant from "./TablaMant";
 import TablaMantPendientes from "./TablaMantPendientes";
 import TablaAcondicionamiento from "./TablaAcondicionamiento";
-import { getFetcher, useGetMantainances, useGetPendingMantainances, useGetPendingSaleRepairs, useGetSaleRepairs, useGetWarehouseConditioning, useGetAllWarehousesOverview, useGetCollectedMachines, useGetNextMachinesToLoad, useGetStaleMachinesOnVehicle } from "pages/api/useRequest";
-import { unloadStaleMachine } from "../../lib/client/machinesFetch";
+import { getFetcher, useGetMantainances, useGetPendingMantainances, useGetPendingSaleRepairs, useGetSaleRepairs, useGetWarehouseConditioning, useGetAllWarehousesOverview, useGetCollectedMachines, useGetNextMachinesToLoad, useGetStaleMachinesOnVehicle, useGetPendingReturnMachines } from "pages/api/useRequest";
+import { unloadStaleMachine, confirmMachineReturn } from "../../lib/client/machinesFetch";
 import { useSnackbar } from "notistack";
 import { formatTZDate } from "lib/client/utils";
 
@@ -37,6 +37,7 @@ function Mantenimientos({ session }) {
   const isTec = user?.role === 'TEC';
   const { collectedMachines } = useGetCollectedMachines(isTec ? getFetcher : null);
   const { staleMachines } = useGetStaleMachinesOnVehicle(getFetcher);
+  const { pendingReturnMachines } = useGetPendingReturnMachines(getFetcher);
   const { nextMachinesToLoad, isLoadingNextMachinesToLoad } = useGetNextMachinesToLoad(getFetcher, true);
   // Returns the deadline 24 weekday-hours after `from`, skipping Saturday and Sunday
   const getWeekdayDeadline = (from: Date): Date => {
@@ -56,9 +57,23 @@ function Mantenimientos({ session }) {
 
   const hasStaleMachines = Array.isArray(staleMachines) && staleMachines.length > 0;
 
+  const hasPendingReturns =
+    Array.isArray(pendingReturnMachines) && pendingReturnMachines.length > 0;
+
   const handleUnloadMachine = async (machineId: string) => {
     setUnloadingId(machineId);
     const result = await unloadStaleMachine({ machineId });
+    if (result.error) {
+      enqueueSnackbar(result.msg, { variant: "error" });
+    } else {
+      enqueueSnackbar(result.msg, { variant: "success" });
+    }
+    setUnloadingId(null);
+  };
+
+  const handleResolveReturn = async (machineId: string, action: 'confirm' | 'reject') => {
+    setUnloadingId(machineId);
+    const result = await confirmMachineReturn({ machineId, action });
     if (result.error) {
       enqueueSnackbar(result.msg, { variant: "error" });
     } else {
@@ -74,12 +89,16 @@ function Mantenimientos({ session }) {
     ...(pendingMantData || []).map(item => ({ ...item, type: 'RENT' }))
   ];
 
-  // Combine rent maintenance and sale repairs for completed list
-  // Sale repairs have priority (appear first)
+  // Combine rent maintenance and sale repairs for completed list,
+  // ordered by completion date (most recent first)
   const combinedCompletedList = [
     ...(saleRepairsData || []).map(item => ({ ...item, type: 'SALE' })),
     ...(mantData || []).map(item => ({ ...item, type: 'RENT' }))
-  ];
+  ].sort((a, b) => {
+    const dateA = new Date(a.finishedAt || a.updatedAt || a.createdAt).getTime();
+    const dateB = new Date(b.finishedAt || b.updatedAt || b.createdAt).getTime();
+    return dateB - dateA;
+  });
 
   const hasPendingError = pendingMantError || pendingSaleRepairsError;
   const pendingErrorMessage = pendingMantError?.message || pendingSaleRepairsError?.message;
@@ -180,6 +199,71 @@ function Mantenimientos({ session }) {
                                 onClick={() => handleUnloadMachine(machine._id)}
                               >
                                 {unloadingId === machine._id ? 'Bajando...' : 'Bajar'}
+                              </Button>
+                            </TableCell>
+                          </TableRow>
+                        ))}
+                      </TableBody>
+                    </Table>
+                  </TableContainer>
+                </Box>
+              </Card>
+            </Grid>
+          )}
+          {hasPendingReturns && (
+            <Grid item xs={12}>
+              <Card>
+                <Box sx={{ p: 2 }}>
+                  <Typography variant="subtitle1" gutterBottom color="info.main">
+                    <DownloadIcon sx={{ verticalAlign: 'middle', mr: 0.5 }} fontSize="small" />
+                    Equipos por confirmar recepción ({pendingReturnMachines.length})
+                  </Typography>
+                  <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
+                    El operador reportó que regresó estos equipos a la bodega. Confirma que sí llegaron para que pasen a LISTO, o marca "No llegó" si no los recibiste.
+                  </Typography>
+                  <TableContainer>
+                    <Table size="small">
+                      <TableHead>
+                        <TableRow>
+                          <TableCell>#Equipo</TableCell>
+                          <TableCell>Marca</TableCell>
+                          <TableCell>Vehículo</TableCell>
+                          <TableCell>Bodega destino</TableCell>
+                          <TableCell>Reportado</TableCell>
+                          <TableCell align="right">Acción</TableCell>
+                        </TableRow>
+                      </TableHead>
+                      <TableBody>
+                        {pendingReturnMachines.map((machine) => (
+                          <TableRow key={machine._id}>
+                            <TableCell>{machine.machineNum}</TableCell>
+                            <TableCell>{machine.brand}</TableCell>
+                            <TableCell>{machine.currentVehicle?.operator?.name || 'Sin operador'}</TableCell>
+                            <TableCell>{machine.returnWarehouse?.name || '-'}</TableCell>
+                            <TableCell>
+                              {machine.returnRequestedAt
+                                ? formatTZDate(machine.returnRequestedAt, "DD MMM HH:mm")
+                                : '-'}
+                            </TableCell>
+                            <TableCell align="right">
+                              <Button
+                                size="small"
+                                variant="contained"
+                                color="success"
+                                sx={{ mr: 1 }}
+                                disabled={unloadingId === machine._id}
+                                onClick={() => handleResolveReturn(machine._id, 'confirm')}
+                              >
+                                {unloadingId === machine._id ? '...' : 'Confirmar'}
+                              </Button>
+                              <Button
+                                size="small"
+                                variant="outlined"
+                                color="error"
+                                disabled={unloadingId === machine._id}
+                                onClick={() => handleResolveReturn(machine._id, 'reject')}
+                              >
+                                No llegó
                               </Button>
                             </TableCell>
                           </TableRow>

@@ -93,6 +93,17 @@ function AssignPickupOperatorModal(props) {
                   <Typography variant="body2">
                     {pickup?.reason || 'N/A'}
                   </Typography>
+
+                  {pickup?.operator && (
+                    <>
+                      <Typography variant="caption" color="text.secondary" sx={{ mt: 1, display: 'block' }}>
+                        Operador actual
+                      </Typography>
+                      <Typography variant="body2" fontWeight="bold">
+                        {pickup.operator.name}
+                      </Typography>
+                    </>
+                  )}
                 </Box>
               </Grid>
 
