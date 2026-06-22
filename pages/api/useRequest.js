@@ -817,3 +817,12 @@ export const useGetPendingReturnMachines = (fetcher) => {
     isLoadingPendingReturnMachines: isLoading
   };
 };
+
+export const useGetFeatureFlags = (fetcher) => {
+  const { data, error, isLoading } = useSWR(ROUTES.FEATURE_FLAGS_API, fetcher);
+  return {
+    featureFlags: data?.data,
+    featureFlagsError: error,
+    isLoadingFeatureFlags: isLoading
+  };
+};
