@@ -1,5 +1,9 @@
 import { validateUserPermissions } from '../auth/authUtils';
-import { updateTecnicianData } from '../../../lib/data/Users';
+import {
+  updateTecnicianData,
+  getMaxMachineNum,
+  MACHINE_BLOCK_SIZE
+} from '../../../lib/data/Users';
 
 async function updateTecnicianAPI(req, res) {
   try {
@@ -11,11 +15,24 @@ async function updateTecnicianAPI(req, res) {
   }
 }
 
+async function getTecnicianRangeInfoAPI(req, res) {
+  try {
+    const maxMachineNum = await getMaxMachineNum();
+    res.status(200).json({ data: { maxMachineNum, blockSize: MACHINE_BLOCK_SIZE } });
+  } catch (e) {
+    console.error(e);
+    res.status(500).json({
+      errorMsg: 'Error al consultar la información de equipos.'
+    });
+  }
+}
+
 async function handler(req, res) {
   const validRole = await validateUserPermissions(req, res, ['ADMIN']);
   if (validRole)
     switch (req.method) {
       case 'GET':
+        await getTecnicianRangeInfoAPI(req, res);
         break;
       case 'POST':
         break;
