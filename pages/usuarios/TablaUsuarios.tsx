@@ -132,7 +132,9 @@ const TablaUsuarios: FC<TablaUsuariosProps> = ({ userList }) => {
         vertical: 'top',
         horizontal: 'center'
       },
-      autoHideDuration: 2000
+      // Longer than the default so the reassignment notice (and the range/repair
+      // block messages) stay readable.
+      autoHideDuration: 6000
     });
 
     if (!result.error) {

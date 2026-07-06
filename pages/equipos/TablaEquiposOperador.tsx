@@ -341,15 +341,24 @@ const TablaEquiposOperador: FC<TablaEquiposOperadorProps> = ({
                       <TableCell>{machine.brand || '-'}</TableCell>
                       <TableCell>{machine.capacity}kg</TableCell>
                       <TableCell align="right">
-                        <Button
-                          variant="outlined"
-                          size="small"
-                          color="warning"
-                          startIcon={<WarehouseIcon />}
-                          onClick={() => handleOpenReturnDialog(machine)}
-                        >
-                          Regresar
-                        </Button>
+                        {machine.pendingReturnConfirmation ? (
+                          <Chip
+                            label="Pendiente de confirmación"
+                            size="small"
+                            color="info"
+                            variant="outlined"
+                          />
+                        ) : (
+                          <Button
+                            variant="outlined"
+                            size="small"
+                            color="warning"
+                            startIcon={<WarehouseIcon />}
+                            onClick={() => handleOpenReturnDialog(machine)}
+                          >
+                            Regresar
+                          </Button>
+                        )}
                       </TableCell>
                     </TableRow>
                   ))}

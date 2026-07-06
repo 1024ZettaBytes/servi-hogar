@@ -22,12 +22,16 @@ async function getUsersAPI(req, res) {
 async function updateUserAPI(req, res) {
   try {
     const { operation } = req.body;
+    let msg = '¡Usuario actualizado con éxito!';
     switch (operation) {
       case 'STATUS': {
-        await changeUserStatus({ ...req.body });
+        const statusResult = await changeUserStatus({ ...req.body });
+        if (statusResult?.reassignedRepairs > 0) {
+          msg += ` Se reasignaron ${statusResult.reassignedRepairs} reparación(es) de venta pendiente(s) a ${statusResult.reassignedTo}.`;
+        }
       }
     }
-    res.status(200).json({ msg: '¡Usuario actualizado con éxito!' });
+    res.status(200).json({ msg });
   } catch (e) {
     console.error(e);
     res.status(500).json({ errorMsg: e.message });

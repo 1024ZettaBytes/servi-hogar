@@ -19,7 +19,9 @@ async function returnToWarehouseAPI(req, res, userId) {
       warehouseId,
       operatorId: userId,
     });
-    res.status(200).json({ msg: "Equipo regresado al almacén con éxito" });
+    res.status(200).json({
+      msg: "Regreso reportado. Pendiente de confirmación del técnico.",
+    });
   } catch (e) {
     console.error(e);
     res.status(500).json({

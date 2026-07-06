@@ -19,6 +19,7 @@ import es from 'date-fns/locale/es';
 import Label from '@/components/Label';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import PersonAddAlt1Icon from '@mui/icons-material/PersonAddAlt1';
+import SwapHorizIcon from '@mui/icons-material/SwapHoriz';
 import ImageSearchIcon from '@mui/icons-material/ImageSearch';
 import CancelIcon from '@mui/icons-material/Cancel';
 import ImagesModal from '@/components/ImagesModal';
@@ -308,6 +309,18 @@ const TablaRecoleccionesVentasPendientes: FC<TablaRecoleccionesVentasPendientesP
                             disabled={isAssigning}
                           >
                             <PersonAddAlt1Icon fontSize="small" />
+                          </IconButton>
+                        </Tooltip>
+                      )}
+                      {pickup.status === 'ASIGNADA' && (userRole === 'ADMIN' || userRole === 'AUX') && (
+                        <Tooltip title="Reasignar operador">
+                          <IconButton
+                            size="small"
+                            color="primary"
+                            onClick={() => handleAssignOperator(pickup)}
+                            disabled={isAssigning}
+                          >
+                            <SwapHorizIcon fontSize="small" />
                           </IconButton>
                         </Tooltip>
                       )}

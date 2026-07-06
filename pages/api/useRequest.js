@@ -805,3 +805,24 @@ export const useGetStaleMachinesOnVehicle = (fetcher) => {
     isLoadingStaleMachines: isLoading
   };
 };
+
+export const useGetPendingReturnMachines = (fetcher) => {
+  const { data, error, isLoading } = useSWR(
+    ROUTES.CONFIRM_RETURN_MACHINE_API,
+    fetcher
+  );
+  return {
+    pendingReturnMachines: data?.data,
+    pendingReturnMachinesError: error,
+    isLoadingPendingReturnMachines: isLoading
+  };
+};
+
+export const useGetFeatureFlags = (fetcher) => {
+  const { data, error, isLoading } = useSWR(ROUTES.FEATURE_FLAGS_API, fetcher);
+  return {
+    featureFlags: data?.data,
+    featureFlagsError: error,
+    isLoadingFeatureFlags: isLoading
+  };
+};

@@ -34,6 +34,7 @@ import AttachMoneyIcon from '@mui/icons-material/AttachMoney';
 import AssignmentIcon from '@mui/icons-material/Assignment';
 import NoCrashIcon from '@mui/icons-material/NoCrash';
 import SearchIcon from '@mui/icons-material/Search';
+import SettingsIcon from '@mui/icons-material/Settings';
 
 const MenuWrapper = styled(Box)(
   ({ theme }) => `
@@ -940,6 +941,23 @@ function SidebarMenu({ userRole }) {
                         startIcon={<ReceiptLongIcon />}
                       >
                         Nómina
+                      </Button>
+                    </NextLink>
+                  </ListItem>
+                )}
+                               {userRole === 'ADMIN' && (
+                  <ListItem component="div">
+                    <NextLink href="/configuraciones" passHref>
+                      <Button
+                        className={
+                          currentRoute === '/configuraciones' ? 'active' : ''
+                        }
+                        disableRipple
+                        component="a"
+                        onClick={closeSidebar}
+                        startIcon={<SettingsIcon />}
+                      >
+                        Configuraciones
                       </Button>
                     </NextLink>
                   </ListItem>

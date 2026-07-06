@@ -424,10 +424,19 @@ const TablaPendingSales: FC<TablaPendingSalesProps> = ({
         />
       </Box>
       {cancelModalIsOpen && (
-        <GenericModal 
+        <GenericModal
           open={cancelModalIsOpen}
-          title={"Atención"} 
-          text={'¿Está seguro de cancelar la venta seleccionada?'}
+          title={"Atención"}
+          text={
+            <>
+              ¿Está seguro de cancelar la entrega seleccionada?
+              <br />
+              <br />
+              <strong>Importante:</strong> al cancelar esta entrega, la venta
+              completa quedará cancelada y la máquina volverá a quedar
+              disponible. Esto aplica incluso para entregas de reparación.
+            </>
+          }
           isLoading={isCancelling}
           requiredReason 
           onAccept={handleOnConfirmCancelSale}

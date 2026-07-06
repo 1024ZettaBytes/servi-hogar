@@ -27,6 +27,7 @@ import { useSnackbar } from 'notistack';
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import ShoppingCartCheckoutIcon from '@mui/icons-material/ShoppingCartCheckout';
 import HandymanIcon from '@mui/icons-material/Handyman';
+import SwapHorizIcon from '@mui/icons-material/SwapHoriz';
 import DeleteTwoToneIcon from '@mui/icons-material/DeleteTwoTone';
 import BulkTableActions from '../../src/components/BulkTableActions';
 import SearchIcon from '@mui/icons-material/Search';
@@ -34,6 +35,7 @@ import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
 import NextLink from 'next/link';
 import GenericModal from '@/components/GenericModal';
 import ConvertToSaleMachineModal from '@/components/ConvertToSaleMachineModal';
+import ApplyReplacementModal from '@/components/ApplyReplacementModal';
 import { capitalizeFirstLetter, formatTZDate } from 'lib/client/utils';
 import { MACHINE_STATUS_LIST } from '../../lib/consts/OBJ_CONTS';
 interface TablaEquiposProps {
@@ -149,6 +151,8 @@ const TablaEquipos: FC<TablaEquiposProps> = ({ userRole, machinesList }) => {
   const [dismantleModalIsOpen, setDismantleModalIsOpen] = useState(false);
   const [machineToDismantle, setMachineToDismantle] = useState<{ _id: string; machineNum: number } | null>(null);
   const [isDismantling, setIsDismantling] = useState(false);
+  const [replaceModalIsOpen, setReplaceModalIsOpen] = useState(false);
+  const [machineToReplace, setMachineToReplace] = useState<any | null>(null);
   const userCanDelete = ['ADMIN', 'AUX', 'OPE'].includes(userRole);
   const machineCanBeDeleted = (machineIsActive, machineStatus) => {
     return (
@@ -164,6 +168,13 @@ const TablaEquipos: FC<TablaEquiposProps> = ({ userRole, machinesList }) => {
   }
   const machineCanBedismantled = (machineStatus: string) => {
     return userRole === 'ADMIN' && machineStatus === MACHINE_STATUS_LIST.LISTO;
+  }
+  const machineCanBeReplaced = (machineIsActive: boolean, machineStatus: string) => {
+    return (
+      userRole === 'ADMIN' &&
+      machineIsActive &&
+      machineStatus === MACHINE_STATUS_LIST.RENTADO
+    );
   }
   const canSelectAll =
     machinesList.length > 0 &&
@@ -228,6 +239,21 @@ const TablaEquipos: FC<TablaEquiposProps> = ({ userRole, machinesList }) => {
   const handleOnDismantleClick = (machineId: string, machineNum: number) => {
     setMachineToDismantle({ _id: machineId, machineNum });
     setDismantleModalIsOpen(true);
+  };
+  const handleOnReplaceClick = (machine: any) => {
+    setMachineToReplace(machine);
+    setReplaceModalIsOpen(true);
+  };
+  const handleReplaceModalClose = (replaced: boolean, msg?: string) => {
+    setReplaceModalIsOpen(false);
+    setMachineToReplace(null);
+    if (msg) {
+      enqueueSnackbar(msg, {
+        variant: replaced ? 'success' : 'error',
+        anchorOrigin: { vertical: 'top', horizontal: 'center' },
+        autoHideDuration: 2500
+      });
+    }
   };
   const handleOnConfirmDismantle = async () => {
     setIsDismantling(true);
@@ -546,6 +572,22 @@ const TablaEquipos: FC<TablaEquiposProps> = ({ userRole, machinesList }) => {
                             <HandymanIcon fontSize="small" />
                           </IconButton>
                         </Tooltip>}
+                      { machineCanBeReplaced(machine?.active, machine?.status?.id) &&
+                        <Tooltip title="Aplicar reemplazo" arrow>
+                          <IconButton
+                            onClick={() => handleOnReplaceClick(machine)}
+                            sx={{
+                              '&:hover': {
+                                background: theme.colors.info.lighter
+                              },
+                              color: theme.palette.info.main
+                            }}
+                            color="inherit"
+                            size="small"
+                          >
+                            <SwapHorizIcon fontSize="small" />
+                          </IconButton>
+                        </Tooltip>}
                       {machineCanBeDeleted(
                         machine?.active,
                         machine?.status?.id
@@ -585,6 +627,14 @@ const TablaEquipos: FC<TablaEquiposProps> = ({ userRole, machinesList }) => {
           />
         </Box>
       </Card>
+
+      {machineToReplace && replaceModalIsOpen && (
+        <ApplyReplacementModal
+          open={replaceModalIsOpen}
+          handleOnClose={handleReplaceModalClose}
+          machine={machineToReplace}
+        />
+      )}
 
       {machineToConvert && convertModalIsOpen && (
         <ConvertToSaleMachineModal

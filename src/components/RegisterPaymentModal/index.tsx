@@ -28,7 +28,12 @@ import PhotoCamera from "@mui/icons-material/PhotoCamera";
 import DeleteIcon from "@mui/icons-material/Delete";
 import { registerPayment } from "../../../lib/client/salesFetch";
 import { PAYMENT_METHODS } from "../../../lib/consts/OBJ_CONTS";
-import { useGetPaymentAccounts, getFetcher } from "../../../pages/api/useRequest";
+import { FEATURE_FLAGS } from "../../../lib/consts/featureFlags";
+import {
+  useGetPaymentAccounts,
+  useGetFeatureFlags,
+  getFetcher
+} from "../../../pages/api/useRequest";
 import numeral from "numeral";
 import { convertDateToTZ, compressImage } from "../../../lib/client/utils";
 import { useCheckBlocking } from "src/hooks/useCheckBlocking";
@@ -38,6 +43,7 @@ function RegisterPaymentModal(props) {
   const { handleOnClose, open, sale } = props;
   const { checkBlocking } = useCheckBlocking();
   const { paymentAccounts } = useGetPaymentAccounts(getFetcher);
+  const { featureFlags } = useGetFeatureFlags(getFetcher);
   const [isLoading, setIsLoading] = useState(false);
   const [hasError, setHasError] = useState({ error: false, msg: "" });
   const [paymentAmount, setPaymentAmount] = useState("");
@@ -71,12 +77,19 @@ function RegisterPaymentModal(props) {
   if (!sale) return null;
   const requiresImage = paymentMethod === 'TRANSFER' || paymentMethod === 'DEP';
 
-  // Calculate if cash settlement is available (delivery completed <= 30 days ago)
+  // Calculate if cash settlement is available (delivery completed <= 30 days ago).
+  // Admins can lift the 30-day window via a feature flag.
+  const bypassCashWindow = !!featureFlags?.find(
+    (f) => f.key === FEATURE_FLAGS.CASH_SETTLEMENT_BYPASS_WINDOW
+  )?.enabled;
   const deliveryCompletedAt = sale.delivery?.completedAt;
-  const daysSinceDelivery = deliveryCompletedAt 
+  const daysSinceDelivery = deliveryCompletedAt
     ? Math.floor((new Date().getTime() - new Date(deliveryCompletedAt).getTime()) / (1000 * 60 * 60 * 24))
     : null;
-  const canUseCashSettlement = deliveryCompletedAt && daysSinceDelivery !== null && daysSinceDelivery <= 30;
+  const canUseCashSettlement =
+    deliveryCompletedAt &&
+    daysSinceDelivery !== null &&
+    (bypassCashWindow || daysSinceDelivery <= 30);
 
   // Determine the cash price to use
   const effectiveCashPrice = sale.cashPrice || (cashPriceInput ? parseFloat(cashPriceInput) : null);
