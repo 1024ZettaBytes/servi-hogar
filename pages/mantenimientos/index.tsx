@@ -60,6 +60,22 @@ function Mantenimientos({ session }) {
   const hasPendingReturns =
     Array.isArray(pendingReturnMachines) && pendingReturnMachines.length > 0;
 
+  // Max horas transcurridas desde que un equipo fue reportado como regresado
+  // por el operador (returnRequestedAt) entre todos los pendientes.
+  const maxPendingReturnHours = hasPendingReturns
+    ? Math.max(
+        ...pendingReturnMachines.map((m) =>
+          m.returnRequestedAt
+            ? (Date.now() - new Date(m.returnRequestedAt).getTime()) / 3600000
+            : 0
+        )
+      )
+    : 0;
+
+  const hasOverduePendingReturns = isTec && maxPendingReturnHours >= 72;
+  const hasWarningPendingReturns =
+    isTec && maxPendingReturnHours >= 24 && maxPendingReturnHours < 72;
+
   const handleUnloadMachine = async (machineId: string) => {
     setUnloadingId(machineId);
     const result = await unloadStaleMachine({ machineId });
@@ -298,6 +314,22 @@ function Mantenimientos({ session }) {
             </Grid>
           )}
 
+          {hasOverduePendingReturns && (
+            <Grid item xs={12}>
+              <Alert severity="error">
+                Hay equipos regresados por el operador sin confirmar recepción desde hace más de 72 horas. Debes confirmarlos (o marcarlos como "No llegó") para poder realizar mantenimientos.
+              </Alert>
+            </Grid>
+          )}
+
+          {hasWarningPendingReturns && (
+            <Grid item xs={12}>
+              <Alert severity="warning">
+                Hay equipos regresados por el operador sin confirmar recepción desde hace más de 24 horas. Confírmalos pronto: pasadas las 72 horas se bloquearán los mantenimientos.
+              </Alert>
+            </Grid>
+          )}
+
           <Grid item xs={12}>
             {currentTab === "pendientes" && (
               <>
@@ -315,7 +347,7 @@ function Mantenimientos({ session }) {
                     <TablaMantPendientes
                       listData={combinedPendingList}
                       userRole={user?.role}
-                      isBlocked={hasOverdueCollected || (isTec && hasStaleMachines)}
+                      isBlocked={hasOverdueCollected || (isTec && hasStaleMachines) || hasOverduePendingReturns}
                     />
                   </Card>
                 )}
