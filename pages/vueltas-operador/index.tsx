@@ -75,6 +75,7 @@ function VueltasOperador({ session }) {
     mutate(`/api/extra-trips/completed?date=${formatTZDate(selectedDate, "YYYY-MM-DD")}`);
     mutate(`/api/sales/deliveries/pending`);
     mutate(`/api/sales/deliveries/completed?date=${formatTZDate(selectedDate, "YYYY-MM-DD")}`);
+    mutate(`/api/tasks/scheduled-slots?date=${formatTZDate(selectedDate, "YYYY-MM-DD")}`);
   };
   
   // Fetch pending tasks

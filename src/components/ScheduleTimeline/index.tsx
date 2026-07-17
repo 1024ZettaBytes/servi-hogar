@@ -83,6 +83,7 @@ const ScheduleTimeline: FC<ScheduleTimelineProps> = ({ selectedDate }) => {
   ): 'primary' | 'warning' | 'error' | 'info' | 'success' | 'secondary' => {
     switch (type) {
       case 'ENTREGA':
+      case 'ENTREGA_VENTA':
         return 'primary';
       case 'CAMBIO':
         return 'warning';
@@ -102,6 +103,7 @@ const ScheduleTimeline: FC<ScheduleTimelineProps> = ({ selectedDate }) => {
   const getTypeBgColor = (type: string) => {
     switch (type) {
       case 'ENTREGA':
+      case 'ENTREGA_VENTA':
         return alpha(theme.palette.primary.main, 0.15);
       case 'CAMBIO':
         return alpha(theme.palette.warning.main, 0.15);
@@ -127,6 +129,21 @@ const ScheduleTimeline: FC<ScheduleTimelineProps> = ({ selectedDate }) => {
   const timeSlots = generateTimeSlots(scheduledSlotsData || []);
   const occupiedCount = timeSlots.filter((s) => s.isOccupied).length;
   const availableCount = timeSlots.length - occupiedCount;
+
+  const getTypeLabel = (type: string) => {
+    switch (type) {
+      case 'ENTREGA_VENTA':
+        return 'ENTREGA VENTA';
+      case 'RECOLECCION_VENTA':
+        return 'RECOLECCIÓN VENTA';
+      case 'CAMBIO_VENTA':
+        return 'CAMBIO VENTA';
+      case 'VUELTA_EXTRA':
+        return 'VUELTA EXTRA';
+      default:
+        return type;
+    }
+  };
 
   // Get current time slot
   const now = new Date();
@@ -476,7 +493,7 @@ const ScheduleTimeline: FC<ScheduleTimelineProps> = ({ selectedDate }) => {
                                 ml: 1
                               }}
                             >
-                              {slot.occupiedBy.taskType}
+                              {getTypeLabel(slot.occupiedBy.taskType)}
                             </Typography>
                           </>
                         ) : isCurrentSlot ? (

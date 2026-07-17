@@ -199,6 +199,7 @@ const ScheduleTimePicker: FC<ScheduleTimePickerProps> = ({
   const getTypeColor = (type: string): 'primary' | 'warning' | 'error' | 'info' | 'success' | 'secondary' => {
     switch (type) {
       case 'ENTREGA':
+      case 'ENTREGA_VENTA':
         return 'primary';
       case 'CAMBIO':
         return 'warning';
@@ -218,6 +219,7 @@ const ScheduleTimePicker: FC<ScheduleTimePickerProps> = ({
   const getTypeBgColor = (type: string, theme: any) => {
     switch (type) {
       case 'ENTREGA':
+      case 'ENTREGA_VENTA':
         return alpha(theme.palette.primary.main, 0.15);
       case 'CAMBIO':
         return alpha(theme.palette.warning.main, 0.15);
@@ -235,6 +237,21 @@ const ScheduleTimePicker: FC<ScheduleTimePickerProps> = ({
   };
 
   const theme = useTheme();
+
+  const getTypeLabel = (type: string) => {
+    switch (type) {
+      case 'ENTREGA_VENTA':
+        return 'ENTREGA VENTA';
+      case 'RECOLECCION_VENTA':
+        return 'RECOLECCIÓN VENTA';
+      case 'CAMBIO_VENTA':
+        return 'CAMBIO VENTA';
+      case 'VUELTA_EXTRA':
+        return 'VUELTA EXTRA';
+      default:
+        return type;
+    }
+  };
 
   const filteredSlots = showOnlyAvailable
     ? timeSlots.filter((slot) => !slot.isOccupied || slot.isCurrent)
@@ -505,7 +522,7 @@ const ScheduleTimePicker: FC<ScheduleTimePickerProps> = ({
                                 ml: 1
                               }}
                             >
-                              {slot.occupiedBy.taskType}
+                              {getTypeLabel(slot.occupiedBy.taskType)}
                             </Typography>
                           </>
                         ) : isCurrentTask ? (
@@ -608,7 +625,7 @@ const ScheduleTimePicker: FC<ScheduleTimePickerProps> = ({
                 fontWeight: 600
               }}
             >
-              {selectedSlot?.occupiedBy?.taskType}
+              {getTypeLabel(selectedSlot?.occupiedBy?.taskType || '')}
             </Typography>
             <Typography fontWeight="bold" mt={1}>
               {selectedSlot?.occupiedBy?.customerName}

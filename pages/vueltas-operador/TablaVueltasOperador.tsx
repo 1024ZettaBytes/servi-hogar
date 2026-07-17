@@ -381,7 +381,7 @@ const TablaVueltasOperador: FC<TablaVueltasOperadorProps> = ({
                           sx={{ cursor: 'pointer' }}
                         />
                       ) : (
-                        (isAdmin || isOperator) && (
+                        (isManager || isOperator) && (
                           <Button
                             size="small"
                             variant="outlined"
