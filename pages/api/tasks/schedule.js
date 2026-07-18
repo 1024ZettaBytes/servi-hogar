@@ -21,7 +21,7 @@ export default async function handler(req, res) {
         msg: 'taskId and taskType are required' 
       });
     }
-    const validTaskTypes = ['ENTREGA', 'RECOLECCION', 'CAMBIO', 'RECOLECCION_VENTA', 'COBRANZA', 'VUELTA_EXTRA', 'ENTREGA_VENTA'];
+    const validTaskTypes = ['ENTREGA', 'RECOLECCION', 'CAMBIO', 'RECOLECCION_VENTA', 'CAMBIO_VENTA', 'COBRANZA', 'VUELTA_EXTRA', 'ENTREGA_VENTA'];
     if (!validTaskTypes.includes(taskType)) {
       return res.status(400).json({ 
         error: true, 
