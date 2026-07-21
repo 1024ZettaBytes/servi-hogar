@@ -94,7 +94,6 @@ const TablaVueltasOperador: FC<TablaVueltasOperadorProps> = ({
     task: any;
   } | null>(null);
 
-  const isAdmin = userRole === 'ADMIN';
   const isManager = userRole === 'ADMIN' || userRole === 'AUX';
   const isOperator = userRole === 'OPE';
   const [taskToReassign, setTaskToReassign] = useState<any>(null);
@@ -381,7 +380,7 @@ const TablaVueltasOperador: FC<TablaVueltasOperadorProps> = ({
                           sx={{ cursor: 'pointer' }}
                         />
                       ) : (
-                        (isAdmin || isOperator) && (
+                        (isManager || isOperator) && (
                           <Button
                             size="small"
                             variant="outlined"
