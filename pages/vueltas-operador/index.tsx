@@ -33,10 +33,14 @@ import {
   useGetCompletedExtraTrips,
   useGetPendingSaleDeliveries,
   useGetCompletedSaleDeliveries,
+  useGetExternalRepairs,
   getFetcher,
 } from "../api/useRequest";
 import TablaVueltasOperador from "./TablaVueltasOperador";
 import TablaVueltasExtras from "./TablaVueltasExtras";
+import TablaVueltasReparacionExterna, {
+  buildVueltas,
+} from "./TablaVueltasReparacionExterna";
 import ScheduleTimeline from "@/components/ScheduleTimeline";
 import AddExtraTripModal from "@/components/AddExtraTripModal";
 import { formatTZDate, setDateToEnd } from "lib/client/utils";
@@ -143,6 +147,22 @@ function VueltasOperador({ session }) {
     getFetcher,
     formatTZDate(selectedDate, "YYYY-MM-DD")
   );
+
+  // Fetch external-repair vueltas (pickups + deliveries/returns). SWR shares the
+  // cache with TablaVueltasReparacionExterna, so no extra network request.
+  const { externalRepairsList: externalRepairsActive } = useGetExternalRepairs(getFetcher);
+  const { externalRepairsList: externalRepairsFinalized } = useGetExternalRepairs(getFetcher, false);
+  const { pending: externalPendingVueltas, completed: externalCompletedVueltas } =
+    buildVueltas([
+      ...(externalRepairsActive || []),
+      ...(externalRepairsFinalized || []),
+    ]);
+  const selectedDayKey = formatTZDate(selectedDate, "YYYY-MM-DD");
+  const externalCompletedForDay = externalCompletedVueltas.filter(
+    (v) => formatTZDate(v.completedAt, "YYYY-MM-DD") === selectedDayKey
+  );
+  const externalPendingCount = externalPendingVueltas.length;
+  const externalCompletedCount = externalCompletedForDay.length;
 
   const generalError =
     pendingDeliveriesError || pendingPickupsError || pendingSalePickupsError || pendingChangesError ||
@@ -325,9 +345,13 @@ function VueltasOperador({ session }) {
     allPendingTasks.length +
     allCompletedTasks.length +
     pendingExtraTripsCount +
-    completedExtraTripsCount;
-  const completed = allCompletedTasks.length + completedExtraTripsCount;
-  const pending = allPendingTasks.length + pendingExtraTripsCount;
+    completedExtraTripsCount +
+    externalPendingCount +
+    externalCompletedCount;
+  const completed =
+    allCompletedTasks.length + completedExtraTripsCount + externalCompletedCount;
+  const pending =
+    allPendingTasks.length + pendingExtraTripsCount + externalPendingCount;
 
   const earningsPerTask = 25;
   const totalEarnings = completed * earningsPerTask;
@@ -470,6 +494,14 @@ function VueltasOperador({ session }) {
                     onRefresh={handleRefresh}
                   />
                 </Card>
+
+                {/* External repair vueltas (pickups + deliveries/returns) */}
+                <Box sx={{ mb: 4 }}>
+                  <TablaVueltasReparacionExterna
+                    userRole={userRole}
+                    selectedDate={selectedDate}
+                  />
+                </Box>
 
                 {/* Extra Trips Section */}
                

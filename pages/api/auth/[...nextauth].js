@@ -29,15 +29,17 @@ export default NextAuth({
         session.user = {
           ...tokenUser,
           isBlocked: userOnDb.isBlocked,
+          blockReason: userOnDb.blockReason,
           isSuperUser
         };
       }
       else{
-        session.user = { 
-          id: userOnDb?._id, 
-          name: userOnDb?.name, 
+        session.user = {
+          id: userOnDb?._id,
+          name: userOnDb?.name,
           role: userOnDb?.role?.id,
           isBlocked: userOnDb.isBlocked,
+          blockReason: userOnDb.blockReason,
           isSuperUser
         }
       }

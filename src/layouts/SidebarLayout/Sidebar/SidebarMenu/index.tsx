@@ -326,40 +326,40 @@ function SidebarMenu({ userRole }) {
                   </ListItem>
                   {['ADMIN', 'AUX'].includes(userRole) && (
                     <>
-                    <ListItem component="div">
-                      <NextLink href="/equipos-venta" passHref>
-                        <Button
-                          className={
-                            currentRoute.includes('/equipos-venta')
-                              ? 'active'
-                              : ''
-                          }
-                          disableRipple
-                          component="a"
-                          onClick={closeSidebar}
-                          startIcon={<ShoppingBagIcon />}
-                        >
-                          Equipos de Venta
-                        </Button>
-                      </NextLink>
-                    </ListItem>
-                    <ListItem component="div">
-                      <NextLink href="/ventas/pagos" passHref>
-                        <Button
-                          className={
-                            currentRoute.includes('/ventas/pagos')
-                              ? 'active'
-                              : ''
-                          }
-                          disableRipple
-                          component="a"
-                          onClick={closeSidebar}
-                          startIcon={<PaidIcon />}
-                        >
-                          Pagos
-                        </Button>
-                      </NextLink>
-                    </ListItem>
+                      <ListItem component="div">
+                        <NextLink href="/equipos-venta" passHref>
+                          <Button
+                            className={
+                              currentRoute.includes('/equipos-venta')
+                                ? 'active'
+                                : ''
+                            }
+                            disableRipple
+                            component="a"
+                            onClick={closeSidebar}
+                            startIcon={<ShoppingBagIcon />}
+                          >
+                            Equipos de Venta
+                          </Button>
+                        </NextLink>
+                      </ListItem>
+                      <ListItem component="div">
+                        <NextLink href="/ventas/pagos" passHref>
+                          <Button
+                            className={
+                              currentRoute.includes('/ventas/pagos')
+                                ? 'active'
+                                : ''
+                            }
+                            disableRipple
+                            component="a"
+                            onClick={closeSidebar}
+                            startIcon={<PaidIcon />}
+                          >
+                            Pagos
+                          </Button>
+                        </NextLink>
+                      </ListItem>
                     </>
                   )}
                 </List>
@@ -434,6 +434,25 @@ function SidebarMenu({ userRole }) {
                       </Button>
                     </NextLink>
                   </ListItem>
+                  {userRole === 'OPE' && (
+                    <ListItem component="div">
+                      <NextLink href="/reparaciones-externas" passHref>
+                        <Button
+                          className={
+                            currentRoute.startsWith('/reparaciones-externas')
+                              ? 'active'
+                              : ''
+                          }
+                          disableRipple
+                          component="a"
+                          onClick={closeSidebar}
+                          startIcon={<LocalShippingIcon />}
+                        >
+                          Rep. Externa (ruta)
+                        </Button>
+                      </NextLink>
+                    </ListItem>
+                  )}
                 </List>
               </SubMenuWrapper>
             </List>
@@ -658,6 +677,24 @@ function SidebarMenu({ userRole }) {
                       startIcon={<BuildIcon />}
                     >
                       Mantenimientos
+                    </Button>
+                  </NextLink>
+                </ListItem>
+                <ListItem component="div">
+                  <NextLink href="/reparaciones-externas" passHref>
+                    <Button
+                      className={
+                        currentRoute.startsWith('/reparaciones-externas') &&
+                        !currentRoute.includes('/registrar')
+                          ? 'active'
+                          : ''
+                      }
+                      disableRipple
+                      component="a"
+                      onClick={closeSidebar}
+                      startIcon={<BuildIcon />}
+                    >
+                      Reparaciones Externas
                     </Button>
                   </NextLink>
                 </ListItem>
@@ -945,7 +982,7 @@ function SidebarMenu({ userRole }) {
                     </NextLink>
                   </ListItem>
                 )}
-                               {userRole === 'ADMIN' && (
+                {userRole === 'ADMIN' && (
                   <ListItem component="div">
                     <NextLink href="/configuraciones" passHref>
                       <Button

@@ -57,11 +57,11 @@ export const useGetCustomerLevels = (fetcher) => {
 };
 
 export const useGetCustomerById = (fetcher, id) => {
-  const { data, error } = useSWR(
+  const { data, error, isLoading } = useSWR(
     id ? ROUTES.CUSTOMER_BY_ID_API.replace(':id', id) : null,
     fetcher
   );
-  return { customer: data?.data, customerByIdError: error };
+  return { customer: data?.data, customerByIdError: error, isLoadingCustomer: isLoading };
 };
 //
 // Cities
@@ -572,6 +572,45 @@ export const useGetSaleRepairById = (fetcher, id) => {
     saleRepairData: data?.data,
     saleRepairError: error,
     isLoadingSaleRepair: isLoading
+  };
+};
+
+// External Repairs
+export const useGetExternalRepairs = (fetcher, pending = true) => {
+  const { data, error, isLoading } = useSWR(
+    `${ROUTES.ALL_EXTERNAL_REPAIRS_API}${pending ? '' : '?pending=false'}`,
+    fetcher
+  );
+  return {
+    externalRepairsList: data?.data,
+    externalRepairsReminders: data?.reminders,
+    externalRepairsOverdueReturns: data?.overdueReturns,
+    externalRepairsError: error,
+    isLoadingExternalRepairs: isLoading
+  };
+};
+
+export const useGetRecolectadasReparacionExterna = (fetcher) => {
+  const { data, error, isLoading } = useSWR(
+    ROUTES.EXTERNAL_REPAIRS_RECOLECTADAS_API,
+    fetcher
+  );
+  return {
+    recolectadasReparacionExterna: data?.data,
+    recolectadasReparacionExternaError: error,
+    isLoadingRecolectadasReparacionExterna: isLoading
+  };
+};
+
+export const useGetExternalRepairById = (fetcher, id) => {
+  const { data, error, isLoading } = useSWR(
+    id ? ROUTES.EXTERNAL_REPAIR_BY_ID_API.replace(':id', id) : null,
+    fetcher
+  );
+  return {
+    externalRepairData: data?.data,
+    externalRepairError: error,
+    isLoadingExternalRepair: isLoading
   };
 };
 

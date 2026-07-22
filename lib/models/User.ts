@@ -6,6 +6,7 @@ export interface IUser extends Document {
   role: Schema.Types.ObjectId;
   isActive: boolean;
   isBlocked: boolean;
+  blockReason: string;
   password: string;
   startM: number;
   endM: number;
@@ -36,6 +37,12 @@ const UserSchema = new Schema<IUser>({
   isBlocked: {
     type: Boolean,
     default: false
+  },
+  // Human-readable reason shown when a user is blocked (e.g. why the office was
+  // blocked and how to avoid it). Cleared on unlock.
+  blockReason: {
+    type: String,
+    default: ''
   },
   password: {
     type: String,

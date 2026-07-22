@@ -34,7 +34,9 @@ const TYPE_LABELS = {
   CAMBIO_VENTA: 'Cambio de garantía',
   COBRANZA: 'Cobranza',
   ENTREGA_VENTA: 'Entrega de venta',
-  VUELTA_EXTRA: 'Vuelta extra'
+  VUELTA_EXTRA: 'Vuelta extra',
+  RECOLECCION_EXTERNA: 'Recolección (rep. externa)',
+  ENTREGA_EXTERNA: 'Entrega/Devolución (rep. externa)'
 };
 
 export default function ReassignVueltaModal({

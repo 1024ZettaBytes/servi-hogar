@@ -3,6 +3,7 @@ import mongoose, { Model, model, Schema } from 'mongoose';
 export interface IUsedInventory extends Document {
   mantainance: Schema.Types.ObjectId;
   saleRepair: Schema.Types.ObjectId;
+  externalRepair: Schema.Types.ObjectId;
   inventoryProduct: Schema.Types.ObjectId;
   qty: number;
   price: number;
@@ -19,6 +20,11 @@ const UsedInventorySchema = new Schema<IUsedInventory>({
   saleRepair: {
     type: Schema.Types.ObjectId,
     ref: 'sale_repairs',
+    default: null
+  },
+  externalRepair: {
+    type: Schema.Types.ObjectId,
+    ref: 'external_repairs',
     default: null
   },
   inventoryProduct: {
