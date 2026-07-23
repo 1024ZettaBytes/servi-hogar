@@ -453,7 +453,9 @@ const TablaVueltasOperador: FC<TablaVueltasOperadorProps> = ({
                         {sectorName || 'N/A'}
                       </Typography>
                       <Typography
-                        variant="body2" color="text.secondary" noWrap
+                        variant="body2"
+                        color="text.secondary"
+                        noWrap
                       >
                         {task.suburb && `${task.suburb}`}
                       </Typography>

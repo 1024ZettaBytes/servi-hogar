@@ -9,7 +9,8 @@ import {
 } from '../../../lib/data/Users';
 async function getUsersAPI(req, res) {
   try {
-    const allUsers = await getUsersData();
+    const { role } = req.query;
+    const allUsers = await getUsersData(role);
     res.status(200).json({ data: allUsers });
   } catch (e) {
     console.error(e);

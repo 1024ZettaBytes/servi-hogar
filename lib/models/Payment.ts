@@ -23,7 +23,9 @@ const PaymentSchema = new Schema<IPayment>({
   customer: {
     type: Schema.Types.ObjectId,
     ref: 'customers',
-    required: true
+    // Optional: EXTERNAL_REPAIR payments are for external clients that are not
+    // registered as customers, so they have no customer reference.
+    default: null
   },
   reason: { type: String, required: true },
   description: { type: String, required: true },

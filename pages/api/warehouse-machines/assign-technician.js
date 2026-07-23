@@ -8,7 +8,7 @@ export default async function handler(req, res) {
       const allowed = await validateUserPermissions(req, res, ['ADMIN', 'AUX']);
       if (!allowed) return;
 
-      const { warehouseMachineId, technicianId, warehouseId } = req.body;
+      const { warehouseMachineId, technicianId, warehouseId, isReAssigning } = req.body;
 
       if (!warehouseMachineId || !technicianId) {
         return res.status(400).json({ error: 'Faltan parámetros requeridos' });
@@ -18,6 +18,7 @@ export default async function handler(req, res) {
         warehouseMachineId,
         technicianId,
         warehouseId: warehouseId || null,
+        isReAssigning,
         lastUpdatedBy: userId
       });
       return res.status(200).json({

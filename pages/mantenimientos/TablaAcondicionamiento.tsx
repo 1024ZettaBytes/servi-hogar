@@ -32,6 +32,7 @@ import {
   Select,
   MenuItem
 } from '@mui/material';
+import EditIcon from '@mui/icons-material/Edit';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import PhotoCameraIcon from '@mui/icons-material/PhotoCamera';
 import { useSnackbar } from 'notistack';
@@ -41,6 +42,7 @@ import {
   WAREHOUSE_MACHINE_ORIGIN_LABELS,
   WAREHOUSE_ORIGIN_COLORS
 } from '../../lib/consts/OBJ_CONTS';
+import AssignTechnicianModal from '@/components/AssignTechnicianModal';
 
 const applyPagination = (list: any[], page: number, limit: number): any[] => {
   return list.slice(page * limit, page * limit + limit);
@@ -95,6 +97,7 @@ interface TablaAcondicionamientoProps {
   listData: any[];
   userRole: string;
   warehousesList: any[];
+  techniciansList?: any[];
 }
 
 const PHOTO_LABELS = ['Frente', 'Tablero', 'Etiqueta', 'Debajo'];
@@ -102,25 +105,46 @@ const PHOTO_LABELS = ['Frente', 'Tablero', 'Etiqueta', 'Debajo'];
 const TablaAcondicionamiento: FC<TablaAcondicionamientoProps> = ({
   listData,
   userRole,
-  warehousesList
+  warehousesList,
+  techniciansList = []
 }) => {
+  const isAdminOrAux = ['ADMIN', 'AUX'].includes(userRole);
   const { enqueueSnackbar } = useSnackbar();
   const theme = useTheme();
   const [page, setPage] = useState<number>(0);
   const [limit, setLimit] = useState<number>(10);
-
   const [completeModalOpen, setCompleteModalOpen] = useState(false);
+
   const [selectedMachine, setSelectedMachine] = useState<any>(null);
+
+  const [reassignModalOpen, setReassignModalOpen] = useState(false);
+
   const [photos, setPhotos] = useState<{ [key: string]: File | null }>({
     photo1: null,
     photo2: null,
     photo3: null,
     photo4: null
   });
-  const [photoPreviews, setPhotoPreviews] = useState<{ [key: string]: string }>({});
+  const [photoPreviews, setPhotoPreviews] = useState<{ [key: string]: string }>(
+    {}
+  );
   const [selectedWarehouse, setSelectedWarehouse] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
 
+  const handleCloseAssign = (assigned, msg = null) => {
+    
+    if (msg) {
+      enqueueSnackbar(msg, {
+        variant: assigned ? 'success' : 'error',
+        anchorOrigin: { vertical: 'top', horizontal: 'center' },
+        autoHideDuration: 3000
+      });
+    }
+    if(assigned) {
+      setReassignModalOpen(false);
+      setSelectedMachine(null);
+    }
+  };
   const handlePageChange = (_event: any, newPage: number): void => {
     setPage(newPage);
   };
@@ -211,7 +235,7 @@ const TablaAcondicionamiento: FC<TablaAcondicionamientoProps> = ({
                 <TableCell>Marca</TableCell>
                 <TableCell>N. Serie</TableCell>
                 <TableCell>Origen</TableCell>
-                {['ADMIN', 'AUX'].includes(userRole) && (
+                {isAdminOrAux && (
                   <TableCell>Técnico</TableCell>
                 )}
                 <TableCell>Fotos ingreso</TableCell>
@@ -223,7 +247,12 @@ const TablaAcondicionamiento: FC<TablaAcondicionamientoProps> = ({
               {paginatedMachines.map((machine) => (
                 <TableRow hover key={machine._id}>
                   <TableCell>
-                    <Typography variant="body1" fontWeight="bold" color="text.primary" noWrap>
+                    <Typography
+                      variant="body1"
+                      fontWeight="bold"
+                      color="text.primary"
+                      noWrap
+                    >
                       #{machine.entryNumber}
                     </Typography>
                   </TableCell>
@@ -238,11 +267,35 @@ const TablaAcondicionamiento: FC<TablaAcondicionamientoProps> = ({
                     </Typography>
                   </TableCell>
                   <TableCell>{getOriginChip(machine.origin)}</TableCell>
-                  {['ADMIN', 'AUX'].includes(userRole) && (
+                  {isAdminOrAux && (
                     <TableCell>
-                      <Typography variant="body2" color="text.primary" noWrap>
-                        {machine.assignedTechnician?.name || 'Sin asignar'}
-                      </Typography>
+                      <Box
+                        sx={{ display: 'flex', alignItems: 'center', gap: 1 }}
+                      >
+                        <Typography variant="body2" color="text.primary" noWrap>
+                          {machine.assignedTechnician?.name || 'Sin asignar'}
+                        </Typography>
+                        <Tooltip
+                          title={
+                            machine.assignedTechnician
+                              ? 'Cambiar técnico'
+                              : 'Asignar técnico'
+                          }
+                          arrow
+                        >
+                          <IconButton
+                            size="small"
+                            color="primary"
+                            onClick={() => {
+                              console.log('Reassigning machine:', machine);
+                              setSelectedMachine(machine);
+                              setReassignModalOpen(true);
+                            }}
+                          >
+                            <EditIcon fontSize="small" />
+                          </IconButton>
+                        </Tooltip>
+                      </Box>
                     </TableCell>
                   )}
                   <TableCell>
@@ -259,9 +312,7 @@ const TablaAcondicionamiento: FC<TablaAcondicionamientoProps> = ({
                       </AvatarGroup>
                     )}
                   </TableCell>
-                  <TableCell>
-                    {getTimerChip(machine.techAssignedAt)}
-                  </TableCell>
+                  <TableCell>{getTimerChip(machine.techAssignedAt)}</TableCell>
                   <TableCell align="right">
                     <Tooltip title="Completar acondicionamiento" arrow>
                       <IconButton
@@ -284,10 +335,14 @@ const TablaAcondicionamiento: FC<TablaAcondicionamientoProps> = ({
               {paginatedMachines.length === 0 && (
                 <TableRow>
                   <TableCell
-                    colSpan={['ADMIN', 'AUX'].includes(userRole) ? 8 : 7}
+                    colSpan={isAdminOrAux ? 8 : 7}
                     align="center"
                   >
-                    <Typography variant="body2" color="text.secondary" sx={{ py: 3 }}>
+                    <Typography
+                      variant="body2"
+                      color="text.secondary"
+                      sx={{ py: 3 }}
+                    >
                       No hay máquinas en acondicionamiento
                     </Typography>
                   </TableCell>
@@ -309,7 +364,15 @@ const TablaAcondicionamiento: FC<TablaAcondicionamientoProps> = ({
           />
         </Box>
       </Card>
-
+      {reassignModalOpen && selectedMachine && (
+        <AssignTechnicianModal
+          open={reassignModalOpen}
+          handleOnClose={handleCloseAssign}
+          machine={selectedMachine}
+          techniciansList={techniciansList}
+          isReAssigning={true}
+        />
+      )}
       {/* Complete conditioning modal */}
       {completeModalOpen && selectedMachine && (
         <Dialog
@@ -321,8 +384,11 @@ const TablaAcondicionamiento: FC<TablaAcondicionamientoProps> = ({
           <DialogTitle>Completar acondicionamiento</DialogTitle>
           <DialogContent>
             <Alert severity="info" sx={{ mb: 2, mt: 1 }}>
-              Máquina <strong>#{selectedMachine.entryNumber}</strong> — {selectedMachine.brand}
-              {selectedMachine.serialNumber ? ` (Serie: ${selectedMachine.serialNumber})` : ''}
+              Máquina <strong>#{selectedMachine.entryNumber}</strong> —{' '}
+              {selectedMachine.brand}
+              {selectedMachine.serialNumber
+                ? ` (Serie: ${selectedMachine.serialNumber})`
+                : ''}
             </Alert>
             <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
               Suba las 4 fotos del equipo acondicionado. Estas fotos se usarán
@@ -382,18 +448,18 @@ const TablaAcondicionamiento: FC<TablaAcondicionamientoProps> = ({
                       ) : (
                         <>
                           <PhotoCameraIcon
-                            sx={{ fontSize: 32, color: theme.palette.grey[400], mb: 0.5 }}
+                            sx={{
+                              fontSize: 32,
+                              color: theme.palette.grey[400],
+                              mb: 0.5
+                            }}
                           />
                           <Typography variant="caption" color="text.secondary">
                             {label} *
                           </Typography>
                         </>
                       )}
-                      <Button
-                        component="label"
-                        size="small"
-                        sx={{ mt: 0.5 }}
-                      >
+                      <Button component="label" size="small" sx={{ mt: 0.5 }}>
                         {photos[field] ? 'Cambiar' : 'Subir'}
                         <input
                           type="file"
@@ -421,7 +487,13 @@ const TablaAcondicionamiento: FC<TablaAcondicionamientoProps> = ({
               color="success"
               onClick={handleSubmitComplete}
               disabled={!canSubmit || isSubmitting}
-              startIcon={isSubmitting ? <CircularProgress size={20} /> : <CheckCircleIcon />}
+              startIcon={
+                isSubmitting ? (
+                  <CircularProgress size={20} />
+                ) : (
+                  <CheckCircleIcon />
+                )
+              }
             >
               {isSubmitting ? 'Completando...' : 'Completar'}
             </Button>
@@ -435,7 +507,9 @@ const TablaAcondicionamiento: FC<TablaAcondicionamientoProps> = ({
 TablaAcondicionamiento.propTypes = {
   listData: PropTypes.array.isRequired,
   userRole: PropTypes.string.isRequired,
-  warehousesList: PropTypes.array.isRequired
+  warehousesList: PropTypes.array.isRequired,
+  techniciansList: PropTypes.array
 };
 
 export default TablaAcondicionamiento;
+

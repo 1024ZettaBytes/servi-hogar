@@ -15,6 +15,7 @@ interface UserBlockedModalProps {
 export default function UserBlockedModal({ open }: UserBlockedModalProps) {
   const { data: session } = useSession();
   const userRole = (session?.user as any)?.role;
+  const blockReason = (session?.user as any)?.blockReason;
 
   const handleLogout = async () => {
     await signOut({ callbackUrl: '/login' });
@@ -39,7 +40,15 @@ export default function UserBlockedModal({ open }: UserBlockedModalProps) {
         <Alert severity="error" sx={{ mb: 2 }}>
           Tu cuenta ha sido bloqueada temporalmente
         </Alert>
-        {userRole === 'ADMIN' ? (
+        {blockReason ? (
+          <>
+            <DialogContentText>{blockReason}</DialogContentText>
+            <DialogContentText sx={{ mt: 2 }}>
+              Contacta a un Super Usuario para que te desbloquee una vez resuelto
+              el pendiente.
+            </DialogContentText>
+          </>
+        ) : userRole === 'ADMIN' ? (
           <>
             <DialogContentText>
               Has sido bloqueado debido a que existen equipos en investigación

@@ -26,13 +26,15 @@ interface AssignTechnicianModalProps {
   handleOnClose: (assigned: boolean, msg?: string) => void;
   machine: any;
   techniciansList: any[];
+  isReAssigning?: boolean;
 }
 
 const AssignTechnicianModal: FC<AssignTechnicianModalProps> = ({
   open,
   handleOnClose,
   machine,
-  techniciansList
+  techniciansList,
+  isReAssigning= false
 }) => {
   const [selectedTechnician, setSelectedTechnician] = useState('');
   const [selectedWarehouse, setSelectedWarehouse] = useState('');
@@ -41,9 +43,9 @@ const AssignTechnicianModal: FC<AssignTechnicianModalProps> = ({
   const { warehousesList } = useGetAllWarehousesOverview(getFetcher);
 
   const handleSubmit = async () => {
-    if (!selectedTechnician || !selectedWarehouse) return;
+    if (!selectedTechnician || (!selectedWarehouse && !isReAssigning)) return;
     setIsSubmitting(true);
-    const result = await assignTechnician(machine._id, selectedTechnician, selectedWarehouse);
+    const result = await assignTechnician(machine._id, selectedTechnician, selectedWarehouse, isReAssigning);
     setIsSubmitting(false);
     if (!result.error) {
       handleOnClose(true, result.msg);
@@ -79,6 +81,7 @@ const AssignTechnicianModal: FC<AssignTechnicianModalProps> = ({
               ))}
             </Select>
           </FormControl>
+          { !isReAssigning && 
           <FormControl fullWidth required sx={{ mt: 2 }}>
             <InputLabel>Ubicación destino</InputLabel>
             <Select
@@ -92,7 +95,7 @@ const AssignTechnicianModal: FC<AssignTechnicianModalProps> = ({
                 </MenuItem>
               ))}
             </Select>
-          </FormControl>
+          </FormControl>}
         </Box>
       </DialogContent>
       <DialogActions>
@@ -105,7 +108,7 @@ const AssignTechnicianModal: FC<AssignTechnicianModalProps> = ({
         <Button
           variant="contained"
           onClick={handleSubmit}
-          disabled={!selectedTechnician || !selectedWarehouse || isSubmitting}
+          disabled={!selectedTechnician || (!selectedWarehouse && !isReAssigning) || isSubmitting}
           startIcon={isSubmitting ? <CircularProgress size={20} /> : null}
         >
           {isSubmitting ? 'Asignando...' : 'Asignar'}
@@ -119,7 +122,8 @@ AssignTechnicianModal.propTypes = {
   open: PropTypes.bool.isRequired,
   handleOnClose: PropTypes.func.isRequired,
   machine: PropTypes.object.isRequired,
-  techniciansList: PropTypes.array.isRequired
+  techniciansList: PropTypes.array.isRequired,
+  isReAssigning: PropTypes.bool,
 };
 
 export default AssignTechnicianModal;

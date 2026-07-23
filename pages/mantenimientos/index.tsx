@@ -15,7 +15,7 @@ import NextBreadcrumbs from "@/components/Shared/BreadCrums";
 import TablaMant from "./TablaMant";
 import TablaMantPendientes from "./TablaMantPendientes";
 import TablaAcondicionamiento from "./TablaAcondicionamiento";
-import { getFetcher, useGetMantainances, useGetPendingMantainances, useGetPendingSaleRepairs, useGetSaleRepairs, useGetWarehouseConditioning, useGetAllWarehousesOverview, useGetCollectedMachines, useGetNextMachinesToLoad, useGetStaleMachinesOnVehicle, useGetPendingReturnMachines } from "pages/api/useRequest";
+import { getFetcher, useGetMantainances, useGetPendingMantainances, useGetPendingSaleRepairs, useGetSaleRepairs, useGetWarehouseConditioning, useGetAllWarehousesOverview, useGetCollectedMachines, useGetNextMachinesToLoad, useGetStaleMachinesOnVehicle, useGetPendingReturnMachines, useGetUsers } from "pages/api/useRequest";
 import { unloadStaleMachine, confirmMachineReturn } from "../../lib/client/machinesFetch";
 import { useSnackbar } from "notistack";
 import { formatTZDate } from "lib/client/utils";
@@ -27,12 +27,17 @@ function Mantenimientos({ session }) {
   const [unloadingId, setUnloadingId] = useState<string | null>(null);
   const { enqueueSnackbar } = useSnackbar();
 
+  const isAdminOrAux = ['ADMIN', 'AUX'].includes(user?.role);
+  const { userList } = useGetUsers(isAdminOrAux ? getFetcher : null, 'TEC');
+  const techniciansList = (userList || []).filter((u) => u.isActive);
+
   const { pendingMantData, pendingMantError } = useGetPendingMantainances(getFetcher);
   const { mantData, mantError } = useGetMantainances(getFetcher);
   const { pendingSaleRepairsList, pendingSaleRepairsError } = useGetPendingSaleRepairs(getFetcher);
   const { saleRepairsData, saleRepairsError } = useGetSaleRepairs(getFetcher);
   const { conditioningList, conditioningError, isLoadingConditioning } = useGetWarehouseConditioning(getFetcher);
   const { warehousesList } = useGetAllWarehousesOverview(getFetcher);
+
 
   const isTec = user?.role === 'TEC';
   const { collectedMachines } = useGetCollectedMachines(isTec ? getFetcher : null);
@@ -347,6 +352,7 @@ function Mantenimientos({ session }) {
                     <TablaMantPendientes
                       listData={combinedPendingList}
                       userRole={user?.role}
+                      techniciansList={techniciansList}
                       isBlocked={hasOverdueCollected || (isTec && hasStaleMachines) || hasOverduePendingReturns}
                     />
                   </Card>
@@ -389,10 +395,12 @@ function Mantenimientos({ session }) {
                     listData={conditioningList || []}
                     userRole={user?.role}
                     warehousesList={warehousesList || []}
+                    techniciansList={techniciansList}
                   />
                 )}
               </>
             )}
+
           </Grid>
         </Grid>
       </Container>

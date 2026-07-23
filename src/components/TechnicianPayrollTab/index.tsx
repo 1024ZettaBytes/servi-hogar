@@ -208,6 +208,17 @@ function TechnicianPayrollTab({ weekStart, weekEnd, userRole }: TechnicianPayrol
                     </Typography>
                   </Card>
                 </Grid>
+                <Grid item xs={12} sm={6} md={2.4}>
+                  <Card sx={{ p: 2, backgroundColor: '#ede7f6' }}>
+                    <Typography variant="subtitle2" color="text.secondary">Reparaciones externas</Typography>
+                    <Typography variant="h5" fontWeight="bold">
+                      ${techReport.externalRepairsPayment?.toFixed(2) || '0.00'}
+                    </Typography>
+                    <Typography variant="caption" color="text.secondary">
+                      {techReport.externalRepairsCount || 0} × $200
+                    </Typography>
+                  </Card>
+                </Grid>
 
                 {/* Punctuality bonus */}
                 <Grid item xs={12} sm={6} md={2.4}>

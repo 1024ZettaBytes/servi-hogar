@@ -1,5 +1,7 @@
 # Project Guidelines — Servi-Hogar
 
+> Generated from `.github/copilot-instructions.md`. Keep both in sync when conventions change.
+
 ## Overview
 
 Appliance rental management system for a Mexican rental business. Tracks machines (washers/dryers), customers, rents, deliveries, pickups, payments, maintenance, sales, and technician workflows.
@@ -8,7 +10,7 @@ Appliance rental management system for a Mexican rental business. Tracks machine
 
 - **Next.js 12** (Pages Router) · **React 17** · **TypeScript 4.8** (mixed JS/TS, `strict: false`)
 - **MUI 5** with Emotion CSS-in-JS, Spanish locale (`esES`)
-- **MongoDB** via Mongoose 6 (47 models in `lib/models/`)
+- **MongoDB** via Mongoose 6 (models in `lib/models/`)
 - **next-auth** (Credentials provider, JWT sessions, role-based access)
 - **SWR** for client-side data fetching/caching
 - **Axios** with global interceptors (`lib/client/axiosConfig.js`)
@@ -40,7 +42,7 @@ lib/
   consts/            # Enum-like constants (MACHINE_STATUS_LIST, PAYMENT_REASONS, etc.)
   auth.js            # validateServerSideSession(), getUserId(), validateUserPermissions()
   db.js              # connectToDatabase(), isConnected()
-  cloud.js           # Google Cloud Storage operations
+  cloud.js           # Google Cloud Storage operations (uploadFile)
 src/
   components/        # Feature-organized MUI components (modals, tables, forms)
   layouts/           # SidebarLayout (role-based nav), BaseLayout
@@ -59,20 +61,30 @@ types/               # TS declarations (next-auth.d.ts)
 
 ### API Routes
 - Pattern: `pages/api/[domain]/[action].js` (plain JS)
-- Always disable bodyParser: `export const config = { api: { bodyParser: false } }`
-- Use `formidable` for multipart/form-data parsing
+- For multipart uploads disable bodyParser: `export const config = { api: { bodyParser: false } }`
+- Use `formidable` for multipart/form-data parsing (field/file values may be arrays — normalize with a `one()` helper)
 - Validate permissions: `validateUserPermissions(req, res, ["ADMIN", "AUX"])`
 - Response shape: `{ data, msg, errorMsg }`
 
 ### Data Layer (`lib/data/`)
 - One file per domain (Machines.js, Rents.js, Customers.js, etc.)
 - Always check DB connection: `if (!isConnected()) await connectToDatabase()`
+- Multi-write operations run in a Mongoose transaction (`session.startTransaction()` / `commitTransaction()` / `abortTransaction()` + `endSession()` in `finally`/catch)
 - Use Mongoose aggregation pipelines + `.populate()` for complex queries
 
 ### Client Fetch (`lib/client/`)
-- One `*Fetch.js` per domain wrapping axios/fetch calls
+- One `*Fetch.js` per domain
+- **Use `axios` for HTTP calls, never `fetch`** (global interceptors live in `axiosConfig.js`)
 - Return `{ error, msg }` on failure
 - Trigger SWR revalidation via `refreshData()` after mutations
+
+### Image / File uploads
+> Two rules that MUST be followed for every flow that captures photos or files.
+
+- **Client-side compression is mandatory before upload.** Compress each image with `compressImage()` from `lib/client/utils` before appending it to the `FormData`, exactly as done in existing flows (e.g. `pages/almacen/registrar-compra`, `pages/reparaciones-externas/registrar`). Never send raw camera-sized files.
+- **Upload to Google Cloud asynchronously / in parallel.** In the data layer, upload multiple files concurrently with `Promise.all(...)` over `uploadFile(filepath, fileName)` — do **not** `await` uploads one-by-one in a loop. Prefer uploading **before** opening a DB transaction so the transaction is not held open during network I/O. Reference: `createExternalRepairData` in `lib/data/ExternalRepairs.js`, rent-delivery uploads in `lib/data/Deliveries.js`.
+- Required photos must be validated on **both** the client (block submit) and the server (throw before upload).
+- `uploadFile(filePath, fileName)` in `lib/cloud.js` uploads to GCS, makes the object public, and returns its public URL.
 
 ### Components
 - Feature-organized modals under `src/components/` (e.g., `AddMachineModal/`)
@@ -80,13 +92,13 @@ types/               # TS declarations (next-auth.d.ts)
 - Path alias: `@/*` → `./src/*`, `@/public/*` → `./public/*`
 
 ### Loading states
-- Every page/table/section that fetches data (SWR) MUST render a loading indicator while `isLoading` is true — never show an empty table or blank area during fetch. Follow the existing pattern: a centered MUI `CircularProgress` (`<Box display="flex" justifyContent="center" py={4}><CircularProgress /></Box>`) or `Skeleton` inside the card, plus a distinct empty-state only when `!isLoading && data.length === 0`. Reference: `pages/recolectadas/*`, `pages/mantenimientos/index.tsx`.
+- Every page/table/section that fetches data with SWR MUST show a loading indicator while `isLoading` is true — never render an empty table or blank area during fetch. Follow the existing pattern: a centered MUI `CircularProgress` (e.g. `<Box display="flex" justifyContent="center" py={4}><CircularProgress /></Box>`) or `Skeleton` inside the card, and a distinct empty-state message only when `!isLoading && data.length === 0`. Reference: `pages/recolectadas/*` tables, `pages/mantenimientos/index.tsx`.
 
 ### Auth & Roles
-- Roles: `ADMIN`, `AUX`, `TEC` (technician), and others
+- Roles: `ADMIN`, `AUX` (office), `TEC` (technician), `OPE` (operator/route/driver), `SUB`, `PARTNER`
 - Technicians require tools assigned before login
-- User states: `wasRemoved`, `isBlocked`, `isSuperUser`
-- Server-side: `validateServerSideSession()` in `getServerSideProps`
+- User states: `isActive`, `isBlocked`, `isSuperUser`
+- Server-side: `validateServerSideSession()` in `getServerSideProps`; redirect by role when a page is role-restricted
 - Client-side: session from `next-auth/react`
 
 ### Models
@@ -97,3 +109,8 @@ types/               # TS declarations (next-auth.d.ts)
 ### Constants
 - Status enums in `lib/consts/OBJ_CONTS.js` (e.g., `MACHINE_STATUS_LIST`)
 - API URLs in `lib/consts/API_URL_CONST.js`
+
+## Verification
+
+- Typecheck the whole project with `node_modules/.bin/tsc --noEmit` (expects 0 errors).
+- `.js` files under `lib/` and `pages/api/` are ESM — parse-check with the project's Babel preset (`next/babel`) rather than `node --check`.
