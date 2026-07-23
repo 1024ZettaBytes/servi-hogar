@@ -50,6 +50,7 @@ export interface IExternalRepair extends Document {
   // Pickup (recolección)
   pickupAssignedTo: Schema.Types.ObjectId;
   pickupScheduledDate: Date;
+  scheduledTime: Date;
   pickupCompletedAt: Date;
   pickupConditionNote: string;
   // Physical location
@@ -124,6 +125,7 @@ const ExternalRepairSchema = new Schema<IExternalRepair>({
     default: null
   },
   pickupScheduledDate: { type: Date, default: null },
+  scheduledTime: { type: Date, default: null },
   pickupCompletedAt: { type: Date, default: null },
   pickupConditionNote: { type: String, default: '' },
   currentWarehouse: {

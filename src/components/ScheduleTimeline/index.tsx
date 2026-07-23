@@ -86,13 +86,15 @@ const ScheduleTimeline: FC<ScheduleTimelineProps> = ({ selectedDate }) => {
       case 'ENTREGA_VENTA':
         return 'primary';
       case 'CAMBIO':
+      case 'RECOLECCION_EXTERNA':
         return 'warning';
       case 'RECOLECCION':
-        return 'error';
       case 'RECOLECCION_VENTA':
         return 'error';
       case 'COBRANZA':
         return 'info';
+      case 'ENTREGA_EXTERNA':
+        return 'success';
       case 'VUELTA_EXTRA':
         return 'secondary';
       default:
@@ -106,13 +108,15 @@ const ScheduleTimeline: FC<ScheduleTimelineProps> = ({ selectedDate }) => {
       case 'ENTREGA_VENTA':
         return alpha(theme.palette.primary.main, 0.15);
       case 'CAMBIO':
+      case 'RECOLECCION_EXTERNA':
         return alpha(theme.palette.warning.main, 0.15);
       case 'RECOLECCION':
-        return alpha(theme.palette.error.main, 0.15);
       case 'RECOLECCION_VENTA':
         return alpha(theme.palette.error.main, 0.15);
       case 'COBRANZA':
         return alpha(theme.palette.info.main, 0.15);
+      case 'ENTREGA_EXTERNA':
+        return alpha(theme.palette.success.main, 0.15);
       case 'VUELTA_EXTRA':
         return alpha(theme.palette.secondary.main, 0.15);
       default:
@@ -140,6 +144,10 @@ const ScheduleTimeline: FC<ScheduleTimelineProps> = ({ selectedDate }) => {
         return 'CAMBIO VENTA';
       case 'VUELTA_EXTRA':
         return 'VUELTA EXTRA';
+      case 'RECOLECCION_EXTERNA':
+        return 'RECOL. EXTERNA';
+      case 'ENTREGA_EXTERNA':
+        return 'ENTREGA EXTERNA';
       default:
         return type;
     }

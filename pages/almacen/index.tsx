@@ -66,7 +66,7 @@ function Almacen({ session }) {
 
   const { warehouseSummary } = useGetWarehouseSummary(getFetcher);
 
-  const { userList } = useGetUsers(getFetcher);
+  const { userList } = useGetUsers(getFetcher, 'TEC');
   const techniciansList = (userList || []).filter(
     (u) => u.role?.id === 'TEC' && u.isActive
   );

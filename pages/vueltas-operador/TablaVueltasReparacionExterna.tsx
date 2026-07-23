@@ -13,11 +13,16 @@ import {
   Button,
   Chip,
   Box,
-  CircularProgress
+  CircularProgress,
+  IconButton,
+  Tooltip,
+  Typography
 } from '@mui/material';
 import SwapHorizIcon from '@mui/icons-material/SwapHoriz';
+import AccessTimeIcon from '@mui/icons-material/AccessTime';
 import { useSnackbar } from 'notistack';
 import ReassignVueltaModal from '@/components/ReassignVueltaModal';
+import ScheduleTimePicker from '@/components/ScheduleTimePicker';
 import { formatTZDate } from 'lib/client/utils';
 import { getFetcher, useGetExternalRepairs } from '../../pages/api/useRequest';
 
@@ -37,7 +42,8 @@ export function buildVueltas(list) {
         color: 'secondary',
         totalNumber: r.totalNumber,
         customerName: r.customerName,
-        operator: r.pickupAssignedTo
+        operator: r.pickupAssignedTo,
+        scheduledTime: r.scheduledTime
       });
     } else if (r.pickupCompletedAt) {
       completed.push({
@@ -65,7 +71,8 @@ export function buildVueltas(list) {
         color: r.status === 'NO_AUTORIZADA' ? 'error' : 'primary',
         totalNumber: r.totalNumber,
         customerName: r.customerName,
-        operator: r.deliveryAssignedTo
+        operator: r.deliveryAssignedTo,
+        scheduledTime: r.scheduledTime
       });
     } else if (r.deliveredAt) {
       completed.push({
@@ -83,7 +90,7 @@ export function buildVueltas(list) {
   return { pending, completed };
 }
 
-function VueltasTable({ vueltas, canReassign, onReassign, showDate = false }) {
+function VueltasTable({ vueltas, canReassign, onReassign, onSchedule, showDate = false }) {
   const router = useRouter();
   return (
     <TableContainer>
@@ -94,6 +101,7 @@ function VueltasTable({ vueltas, canReassign, onReassign, showDate = false }) {
             <TableCell>Folio</TableCell>
             <TableCell>Cliente</TableCell>
             <TableCell>Operador</TableCell>
+            {!showDate && <TableCell>Programada</TableCell>}
             {showDate && <TableCell>Fecha</TableCell>}
             <TableCell align="right">Acciones</TableCell>
           </TableRow>
@@ -107,6 +115,26 @@ function VueltasTable({ vueltas, canReassign, onReassign, showDate = false }) {
               <TableCell>#{v.totalNumber}</TableCell>
               <TableCell>{v.customerName}</TableCell>
               <TableCell>{v.operator?.name || '—'}</TableCell>
+              {!showDate && (
+                <TableCell>
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                    <Typography variant="body1" fontWeight="bold">
+                      {v.scheduledTime
+                        ? formatTZDate(new Date(v.scheduledTime), 'HH:mm')
+                        : 'Sin programar'}
+                    </Typography>
+                    <Tooltip title={v.scheduledTime ? 'Cambiar hora' : 'Programar hora'} arrow>
+                      <IconButton
+                        size="small"
+                        color="secondary"
+                        onClick={() => onSchedule(v)}
+                      >
+                        <AccessTimeIcon fontSize="small" />
+                      </IconButton>
+                    </Tooltip>
+                  </Box>
+                </TableCell>
+              )}
               {showDate && (
                 <TableCell>
                   {v.completedAt
@@ -148,6 +176,8 @@ function TablaVueltasReparacionExterna({ userRole, selectedDate }) {
     isLoadingExternalRepairs: isLoadingFinalized
   } = useGetExternalRepairs(getFetcher, false);
   const [reassignTask, setReassignTask] = useState<any>(null);
+  const [scheduleModalOpen, setScheduleModalOpen] = useState(false);
+  const [taskToSchedule, setTaskToSchedule] = useState<any>(null);
 
   const canReassign = ['ADMIN', 'AUX'].includes(userRole);
 
@@ -200,6 +230,11 @@ function TablaVueltasReparacionExterna({ userRole, selectedDate }) {
       operator: v.operator
     });
 
+  const onSchedule = (v) => {
+    setTaskToSchedule(v);
+    setScheduleModalOpen(true);
+  };
+
   return (
     <>
       {pending.length > 0 && (
@@ -210,6 +245,7 @@ function TablaVueltasReparacionExterna({ userRole, selectedDate }) {
             vueltas={pending}
             canReassign={canReassign}
             onReassign={onReassign}
+            onSchedule={onSchedule}
           />
         </Card>
       )}
@@ -222,6 +258,7 @@ function TablaVueltasReparacionExterna({ userRole, selectedDate }) {
             vueltas={completedForDay}
             canReassign={false}
             onReassign={onReassign}
+            onSchedule={onSchedule}
             showDate
           />
         </Card>
@@ -234,8 +271,30 @@ function TablaVueltasReparacionExterna({ userRole, selectedDate }) {
           handleOnClose={handleCloseReassign}
         />
       )}
+
+      {scheduleModalOpen && taskToSchedule && (
+        <ScheduleTimePicker
+          open={scheduleModalOpen}
+          onClose={() => {
+            setScheduleModalOpen(false);
+            setTaskToSchedule(null);
+          }}
+          taskId={taskToSchedule._id}
+          taskType={taskToSchedule.type}
+          currentScheduledTime={taskToSchedule.scheduledTime}
+          onScheduleSaved={() => {
+            enqueueSnackbar('Hora programada correctamente', {
+              variant: 'success',
+              anchorOrigin: { vertical: 'top', horizontal: 'center' },
+              autoHideDuration: 2000
+            });
+          }}
+          selectedDate={selectedDate || new Date()}
+        />
+      )}
     </>
   );
 }
 
 export default TablaVueltasReparacionExterna;
+

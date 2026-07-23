@@ -26,6 +26,22 @@ import DoNotDisturbOnOutlinedIcon from '@mui/icons-material/DoNotDisturbOnOutlin
 import PendingActionsIcon from '@mui/icons-material/PendingActions';
 import DoneOutlineIcon from '@mui/icons-material/DoneOutline';
 
+import EditIcon from '@mui/icons-material/Edit';
+import {
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  Button,
+  FormControl,
+  InputLabel,
+  Select,
+  MenuItem,
+  CircularProgress,
+  Alert
+} from '@mui/material';
+import { useSnackbar } from 'notistack';
+import { reassignMantTechnician } from '../../lib/client/mantainanacesFetch';
 import NextLink from 'next/link';
 
 export const getStatusLabel = (status) => {
@@ -75,6 +91,7 @@ interface TablaMantPendientesProps {
   className?: string;
   listData: any[];
   userRole: string;
+  techniciansList?: any[];
   isBlocked?: boolean;
 }
 
@@ -89,10 +106,16 @@ const applyPagination = (
 const TablaMantPendientes: FC<TablaMantPendientesProps> = ({
   listData,
   userRole,
+  techniciansList = [],
   isBlocked = false
 }) => {
+  const { enqueueSnackbar } = useSnackbar();
   const [page, setPage] = useState<number>(0);
   const [limit, setLimit] = useState<number>(30);
+  const [reassignModalOpen, setReassignModalOpen] = useState(false);
+  const [selectedMant, setSelectedMant] = useState<any>(null);
+  const [selectedTechnician, setSelectedTechnician] = useState<string>('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handlePageChange = (_event: any, newPage: number): void => {
     setPage(newPage);
@@ -102,10 +125,40 @@ const TablaMantPendientes: FC<TablaMantPendientesProps> = ({
     setLimit(parseInt(event.target.value));
   };
 
+  const handleOpenReassignModal = (mant: any) => {
+    setSelectedMant(mant);
+    setSelectedTechnician(mant?.takenBy?._id || '');
+    setReassignModalOpen(true);
+  };
+
+  const handleCloseReassignModal = () => {
+    setReassignModalOpen(false);
+    setSelectedMant(null);
+    setSelectedTechnician('');
+  };
+
+  const handleSubmitReassign = async () => {
+    if (!selectedMant || !selectedTechnician) return;
+    setIsSubmitting(true);
+    const result = await reassignMantTechnician({
+      mantId: selectedMant._id,
+      technicianId: selectedTechnician,
+      type: selectedMant.type
+    });
+    setIsSubmitting(false);
+    if (!result.error) {
+      enqueueSnackbar(result.msg, { variant: 'success' });
+      handleCloseReassignModal();
+    } else {
+      enqueueSnackbar(result.msg, { variant: 'error' });
+    }
+  };
+
   const paginatedMants = applyPagination(listData, page, limit);
 
   const theme = useTheme();
   const isAdmin = userRole === 'ADMIN';
+  const isAdminOrAux = ['ADMIN', 'AUX'].includes(userRole);
   const canComplete = !isBlocked && (isAdmin || !listData.some((m) => m.daysSinceCreate >= 3));
   return (
     <>
@@ -128,7 +181,7 @@ const TablaMantPendientes: FC<TablaMantPendientesProps> = ({
                 <TableCell align="center">Equipo</TableCell>
                 <TableCell align="center">Estado</TableCell>
                 <TableCell align="center">Días Transcurridos</TableCell>
-                {isAdmin && <TableCell align="center">Técnico</TableCell>}
+                {isAdminOrAux && <TableCell align="center">Técnico</TableCell>}
                 <TableCell align="center"></TableCell>
               </TableRow>
             </TableHead>
@@ -177,9 +230,22 @@ const TablaMantPendientes: FC<TablaMantPendientesProps> = ({
                     <TableCell align="center">
                       {mant?.daysSinceCreate}
                     </TableCell>
-                    {isAdmin && (
+                    {isAdminOrAux && (
                       <TableCell align="center">
-                        {mant?.takenBy?.name || 'Sin asignar'}
+                        <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 1 }}>
+                          <Typography variant="body2" color="text.primary" noWrap>
+                            {mant?.takenBy?.name || 'Sin asignar'}
+                          </Typography>
+                          <Tooltip title={mant?.takenBy ? 'Cambiar técnico' : 'Asignar técnico'} arrow>
+                            <IconButton
+                              size="small"
+                              color="primary"
+                              onClick={() => handleOpenReassignModal(mant)}
+                            >
+                              <EditIcon fontSize="small" />
+                            </IconButton>
+                          </Tooltip>
+                        </Box>
                       </TableCell>
                     )}
                     <TableCell align="center">
@@ -221,18 +287,73 @@ const TablaMantPendientes: FC<TablaMantPendientesProps> = ({
           />
         </Box>
       </Card>
+
+      {/* Modal Reasignación Técnico Mantenimiento */}
+      {reassignModalOpen && selectedMant && (
+        <Dialog
+          open={reassignModalOpen}
+          onClose={handleCloseReassignModal}
+          maxWidth="sm"
+          fullWidth
+        >
+          <DialogTitle>
+            {selectedMant?.takenBy ? 'Cambiar técnico' : 'Asignar técnico'}
+          </DialogTitle>
+          <DialogContent>
+            <Box sx={{ mt: 1 }}>
+              <Alert severity="info" sx={{ mb: 2 }}>
+                Mantenimiento Equipo <strong>#{selectedMant?.machine?.machineNum}</strong>
+                {selectedMant?.type === 'SALE' ? ' (Venta)' : ''}
+              </Alert>
+              <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+                Seleccione el nuevo técnico asignado a este mantenimiento.
+              </Typography>
+              <FormControl fullWidth required>
+                <InputLabel>Técnico</InputLabel>
+                <Select
+                  value={selectedTechnician}
+                  label="Técnico"
+                  onChange={(e) => setSelectedTechnician(e.target.value as string)}
+                >
+                  {techniciansList.map((tec) => (
+                    <MenuItem key={tec._id} value={tec._id}>
+                      {tec.name}
+                    </MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
+            </Box>
+          </DialogContent>
+          <DialogActions>
+            <Button onClick={handleCloseReassignModal} disabled={isSubmitting}>
+              Cancelar
+            </Button>
+            <Button
+              variant="contained"
+              onClick={handleSubmitReassign}
+              disabled={!selectedTechnician || isSubmitting}
+              startIcon={isSubmitting ? <CircularProgress size={20} /> : null}
+            >
+              {isSubmitting ? 'Guardando...' : 'Guardar'}
+            </Button>
+          </DialogActions>
+        </Dialog>
+      )}
     </>
   );
 };
 
 TablaMantPendientes.propTypes = {
   listData: PropTypes.array.isRequired,
-  userRole: PropTypes.string.isRequired
+  userRole: PropTypes.string.isRequired,
+  techniciansList: PropTypes.array
 };
 
 TablaMantPendientes.defaultProps = {
   listData: [],
-  userRole: null
+  userRole: null,
+  techniciansList: []
 };
 
 export default TablaMantPendientes;
+
