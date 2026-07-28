@@ -7,6 +7,7 @@ export interface IConditioningRecord extends Document {
   assignedAt: Date;
   completedAt: Date;
   conditioningPhotos: [String];
+  isPayable: boolean;
   createdAt: Date;
   updatedAt: Date;
   lastUpdatedBy: Schema.Types.ObjectId;
@@ -27,6 +28,7 @@ const ConditioningRecordSchema = new Schema<IConditioningRecord>({
   assignedAt: { type: Date, required: true },
   completedAt: { type: Date, default: null },
   conditioningPhotos: { type: [String], default: [] },
+  isPayable: { type: Boolean, default: true },
   createdAt: { type: Date, required: true },
   updatedAt: { type: Date, required: true },
   lastUpdatedBy: { type: Schema.Types.ObjectId, required: true, ref: 'users' }
