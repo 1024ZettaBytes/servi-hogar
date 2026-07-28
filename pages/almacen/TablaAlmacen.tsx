@@ -527,7 +527,7 @@ const TablaAlmacen: FC<TablaAlmacenProps> = ({
           open={saleModalOpen}
           title="Pasar a venta"
           requiredReason={false}
-          text={`¿Está seguro de pasar la máquina #${machineToSale?.entryNumber} (${machineToSale?.brand}) a la lista de venta? Se creará un equipo de venta a partir de esta máquina.`}
+          text={`¿Está seguro de pasar la máquina #${machineToSale?.entryNumber} (${machineToSale?.brand}) a la lista de venta? Se creará un equipo de venta a partir de esta máquina o se reactivará uno existente si ya se había creado previamente.`}
           isLoading={isMovingToSale}
           onAccept={handleMoveToSale}
           onCancel={() => {
