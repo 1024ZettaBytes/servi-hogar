@@ -289,6 +289,7 @@ function Ventas({ session }) {
         <AddSaleModal
           open={modalIsOpen}
           handleOnClose={handleClose}
+          currentUserId={session.user.id}
         />
       ) : null}
       

@@ -30,6 +30,7 @@ export interface ISale extends Document {
   createdAt: Date;
   updatedAt: Date;
   createdBy: Schema.Types.ObjectId;
+  soldBy: Schema.Types.ObjectId;
   lastUpdatedBy: Schema.Types.ObjectId;
 }
 
@@ -77,6 +78,7 @@ const SaleSchema = new Schema<ISale>({
   createdAt: { type: Date, required: true },
   updatedAt: { type: Date, required: true },
   createdBy: { type: Schema.Types.ObjectId, required: true, ref: 'users' },
+  soldBy: { type: Schema.Types.ObjectId, default: null, ref: 'users' },
   lastUpdatedBy: { type: Schema.Types.ObjectId, required: true, ref: 'users' }
 });
 

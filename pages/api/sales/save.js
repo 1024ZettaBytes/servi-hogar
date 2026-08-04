@@ -43,6 +43,7 @@ async function handler(req, res) {
         initialPayment: getField('initialPayment') ? parseFloat(getField('initialPayment')) : null,
         totalWeeks: getField('totalWeeks') ? parseInt(getField('totalWeeks')) : null,
         createdBy: userId,
+        soldBy: getField('soldBy') || userId,
         isUpfrontCashPayment,
         paymentMethod: getField('paymentMethod') || null,
         paymentAccountId: getField('paymentAccountId') || null,

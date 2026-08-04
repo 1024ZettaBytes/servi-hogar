@@ -29,7 +29,8 @@ import DeleteIcon from '@mui/icons-material/Delete';
 import {
   getFetcher,
   useGetAllCustomers,
-  useGetPaymentAccounts
+  useGetPaymentAccounts,
+  useGetUsers
 } from '../../../pages/api/useRequest';
 import { saveSale } from '../../../lib/client/salesFetch';
 import { getAllSalesMachines } from '../../../lib/client/salesMachinesFetch';
@@ -38,15 +39,22 @@ import { compressImage } from '../../../lib/client/utils';
 import PaymentReceipt from '../PaymentReceipt';
 
 function AddSaleModal(props) {
-  const { handleOnClose, open, preSelectedMachine } = props;
+  const { handleOnClose, open, preSelectedMachine, currentUserId } = props;
   const { customerList, customerError } = useGetAllCustomers(getFetcher, false);
   const { paymentAccounts } = useGetPaymentAccounts(getFetcher);
+  const { userList } = useGetUsers(getFetcher);
+
+  // Only active AUX or OPE users can be credited for a sale
+  const eligibleUsers = (userList || []).filter(
+    (u) => u.isActive && (u.role?.id === 'AUX' || u.role?.id === 'OPE')
+  );
 
   const [isLoading, setIsLoading] = useState(false);
   const [hasError, setHasError] = useState({ error: false, msg: '' });
   const [useExistingMachine, setUseExistingMachine] = useState(true);
   const [selectedMachine, setSelectedMachine] = useState(null);
   const [selectedCustomer, setSelectedCustomer] = useState(null);
+  const [selectedSoldBy, setSelectedSoldBy] = useState<string>('');
   const [serialNumber, setSerialNumber] = useState('');
   const [cashPrice, setCashPrice] = useState('');
   const [totalAmount, setTotalAmount] = useState('');
@@ -88,6 +96,13 @@ function AddSaleModal(props) {
       setSelectedMachine(preSelectedMachine);
     }
   }, [open, preSelectedMachine]);
+
+  // Default sold-by to current user when the modal opens
+  useEffect(() => {
+    if (open && currentUserId) {
+      setSelectedSoldBy(currentUserId);
+    }
+  }, [open, currentUserId]);
 
   // Get available sales machines (active ones that are not sold)
   const availableMachines = salesMachines.filter(
@@ -186,6 +201,7 @@ function AddSaleModal(props) {
     formData.append('saleDate', new Date().toISOString());
     formData.append('cashPrice', cashPrice || '');
     formData.append('isUpfrontCashPayment', isUpfrontCashPayment ? 'true' : 'false');
+    formData.append('soldBy', selectedSoldBy || '');
 
     if (isUpfrontCashPayment) {
       formData.append('paymentMethod', paymentMethod);
@@ -223,6 +239,7 @@ function AddSaleModal(props) {
     setUseExistingMachine(true);
     setSelectedMachine(null);
     setSelectedCustomer(null);
+    setSelectedSoldBy('');
     setSerialNumber('');
     setCashPrice('');
     setTotalAmount('');
@@ -366,6 +383,34 @@ function AddSaleModal(props) {
                         <TextField {...params} label="Cliente (opcional)" />
                       )}
                     />
+                  )}
+                </Grid>
+
+                {/* Vendedor - who gets the sales commission */}
+                <Grid item lg={12}>
+                  {!userList ? (
+                    <Skeleton
+                      variant="rectangular"
+                      width={'100%'}
+                      height={56}
+                      animation="wave"
+                    />
+                  ) : (
+                    <FormControl fullWidth required>
+                      <InputLabel id="sold-by-label">Vendedor</InputLabel>
+                      <Select
+                        labelId="sold-by-label"
+                        value={selectedSoldBy}
+                        label="Vendedor"
+                        onChange={(e) => setSelectedSoldBy(e.target.value)}
+                      >
+                        {eligibleUsers.map((u) => (
+                          <MenuItem key={u._id} value={u._id}>
+                            {u.name}
+                          </MenuItem>
+                        ))}
+                      </Select>
+                    </FormControl>
                   )}
                 </Grid>
 
@@ -647,7 +692,8 @@ function AddSaleModal(props) {
 AddSaleModal.propTypes = {
   open: PropTypes.bool.isRequired,
   handleOnClose: PropTypes.func.isRequired,
-  preSelectedMachine: PropTypes.object
+  preSelectedMachine: PropTypes.object,
+  currentUserId: PropTypes.string
 };
 
 export default AddSaleModal;
