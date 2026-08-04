@@ -134,6 +134,14 @@ function OperatorPayrollTab({ weekStartStr, userRole }: OperatorPayrollTabProps)
                     <TableCell align="right">{numeral(row.count * op.earningsPerTask).format('$0,0.00')}</TableCell>
                   </TableRow>
                 ))}
+                {op.salesCount > 0 && (
+                  <TableRow>
+                    <TableCell>Ventas Registradas</TableCell>
+                    <TableCell align="center">{op.salesCount}</TableCell>
+                    <TableCell align="right">{numeral(op.salesCommissionPerUnit).format('$0,0.00')}</TableCell>
+                    <TableCell align="right">{numeral(op.salesCommission).format('$0,0.00')}</TableCell>
+                  </TableRow>
+                )}
                 {op.streetPurchases > 0 && (
                   <TableRow>
                     <TableCell>Compras en Calle</TableCell>
@@ -144,7 +152,7 @@ function OperatorPayrollTab({ weekStartStr, userRole }: OperatorPayrollTabProps)
                 )}
                 <TableRow sx={{ backgroundColor: '#f5f5f5' }}>
                   <TableCell sx={{ fontWeight: 'bold' }}>Total</TableCell>
-                  <TableCell align="center" sx={{ fontWeight: 'bold' }}>{op.totalTasks + op.streetPurchases}</TableCell>
+                  <TableCell align="center" sx={{ fontWeight: 'bold' }}>{op.totalTasks + op.streetPurchases + op.salesCount}</TableCell>
                   <TableCell />
                   <TableCell align="right" sx={{ fontWeight: 'bold' }}>
                     {numeral(op.totalEarnings).format('$0,0.00')}

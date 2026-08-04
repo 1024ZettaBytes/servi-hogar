@@ -144,7 +144,8 @@ function EquiposVenta({ session }) {
             <AddSaleModal 
               open={saleModalIsOpen} 
               handleOnClose={handleSaleModalClose}
-              preSelectedMachine={selectedMachineForSale} 
+              preSelectedMachine={selectedMachineForSale}
+              currentUserId={user.id}
             />
           )}
         </Grid>

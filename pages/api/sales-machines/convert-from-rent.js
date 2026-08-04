@@ -1,4 +1,4 @@
-import { convertMachineToSaleData } from '../../../lib/data/SalesMachines';
+import { createRentConversionData } from '../../../lib/data/WarehouseMachines';
 import { validateUserPermissions, getUserId } from '../auth/authUtils';
 import formidable from 'formidable';
 
@@ -33,15 +33,16 @@ export default async function handler(req, res) {
         });
       });
 
-      await convertMachineToSaleData({
+      await createRentConversionData({
         machineId: fields.machineId,
         serialNumber: fields.serialNumber,
+        technicianId: fields.technicianId,
         files,
         lastUpdatedBy: userId
       });
 
       return res.status(200).json({
-        msg: 'Equipo convertido a equipo de venta exitosamente'
+        msg: 'El equipo fue enviado a acondicionamiento. Cuando el técnico lo termine estará listo para venta.'
       });
     } catch (error) {
       console.error(error);
