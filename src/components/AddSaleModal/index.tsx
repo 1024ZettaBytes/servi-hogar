@@ -380,7 +380,7 @@ function AddSaleModal(props) {
                         option.id === value.id
                       }
                       renderInput={(params) => (
-                        <TextField {...params} label="Cliente (opcional)" />
+                        <TextField {...params} label="Cliente" required />
                       )}
                     />
                   )}
