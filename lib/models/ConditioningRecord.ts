@@ -24,7 +24,11 @@ const ConditioningRecordSchema = new Schema<IConditioningRecord>({
     ref: 'users',
     required: true
   },
-  status: { type: String, enum: ['PENDIENTE', 'COMPLETADO'], default: 'PENDIENTE' },
+  status: {
+    type: String,
+    enum: ['PENDIENTE', 'COMPLETADO', 'CANCELADO'],
+    default: 'PENDIENTE'
+  },
   assignedAt: { type: Date, required: true },
   completedAt: { type: Date, default: null },
   conditioningPhotos: { type: [String], default: [] },
