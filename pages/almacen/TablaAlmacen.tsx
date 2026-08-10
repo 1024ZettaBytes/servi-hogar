@@ -476,6 +476,27 @@ const TablaAlmacen: FC<TablaAlmacenProps> = ({
                         </Tooltip>)}
                       </>
                     )}
+                  {isSuperUser &&
+                    machine.status === 'EN_ACONDICIONAMIENTO' && (
+                      <Tooltip title="Desmantelar" arrow>
+                        <IconButton
+                          sx={{
+                            '&:hover': {
+                              background: theme.colors.error.lighter
+                            },
+                            color: theme.palette.error.dark
+                          }}
+                          color="inherit"
+                          size="small"
+                          onClick={() => {
+                            setMachineToDismantle(machine);
+                            setDismantleModalOpen(true);
+                          }}
+                        >
+                          <DeconstructIcon fontSize="small" />
+                        </IconButton>
+                      </Tooltip>
+                    )}
                 </TableCell>
               </TableRow>
             ))}
