@@ -824,6 +824,18 @@ export const useGetWarehouseConditioning = (fetcher) => {
   };
 };
 
+export const useGetFinishedConditioning = (fetcher) => {
+  const { data, error, isLoading } = useSWR(
+    ROUTES.WAREHOUSE_CONDITIONING_FINISHED_API,
+    fetcher
+  );
+  return {
+    finishedConditioningList: data?.data,
+    finishedConditioningError: error,
+    isLoadingFinishedConditioning: isLoading
+  };
+};
+
 export const useGetNextMachinesToLoad = (fetcher, all=false) => {
   const url = `${ROUTES.LOAD_MACHINE_TO_VEHICLE_API}?all=${all}`;
   const { data, error, isLoading } = useSWR(url, fetcher);
