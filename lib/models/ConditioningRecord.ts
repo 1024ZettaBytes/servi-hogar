@@ -3,6 +3,7 @@ import mongoose, { Model, model, Schema } from 'mongoose';
 export interface IConditioningRecord extends Document {
   warehouseMachine: Schema.Types.ObjectId;
   technician: Schema.Types.ObjectId;
+  previousTechnician: Schema.Types.ObjectId;
   status: string;
   assignedAt: Date;
   completedAt: Date;
@@ -23,6 +24,13 @@ const ConditioningRecordSchema = new Schema<IConditioningRecord>({
     type: Schema.Types.ObjectId,
     ref: 'users',
     required: true
+  },
+  // Técnico que realizó el acondicionamiento anterior del equipo.
+  // Solo se llena en retrabajos por CAMBIO_VENTA.
+  previousTechnician: {
+    type: Schema.Types.ObjectId,
+    ref: 'users',
+    default: null
   },
   status: {
     type: String,

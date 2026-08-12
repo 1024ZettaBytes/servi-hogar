@@ -15,7 +15,8 @@ import NextBreadcrumbs from "@/components/Shared/BreadCrums";
 import TablaMant from "./TablaMant";
 import TablaMantPendientes from "./TablaMantPendientes";
 import TablaAcondicionamiento from "./TablaAcondicionamiento";
-import { getFetcher, useGetMantainances, useGetPendingMantainances, useGetPendingSaleRepairs, useGetSaleRepairs, useGetWarehouseConditioning, useGetAllWarehousesOverview, useGetCollectedMachines, useGetNextMachinesToLoad, useGetStaleMachinesOnVehicle, useGetPendingReturnMachines, useGetUsers } from "pages/api/useRequest";
+import TablaAcondicionamientoFinalizados from "./TablaAcondicionamientoFinalizados";
+import { getFetcher, useGetMantainances, useGetPendingMantainances, useGetPendingSaleRepairs, useGetSaleRepairs, useGetWarehouseConditioning, useGetFinishedConditioning, useGetAllWarehousesOverview, useGetCollectedMachines, useGetNextMachinesToLoad, useGetStaleMachinesOnVehicle, useGetPendingReturnMachines, useGetUsers } from "pages/api/useRequest";
 import { unloadStaleMachine, confirmMachineReturn } from "../../lib/client/machinesFetch";
 import { useSnackbar } from "notistack";
 import { formatTZDate } from "lib/client/utils";
@@ -24,6 +25,7 @@ function Mantenimientos({ session }) {
   const { user } = session;
   const paths = ["Inicio", "Mantenimientos"];
   const [currentTab, setCurrentTab] = useState("pendientes");
+  const [conditioningTab, setConditioningTab] = useState("pendientes");
   const [unloadingId, setUnloadingId] = useState<string | null>(null);
   const { enqueueSnackbar } = useSnackbar();
 
@@ -36,6 +38,11 @@ function Mantenimientos({ session }) {
   const { pendingSaleRepairsList, pendingSaleRepairsError } = useGetPendingSaleRepairs(getFetcher);
   const { saleRepairsData, saleRepairsError } = useGetSaleRepairs(getFetcher);
   const { conditioningList, conditioningError, isLoadingConditioning } = useGetWarehouseConditioning(getFetcher);
+  const {
+    finishedConditioningList,
+    finishedConditioningError,
+    isLoadingFinishedConditioning
+  } = useGetFinishedConditioning(getFetcher);
   const { warehousesList } = useGetAllWarehousesOverview(getFetcher);
 
 
@@ -133,6 +140,11 @@ function Mantenimientos({ session }) {
     { value: "pendientes", label: `Pendientes (${combinedPendingList.length})` },
     { value: "pasados", label: `Pasados (${combinedCompletedList.length})` },
     { value: "acondicionamiento", label: `Acondicionamiento (${(conditioningList || []).length})` },
+  ];
+
+  const conditioningTabs = [
+    { value: "pendientes", label: `Pendientes (${(conditioningList || []).length})` },
+    { value: "finalizados", label: `Finalizados (${(finishedConditioningList || []).length})` },
   ];
 
   return (
@@ -381,22 +393,58 @@ function Mantenimientos({ session }) {
 
             {currentTab === "acondicionamiento" && (
               <>
-                {conditioningError ? (
-                  <Alert severity="error">Error al cargar datos de acondicionamiento</Alert>
-                ) : isLoadingConditioning ? (
-                  <Skeleton
-                    variant="rectangular"
-                    width={"100%"}
-                    height={500}
-                    animation="wave"
-                  />
-                ) : (
-                  <TablaAcondicionamiento
-                    listData={conditioningList || []}
-                    userRole={user?.role}
-                    warehousesList={warehousesList || []}
-                    techniciansList={techniciansList}
-                  />
+                <Tabs
+                  onChange={(_e, val) => setConditioningTab(val)}
+                  value={conditioningTab}
+                  textColor="primary"
+                  indicatorColor="primary"
+                  sx={{ mb: 2 }}
+                >
+                  {conditioningTabs.map((tab) => (
+                    <Tab key={tab.value} label={tab.label} value={tab.value} />
+                  ))}
+                </Tabs>
+
+                {conditioningTab === "pendientes" && (
+                  <>
+                    {conditioningError ? (
+                      <Alert severity="error">Error al cargar datos de acondicionamiento</Alert>
+                    ) : isLoadingConditioning ? (
+                      <Skeleton
+                        variant="rectangular"
+                        width={"100%"}
+                        height={500}
+                        animation="wave"
+                      />
+                    ) : (
+                      <TablaAcondicionamiento
+                        listData={conditioningList || []}
+                        userRole={user?.role}
+                        warehousesList={warehousesList || []}
+                        techniciansList={techniciansList}
+                      />
+                    )}
+                  </>
+                )}
+
+                {conditioningTab === "finalizados" && (
+                  <>
+                    {finishedConditioningError ? (
+                      <Alert severity="error">Error al cargar los acondicionamientos finalizados</Alert>
+                    ) : isLoadingFinishedConditioning ? (
+                      <Skeleton
+                        variant="rectangular"
+                        width={"100%"}
+                        height={500}
+                        animation="wave"
+                      />
+                    ) : (
+                      <TablaAcondicionamientoFinalizados
+                        listData={finishedConditioningList || []}
+                        userRole={user?.role}
+                      />
+                    )}
+                  </>
                 )}
               </>
             )}
