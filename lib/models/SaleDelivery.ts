@@ -22,6 +22,9 @@ export interface ISaleDelivery extends Document {
   updatedCustomerData: object;
   cancellationReason: string;
   scheduledTime: Date;
+  paymentInCash: boolean; // Solo para COBRANZA: el cliente pagó en efectivo al operador
+  cashAmount: number; // Monto en efectivo recibido por el operador (para corte de caja)
+  salePayment: Schema.Types.ObjectId; // Abono generado por el efectivo recibido en la cobranza
   createdAt: Date;
   updatedAt: Date;
   createdBy: Schema.Types.ObjectId;
@@ -83,6 +86,13 @@ const SaleDeliverySchema = new Schema<ISaleDelivery>({
   updatedCustomerData: { type: Object, default: null },
   cancellationReason: { type: String, default: '' },
   scheduledTime: { type: Date, default: null },
+  paymentInCash: { type: Boolean, default: false },
+  cashAmount: { type: Number, default: null },
+  salePayment: {
+    type: Schema.Types.ObjectId,
+    ref: 'salepayments',
+    default: null
+  },
   createdAt: { type: Date, required: true },
   updatedAt: { type: Date, required: true },
   createdBy: { type: Schema.Types.ObjectId, required: true, ref: 'users' },

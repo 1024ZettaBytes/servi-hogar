@@ -9,6 +9,7 @@ export interface ISalePayment extends Document {
   method: 'TRANSFER' | 'DEP' | 'CASH' | 'CASH_OFFICE';
   paymentAccount?: Schema.Types.ObjectId;
   isCashSettlement: boolean;
+  isDownPayment: boolean;
   createdBy: Schema.Types.ObjectId;
   createdAt: Date;
 }
@@ -30,6 +31,7 @@ const SalePaymentSchema = new Schema<ISalePayment>({
   },
   paymentAccount: { type: Schema.Types.ObjectId, ref: 'payment_accounts', default: null },
   isCashSettlement: { type: Boolean, default: false },
+  isDownPayment: { type: Boolean, default: false },
   createdBy: { type: Schema.Types.ObjectId, required: true, ref: 'users' },
   createdAt: { type: Date, required: true }
 });

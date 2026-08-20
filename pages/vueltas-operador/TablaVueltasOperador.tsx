@@ -169,10 +169,19 @@ const TablaVueltasOperador: FC<TablaVueltasOperadorProps> = ({
     }
   };
 
-  const handleConfirmCompletion = async (outcome: string) => {
+  const handleConfirmCompletion = async (collectionData: {
+    outcome: string;
+    paymentInCash: boolean;
+    cashAmount: number | null;
+  }) => {
     setIsCompleting(true);
 
-    const result = await completeCollectionVisit(taskToComplete._id, outcome);
+    const { outcome, paymentInCash, cashAmount } = collectionData;
+
+    const result = await completeCollectionVisit(taskToComplete._id, outcome, {
+      paymentInCash,
+      cashAmount
+    });
 
     if (isMounted.current) {
       setIsCompleting(false);
@@ -801,6 +810,7 @@ const TablaVueltasOperador: FC<TablaVueltasOperadorProps> = ({
           }}
           handleOnConfirm={handleConfirmCompletion}
           isLoading={isCompleting}
+          sale={taskToComplete.sale}
         />
       )}
       {tripToComplete && (

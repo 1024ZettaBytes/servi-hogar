@@ -135,7 +135,9 @@ const TablaPagosVenta: FC<TablaPagosVentaProps> = () => {
                 </TableHead>
                 <TableBody>
                   {salePayments?.list?.map((payment) => {
-                    const paymentLabel = payment.isCashSettlement
+                    const paymentLabel = payment.isDownPayment
+                      ? 'Enganche'
+                      : payment.isCashSettlement
                       ? 'Contado'
                       : payment.paymentNumber
                         ? `${payment.paymentNumber} de ${payment.sale?.totalWeeks || '?'}`

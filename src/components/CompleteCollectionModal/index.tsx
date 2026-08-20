@@ -14,27 +14,66 @@ import {
   FormControl,
   RadioGroup,
   FormControlLabel,
-  Radio
+  Radio,
+  Checkbox,
+  TextField,
+  InputAdornment
 } from "@mui/material";
 import { LoadingButton } from "@mui/lab";
 
 function CompleteCollectionModal(props) {
-  const { open, handleOnClose, handleOnConfirm, isLoading} = props;
-  
+  const { open, handleOnClose, handleOnConfirm, isLoading, sale } = props;
+
   const [outcome, setOutcome] = useState('PROMESA');
+  const [paymentInCash, setPaymentInCash] = useState(false);
+  const [cashAmount, setCashAmount] = useState('');
   const [hasError, setHasError] = useState({ error: false, msg: "" });
 
-  const saveButtonEnabled = true; 
+  // El efectivo solo aplica cuando el cliente ya pagó durante la visita
+  const isCashPayment = outcome === 'PAGO' && paymentInCash;
+  const parsedCashAmount = Number(cashAmount);
+  const isCashAmountValid =
+    cashAmount !== '' && Number.isFinite(parsedCashAmount) && parsedCashAmount > 0;
+
+  const saveButtonEnabled = !isCashPayment || isCashAmountValid;
+
+  const resetForm = () => {
+    setOutcome('PROMESA');
+    setPaymentInCash(false);
+    setCashAmount('');
+    setHasError({ error: false, msg: "" });
+  };
+
+  const handleOutcomeChange = (value) => {
+    setOutcome(value);
+    if (value !== 'PAGO') {
+      // Si no pagó, no hay efectivo que registrar
+      setPaymentInCash(false);
+      setCashAmount('');
+    }
+  };
 
   async function submitHandler(event) {
     event.preventDefault();
     setHasError({ error: false, msg: "" });
-    handleOnConfirm(outcome);
+
+    if (isCashPayment && !isCashAmountValid) {
+      setHasError({
+        error: true,
+        msg: "Indique la cantidad de efectivo recibida."
+      });
+      return;
+    }
+
+    handleOnConfirm({
+      outcome,
+      paymentInCash: isCashPayment,
+      cashAmount: isCashPayment ? parsedCashAmount : null
+    });
   }
 
   const handleClose = () => {
-    setHasError({ error: false, msg: "" });
-    setOutcome('PROMESA'); 
+    resetForm();
     handleOnClose();
   };
 
@@ -55,21 +94,82 @@ function CompleteCollectionModal(props) {
                   <RadioGroup
                     name="outcome"
                     value={outcome}
-                    onChange={(e) => setOutcome(e.target.value)}
+                    onChange={(e) => handleOutcomeChange(e.target.value)}
                   >
-                    <FormControlLabel 
-                      value="PROMESA" 
-                      control={<Radio />} 
-                      label="Promesa de pago" 
+                    <FormControlLabel
+                      value="PROMESA"
+                      control={<Radio />}
+                      label="Promesa de pago"
                     />
-                    <FormControlLabel 
-                      value="PAGO" 
-                      control={<Radio />} 
-                      label="Ya pagó" 
+                    <FormControlLabel
+                      value="PAGO"
+                      control={<Radio />}
+                      label="Ya pagó"
                     />
                   </RadioGroup>
                 </FormControl>
               </Grid>
+
+              {outcome === 'PAGO' && (
+                <Grid item xs={12}>
+                  <Divider sx={{ mb: 1 }} />
+                  <FormControlLabel
+                    control={
+                      <Checkbox
+                        checked={paymentInCash}
+                        onChange={(e) => {
+                          setPaymentInCash(e.target.checked);
+                          if (!e.target.checked) setCashAmount('');
+                        }}
+                      />
+                    }
+                    label="El pago fue en efectivo y lo recibí yo"
+                  />
+                </Grid>
+              )}
+
+              {isCashPayment && (
+                <Grid item xs={12}>
+                  <TextField
+                    label="Cantidad recibida"
+                    type="number"
+                    fullWidth
+                    autoFocus
+                    size="small"
+                    variant="outlined"
+                    value={cashAmount}
+                    onChange={(e) => setCashAmount(e.target.value)}
+                    error={cashAmount !== '' && !isCashAmountValid}
+                    helperText={
+                      cashAmount !== '' && !isCashAmountValid
+                        ? "Ingrese una cantidad mayor a 0"
+                        : "Se registrará como abono a la venta y en su corte de caja"
+                    }
+                    InputProps={{
+                      startAdornment: (
+                        <InputAdornment position="start">$</InputAdornment>
+                      ),
+                      inputProps: { min: 0, step: "0.01" }
+                    }}
+                  />
+                  {Boolean(sale?.weeklyPayment || sale?.remainingAmount) && (
+                    <Typography
+                      variant="caption"
+                      color="text.secondary"
+                      component="div"
+                      sx={{ mt: 1 }}
+                    >
+                      {sale?.weeklyPayment
+                        ? `Pago semanal: $${sale.weeklyPayment}`
+                        : ''}
+                      {sale?.weeklyPayment && sale?.remainingAmount ? ' · ' : ''}
+                      {sale?.remainingAmount
+                        ? `Saldo: $${sale.remainingAmount}`
+                        : ''}
+                    </Typography>
+                  )}
+                </Grid>
+              )}
 
               <Grid item xs={12}>
                 {hasError.error ? (
@@ -121,13 +221,15 @@ function CompleteCollectionModal(props) {
 
 CompleteCollectionModal.propTypes = {
   open: PropTypes.bool.isRequired,
-  handleOnClose: PropTypes.func.isRequired,   
-  handleOnConfirm: PropTypes.func.isRequired, 
-  isLoading: PropTypes.bool
+  handleOnClose: PropTypes.func.isRequired,
+  handleOnConfirm: PropTypes.func.isRequired,
+  isLoading: PropTypes.bool,
+  sale: PropTypes.object
 };
 
 CompleteCollectionModal.defaultProps = {
-  isLoading: false
+  isLoading: false,
+  sale: null
 };
 
 export default CompleteCollectionModal;

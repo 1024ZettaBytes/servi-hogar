@@ -401,6 +401,9 @@ function SaleDetail() {
                                   {payment.isCashSettlement && (
                                     <Chip label="Contado" size="small" color="success" sx={{ ml: 1 }} />
                                   )}
+                                  {payment.isDownPayment && (
+                                    <Chip label="Enganche" size="small" color="success" sx={{ ml: 1 }} />
+                                  )}
                                 </TableCell>
                                 <TableCell align="center">{payment.weeksCovered}</TableCell>
                                 <TableCell>{payment.createdBy?.name || 'N/A'}</TableCell>
@@ -417,8 +420,12 @@ function SaleDetail() {
                                 </TableCell>
                               </TableRow>
                             ))}
-                            {/* Initial Payment */}
-                            {sale.initialPayment > 0 && (
+                            {/* Initial Payment (legacy sales only: shown when no real
+                                down payment / cash settlement record exists) */}
+                            {sale.initialPayment > 0 &&
+                              !sale.payments?.some(
+                                (p) => p.isDownPayment || p.isCashSettlement
+                              ) && (
                               <TableRow>
                                 <TableCell>-</TableCell>
                                 <TableCell>{formatTZDate(sale.saleDate, "DD/MM/YYYY HH:mm")}</TableCell>

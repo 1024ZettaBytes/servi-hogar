@@ -7,19 +7,36 @@ async function handler(req, res) {
 
   if (validRole && req.method === 'POST') {
     try {
-      const { deliveryId, outcome } = req.body;
-      
+      const { deliveryId, outcome, paymentInCash, cashAmount } = req.body;
+
       if (!outcome) {
         return res.status(400).json({ errorMsg: 'Debe seleccionar un motivo.' });
       }
 
-      const result = await completeCollectionVisitData({ 
-        deliveryId, 
-        outcome, 
-        lastUpdatedBy: userId 
+      const isCashPayment = outcome === 'PAGO' && paymentInCash === true;
+
+      if (isCashPayment) {
+        const amount = Number(cashAmount);
+        if (!Number.isFinite(amount) || amount <= 0) {
+          return res
+            .status(400)
+            .json({ errorMsg: 'Debe indicar una cantidad válida de efectivo recibido.' });
+        }
+      }
+
+      const result = await completeCollectionVisitData({
+        deliveryId,
+        outcome,
+        paymentInCash: isCashPayment,
+        cashAmount,
+        lastUpdatedBy: userId
       });
-      
-      res.status(200).json({ msg: 'Visita completada.', data: result });
+
+      const msg = isCashPayment
+        ? 'Visita completada y abono en efectivo registrado.'
+        : 'Visita completada.';
+
+      res.status(200).json({ msg, data: result });
     } catch (e) {
       console.error(e);
       res.status(500).json({ errorMsg: e.message });
