@@ -56,7 +56,6 @@ async function getPaymentsProgressAPI(req, res) {
     const users = await User.find({ role: { $in: validRoles.map(role => role._id) }, isActive: true })
       .select({ _id: 1, id: 1, name: 1 })
       .lean();
-
     const activeRentLog = await CurrentRentsLog.findOne({ dateText: dateToPlainString(pastWeekEnd) }).lean();
     const totalActiveRents = activeRentLog ? activeRentLog.amount : 0;
     // Calculate targets

@@ -21,6 +21,8 @@ export interface ISale extends Document {
     completed: boolean;
     deliveryRef?: Schema.Types.ObjectId;
     outcome?: string;
+    paymentInCash?: boolean;
+    cashAmount?: number;
     completedAt?: Date;
     completedBy?: Schema.Types.ObjectId;
   }[];
@@ -68,6 +70,8 @@ const SaleSchema = new Schema<ISale>({
       completed: { type: Boolean, default: false },
       deliveryRef: { type: Schema.Types.ObjectId, ref: 'sale_deliveries' },
       outcome: { type: String, enum: ['PROMESA', 'PAGO', null], default: null },
+      paymentInCash: { type: Boolean, default: false },
+      cashAmount: { type: Number, default: null },
       completedAt: { type: Date },
       completedBy: { type: Schema.Types.ObjectId, ref: 'users' }
     }
