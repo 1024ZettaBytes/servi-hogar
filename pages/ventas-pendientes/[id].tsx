@@ -6,6 +6,7 @@ import SidebarLayout from '@/layouts/SidebarLayout';
 import MyLocationIcon from '@mui/icons-material/MyLocation';
 import PhotoCamera from '@mui/icons-material/PhotoCamera';
 import DeleteIcon from '@mui/icons-material/Delete';
+import ReceiptIcon from '@mui/icons-material/Receipt';
 import { LoadingButton } from '@mui/lab';
 import {
   Alert,
@@ -36,6 +37,7 @@ import StepLabel from '@mui/material/StepLabel';
 import Stepper from '@mui/material/Stepper';
 import { DesktopDatePicker } from '@mui/x-date-pickers';
 import { completeSaleDelivery } from 'lib/client/salesFetch';
+import PaymentReceipt from 'src/components/PaymentReceipt';
 import { useCheckBlocking } from 'src/hooks/useCheckBlocking';
 import { getSession } from 'next-auth/react';
 import Head from 'next/head';
@@ -52,8 +54,10 @@ import {
 } from '../../lib/client/utils';
 import {
   getFetcher,
-  useGetCities
+  useGetCities,
+  useGetPaymentAccounts
 } from '../api/useRequest';
+import { PAYMENT_METHODS } from '../../lib/consts/OBJ_CONTS';
 import useSWR from 'swr';
 import ConfirmEquipmentDeliveryModal from '@/components/ConfirmEquipmentDeliveryModal';
 
@@ -85,13 +89,21 @@ function CompletarVenta() {
   });
 
   const { citiesList, citiesError } = useGetCities(getFetcher);
+  const { paymentAccounts } = useGetPaymentAccounts(getFetcher);
 
   const [attached, setAttached] = useState<any>({
     ine: { file: null, url: null },
     frontal: { file: null, url: null },
     label: { file: null, url: null },
-    board: { file: null, url: null }
+    board: { file: null, url: null },
+    downPayment: { file: null, url: null }
   });
+
+  // Enganche (down payment) collected on delivery
+  const [downPaymentMethod, setDownPaymentMethod] = useState<string>('');
+  const [selectedPaymentAccount, setSelectedPaymentAccount] = useState<any>(null);
+  const [receipt, setReceipt] = useState<any>(null);
+  const [showReceipt, setShowReceipt] = useState<boolean>(false);
 
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
   const [hasErrorSubmitting, setHasErrorSubmitting] = useState<any>({
@@ -241,6 +253,20 @@ function CompletarVenta() {
     />
   );
 
+  // The enganche is only collected here for credit sales that were not paid upfront
+  const requiresDownPayment = sale?.initialPayment > 0 && sale?.status !== 'PAGADA';
+  const downPaymentRequiresImage =
+    downPaymentMethod === 'TRANSFER' || downPaymentMethod === 'DEP';
+
+  const isDownPaymentComplete = () => {
+    if (!requiresDownPayment) return true;
+    if (!downPaymentMethod) return false;
+    if (downPaymentRequiresImage) {
+      return !!selectedPaymentAccount && !!attached.downPayment?.file;
+    }
+    return true;
+  };
+
   const checkEnabledButton = () => {
     if (activeStep === 0)
       return (
@@ -257,7 +283,8 @@ function CompletarVenta() {
         attached.ine.file &&
         attached.frontal.file &&
         attached.label.file &&
-        attached.board.file
+        attached.board.file &&
+        isDownPaymentComplete()
       );
   };
 
@@ -274,7 +301,12 @@ function CompletarVenta() {
       customerData: {
         ...customerToEdit,
         isOk
-      }
+      },
+      downPaymentMethod: requiresDownPayment ? downPaymentMethod : null,
+      downPaymentAccountId:
+        requiresDownPayment && downPaymentRequiresImage
+          ? selectedPaymentAccount?._id
+          : null
     };
 
     setPendingSaleData(saleData);
@@ -292,6 +324,7 @@ function CompletarVenta() {
     const result = await completeSaleDelivery(attached, pendingSaleData);
     setIsSubmitting(false);
     if (!result.error) {
+      setReceipt(result.receipt);
       setActiveStep((prev) => prev + 1);
       await checkBlocking(result.wasBlocked);
     } else {
@@ -1042,6 +1075,146 @@ function CompletarVenta() {
                               </Grid>
 
 
+                              {/* Enganche (down payment) */}
+                              {requiresDownPayment && (
+                                <>
+                                  <Grid item xs={12} m={1}>
+                                    <Typography
+                                      variant="subtitle2"
+                                      color="text.secondary"
+                                      gutterBottom
+                                    >
+                                      Cobro del enganche
+                                    </Typography>
+                                    <Alert severity="info">
+                                      Monto a cobrar:{' '}
+                                      <strong>
+                                        ${sale?.initialPayment?.toFixed(2)}
+                                      </strong>
+                                    </Alert>
+                                  </Grid>
+
+                                  <Grid item xs={12} md={4} m={1}>
+                                    <FormControl fullWidth required>
+                                      <InputLabel id="down-payment-method-label">
+                                        Método de pago
+                                      </InputLabel>
+                                      <Select
+                                        labelId="down-payment-method-label"
+                                        id="downPaymentMethod"
+                                        value={downPaymentMethod}
+                                        label="Método de pago"
+                                        onChange={(e) => {
+                                          const value = e.target.value;
+                                          setDownPaymentMethod(value);
+                                          if (value !== 'TRANSFER' && value !== 'DEP') {
+                                            setSelectedPaymentAccount(null);
+                                            handleRemoveImage('downPayment');
+                                          }
+                                        }}
+                                      >
+                                        {Object.keys(PAYMENT_METHODS).map((key) => (
+                                          <MenuItem key={key} value={key}>
+                                            {PAYMENT_METHODS[key]}
+                                          </MenuItem>
+                                        ))}
+                                      </Select>
+                                    </FormControl>
+                                  </Grid>
+
+                                  {downPaymentRequiresImage && (
+                                    <Grid item xs={12} md={4} m={1}>
+                                      <FormControl fullWidth required>
+                                        <InputLabel id="down-payment-account-label">
+                                          Cuenta
+                                        </InputLabel>
+                                        <Select
+                                          labelId="down-payment-account-label"
+                                          id="downPaymentAccount"
+                                          value={selectedPaymentAccount?._id || ''}
+                                          label="Cuenta"
+                                          onChange={(e) => {
+                                            const selected = paymentAccounts?.find(
+                                              (acc) => acc._id === e.target.value
+                                            );
+                                            setSelectedPaymentAccount(selected);
+                                          }}
+                                        >
+                                          {paymentAccounts?.map((acc) => (
+                                            <MenuItem key={acc._id} value={acc._id}>
+                                              {`${acc.bank} ${acc.count} (${acc.number.slice(-4)})`}
+                                            </MenuItem>
+                                          ))}
+                                        </Select>
+                                      </FormControl>
+                                    </Grid>
+                                  )}
+
+                                  {downPaymentRequiresImage && (
+                                    <Grid item xs={12} md={4} m={1}>
+                                      <Box>
+                                        <Typography
+                                          variant="body2"
+                                          fontWeight="medium"
+                                          gutterBottom
+                                        >
+                                          Foto del comprobante del enganche *
+                                        </Typography>
+                                        {attached.downPayment?.url ? (
+                                          <Card>
+                                            <CardMedia
+                                              component="img"
+                                              height="150"
+                                              image={attached.downPayment.url}
+                                              alt="Comprobante del enganche"
+                                            />
+                                            <CardActions sx={{ justifyContent: 'center' }}>
+                                              <IconButton
+                                                size="small"
+                                                color="error"
+                                                onClick={() =>
+                                                  handleRemoveImage('downPayment')
+                                                }
+                                              >
+                                                <DeleteIcon />
+                                              </IconButton>
+                                            </CardActions>
+                                          </Card>
+                                        ) : (
+                                          <Button
+                                            variant="outlined"
+                                            component="label"
+                                            fullWidth
+                                            startIcon={<PhotoCamera />}
+                                            sx={{ height: 150 }}
+                                          >
+                                            Subir Foto
+                                            <input
+                                              type="file"
+                                              hidden
+                                              accept="image/*"
+                                              onChange={(e) =>
+                                                handleImageUpload(e, 'downPayment')
+                                              }
+                                            />
+                                          </Button>
+                                        )}
+                                        {attached.downPayment?.error && (
+                                          <Typography
+                                            color="error"
+                                            variant="caption"
+                                            display="block"
+                                            sx={{ mt: 1 }}
+                                          >
+                                            Seleccione un archivo válido (*.jpg, *.jpeg, *.png).
+                                          </Typography>
+                                        )}
+                                      </Box>
+                                    </Grid>
+                                  )}
+                                </>
+                              )}
+
                               {hasErrorSubmitting.error && (
                                 <Grid item lg={6} m={1}>
                                   <Alert severity="error">
@@ -1084,6 +1257,17 @@ function CompletarVenta() {
                 {activeStep === steps.length && (
                   <Paper square elevation={0} sx={{ p: 3 }}>
                     <Alert severity="success">La entrega fue completada exitosamente</Alert>
+                    {receipt && (
+                      <Button
+                        variant="outlined"
+                        color="success"
+                        startIcon={<ReceiptIcon />}
+                        sx={{ mt: 1, mr: 1 }}
+                        onClick={() => setShowReceipt(true)}
+                      >
+                        Ver recibo
+                      </Button>
+                    )}
                     <NextLink href="/ventas">
                       <Button sx={{ mt: 1, mr: 1 }}>
                         Volver a ventas
@@ -1096,6 +1280,13 @@ function CompletarVenta() {
           </Grid>
         </Grid>
       </Container>
+      {showReceipt && (
+        <PaymentReceipt
+          receipt={receipt}
+          open={showReceipt}
+          onClose={() => setShowReceipt(false)}
+        />
+      )}
       {openConfirmModal && <ConfirmEquipmentDeliveryModal
         open={openConfirmModal}
         machineInfo={machineInfo}

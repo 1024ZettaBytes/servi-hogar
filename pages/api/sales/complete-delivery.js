@@ -74,6 +74,8 @@ async function handler(req, res) {
       const frontalImage = Array.isArray(files.frontal) ? files.frontal[0] : files.frontal;
       const labelImage = Array.isArray(files.label) ? files.label[0] : files.label;
       const boardImage = Array.isArray(files.board) ? files.board[0] : files.board;
+      // Optional: only sent when the down payment method requires a voucher
+      const downPaymentImage = Array.isArray(files.downPayment) ? files.downPayment[0] : files.downPayment;
       
       // Log file sizes
       if (ineImage) console.log('INE image size:', (ineImage.size / 1024).toFixed(2), 'KB');
@@ -114,11 +116,20 @@ async function handler(req, res) {
         labelImageName: labelImage.originalFilename,
         boardImagePath: boardImage.filepath,
         boardImageName: boardImage.originalFilename,
-        customerData: saleData.customerData
+        customerData: saleData.customerData,
+        downPaymentMethod: saleData.downPaymentMethod,
+        downPaymentAccountId: saleData.downPaymentAccountId,
+        downPaymentImagePath: downPaymentImage?.filepath,
+        downPaymentImageName: downPaymentImage?.originalFilename
       });
       
       console.log('✅ Sale delivery completed successfully');
-      res.status(200).json({ msg: 'Entrega completada con éxito!', data: result, wasBlocked: result.wasBlocked });
+      res.status(200).json({
+        msg: 'Entrega completada con éxito!',
+        data: result,
+        wasBlocked: result.wasBlocked,
+        receipt: result.receipt
+      });
     } catch (e) {
       console.error('❌ Error in complete-delivery API');
       console.error('Error name:', e.name);
