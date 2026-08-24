@@ -21,6 +21,7 @@ import PendingActionsIcon from '@mui/icons-material/PendingActions';
 import ListIcon from '@mui/icons-material/List';
 import LocalShippingIcon from '@mui/icons-material/LocalShipping';
 import InventoryIcon from '@mui/icons-material/Inventory';
+import PointOfSaleIcon from '@mui/icons-material/PointOfSale';
 import HailIcon from '@mui/icons-material/Hail';
 import ChangeCircleIcon from '@mui/icons-material/ChangeCircle';
 import PaidIcon from '@mui/icons-material/Paid';
@@ -846,6 +847,23 @@ function SidebarMenu({ userRole }) {
                       </NextLink>
                     </ListItem>
                   </>
+                )}
+                {['ADMIN', 'AUX', 'OPE'].includes(userRole) && (
+                  <ListItem component="div">
+                    <NextLink href="/corte-caja" passHref>
+                      <Button
+                        className={
+                          currentRoute.includes('/corte-caja') ? 'active' : ''
+                        }
+                        disableRipple
+                        component="a"
+                        onClick={closeSidebar}
+                        startIcon={<PointOfSaleIcon />}
+                      >
+                        Corte de caja
+                      </Button>
+                    </NextLink>
+                  </ListItem>
                 )}
                 {['ADMIN', 'AUX'].includes(userRole) && (
                   <ListItem component="div">

@@ -226,15 +226,27 @@ const TablaVueltasExtras: FC<TablaVueltasExtrasProps> = ({
                               : 'Sin programar')
                         }
                       </Typography>
-                      {!showCompleted  && (
-                        <Tooltip title={trip.scheduledTime ? 'Cambiar hora' : 'Programar hora'} arrow>
-                          <IconButton
-                            size="small"
-                            color="secondary"
-                            onClick={() => handleScheduleTrip(trip)}
-                          >
-                            <AccessTimeIcon fontSize="small" />
-                          </IconButton>
+                      {!showCompleted && (
+                        <Tooltip
+                          title={
+                            !trip.assignedTo
+                              ? 'Asigna un operador primero'
+                              : trip.scheduledTime
+                              ? 'Cambiar hora'
+                              : 'Programar hora'
+                          }
+                          arrow
+                        >
+                          <span>
+                            <IconButton
+                              size="small"
+                              color="secondary"
+                              disabled={!trip.assignedTo}
+                              onClick={() => handleScheduleTrip(trip)}
+                            >
+                              <AccessTimeIcon fontSize="small" />
+                            </IconButton>
+                          </span>
                         </Tooltip>
                       )}
                     </Box>
@@ -339,6 +351,8 @@ const TablaVueltasExtras: FC<TablaVueltasExtrasProps> = ({
           }}
           taskId={tripToSchedule._id}
           taskType="VUELTA_EXTRA"
+          operatorId={tripToSchedule.assignedTo?._id || null}
+          operatorName={tripToSchedule.assignedTo?.name || null}
           currentScheduledTime={tripToSchedule.scheduledTime}
           onScheduleSaved={() => {
             enqueueSnackbar('Hora programada correctamente', {

@@ -10,6 +10,7 @@ export interface ISalePayment extends Document {
   paymentAccount?: Schema.Types.ObjectId;
   isCashSettlement: boolean;
   isDownPayment: boolean;
+  cashCut?: Schema.Types.ObjectId;
   createdBy: Schema.Types.ObjectId;
   createdAt: Date;
 }
@@ -32,6 +33,8 @@ const SalePaymentSchema = new Schema<ISalePayment>({
   paymentAccount: { type: Schema.Types.ObjectId, ref: 'payment_accounts', default: null },
   isCashSettlement: { type: Boolean, default: false },
   isDownPayment: { type: Boolean, default: false },
+  // Corte de caja que ya cerró este cobro en efectivo (null = pendiente de cortar)
+  cashCut: { type: Schema.Types.ObjectId, ref: 'cash_cuts', default: null },
   createdBy: { type: Schema.Types.ObjectId, required: true, ref: 'users' },
   createdAt: { type: Date, required: true }
 });

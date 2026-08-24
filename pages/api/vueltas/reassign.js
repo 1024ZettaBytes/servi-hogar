@@ -9,13 +9,17 @@ async function reassignAPI(req, res, userId) {
         errorMsg: 'Faltan datos para reasignar la vuelta (taskType, taskId, operatorId)'
       });
     }
-    await reassignVueltaData({
+    const { scheduleCleared } = await reassignVueltaData({
       taskType,
       taskId,
       operatorId,
       lastUpdatedBy: userId
     });
-    res.status(200).json({ msg: 'Vuelta reasignada con éxito' });
+    res.status(200).json({
+      msg: scheduleCleared
+        ? 'Vuelta reasignada con éxito. Se quitó la hora programada; hay que reprogramarla con el nuevo operador.'
+        : 'Vuelta reasignada con éxito'
+    });
   } catch (e) {
     console.error(e);
     res.status(500).json({

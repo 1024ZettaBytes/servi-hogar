@@ -57,7 +57,10 @@ import {
   useGetCities,
   useGetPaymentAccounts
 } from '../api/useRequest';
-import { PAYMENT_METHODS } from '../../lib/consts/OBJ_CONTS';
+import {
+  PAYMENT_METHODS,
+  getPaymentMethodsForRole
+} from '../../lib/consts/OBJ_CONTS';
 import useSWR from 'swr';
 import ConfirmEquipmentDeliveryModal from '@/components/ConfirmEquipmentDeliveryModal';
 
@@ -1113,11 +1116,13 @@ function CompletarVenta() {
                                           }
                                         }}
                                       >
-                                        {Object.keys(PAYMENT_METHODS).map((key) => (
-                                          <MenuItem key={key} value={key}>
-                                            {PAYMENT_METHODS[key]}
-                                          </MenuItem>
-                                        ))}
+                                        {getPaymentMethodsForRole('OPE').map(
+                                          (key) => (
+                                            <MenuItem key={key} value={key}>
+                                              {PAYMENT_METHODS[key]}
+                                            </MenuItem>
+                                          )
+                                        )}
                                       </Select>
                                     </FormControl>
                                   </Grid>

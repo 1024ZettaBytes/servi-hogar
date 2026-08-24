@@ -15,6 +15,7 @@ export interface IPayment extends Document {
   lastUpdatedBy: Schema.Types.ObjectId;
   weeksToPay?: number;
   lateFee?: number;
+  cashCut?: Schema.Types.ObjectId;
 }
 
 const PaymentSchema = new Schema<IPayment>({
@@ -41,6 +42,8 @@ const PaymentSchema = new Schema<IPayment>({
   date: { type: Date, required: true },
   lateFee: { type: Number, default: 0 },
   weeksToPay: { type: Number, default: 0 },
+  // Corte de caja que ya cerró este cobro en efectivo (null = pendiente de cortar)
+  cashCut: { type: Schema.Types.ObjectId, ref: 'cash_cuts', default: null },
   lastUpdatedBy: { type: Schema.Types.ObjectId, required: true, ref: 'users' }
 });
 
