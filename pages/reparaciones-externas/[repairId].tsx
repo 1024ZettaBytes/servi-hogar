@@ -49,7 +49,10 @@ import {
   useGetPaymentAccounts,
   useGetAllWarehousesOverview
 } from '../../pages/api/useRequest';
-import { PAYMENT_METHODS } from '../../lib/consts/OBJ_CONTS';
+import {
+  PAYMENT_METHODS,
+  getPaymentMethodsForRole
+} from '../../lib/consts/OBJ_CONTS';
 import {
   submitExternalRepairBudget,
   addUsedProductToExternalRepair,
@@ -1132,13 +1135,13 @@ function ExternalRepairDetail({ session }) {
                                             setDeliveryMethod(e.target.value)
                                           }
                                         >
-                                          {Object.keys(PAYMENT_METHODS).map(
-                                            (m) => (
-                                              <MenuItem key={m} value={m}>
-                                                {PAYMENT_METHODS[m]}
-                                              </MenuItem>
-                                            )
-                                          )}
+                                          {getPaymentMethodsForRole(
+                                            session?.user?.role
+                                          ).map((m) => (
+                                            <MenuItem key={m} value={m}>
+                                              {PAYMENT_METHODS[m]}
+                                            </MenuItem>
+                                          ))}
                                         </Select>
                                       </FormControl>
                                     </Grid>

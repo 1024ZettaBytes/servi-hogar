@@ -44,6 +44,7 @@ async function handler(req, res) {
     await completeExternalRepairDelivery({
       repairId: one(fields.repairId),
       deliveredBy: userId,
+      deliveredByRole: ok,
       method: one(fields.method),
       folio: one(fields.folio),
       paymentAccountId: one(fields.paymentAccountId),

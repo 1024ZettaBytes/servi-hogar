@@ -878,3 +878,51 @@ export const useGetFeatureFlags = (fetcher) => {
     isLoadingFeatureFlags: isLoading
   };
 };
+
+// Cash cuts (Corte de caja)
+export const useGetRouteCashSummary = (fetcher, userId = null) => {
+  const url = userId
+    ? `${ROUTES.ROUTE_CASH_SUMMARY_API}?userId=${userId}`
+    : ROUTES.ROUTE_CASH_SUMMARY_API;
+  const { data, error, isLoading } = useSWR(url, fetcher);
+  return {
+    routeCashSummary: data?.data,
+    routeCashSummaryError: error,
+    isLoadingRouteCash: isLoading
+  };
+};
+
+export const useGetOfficeCashBox = (fetcher) => {
+  const { data, error, isLoading } = useSWR(ROUTES.OFFICE_CASH_BOX_API, fetcher);
+  return {
+    officeCashBox: data?.data,
+    officeCashBoxError: error,
+    isLoadingOfficeBox: isLoading
+  };
+};
+
+export const useGetCashCuts = (fetcher, limit, page, type = null) => {
+  let url = getPaginatedUrl(ROUTES.CASH_CUTS_API, limit, page);
+  if (type) {
+    url += `&type=${type}`;
+  }
+  const { data, error, isLoading } = useSWR(url, fetcher);
+  return {
+    cashCuts: data?.data,
+    cashCutsError: error,
+    isLoadingCashCuts: isLoading
+  };
+};
+
+export const useGetCashExpenses = (fetcher, limit, page, onlyOpen = false) => {
+  let url = getPaginatedUrl(ROUTES.CASH_EXPENSES_API, limit, page);
+  if (onlyOpen) {
+    url += `&onlyOpen=true`;
+  }
+  const { data, error, isLoading } = useSWR(url, fetcher);
+  return {
+    cashExpenses: data?.data,
+    cashExpensesError: error,
+    isLoadingCashExpenses: isLoading
+  };
+};
