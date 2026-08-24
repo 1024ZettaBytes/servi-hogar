@@ -123,14 +123,26 @@ function VueltasTable({ vueltas, canReassign, onReassign, onSchedule, showDate =
                         ? formatTZDate(new Date(v.scheduledTime), 'HH:mm')
                         : 'Sin programar'}
                     </Typography>
-                    <Tooltip title={v.scheduledTime ? 'Cambiar hora' : 'Programar hora'} arrow>
-                      <IconButton
-                        size="small"
-                        color="secondary"
-                        onClick={() => onSchedule(v)}
-                      >
-                        <AccessTimeIcon fontSize="small" />
-                      </IconButton>
+                    <Tooltip
+                      title={
+                        !v.operator
+                          ? 'Asigna un operador primero'
+                          : v.scheduledTime
+                          ? 'Cambiar hora'
+                          : 'Programar hora'
+                      }
+                      arrow
+                    >
+                      <span>
+                        <IconButton
+                          size="small"
+                          color="secondary"
+                          disabled={!v.operator}
+                          onClick={() => onSchedule(v)}
+                        >
+                          <AccessTimeIcon fontSize="small" />
+                        </IconButton>
+                      </span>
                     </Tooltip>
                   </Box>
                 </TableCell>
@@ -281,6 +293,8 @@ function TablaVueltasReparacionExterna({ userRole, selectedDate }) {
           }}
           taskId={taskToSchedule._id}
           taskType={taskToSchedule.type}
+          operatorId={taskToSchedule.operator?._id || null}
+          operatorName={taskToSchedule.operator?.name || null}
           currentScheduledTime={taskToSchedule.scheduledTime}
           onScheduleSaved={() => {
             enqueueSnackbar('Hora programada correctamente', {

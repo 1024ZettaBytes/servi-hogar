@@ -1,6 +1,7 @@
-import { FC, useState } from 'react';
+import { FC, Fragment, useMemo, useState } from 'react';
 import {
   useGetScheduledSlots,
+  useGetOperators,
   getFetcher
 } from '../../../pages/api/useRequest';
 import {
@@ -9,7 +10,8 @@ import {
   CircularProgress,
   alpha,
   useTheme,
-  Collapse
+  Collapse,
+  Tooltip
 } from '@mui/material';
 import AccessTimeIcon from '@mui/icons-material/AccessTime';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
@@ -21,6 +23,7 @@ import { es } from 'date-fns/locale';
 
 interface ScheduleTimelineProps {
   selectedDate: Date;
+  userRole?: string;
 }
 
 interface TimeSlot {
@@ -35,48 +38,27 @@ interface TimeSlot {
   };
 }
 
-const ScheduleTimeline: FC<ScheduleTimelineProps> = ({ selectedDate }) => {
+// Columna de la vista de oficina: un operador, o el cajón de vueltas sin asignar.
+interface OperatorColumn {
+  id: string;
+  name: string;
+}
+
+// 07:00 → 20:00 en intervalos de 30 minutos.
+const FIRST_HOUR = 7;
+const SLOT_COUNT = 26;
+const UNASSIGNED_COLUMN_ID = '__unassigned__';
+
+const minuteKey = (date: Date) => date.getHours() * 60 + date.getMinutes();
+
+const ScheduleTimeline: FC<ScheduleTimelineProps> = ({
+  selectedDate,
+  userRole
+}) => {
   const theme = useTheme();
   const [expanded, setExpanded] = useState(true);
 
-  // Generate time slots from 07:00 to 20:00 (30-minute intervals)
-  const generateTimeSlots = (scheduledSlots: any[]): TimeSlot[] => {
-    const slots: TimeSlot[] = [];
-    const baseDate = new Date(selectedDate);
-    baseDate.setHours(7, 0, 0, 0);
-
-    for (let i = 0; i < 26; i++) {
-      const slotTime = new Date(baseDate);
-      slotTime.setMinutes(baseDate.getMinutes() + i * 30);
-
-      const occupiedSlot = scheduledSlots.find((s) => {
-        const scheduledDate = new Date(s.scheduledTime);
-        return (
-          scheduledDate.getFullYear() === slotTime.getFullYear() &&
-          scheduledDate.getMonth() === slotTime.getMonth() &&
-          scheduledDate.getDate() === slotTime.getDate() &&
-          scheduledDate.getHours() === slotTime.getHours() &&
-          scheduledDate.getMinutes() === slotTime.getMinutes()
-        );
-      });
-
-      slots.push({
-        time: slotTime,
-        label: format(slotTime, 'HH:mm', { locale: es }),
-        isOccupied: !!occupiedSlot,
-        occupiedBy: occupiedSlot
-          ? {
-              taskId: occupiedSlot.taskId,
-              taskType: occupiedSlot.taskType,
-              customerName: occupiedSlot.customerName,
-              sector: occupiedSlot.sector || ''
-            }
-          : undefined
-      });
-    }
-
-    return slots;
-  };
+  const isManager = userRole === 'ADMIN' || userRole === 'AUX';
 
   const getTypeColor = (
     type: string
@@ -124,16 +106,6 @@ const ScheduleTimeline: FC<ScheduleTimelineProps> = ({ selectedDate }) => {
     }
   };
 
-  const dateStr = format(selectedDate, 'yyyy-MM-dd');
-  const { scheduledSlotsData, isLoadingScheduledSlots } = useGetScheduledSlots(
-    getFetcher,
-    dateStr
-  );
-
-  const timeSlots = generateTimeSlots(scheduledSlotsData || []);
-  const occupiedCount = timeSlots.filter((s) => s.isOccupied).length;
-  const availableCount = timeSlots.length - occupiedCount;
-
   const getTypeLabel = (type: string) => {
     switch (type) {
       case 'ENTREGA_VENTA':
@@ -153,6 +125,100 @@ const ScheduleTimeline: FC<ScheduleTimelineProps> = ({ selectedDate }) => {
     }
   };
 
+  const dateStr = format(selectedDate, 'yyyy-MM-dd');
+  // El API acota la respuesta: el OPE recibe solo su agenda; oficina recibe todas.
+  const { scheduledSlotsData, isLoadingScheduledSlots } = useGetScheduledSlots(
+    getFetcher,
+    dateStr
+  );
+  const { operatorsList } = useGetOperators(isManager ? getFetcher : null);
+
+  const slotTimes = useMemo(() => {
+    const baseDate = new Date(selectedDate);
+    baseDate.setHours(FIRST_HOUR, 0, 0, 0);
+    return Array.from({ length: SLOT_COUNT }, (_, i) => {
+      const slotTime = new Date(baseDate);
+      slotTime.setMinutes(baseDate.getMinutes() + i * 30);
+      return slotTime;
+    });
+  }, [selectedDate]);
+
+  // Solo los slots del día seleccionado que caen en un intervalo de la rejilla.
+  const slotsForDay = useMemo(
+    () =>
+      (scheduledSlotsData || []).filter((s: any) => {
+        const scheduled = new Date(s.scheduledTime);
+        return (
+          scheduled.getFullYear() === selectedDate.getFullYear() &&
+          scheduled.getMonth() === selectedDate.getMonth() &&
+          scheduled.getDate() === selectedDate.getDate()
+        );
+      }),
+    [scheduledSlotsData, selectedDate]
+  );
+
+  // --- Vista del operador: un solo timeline vertical ---
+  const timeSlots: TimeSlot[] = useMemo(
+    () =>
+      slotTimes.map((slotTime) => {
+        const occupiedSlot = slotsForDay.find(
+          (s: any) => minuteKey(new Date(s.scheduledTime)) === minuteKey(slotTime)
+        );
+        return {
+          time: slotTime,
+          label: format(slotTime, 'HH:mm', { locale: es }),
+          isOccupied: !!occupiedSlot,
+          occupiedBy: occupiedSlot
+            ? {
+                taskId: occupiedSlot.taskId,
+                taskType: occupiedSlot.taskType,
+                customerName: occupiedSlot.customerName,
+                sector: occupiedSlot.sector || ''
+              }
+            : undefined
+        };
+      }),
+    [slotTimes, slotsForDay]
+  );
+
+  // --- Vista de oficina: una columna por operador ---
+  // Solo se muestra el operador que está activo Y tiene al menos una vuelta
+  // programada en la fecha indicada.
+  const columns: OperatorColumn[] = useMemo(() => {
+    if (!isManager) return [];
+    const withSlots = new Set(
+      slotsForDay.map((s: any) => s.operatorId).filter(Boolean)
+    );
+    const cols: OperatorColumn[] = (operatorsList || [])
+      .filter((op: any) => op.isActive !== false && withSlots.has(String(op._id)))
+      .map((op: any) => ({ id: String(op._id), name: op.name }));
+    // Vueltas programadas cuyo operador se quitó: no se esconden, se agrupan aparte.
+    const hasUnassigned = slotsForDay.some((s: any) => !s.operatorId);
+    if (hasUnassigned) {
+      cols.push({ id: UNASSIGNED_COLUMN_ID, name: 'Sin asignar' });
+    }
+    return cols;
+  }, [isManager, operatorsList, slotsForDay]);
+
+  // { operatorId -> { minuto -> vuelta } }
+  const slotsByOperator = useMemo(() => {
+    const map = new Map<string, Map<number, any>>();
+    if (!isManager) return map;
+    for (const slot of slotsForDay as any[]) {
+      const columnId = slot.operatorId || UNASSIGNED_COLUMN_ID;
+      if (!map.has(columnId)) map.set(columnId, new Map());
+      map.get(columnId).set(minuteKey(new Date(slot.scheduledTime)), slot);
+    }
+    return map;
+  }, [isManager, slotsForDay]);
+
+  const occupiedCount = isManager
+    ? slotsForDay.length
+    : timeSlots.filter((s) => s.isOccupied).length;
+  const availableCount = isManager
+    ? Math.max(SLOT_COUNT * columns.length - occupiedCount, 0)
+    : timeSlots.length - occupiedCount;
+
   // Get current time slot
   const now = new Date();
   const currentHour = now.getHours();
@@ -161,6 +227,12 @@ const ScheduleTimeline: FC<ScheduleTimelineProps> = ({ selectedDate }) => {
     selectedDate.getFullYear() === now.getFullYear() &&
     selectedDate.getMonth() === now.getMonth() &&
     selectedDate.getDate() === now.getDate();
+
+  const isCurrentTimeSlot = (slotTime: Date) =>
+    isToday &&
+    slotTime.getHours() === currentHour &&
+    ((currentMinutes < 30 && slotTime.getMinutes() === 0) ||
+      (currentMinutes >= 30 && slotTime.getMinutes() === 30));
 
   return (
     <Box
@@ -214,6 +286,7 @@ const ScheduleTimeline: FC<ScheduleTimelineProps> = ({ selectedDate }) => {
             }}
           >
             {format(selectedDate, "EEEE d 'de' MMMM", { locale: es })}
+            {isManager ? ' · todos los operadores' : ''}
           </Typography>
         </Box>
 
@@ -272,14 +345,186 @@ const ScheduleTimeline: FC<ScheduleTimelineProps> = ({ selectedDate }) => {
         </Box>
       </Box>
 
-      {/* Vertical Timeline */}
       <Collapse in={expanded}>
         <Box sx={{ p: 2 }}>
-          {isLoadingScheduledSlots ? (
+          {isLoadingScheduledSlots || (isManager && !operatorsList) ? (
             <Box display="flex" justifyContent="center" p={2}>
               <CircularProgress size={24} />
             </Box>
+          ) : isManager ? (
+            /* --- Oficina: una columna por operador --- */
+            columns.length === 0 ? (
+              <Typography variant="body2" color="text.secondary" align="center">
+                No hay vueltas programadas para esta fecha.
+              </Typography>
+            ) : (
+              <Box sx={{ maxHeight: 420, overflow: 'auto' }}>
+                <Box
+                  sx={{
+                    display: 'grid',
+                    gridTemplateColumns: `56px repeat(${columns.length}, minmax(150px, 1fr))`,
+                    minWidth: 56 + columns.length * 150,
+                    gap: 0.5
+                  }}
+                >
+                  {/* Encabezado */}
+                  <Box
+                    sx={{
+                      position: 'sticky',
+                      top: 0,
+                      zIndex: 2,
+                      bgcolor: 'background.paper'
+                    }}
+                  />
+                  {columns.map((column) => (
+                    <Box
+                      key={column.id}
+                      sx={{
+                        position: 'sticky',
+                        top: 0,
+                        zIndex: 2,
+                        px: 1,
+                        py: 0.75,
+                        borderRadius: 1,
+                        textAlign: 'center',
+                        bgcolor: alpha(theme.palette.primary.main, 0.1)
+                      }}
+                    >
+                      <Typography
+                        variant="caption"
+                        sx={{
+                          fontWeight: 700,
+                          fontSize: '0.75rem',
+                          overflow: 'hidden',
+                          textOverflow: 'ellipsis',
+                          whiteSpace: 'nowrap',
+                          display: 'block'
+                        }}
+                      >
+                        {column.name}
+                      </Typography>
+                    </Box>
+                  ))}
+
+                  {/* Filas: un renglón por intervalo de 30 min */}
+                  {slotTimes.map((slotTime) => {
+                    const isCurrentSlot = isCurrentTimeSlot(slotTime);
+                    return (
+                      <Fragment key={slotTime.getTime()}>
+                        <Box
+                          sx={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'flex-end',
+                            pr: 1
+                          }}
+                        >
+                          <Typography
+                            variant="caption"
+                            sx={{
+                              fontWeight: isCurrentSlot ? 700 : 500,
+                              color: isCurrentSlot
+                                ? 'primary.main'
+                                : 'text.secondary',
+                              fontSize: '0.75rem'
+                            }}
+                          >
+                            {format(slotTime, 'HH:mm', { locale: es })}
+                          </Typography>
+                        </Box>
+
+                        {columns.map((column) => {
+                          const vuelta = slotsByOperator
+                            .get(column.id)
+                            ?.get(minuteKey(slotTime));
+
+                          if (!vuelta) {
+                            return (
+                              <Box
+                                key={column.id}
+                                sx={{
+                                  minHeight: 36,
+                                  borderRadius: 1,
+                                  display: 'flex',
+                                  alignItems: 'center',
+                                  justifyContent: 'center',
+                                  bgcolor: isCurrentSlot
+                                    ? alpha(theme.palette.primary.main, 0.08)
+                                    : alpha(theme.palette.grey[100], 0.5)
+                                }}
+                              >
+                                <Typography
+                                  variant="caption"
+                                  sx={{ color: 'text.disabled' }}
+                                >
+                                  —
+                                </Typography>
+                              </Box>
+                            );
+                          }
+
+                          const color = getTypeColor(vuelta.taskType);
+                          return (
+                            <Tooltip
+                              key={column.id}
+                              arrow
+                              title={`${getTypeLabel(vuelta.taskType)} · ${
+                                vuelta.customerName
+                              }${vuelta.sector ? ` · ${vuelta.sector}` : ''}`}
+                            >
+                              <Box
+                                sx={{
+                                  minHeight: 36,
+                                  px: 1,
+                                  py: 0.5,
+                                  borderRadius: 1,
+                                  bgcolor: getTypeBgColor(vuelta.taskType),
+                                  border: '1px solid',
+                                  borderColor: alpha(
+                                    theme.palette[color].main,
+                                    0.3
+                                  ),
+                                  overflow: 'hidden'
+                                }}
+                              >
+                                <Typography
+                                  variant="caption"
+                                  sx={{
+                                    display: 'block',
+                                    fontWeight: 600,
+                                    fontSize: '0.65rem',
+                                    color: theme.palette[color].dark,
+                                    overflow: 'hidden',
+                                    textOverflow: 'ellipsis',
+                                    whiteSpace: 'nowrap'
+                                  }}
+                                >
+                                  {getTypeLabel(vuelta.taskType)}
+                                </Typography>
+                                <Typography
+                                  variant="caption"
+                                  sx={{
+                                    display: 'block',
+                                    fontSize: '0.7rem',
+                                    overflow: 'hidden',
+                                    textOverflow: 'ellipsis',
+                                    whiteSpace: 'nowrap'
+                                  }}
+                                >
+                                  {vuelta.customerName}
+                                </Typography>
+                              </Box>
+                            </Tooltip>
+                          );
+                        })}
+                      </Fragment>
+                    );
+                  })}
+                </Box>
+              </Box>
+            )
           ) : (
+            /* --- Operador: su propio timeline vertical --- */
             <Box
               sx={{
                 position: 'relative',
@@ -312,11 +557,7 @@ const ScheduleTimeline: FC<ScheduleTimelineProps> = ({ selectedDate }) => {
 
                 {/* Timeline Items */}
                 {timeSlots.map((slot, index) => {
-                  const isCurrentSlot =
-                    isToday &&
-                    slot.time.getHours() === currentHour &&
-                    ((currentMinutes < 30 && slot.time.getMinutes() === 0) ||
-                      (currentMinutes >= 30 && slot.time.getMinutes() === 30));
+                  const isCurrentSlot = isCurrentTimeSlot(slot.time);
 
                   return (
                     <Box

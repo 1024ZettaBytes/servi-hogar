@@ -1,5 +1,5 @@
 import { updateTaskScheduledTime } from '../../../lib/data/Tasks';
-import { validateUserPermissions } from '../auth/authUtils';
+import { validateUserPermissions, getUserId } from '../auth/authUtils';
 
 export default async function handler(req, res) {
   const validRole = await validateUserPermissions(req, res, ['ADMIN', 'AUX', 'OPE']);
@@ -29,7 +29,13 @@ export default async function handler(req, res) {
       });
     }
 
-    const result = await updateTaskScheduledTime(taskId, taskType, scheduledTime);
+    // La programación es por operador: el data layer necesita saber quién programa
+    // para validar la propiedad de la vuelta y sobre qué agenda escribir.
+    const userId = await getUserId(req);
+    const result = await updateTaskScheduledTime(taskId, taskType, scheduledTime, {
+      userId,
+      userRole: validRole
+    });
 
     if (result.error) {
       return res.status(400).json(result);

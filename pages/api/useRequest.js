@@ -616,9 +616,15 @@ export const useGetExternalRepairById = (fetcher, id) => {
 };
 
 // Scheduled Tasks
-export const useGetScheduledSlots = (fetcher, date) => {
+// `operatorId` acota la respuesta a la agenda de un operador. El rol OPE siempre
+// recibe la suya (el API lo fuerza); oficina lo omite para ver todas las agendas.
+export const useGetScheduledSlots = (fetcher, date, operatorId = null) => {
   const { data, error, isLoading } = useSWR(
-    date ? `${ROUTES.SCHEDULED_SLOTS_API}?date=${date}` : null,
+    date
+      ? `${ROUTES.SCHEDULED_SLOTS_API}?date=${date}${
+          operatorId ? `&operatorId=${operatorId}` : ''
+        }`
+      : null,
     fetcher
   );
   return {

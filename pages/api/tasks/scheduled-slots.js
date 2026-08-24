@@ -1,5 +1,5 @@
 import { getScheduledSlotsForDate } from '../../../lib/data/Tasks';
-import { validateUserPermissions } from '../auth/authUtils';
+import { validateUserPermissions, getUserId } from '../auth/authUtils';
 
 export default async function handler(req, res) {
   const validRole = await validateUserPermissions(req, res, ['ADMIN', 'AUX', 'OPE']);
@@ -22,7 +22,13 @@ export default async function handler(req, res) {
       });
     }
 
-    const result = await getScheduledSlotsForDate(date);
+    // El operador solo ve su propia agenda; oficina puede pedir la de un operador
+    // en concreto o (sin operatorId) todas para la vista por columnas.
+    const userId = await getUserId(req);
+    const operatorId =
+      validRole === 'OPE' ? userId : req.query.operatorId || null;
+
+    const result = await getScheduledSlotsForDate(date, { operatorId });
 
     if (result.error) {
       return res.status(400).json(result);

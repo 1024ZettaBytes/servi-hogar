@@ -37,6 +37,9 @@ interface ScheduleTimePickerProps {
   currentScheduledTime: Date | null;
   onScheduleSaved: () => void;
   selectedDate: Date;
+  /** Operador dueño de la vuelta: la agenda que se muestra es la suya. */
+  operatorId?: string | null;
+  operatorName?: string | null;
 }
 
 interface TimeSlot {
@@ -59,7 +62,9 @@ const ScheduleTimePicker: FC<ScheduleTimePickerProps> = ({
   taskType,
   currentScheduledTime,
   onScheduleSaved,
-  selectedDate
+  selectedDate,
+  operatorId = null,
+  operatorName = null
 }) => {
   const [internalDate, setInternalDate] = useState<Date>(selectedDate);
   const [selectedSlot, setSelectedSlot] = useState<TimeSlot | null>(null);
@@ -125,9 +130,12 @@ const ScheduleTimePicker: FC<ScheduleTimePickerProps> = ({
   };
 
   const dateStr = format(internalDate, 'yyyy-MM-dd');
+  // La disponibilidad mostrada es la de ESTE operador: dos operadores pueden
+  // tener la misma hora ocupada sin estorbarse.
   const { scheduledSlotsData, isLoadingScheduledSlots } = useGetScheduledSlots(
     getFetcher,
-    open ? dateStr : null
+    open ? dateStr : null,
+    operatorId
   );
 
   const timeSlots = generateTimeSlots(scheduledSlotsData || []);
@@ -279,7 +287,9 @@ const ScheduleTimePicker: FC<ScheduleTimePickerProps> = ({
         <DialogTitle sx={{ pb: 1 }}>
           <Box display="flex" alignItems="center" gap={1} mb={2}>
             <AccessTimeIcon color="primary" />
-            <Typography variant="h6">Programar Hora</Typography>
+            <Typography variant="h6">
+              {operatorName ? `Programar Hora — ${operatorName}` : 'Programar Hora'}
+            </Typography>
           </Box>
           
           {/* Date Navigation */}

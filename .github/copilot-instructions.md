@@ -27,6 +27,8 @@ npm start            # production start
 
 Requires `.env` with: `MONGO_URI`, `CLOUD_PROJECT`, `CLOUD_EMAIL`, `CLOUD_KEY`, `CLOUD_BUCKET`, `FILES_HOST`, `NEXTAUTH_SECRET`, `MAPS_API_KEY`.
 
+Optional: `CASH_CUT_START_DATE` (ISO date) — fecha desde la que el corte de caja considera cobros en efectivo. Sin ella se usa el valor por defecto en `lib/consts/OBJ_CONTS.js`. Todo lo cobrado antes de esa fecha queda fuera de los cortes.
+
 ## Architecture
 
 ```

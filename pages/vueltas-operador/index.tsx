@@ -227,6 +227,7 @@ function VueltasOperador({ session }) {
           sector: item.sale?.customer?.currentResidence?.sector?.name,
           takenAt: item.createdAt,
           suburb: item.sale?.customer?.currentResidence?.suburb,
+          operator: item.assignedTo,
         })),
         // All pending sale changes (warranty exchanges)
         ...(pendingSaleChangesList || []).map((item) => ({
@@ -476,7 +477,10 @@ function VueltasOperador({ session }) {
                 )}
 
                 {/* Schedule Timeline */}
-                <ScheduleTimeline selectedDate={selectedDate} />
+                <ScheduleTimeline
+                  selectedDate={selectedDate}
+                  userRole={userRole}
+                />
                 
                 {/* Pending Tasks Section */}
                 <Card sx={{ mb: 4 }}>

@@ -389,7 +389,23 @@ const TablaVueltasOperador: FC<TablaVueltasOperadorProps> = ({
                           sx={{ cursor: 'pointer' }}
                         />
                       ) : (
-                        (isManager || isOperator) && (
+                        (isManager || isOperator) &&
+                        // La programación vive en la agenda del operador asignado:
+                        // sin operador no hay agenda a la que pertenecer.
+                        (isManager && !task.operator && !task.assignedTo ? (
+                          <Tooltip title="Asigna un operador primero" arrow>
+                            <span>
+                              <Button
+                                size="small"
+                                variant="outlined"
+                                disabled
+                                startIcon={<AccessTimeIcon />}
+                              >
+                                Programar
+                              </Button>
+                            </span>
+                          </Tooltip>
+                        ) : (
                           <Button
                             size="small"
                             variant="outlined"
@@ -398,7 +414,7 @@ const TablaVueltasOperador: FC<TablaVueltasOperadorProps> = ({
                           >
                             Programar
                           </Button>
-                        )
+                        ))
                       )}
                     </TableCell>
                   )}
@@ -843,6 +859,12 @@ const TablaVueltasOperador: FC<TablaVueltasOperadorProps> = ({
           currentScheduledTime={taskToSchedule.scheduledTime}
           onScheduleSaved={handleScheduleSaved}
           selectedDate={selectedDate}
+          operatorId={
+            taskToSchedule.operator?._id || taskToSchedule.assignedTo?._id || null
+          }
+          operatorName={
+            taskToSchedule.operator?.name || taskToSchedule.assignedTo?.name || null
+          }
         />
       )}
       {formatIsOpen && formatConfig && (
