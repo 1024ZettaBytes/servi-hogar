@@ -1,5 +1,5 @@
 import { getCompletedExtraTrips } from '../../../lib/data/ExtraTrips';
-import { validateUserPermissions } from '../auth/authUtils';
+import { validateUserPermissions, getUserId, getUserRole } from '../auth/authUtils';
 
 async function handler(req, res) {
   const validRole = await validateUserPermissions(req, res, ['ADMIN', 'AUX', 'OPE']);
@@ -7,7 +7,15 @@ async function handler(req, res) {
   if (validRole && req.method === 'GET') {
     try {
       const { date } = req.query;
-      const completedTrips = await getCompletedExtraTrips(date || new Date().toISOString());
+      const userRole = await getUserRole(req);
+
+      // Only filter by operator if user is OPE
+      const operatorFilter = userRole === 'OPE' ? await getUserId(req) : null;
+
+      const completedTrips = await getCompletedExtraTrips(
+        date || new Date().toISOString(),
+        operatorFilter
+      );
       res.status(200).json({ data: completedTrips });
     } catch (e) {
       console.error(e);

@@ -1,4 +1,4 @@
-import { validateUserPermissions } from '../../../auth/authUtils';
+import { validateUserPermissions, getUserId, getUserRole } from '../../../auth/authUtils';
 import { getCompletedSaleChangesData } from '../../../../../lib/data/SaleChanges';
 
 export const config = {
@@ -12,7 +12,12 @@ async function handler(req, res) {
   if (validRole && req.method === 'GET') {
     try {
       const { date } = req.query;
-      const changes = await getCompletedSaleChangesData(date || null);
+      const userRole = await getUserRole(req);
+
+      // Only filter by operator if user is OPE
+      const operatorFilter = userRole === 'OPE' ? await getUserId(req) : null;
+
+      const changes = await getCompletedSaleChangesData(date || null, operatorFilter);
       res.status(200).json({ data: changes });
     } catch (e) {
       console.error(e);

@@ -59,6 +59,10 @@ function VueltasOperador({ session }) {
   // Use client-side session data if available, otherwise fall back to server-side session
   const currentUser = sessionData?.user || session?.user;
   const userRole = (currentUser as any)?.role;
+  // Las vueltas de reparación externa se atribuyen por pierna (recolección /
+  // entrega), así que un operador solo debe ver y contar las suyas.
+  const operatorId =
+    userRole === "OPE" ? (currentUser as any)?.id : null;
 
   const handleRefresh = () => {
     // Trigger re-fetch of all pending tasks
@@ -153,10 +157,10 @@ function VueltasOperador({ session }) {
   const { externalRepairsList: externalRepairsActive } = useGetExternalRepairs(getFetcher);
   const { externalRepairsList: externalRepairsFinalized } = useGetExternalRepairs(getFetcher, false);
   const { pending: externalPendingVueltas, completed: externalCompletedVueltas } =
-    buildVueltas([
-      ...(externalRepairsActive || []),
-      ...(externalRepairsFinalized || []),
-    ]);
+    buildVueltas(
+      [...(externalRepairsActive || []), ...(externalRepairsFinalized || [])],
+      operatorId
+    );
   const selectedDayKey = formatTZDate(selectedDate, "YYYY-MM-DD");
   const externalCompletedForDay = externalCompletedVueltas.filter(
     (v) => formatTZDate(v.completedAt, "YYYY-MM-DD") === selectedDayKey
@@ -339,8 +343,13 @@ function VueltasOperador({ session }) {
     : [];
 
   // Calculate statistics
+  // La lista de extras finalizadas incluye las CANCELADAS para poder mostrarlas
+  // en la tabla, pero una vuelta cancelada no se realizó ni se paga.
   const pendingExtraTripsCount = pendingExtraTripsList?.length || 0;
-  const completedExtraTripsCount = completedExtraTripsList?.length || 0;
+  const completedExtraTripsCount =
+    (completedExtraTripsList || []).filter(
+      (trip) => trip.status === "COMPLETADA"
+    ).length;
 
   const totalAssigned =
     allPendingTasks.length +
@@ -504,6 +513,7 @@ function VueltasOperador({ session }) {
                   <TablaVueltasReparacionExterna
                     userRole={userRole}
                     selectedDate={selectedDate}
+                    operatorId={operatorId}
                   />
                 </Box>
 
