@@ -29,12 +29,20 @@ import { getFetcher, useGetExternalRepairs } from '../../pages/api/useRequest';
 // Build the operator's external-repair "vueltas" (pickups + deliveries/returns)
 // from the external repairs list, split into pending (por realizar) and completed
 // (realizadas). Completed trips carry the timestamp they were finished at.
-export function buildVueltas(list) {
+//
+// Una reparación puede tener la recolección asignada a un operador y la entrega
+// a otro, y la API devuelve el registro completo a los dos. Con operatorId
+// cada pierna se cuenta solo para su responsable.
+export function buildVueltas(list, operatorId = null) {
   const pending = [];
   const completed = [];
+  const isMine = (assignee) =>
+    !operatorId ||
+    String(assignee?._id || assignee || '') === String(operatorId);
   for (const r of list || []) {
     // --- Pickup (recolección) ---
-    if (r.status === 'RECOLECCION_AGENDADA') {
+    const minePickup = isMine(r.pickupAssignedTo);
+    if (minePickup && r.status === 'RECOLECCION_AGENDADA') {
       pending.push({
         _id: r._id,
         type: 'RECOLECCION_EXTERNA',
@@ -45,7 +53,7 @@ export function buildVueltas(list) {
         operator: r.pickupAssignedTo,
         scheduledTime: r.scheduledTime
       });
-    } else if (r.pickupCompletedAt) {
+    } else if (minePickup && r.pickupCompletedAt) {
       completed.push({
         _id: r._id,
         type: 'RECOLECCION_EXTERNA',
@@ -59,11 +67,12 @@ export function buildVueltas(list) {
     }
 
     // --- Delivery / return (entrega / devolución) ---
+    const mineDelivery = isMine(r.deliveryAssignedTo);
     const isDeliverablePending =
       (r.status === 'REPARADA' || r.status === 'NO_AUTORIZADA') &&
       r.deliveryAssignedTo &&
       !r.deliveredAt;
-    if (isDeliverablePending) {
+    if (mineDelivery && isDeliverablePending) {
       pending.push({
         _id: r._id,
         type: 'ENTREGA_EXTERNA',
@@ -74,7 +83,7 @@ export function buildVueltas(list) {
         operator: r.deliveryAssignedTo,
         scheduledTime: r.scheduledTime
       });
-    } else if (r.deliveredAt) {
+    } else if (mineDelivery && r.deliveredAt) {
       completed.push({
         _id: r._id,
         type: 'ENTREGA_EXTERNA',
@@ -179,7 +188,7 @@ function VueltasTable({ vueltas, canReassign, onReassign, onSchedule, showDate =
   );
 }
 
-function TablaVueltasReparacionExterna({ userRole, selectedDate }) {
+function TablaVueltasReparacionExterna({ userRole, selectedDate, operatorId = null }) {
   const { enqueueSnackbar } = useSnackbar();
   const { externalRepairsList, isLoadingExternalRepairs } =
     useGetExternalRepairs(getFetcher);
@@ -208,10 +217,10 @@ function TablaVueltasReparacionExterna({ userRole, selectedDate }) {
   // Both pending (non-terminal) and finalized (terminal) repairs contribute
   // completed trips (e.g. a picked-up machine still in evaluation, or an already
   // delivered one).
-  const { pending, completed } = buildVueltas([
-    ...(externalRepairsList || []),
-    ...(finalizedList || [])
-  ]);
+  const { pending, completed } = buildVueltas(
+    [...(externalRepairsList || []), ...(finalizedList || [])],
+    operatorId
+  );
 
   // Only show completed trips finished on the selected day.
   const dayKey = selectedDate

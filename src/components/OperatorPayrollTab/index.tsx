@@ -122,6 +122,7 @@ function OperatorPayrollTab({ weekStartStr, userRole }: OperatorPayrollTabProps)
                   { label: 'Cambios', count: op.changes },
                   { label: 'Recolecciones Venta', count: op.salePickups },
                   { label: 'Entregas Venta', count: op.saleDeliveries },
+                  { label: 'Cobranzas', count: op.collections },
                   { label: 'Cambios Venta', count: op.saleChanges },
                   { label: 'Vueltas Extra', count: op.extraTrips },
                   { label: 'Recolecciones Rep. Externa', count: op.externalRepairPickups },
