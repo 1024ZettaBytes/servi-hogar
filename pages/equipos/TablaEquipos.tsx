@@ -649,7 +649,7 @@ const TablaEquipos: FC<TablaEquiposProps> = ({ userRole, machinesList }) => {
         open={dismantleModalIsOpen}
         title="Desmantelar Equipo"
         requiredReason={false}
-        text={`¿Está seguro de desmantelar el equipo #${machineToDismantle?.machineNum}? El equipo quedará inactivo y con estatus DESMANTELADO. Esta acción es irreversible.`}
+        text={`¿Está seguro de desmantelar el equipo #${machineToDismantle?.machineNum}? El equipo quedará inactivo y aparecerá en Almacén, pestaña Desmanteladas. Esta acción es irreversible.`}
         isLoading={isDismantling}
         onAccept={handleOnConfirmDismantle}
         onCancel={() => {
