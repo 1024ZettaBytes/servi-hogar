@@ -226,7 +226,8 @@ const TablaAlmacen: FC<TablaAlmacenProps> = ({
   };
 
   const showOriginFilter =
-    ['ALMACENADA', 'ACONDICIONADA'].includes(tabFilter) || !tabFilter;
+    ['ALMACENADA', 'ACONDICIONADA', 'DESMANTELADA'].includes(tabFilter) ||
+    !tabFilter;
 
   return (
     <Card>
@@ -248,6 +249,7 @@ const TablaAlmacen: FC<TablaAlmacenProps> = ({
                   <MenuItem value="NUEVA">Nueva (Mexicali)</MenuItem>
                   <MenuItem value="REPUESTA">Repuesta</MenuItem>
                   <MenuItem value="COMPRA_CALLE">Compra en calle</MenuItem>
+                  <MenuItem value="CONVERSION_RENTA">Conversión de Renta</MenuItem>
                 </Select>
               </FormControl>
             )}
@@ -297,6 +299,7 @@ const TablaAlmacen: FC<TablaAlmacenProps> = ({
                     noWrap
                   >
                     #{machine.entryNumber}
+                    {machine.isRentalMachine ? ' (RENTA)' : ''}
                   </Typography>
                 </TableCell>
                 <TableCell>

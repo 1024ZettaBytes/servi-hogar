@@ -1,5 +1,16 @@
 import mongoose, { Model, model, Schema } from 'mongoose';
 
+// Un movimiento del saldo de semanas gratis: por qué se otorgó o dónde se usó.
+// Sirve para explicar el saldo actual, no solo mostrar el número.
+export interface IFreeWeekMovement {
+  reason: string;
+  weeks: number;
+  date: Date;
+  rent: Schema.Types.ObjectId;
+  referral: Schema.Types.ObjectId;
+  createdBy: Schema.Types.ObjectId;
+}
+
 export interface ICustomer extends Document {
   name: string;
   cell: string;
@@ -13,6 +24,7 @@ export interface ICustomer extends Document {
   referrals: [Schema.Types.ObjectId];
   referredBy: Schema.Types.ObjectId;
   freeWeeks: number;
+  freeWeeksHistory: IFreeWeekMovement[];
   firstRentAt: Date;
   hasRent: boolean;
   currentRent: Schema.Types.ObjectId;
@@ -30,6 +42,19 @@ export interface ICustomer extends Document {
   lastUpdatedBy: Schema.Types.ObjectId;
   active: boolean;
 }
+
+const FreeWeekMovementSchema = new Schema<IFreeWeekMovement>({
+  // Uno de FREE_WEEK_REASONS: RECOMENDACION / CAMBIOS_CONSECUTIVOS / USO.
+  reason: { type: String, required: true },
+  // Siempre positivo: el signo lo da el motivo (USO resta, el resto suma).
+  weeks: { type: Number, required: true },
+  date: { type: Date, required: true },
+  // Renta donde ocurrieron los cambios, o donde se aplicaron las semanas.
+  rent: { type: Schema.Types.ObjectId, default: null, ref: 'rents' },
+  // Cliente recomendado que generó la semana.
+  referral: { type: Schema.Types.ObjectId, default: null, ref: 'customers' },
+  createdBy: { type: Schema.Types.ObjectId, default: null, ref: 'users' }
+});
 
 const CustomerSchema = new Schema<ICustomer>({
   name: { type: 'string', required: true },
@@ -62,6 +87,7 @@ const CustomerSchema = new Schema<ICustomer>({
   },
   referrals: { type: [Schema.Types.ObjectId], default: [], ref: 'customers' },
   freeWeeks: { type: Number, default: 0 },
+  freeWeeksHistory: { type: [FreeWeekMovementSchema], default: [] },
   hasRent: { type: 'boolean', default: false },
   firstRentAt: { type: Date, default: null },
   currentRent: { type: Schema.Types.ObjectId, default: null, ref: 'rents' },

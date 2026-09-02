@@ -342,6 +342,7 @@ function ExtendRentModal(props) {
                             selectedWeeks={effectiveRentPeriod.selectedWeeks}
                             useFreeWeeks={effectiveRentPeriod.useFreeWeeks}
                             freeWeeks={rent.customer?.freeWeeks}
+                            freeWeeksDetail={rent.customer?.freeWeeksDetail}
                             weekPrice={rent.customer?.level?.weekPrice}
                             onChangePeriod={onChangePeriod}
                             lateFee={chargeLateFee ? lateFeeAmount : 0}
