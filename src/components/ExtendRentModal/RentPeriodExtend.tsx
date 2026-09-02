@@ -6,12 +6,70 @@ import {
     Grid,
     Typography,
     Alert,
+    Box,
   } from "@mui/material";
   import StarIcon from '@mui/icons-material/Star';
   import { FC } from "react";
   import PropTypes from "prop-types";
   import numeral from "numeral";
-  import { PLAN_ORO, PLAN_99 } from "lib/consts/OBJ_CONTS";
+  import {
+    PLAN_ORO,
+    PLAN_99,
+    CHANGES_FOR_FREE_WEEK,
+    FREE_WEEK_REASONS,
+  } from "lib/consts/OBJ_CONTS";
+  import { formatTZDate } from "lib/client/utils";
+
+  // Explica de dónde salió cada grupo de semanas gratis que el cliente todavía
+  // tiene disponibles.
+  const describeSource = (source) => {
+    const when = source.date
+      ? ` (${formatTZDate(source.date, "DD/MMM/YYYY")})`
+      : "";
+    if (source.reason === FREE_WEEK_REASONS.RECOMENDACION) {
+      const referral = source.referral?.name;
+      return `por recomendar a ${referral || "un cliente"}${when}`;
+    }
+    if (source.reason === FREE_WEEK_REASONS.CAMBIOS_CONSECUTIVOS) {
+      const rentNum = source.rent?.num;
+      const rentLabel = rentNum ? ` en la renta #${rentNum}` : "";
+      return `por ${CHANGES_FOR_FREE_WEEK} cambios consecutivos${rentLabel}${when}`;
+    }
+    return `de origen desconocido${when}`;
+  };
+
+  const weeksLabel = (n) => (n === 1 ? "1 semana" : `${n} semanas`);
+
+  // Desglose del saldo de semanas gratis. El libro de movimientos arrancó vacío,
+  // así que los saldos anteriores se reportan como sin origen en vez de
+  // atribuirles un motivo inventado.
+  const FreeWeeksOrigin = ({ detail }) => {
+    const sources = detail?.sources || [];
+    const unregistered = detail?.unregistered || 0;
+    if (sources.length === 0 && unregistered === 0) return null;
+    return (
+      <Box sx={{ pl: 4, pb: 1 }}>
+        <Typography variant="subtitle2" color="text.secondary" gutterBottom>
+          Origen de las semanas gratis
+        </Typography>
+        {sources.map((source, index) => (
+          <Typography
+            key={`${source.reason}-${index}`}
+            variant="body2"
+            color="text.secondary"
+          >
+            • {weeksLabel(source.remaining)} {describeSource(source)}
+          </Typography>
+        ))}
+        {unregistered > 0 && (
+          <Typography variant="body2" color="text.secondary">
+            • {weeksLabel(unregistered)} de origen no registrado (anteriores al
+            registro de motivos)
+          </Typography>
+        )}
+      </Box>
+    );
+  };
   interface RentPeriodExtendProps {
     className?: string;
     label: string;
@@ -20,6 +78,7 @@ import {
     weekPrice: number;
     lateFee: number;
     freeWeeks?: any;
+    freeWeeksDetail?: any;
     isPlanOro?: boolean;
     isPlan99?: boolean;
     planOverdue?: boolean;
@@ -28,6 +87,7 @@ import {
   const RentPeriodExtend: FC<RentPeriodExtendProps> = ({
     label,
     freeWeeks,
+    freeWeeksDetail,
     onChangePeriod,
     weekPrice,
     selectedWeeks,
@@ -121,12 +181,17 @@ import {
               />
           </Grid>
           {freeWeeks > 0 && !hasPlan && (
-            <Grid item lg={3}>
-              <FormControlLabel
-                control={<Checkbox checked={useFreeWeeks} onChange={(event)=>{onChangePeriod("useFreeWeeks", event.target.checked)}}/>}
-                label={`Usar semanas gratis(${freeWeeks})`}
-              />
-            </Grid>
+            <>
+              <Grid item lg={3}>
+                <FormControlLabel
+                  control={<Checkbox checked={useFreeWeeks} onChange={(event)=>{onChangePeriod("useFreeWeeks", event.target.checked)}}/>}
+                  label={`Usar semanas gratis(${freeWeeks})`}
+                />
+              </Grid>
+              <Grid item xs={12}>
+                <FreeWeeksOrigin detail={freeWeeksDetail} />
+              </Grid>
+            </>
           )}
           <Grid item md={12} lg={12}></Grid>
           <Grid item lg={3}>
@@ -162,6 +227,7 @@ import {
     useFreeWeeks: PropTypes.bool.isRequired,
     weekPrice: PropTypes.number.isRequired,
     freeWeeks: PropTypes.number,
+    freeWeeksDetail: PropTypes.object,
     isPlanOro: PropTypes.bool,
     isPlan99: PropTypes.bool,
     planOverdue: PropTypes.bool,
