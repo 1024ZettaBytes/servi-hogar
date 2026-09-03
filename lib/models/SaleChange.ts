@@ -17,6 +17,7 @@ export interface ISaleChange extends Document {
   imagesUrl: {
     front: string;
     tag: string;
+    board: string;
   };
   operator: Schema.Types.ObjectId;
   scheduledTime: Date;
@@ -62,7 +63,8 @@ const SaleChangeSchema = new Schema<ISaleChange>({
   imagesUrl: {
     type: {
       front: { type: String, default: '' },
-      tag: { type: String, default: '' }
+      tag: { type: String, default: '' },
+      board: { type: String, default: '' }
     },
     default: null
   },
