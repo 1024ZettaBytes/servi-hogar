@@ -120,9 +120,10 @@ const TablaVueltasOperador: FC<TablaVueltasOperadorProps> = ({
   const handleOpenImages = (task: any) => {
     let images;
 
-    if (task.type === 'RECOLECCION_VENTA') {
-      // For sale warranty pickups, check pickup images first (completed pickups)
-      // Then fall back to delivery images (pending pickups shown in operator view)
+    if (task.sale) {
+      // For sale-related tasks (warranty pickups/changes, deliveries, collections),
+      // check the task's own images first (e.g. a completed pickup or change),
+      // then fall back to the sale's delivery images (pending items shown in operator view)
       images = task.imagesUrl || task.sale?.delivery?.imagesUrl;
     } else {
       // For rent-related tasks (deliveries, pickups, changes)
