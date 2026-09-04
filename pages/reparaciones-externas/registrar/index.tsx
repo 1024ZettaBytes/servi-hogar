@@ -32,6 +32,7 @@ import { formatTZDate } from '../../../lib/client/utils';
 import {
   getFetcher,
   useGetOperators,
+  useGetUsers,
   useGetAllCustomers,
   useGetCustomerById
 } from '../../../pages/api/useRequest';
@@ -40,6 +41,8 @@ function AgendarRecoleccionExterna() {
   const paths = ['Inicio', 'Reparaciones Externas', 'Agendar recolección'];
   const { enqueueSnackbar } = useSnackbar();
   const { operatorsList } = useGetOperators(getFetcher);
+  const { userList: technicianList } = useGetUsers(getFetcher, 'TEC');
+  const activeTechnicians = (technicianList || []).filter((t) => t.isActive);
   const { customerList } = useGetAllCustomers(getFetcher, false);
   const [isLoading, setIsLoading] = useState(false);
   const [hasError, setHasError] = useState({ error: false, msg: '' });
@@ -55,6 +58,7 @@ function AgendarRecoleccionExterna() {
   const [customerMaps, setCustomerMaps] = useState(null);
   const [failureDescription, setFailureDescription] = useState('');
   const [operatorId, setOperatorId] = useState('');
+  const [technicianId, setTechnicianId] = useState('');
   const [pickupDate, setPickupDate] = useState(null);
 
   const handleSelectCustomer = (customer) => {
@@ -77,10 +81,10 @@ function AgendarRecoleccionExterna() {
     setIsLoading(true);
     setHasError({ error: false, msg: '' });
 
-    if (!selectedCustomer ||!customer || !failureDescription || !operatorId || !pickupDate) {
+    if (!selectedCustomer ||!customer || !failureDescription || !operatorId || !technicianId || !pickupDate) {
       setHasError({
         error: true,
-        msg: 'Seleccione cliente y complete falla, chofer y fecha de recolección.'
+        msg: 'Seleccione cliente y complete falla, chofer, técnico y fecha de recolección.'
       });
       setIsLoading(false);
       return;
@@ -94,6 +98,7 @@ function AgendarRecoleccionExterna() {
       customerMaps: confirmedCustomerMaps,
       failureDescription,
       pickupAssignedTo: operatorId,
+      assignedTechnicianId: technicianId,
       pickupScheduledDate: formatTZDate(pickupDate, 'YYYY-MM-DD')
     });
 
@@ -107,6 +112,7 @@ function AgendarRecoleccionExterna() {
       handleSelectCustomer(null);
       setFailureDescription('');
       setOperatorId('');
+      setTechnicianId('');
       setPickupDate(new Date());
     } else {
       setHasError({ error: true, msg: result.msg });
@@ -133,7 +139,7 @@ function AgendarRecoleccionExterna() {
               <CardHeader title="Cliente y recolección" />
               <Divider />
               <CardContent>
-                {!customerList || !operatorsList ? (
+                {!customerList || !operatorsList || !technicianList ? (
                   <Box display="flex" justifyContent="center" py={5}>
                     <CircularProgress />
                   </Box>
@@ -226,6 +232,23 @@ function AgendarRecoleccionExterna() {
                           {(operatorsList || []).map((op) => (
                             <MenuItem key={op._id} value={op._id}>
                               {op.name}
+                            </MenuItem>
+                          ))}
+                        </Select>
+                      </FormControl>
+                    </Grid>
+                    <Grid item>
+                      <FormControl fullWidth required>
+                        <InputLabel id="tec-label">Técnico asignado</InputLabel>
+                        <Select
+                          labelId="tec-label"
+                          label="Técnico asignado"
+                          value={technicianId}
+                          onChange={(e) => setTechnicianId(e.target.value)}
+                        >
+                          {activeTechnicians.map((tec) => (
+                            <MenuItem key={tec._id} value={tec._id}>
+                              {tec.name}
                             </MenuItem>
                           ))}
                         </Select>

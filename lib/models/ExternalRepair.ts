@@ -49,6 +49,9 @@ export interface IExternalRepair extends Document {
   status: string;
   // Pickup (recolección)
   pickupAssignedTo: Schema.Types.ObjectId;
+  // Técnico elegido manualmente al agendar la recolección; se convierte en
+  // `takenBy` cuando el equipo se recibe en bodega.
+  assignedTechnician: Schema.Types.ObjectId;
   pickupScheduledDate: Date;
   scheduledTime: Date;
   pickupCompletedAt: Date;
@@ -120,6 +123,11 @@ const ExternalRepairSchema = new Schema<IExternalRepair>({
     default: EXTERNAL_REPAIR_STATUS.RECOLECCION_AGENDADA
   },
   pickupAssignedTo: {
+    type: Schema.Types.ObjectId,
+    ref: 'users',
+    default: null
+  },
+  assignedTechnician: {
     type: Schema.Types.ObjectId,
     ref: 'users',
     default: null

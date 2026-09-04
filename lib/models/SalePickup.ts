@@ -14,6 +14,7 @@ export interface ISalePickup extends Document {
   imagesUrl: {
     front: string;
     tag: string;
+    board: string;
   };
   timeOption: string;
   fromTime: Date;
@@ -60,7 +61,8 @@ const SalePickupSchema = new Schema<ISalePickup>({
   imagesUrl: {
     type: {
       front: { type: String, default: '' },
-      tag: { type: String, default: '' }
+      tag: { type: String, default: '' },
+      board: { type: String, default: '' }
     },
     default: null
   },

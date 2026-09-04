@@ -41,13 +41,15 @@ function CambioVentaPendiente({ session }) {
   const [attached, setAttached] = useState<any>({
     front: { file: null, url: null, error: false },
     tag: { file: null, url: null, error: false },
-    board: { file: null, url: null, error: false }
+    board: { file: null, url: null, error: false },
+    pickedBoard: { file: null, url: null, error: false }
   });
 
   const [badFormat, setBadFormat] = useState<any>({
     front: false,
     tag: false,
-    board: false
+    board: false,
+    pickedBoard: false
   });
   const paths = ['Inicio', 'Cambios ventas pendientes', `${saleChange?.totalNumber || ''}`];
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
@@ -71,7 +73,7 @@ function CambioVentaPendiente({ session }) {
   ];
 
   const checkEnabledButton = () => {
-    if (activeStep === 0) return attached.front.file && attached.tag.file && attached.board.file;
+    if (activeStep === 0) return attached.front.file && attached.tag.file && attached.board.file && attached.pickedBoard.file;
     return true;
   };
 
@@ -324,11 +326,38 @@ function CambioVentaPendiente({ session }) {
                                   <MuiFileInput
                                     required={!attached.board.file}
                                     placeholder={'No seleccionada'}
-                                    label={'Foto de tablero*'}
+                                    label={'Foto de tablero de equipo nuevo*'}
                                     value={attached.board?.file}
                                     onChange={(file) => handleFileChange('board', file)}
                                   />
                                   {attached.board?.error && (
+                                    <Typography color="error" variant="caption">
+                                      Seleccione un archivo válido (*.jpg, *.jpeg, *.png).
+                                    </Typography>
+                                  )}
+                                </Grid>
+
+                                {/* Picked Machine Board Photo */}
+                                <Grid item xs={12} md={6}>
+                                  {attached.pickedBoard?.url &&
+                                    !attached.pickedBoard.file.name.includes('pdf') && (
+                                      <Box mb={2}>
+                                        <Image
+                                          src={attached.pickedBoard.url}
+                                          alt="Tablero equipo recolectado"
+                                          width={300}
+                                          height={400}
+                                        />
+                                      </Box>
+                                    )}
+                                  <MuiFileInput
+                                    required={!attached.pickedBoard.file}
+                                    placeholder={'No seleccionada'}
+                                    label={'Foto de tablero de equipo recolectado*'}
+                                    value={attached.pickedBoard?.file}
+                                    onChange={(file) => handleFileChange('pickedBoard', file)}
+                                  />
+                                  {attached.pickedBoard?.error && (
                                     <Typography color="error" variant="caption">
                                       Seleccione un archivo válido (*.jpg, *.jpeg, *.png).
                                     </Typography>

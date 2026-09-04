@@ -40,12 +40,14 @@ function RecoleccionVentaPendiente({ session }) {
   const { data: sessionData, update: updateSession } = useSession();
   const [attached, setAttached] = useState<any>({
     front: { file: null, url: null, error: false },
-    tag: { file: null, url: null, error: false }
+    tag: { file: null, url: null, error: false },
+    board: { file: null, url: null, error: false }
   });
 
   const [badFormat, setBadFormat] = useState<any>({
     front: false,
-    tag: false
+    tag: false,
+    board: false
   });
   const isCancellation = salePickup?.isCancellation === true;
   const paths = ['Inicio', 'Recolecciones ventas pendientes', `${salePickup?.sale?.saleNum}`];
@@ -71,7 +73,7 @@ function RecoleccionVentaPendiente({ session }) {
   ];
 
   const checkEnabledButton = () => {
-    if (activeStep === 0) return attached.front.file && attached.tag.file;
+    if (activeStep === 0) return attached.front.file && attached.tag.file && attached.board.file;
     return true;
   };
 
@@ -301,6 +303,33 @@ function RecoleccionVentaPendiente({ session }) {
                                     onChange={(file) => handleFileChange('tag', file)}
                                   />
                                   {attached.tag?.error && (
+                                    <Typography color="error" variant="caption">
+                                      Seleccione un archivo válido (*.jpg, *.jpeg, *.png).
+                                    </Typography>
+                                  )}
+                                </Grid>
+
+                                {/* Board Photo */}
+                                <Grid item xs={12} md={6}>
+                                  {attached.board?.url &&
+                                    !attached.board.file.name.includes('pdf') && (
+                                      <Box mb={2}>
+                                        <Image
+                                          src={attached.board.url}
+                                          alt="Tablero"
+                                          width={300}
+                                          height={400}
+                                        />
+                                      </Box>
+                                    )}
+                                  <MuiFileInput
+                                    required={!attached.board.file}
+                                    placeholder={'No seleccionada'}
+                                    label={'Foto de tablero*'}
+                                    value={attached.board?.file}
+                                    onChange={(file) => handleFileChange('board', file)}
+                                  />
+                                  {attached.board?.error && (
                                     <Typography color="error" variant="caption">
                                       Seleccione un archivo válido (*.jpg, *.jpeg, *.png).
                                     </Typography>
