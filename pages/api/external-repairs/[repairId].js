@@ -7,7 +7,8 @@ import {
   scheduleExternalRepairDelivery,
   postponeExternalRepairDelivery,
   receiveExternalRepairInWarehouseData,
-  cancelExternalRepairData
+  cancelExternalRepairData,
+  reassignExternalRepairTechnicianData
 } from '../../../lib/data/ExternalRepairs';
 
 async function getExternalRepairByIdAPI(req, res) {
@@ -118,6 +119,20 @@ async function cancelAPI(req, res, userId) {
   }
 }
 
+async function reassignTechnicianAPI(req, res, userId) {
+  try {
+    await reassignExternalRepairTechnicianData({
+      repairId: req.query.repairId,
+      technicianId: req.body.technicianId,
+      lastUpdatedBy: userId
+    });
+    res.status(200).json({ msg: 'Técnico reasignado exitosamente.' });
+  } catch (e) {
+    console.error(e);
+    res.status(500).json({ errorMsg: e.message });
+  }
+}
+
 async function handler(req, res) {
   const userId = await getUserId(req);
   switch (req.method) {
@@ -139,7 +154,8 @@ async function handler(req, res) {
         'REJECT',
         'SCHEDULE_DELIVERY',
         'POSTPONE_DELIVERY',
-        'CANCEL'
+        'CANCEL',
+        'REASSIGN_TECHNICIAN'
       ];
       if (officeOps.includes(operation)) {
         // Office actions.
@@ -151,6 +167,8 @@ async function handler(req, res) {
           await scheduleDeliveryAPI(req, res, userId);
         else if (operation === 'POSTPONE_DELIVERY')
           await postponeDeliveryAPI(req, res, userId);
+        else if (operation === 'REASSIGN_TECHNICIAN')
+          await reassignTechnicianAPI(req, res, userId);
         else await cancelAPI(req, res, userId);
       } else if (operation === 'RECEIVE_WAREHOUSE') {
         // Warehouse staff drops the collected machine into a warehouse.

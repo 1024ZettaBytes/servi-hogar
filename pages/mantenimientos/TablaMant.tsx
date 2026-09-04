@@ -22,6 +22,7 @@ import { getStatusLabel } from './TablaMantPendientes';
 interface TablaMantProps {
   className?: string;
   listData: any[];
+  userRole?: string;
 }
 
 const applyPagination = (
@@ -32,9 +33,10 @@ const applyPagination = (
   return listData.slice(page * limit, page * limit + limit);
 };
 
-const TablaMant: FC<TablaMantProps> = ({ listData }) => {
+const TablaMant: FC<TablaMantProps> = ({ listData, userRole }) => {
   const [page, setPage] = useState<number>(0);
   const [limit, setLimit] = useState<number>(30);
+  const isAdminOrAux = ['ADMIN', 'AUX'].includes(userRole);
 
   const handlePageChange = (_event: any, newPage: number): void => {
     setPage(newPage);
@@ -66,6 +68,9 @@ const TablaMant: FC<TablaMantProps> = ({ listData }) => {
               <TableRow>
                 <TableCell align="center">Equipo</TableCell>
                 <TableCell align="center">Estado</TableCell>
+                {isAdminOrAux && (
+                  <TableCell align="center">Completado por</TableCell>
+                )}
                 <TableCell align="center">Fecha Inicio</TableCell>
                 <TableCell align="center">Fecha Fin</TableCell>
               </TableRow>
@@ -100,6 +105,11 @@ const TablaMant: FC<TablaMantProps> = ({ listData }) => {
                       )}
                     </TableCell>
                     <TableCell align="center">{getStatusLabel(mant?.status)}</TableCell>
+                    {isAdminOrAux && (
+                      <TableCell align="center">
+                        {mant?.takenBy?.name || 'Sin asignar'}
+                      </TableCell>
+                    )}
                     <TableCell align="center">
                       {formatTZDate(mant?.createdAt, 'DD MMM YYYY')}
                     </TableCell>
@@ -131,7 +141,8 @@ const TablaMant: FC<TablaMantProps> = ({ listData }) => {
 };
 
 TablaMant.propTypes = {
-  listData: PropTypes.array.isRequired
+  listData: PropTypes.array.isRequired,
+  userRole: PropTypes.string
 };
 
 TablaMant.defaultProps = {

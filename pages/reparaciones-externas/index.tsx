@@ -1,6 +1,7 @@
 import Head from 'next/head';
 import { getSession } from 'next-auth/react';
 import { useRouter } from 'next/router';
+import { useState } from 'react';
 import SidebarLayout from '@/layouts/SidebarLayout';
 import { validateServerSideSession } from '../../lib/auth';
 import PageHeader from '@/components/PageHeader';
@@ -22,11 +23,24 @@ import {
   Box,
   Typography,
   Alert,
-  CircularProgress
+  CircularProgress,
+  Tooltip,
+  IconButton,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  FormControl,
+  InputLabel,
+  Select,
+  MenuItem
 } from '@mui/material';
+import EditIcon from '@mui/icons-material/Edit';
+import { useSnackbar } from 'notistack';
 import Footer from '@/components/Footer';
 import NextBreadcrumbs from '@/components/Shared/BreadCrums';
-import { getFetcher, useGetExternalRepairs } from '../../pages/api/useRequest';
+import { getFetcher, useGetExternalRepairs, useGetUsers } from '../../pages/api/useRequest';
+import { reassignExternalRepairTechnician } from '../../lib/client/externalRepairsFetch';
 
 export const EXTERNAL_REPAIR_STATUS_LABELS = {
   RECOLECCION_AGENDADA: { label: 'Recolección agendada', color: 'secondary' },
@@ -50,9 +64,12 @@ function daysSince(date) {
   return Math.floor(diff / (1000 * 60 * 60 * 24));
 }
 
+const TERMINAL_STATUSES = ['ENTREGADA', 'DEVUELTA', 'CANCELADA'];
+
 function ReparacionesExternas({ session }) {
   const paths = ['Inicio', 'Reparaciones Externas'];
   const router = useRouter();
+  const { enqueueSnackbar } = useSnackbar();
   const {
     externalRepairsList,
     externalRepairsReminders,
@@ -64,24 +81,78 @@ function ReparacionesExternas({ session }) {
     isLoadingExternalRepairs: isLoadingFinalized
   } = useGetExternalRepairs(getFetcher, false);
 
-  // Only office (AUX/ADMIN) schedules external-repair pickups.
+  // Only office (AUX/ADMIN) schedules external-repair pickups and reassigns technicians.
   const canRegister = ['ADMIN', 'AUX'].includes(session?.user?.role);
+  const { userList: technicianList } = useGetUsers(
+    canRegister ? getFetcher : null,
+    'TEC'
+  );
+  const activeTechnicians = (technicianList || []).filter((t) => t.isActive);
+
+  const [reassignRepair, setReassignRepair] = useState<any>(null);
+  const [selectedTechnician, setSelectedTechnician] = useState('');
+  const [isReassigning, setIsReassigning] = useState(false);
+
   const list = externalRepairsList || [];
   const finalized = finalizedList || [];
   const reminders = externalRepairsReminders || [];
   const overdueReturns = externalRepairsOverdueReturns || [];
+
+  const handleOpenReassign = (r) => {
+    setReassignRepair(r);
+    setSelectedTechnician(r.takenBy?._id || r.assignedTechnician?._id || '');
+  };
+
+  const handleCloseReassign = () => {
+    setReassignRepair(null);
+    setSelectedTechnician('');
+  };
+
+  const handleSubmitReassign = async () => {
+    if (!reassignRepair || !selectedTechnician) return;
+    setIsReassigning(true);
+    const result = await reassignExternalRepairTechnician(
+      reassignRepair._id,
+      selectedTechnician
+    );
+    setIsReassigning(false);
+    if (!result.error) {
+      enqueueSnackbar(result.msg, { variant: 'success' });
+      handleCloseReassign();
+    } else {
+      enqueueSnackbar(result.msg, { variant: 'error' });
+    }
+  };
 
   const renderRepairRow = (r) => {
     const status = EXTERNAL_REPAIR_STATUS_LABELS[r.status] || {
       label: r.status,
       color: 'default'
     };
+    const canReassign = canRegister && !TERMINAL_STATUSES.includes(r.status);
     return (
       <TableRow hover key={r._id}>
         <TableCell>#{r.totalNumber}</TableCell>
         <TableCell>{r.customerName}</TableCell>
         <TableCell>{r.brand}</TableCell>
-        <TableCell>{r.takenBy?.name || '—'}</TableCell>
+        <TableCell>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+            <Typography variant="body2" noWrap>
+              {r.takenBy?.name || r.assignedTechnician?.name || '—'}
+            </Typography>
+            {canReassign && (
+              <Tooltip title="Cambiar técnico" arrow>
+                <IconButton
+                  size="small"
+                  color="primary"
+                  onClick={() => handleOpenReassign(r)}
+                >
+                  <EditIcon fontSize="small" />
+                </IconButton>
+              </Tooltip>
+            )}
+          </Box>
+        </TableCell>
         <TableCell>
           <Chip size="small" label={status.label} color={status.color as any} />
         </TableCell>
@@ -225,6 +296,52 @@ function ReparacionesExternas({ session }) {
         </Grid>
       </Container>
       <Footer />
+
+      {reassignRepair && (
+        <Dialog
+          open={!!reassignRepair}
+          onClose={handleCloseReassign}
+          maxWidth="sm"
+          fullWidth
+        >
+          <DialogTitle>Cambiar técnico asignado</DialogTitle>
+          <DialogContent>
+            <Box sx={{ mt: 1 }}>
+              <Alert severity="info" sx={{ mb: 2 }}>
+                Reparación externa <strong>#{reassignRepair.totalNumber}</strong> —{' '}
+                {reassignRepair.customerName}
+              </Alert>
+              <FormControl fullWidth required>
+                <InputLabel>Técnico</InputLabel>
+                <Select
+                  value={selectedTechnician}
+                  label="Técnico"
+                  onChange={(e) => setSelectedTechnician(e.target.value as string)}
+                >
+                  {activeTechnicians.map((tec) => (
+                    <MenuItem key={tec._id} value={tec._id}>
+                      {tec.name}
+                    </MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
+            </Box>
+          </DialogContent>
+          <DialogActions>
+            <Button onClick={handleCloseReassign} disabled={isReassigning}>
+              Cancelar
+            </Button>
+            <Button
+              variant="contained"
+              onClick={handleSubmitReassign}
+              disabled={!selectedTechnician || isReassigning}
+              startIcon={isReassigning ? <CircularProgress size={20} /> : null}
+            >
+              {isReassigning ? 'Guardando...' : 'Guardar'}
+            </Button>
+          </DialogActions>
+        </Dialog>
+      )}
     </>
   );
 }

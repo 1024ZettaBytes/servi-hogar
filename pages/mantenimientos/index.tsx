@@ -385,7 +385,7 @@ function Mantenimientos({ session }) {
                   />
                 ) : (
                   <Card>
-                    <TablaMant listData={combinedCompletedList} />
+                    <TablaMant listData={combinedCompletedList} userRole={user?.role} />
                   </Card>
                 )}
               </>
