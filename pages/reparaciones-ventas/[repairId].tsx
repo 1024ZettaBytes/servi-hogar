@@ -1,6 +1,7 @@
 import { LoadingButton } from '@mui/lab';
 import {
   Alert,
+  Box,
   Button,
   Card,
   Container,
@@ -9,6 +10,7 @@ import {
   TextField,
   Typography
 } from '@mui/material';
+import Image from 'next/image';
 import { getFetcher, useGetSaleRepairById } from '../api/useRequest';
 import { useSnackbar } from 'notistack';
 import { useState } from 'react';
@@ -105,7 +107,62 @@ export default function BySaleRepairId({ session }) {
                     </Typography>
                   )}
                 </Grid>
-                
+
+                {getSubHeader('Número de Serie', true)}
+                <Grid item lg={3} xs={12}>
+                  {isLoadingSaleRepair ? (
+                    <Skeleton variant="rounded" height={50} />
+                  ) : (
+                    <Typography ml={1}>
+                      {saleRepairData?.machine?.serialNumber || 'N/A'}
+                    </Typography>
+                  )}
+                </Grid>
+
+                {getSubHeader('Fotos del Equipo', true)}
+                <Grid item lg={10} xs={12}>
+                  {isLoadingSaleRepair ? (
+                    <Skeleton variant="rounded" height={200} />
+                  ) : (
+                    <>
+                      {(() => {
+                        const machinePhotos =
+                          saleRepairData?.machine?.photosUrls?.length > 0
+                            ? saleRepairData.machine.photosUrls
+                            : saleRepairData?.machine?.evidencesUrls || [];
+                        return machinePhotos.length === 0 ? (
+                          <Typography ml={1} fontStyle="italic" color="text.secondary">
+                            Sin fotos disponibles
+                          </Typography>
+                        ) : (
+                          <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap', ml: 1 }}>
+                            {machinePhotos.map((url, index) => (
+                              <a
+                                href={url}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                key={index}
+                              >
+                                <Image
+                                  src={url}
+                                  alt={`Foto ${index + 1} del equipo`}
+                                  width={150}
+                                  height={200}
+                                  style={{
+                                    objectFit: 'cover',
+                                    borderRadius: '8px',
+                                    cursor: 'pointer'
+                                  }}
+                                />
+                              </a>
+                            ))}
+                          </Box>
+                        );
+                      })()}
+                    </>
+                  )}
+                </Grid>
+
                 {getSubHeader('Estado', true)}
                 {isLoadingSaleRepair ? (
                   <Grid item lg={2} xs={12}>
