@@ -34,6 +34,7 @@ import {
   useGetPendingSaleDeliveries,
   useGetCompletedSaleDeliveries,
   useGetExternalRepairs,
+  useGetPrices,
   getFetcher,
 } from "../api/useRequest";
 import TablaVueltasOperador from "./TablaVueltasOperador";
@@ -156,6 +157,7 @@ function VueltasOperador({ session }) {
   // cache with TablaVueltasReparacionExterna, so no extra network request.
   const { externalRepairsList: externalRepairsActive } = useGetExternalRepairs(getFetcher);
   const { externalRepairsList: externalRepairsFinalized } = useGetExternalRepairs(getFetcher, false);
+  const { prices } = useGetPrices(getFetcher);
   const { pending: externalPendingVueltas, completed: externalCompletedVueltas } =
     buildVueltas(
       [...(externalRepairsActive || []), ...(externalRepairsFinalized || [])],
@@ -363,7 +365,7 @@ function VueltasOperador({ session }) {
   const pending =
     allPendingTasks.length + pendingExtraTripsCount + externalPendingCount;
 
-  const earningsPerTask = 25;
+  const earningsPerTask = prices?.vueltaPrice ?? 25;
   const totalEarnings = completed * earningsPerTask;
 
   return (
