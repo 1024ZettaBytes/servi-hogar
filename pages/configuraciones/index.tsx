@@ -1,6 +1,6 @@
 import Head from "next/head";
 import { getSession } from "next-auth/react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import SidebarLayout from "@/layouts/SidebarLayout";
 import { validateServerSideSession } from "../../lib/auth";
 import PageHeader from "@/components/PageHeader";
@@ -8,7 +8,9 @@ import PageTitleWrapper from "@/components/PageTitleWrapper";
 import {
   Card,
   CardContent,
+  CardHeader,
   Container,
+  Divider,
   Grid,
   Skeleton,
   Alert,
@@ -19,15 +21,19 @@ import {
   Switch,
   Chip,
   CircularProgress,
+  TextField,
+  Button,
   useTheme,
   alpha,
 } from "@mui/material";
 import TuneRoundedIcon from "@mui/icons-material/TuneRounded";
 import ToggleOnRoundedIcon from "@mui/icons-material/ToggleOnRounded";
+import PaidRoundedIcon from "@mui/icons-material/PaidRounded";
 import Footer from "@/components/Footer";
 import NextBreadcrumbs from "@/components/Shared/BreadCrums";
-import { useGetFeatureFlags, getFetcher } from "../api/useRequest";
+import { useGetFeatureFlags, useGetPrices, getFetcher } from "../api/useRequest";
 import { updateFeatureFlag } from "../../lib/client/featureFlagsFetch";
+import { updateVueltaPrice } from "../../lib/client/pricesFetch";
 import { useSnackbar } from "notistack";
 
 function Configuraciones() {
@@ -36,6 +42,16 @@ function Configuraciones() {
   const { enqueueSnackbar } = useSnackbar();
   const { featureFlags, featureFlagsError } = useGetFeatureFlags(getFetcher);
   const [updatingKey, setUpdatingKey] = useState<string | null>(null);
+
+  const { prices, pricesError } = useGetPrices(getFetcher);
+  const [vueltaPriceInput, setVueltaPriceInput] = useState<string>("");
+  const [isSavingVueltaPrice, setIsSavingVueltaPrice] = useState(false);
+
+  useEffect(() => {
+    if (prices?.vueltaPrice != null) {
+      setVueltaPriceInput(String(prices.vueltaPrice));
+    }
+  }, [prices?.vueltaPrice]);
 
   const handleToggle = async (key: string, enabled: boolean) => {
     setUpdatingKey(key);
@@ -48,8 +64,32 @@ function Configuraciones() {
     });
   };
 
+  const handleSaveVueltaPrice = async () => {
+    const parsed = Number(vueltaPriceInput);
+    if (isNaN(parsed) || parsed < 0) {
+      enqueueSnackbar("Indique un precio por vuelta válido.", {
+        variant: "error",
+        anchorOrigin: { vertical: "top", horizontal: "center" },
+        autoHideDuration: 2000,
+      });
+      return;
+    }
+    setIsSavingVueltaPrice(true);
+    const result = await updateVueltaPrice(parsed);
+    setIsSavingVueltaPrice(false);
+    enqueueSnackbar(result.msg, {
+      variant: result.error ? "error" : "success",
+      anchorOrigin: { vertical: "top", horizontal: "center" },
+      autoHideDuration: 2000,
+    });
+  };
+
   const isLoading = !featureFlags && !featureFlagsError;
   const flags = featureFlags || [];
+  const isLoadingPrices = !prices && !pricesError;
+  const vueltaPriceUnchanged =
+    prices?.vueltaPrice != null &&
+    Number(vueltaPriceInput) === prices.vueltaPrice;
 
   return (
     <>
@@ -65,6 +105,63 @@ function Configuraciones() {
       </PageTitleWrapper>
       <Container maxWidth="md">
         <Grid container direction="row" spacing={3}>
+          <Grid item xs={12}>
+            {pricesError ? (
+              <Alert severity="error">
+                Hubo un problema al cargar los precios.
+              </Alert>
+            ) : isLoadingPrices ? (
+              <Skeleton variant="rounded" width={"100%"} height={110} animation="wave" />
+            ) : (
+              <Card>
+                <CardHeader
+                  avatar={
+                    <Avatar
+                      sx={{
+                        bgcolor: theme.colors.success.lighter,
+                        color: theme.palette.success.main,
+                      }}
+                      variant="rounded"
+                    >
+                      <PaidRoundedIcon />
+                    </Avatar>
+                  }
+                  title="Precio por vuelta (operadores)"
+                  subheader="Monto que se paga a un operador por cada vuelta completada (entrega, recolección, cambio, cobranza, etc.)"
+                />
+                <Divider />
+                <CardContent>
+                  <Stack direction="row" spacing={2} alignItems="center">
+                    <TextField
+                      label="Precio por vuelta"
+                      type="number"
+                      size="small"
+                      value={vueltaPriceInput}
+                      onChange={(e) => setVueltaPriceInput(e.target.value)}
+                      InputProps={{ inputProps: { min: 0, step: "0.01" } }}
+                      sx={{ width: 200 }}
+                    />
+                    <Button
+                      variant="contained"
+                      disabled={
+                        isSavingVueltaPrice ||
+                        !vueltaPriceInput ||
+                        vueltaPriceUnchanged
+                      }
+                      onClick={handleSaveVueltaPrice}
+                      startIcon={
+                        isSavingVueltaPrice ? (
+                          <CircularProgress size={18} color="inherit" />
+                        ) : null
+                      }
+                    >
+                      Guardar
+                    </Button>
+                  </Stack>
+                </CardContent>
+              </Card>
+            )}
+          </Grid>
           <Grid item xs={12}>
             {featureFlagsError ? (
               <Alert severity="error">
