@@ -1,4 +1,5 @@
 import { FC, ChangeEvent, useState } from 'react';
+import * as str from 'string';
 import PropTypes from 'prop-types';
 import {
   Tooltip,
@@ -18,7 +19,9 @@ import {
   Chip,
   Avatar,
   AvatarGroup,
-  useTheme
+  useTheme,
+  TextField,
+  InputAdornment
 } from '@mui/material';
 import DeleteTwoToneIcon from '@mui/icons-material/DeleteTwoTone';
 import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
@@ -27,6 +30,7 @@ import SellIcon from '@mui/icons-material/Sell';
 import BuildIcon from '@mui/icons-material/Build';
 import MonetizationOnTwoToneIcon from '@mui/icons-material/MonetizationOnTwoTone';
 import VisibilityIcon from '@mui/icons-material/Visibility';
+import SearchIcon from '@mui/icons-material/Search';
 import { useSnackbar } from 'notistack';
 import { deleteSalesMachines } from '../../lib/client/salesMachinesFetch';
 import NextLink from 'next/link';
@@ -37,6 +41,22 @@ interface TablaSalesMachinesProps {
   onUpdate: () => void;
   onSellClick: (machine: any) => void;
 }
+
+const compareStringsForFilter = (keyWord: string, field: string) => {
+  return str(field || '')
+    .latinise()
+    .toLowerCase()
+    .includes(str(keyWord).latinise().toLowerCase());
+};
+
+const applyFilters = (machinesList: any[], filter: string): any[] => {
+  if (!filter || filter === '') return machinesList;
+  return machinesList.filter(
+    (machine) =>
+      compareStringsForFilter(filter, String(machine.machineNum ?? '')) ||
+      compareStringsForFilter(filter, machine.serialNumber)
+  );
+};
 
 const getStatusChip = (status: string) => {
   switch (status) {
@@ -133,6 +153,7 @@ const TablaSalesMachines: FC<TablaSalesMachinesProps> = ({
   const theme = useTheme();
   const [page, setPage] = useState<number>(0);
   const [limit, setLimit] = useState<number>(10);
+  const [filter, setFilter] = useState<string>('');
 
   const handlePageChange = (_event: any, newPage: number): void => {
     setPage(newPage);
@@ -140,6 +161,10 @@ const TablaSalesMachines: FC<TablaSalesMachinesProps> = ({
 
   const handleLimitChange = (event: ChangeEvent<HTMLInputElement>): void => {
     setLimit(parseInt(event.target.value));
+  };
+
+  const handleSearchChange = (e: ChangeEvent<HTMLInputElement>): void => {
+    setFilter(e.target.value);
   };
 
   const handleDelete = async (machineId: string) => {
@@ -168,14 +193,37 @@ const TablaSalesMachines: FC<TablaSalesMachinesProps> = ({
     }
   };
 
-  const paginatedMachines = salesMachinesList ? salesMachinesList.slice(
+  const filteredMachines = salesMachinesList
+    ? applyFilters(salesMachinesList, filter)
+    : [];
+
+  const paginatedMachines = filteredMachines.slice(
     page * limit,
     page * limit + limit
-  ) : [];
+  );
 
   return (
     <Card>
-      <CardHeader title="Equipos de Venta" />
+      <CardHeader
+        title="Equipos de Venta"
+        action={
+          <Box width={220}>
+            <TextField
+              size="small"
+              fullWidth
+              label="Buscar por # o serie"
+              onChange={handleSearchChange}
+              InputProps={{
+                startAdornment: (
+                  <InputAdornment position="start">
+                    <SearchIcon />
+                  </InputAdornment>
+                )
+              }}
+            />
+          </Box>
+        }
+      />
       <Divider />
       <TableContainer>
         <Table>
@@ -359,7 +407,7 @@ const TablaSalesMachines: FC<TablaSalesMachinesProps> = ({
       <Box p={2}>
         <TablePagination
           component="div"
-          count={salesMachinesList?.length || 0}
+          count={filteredMachines.length}
           onPageChange={handlePageChange}
           onRowsPerPageChange={handleLimitChange}
           page={page}

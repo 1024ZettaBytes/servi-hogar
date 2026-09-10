@@ -1,13 +1,15 @@
 import Head from "next/head";
 import { useState } from "react";
+import * as str from "string";
 import { getSession } from "next-auth/react";
 import SidebarLayout from "@/layouts/SidebarLayout";
 import { validateServerSideSession } from "../../lib/auth";
 import PageHeader from "@/components/PageHeader";
 import PageTitleWrapper from "@/components/PageTitleWrapper";
-import { Card, Container, Grid, Skeleton, Alert, Tabs, Tab, Chip, Box, Typography, CircularProgress, Button, Table, TableBody, TableCell, TableContainer, TableHead, TableRow } from "@mui/material";
+import { Card, Container, Grid, Skeleton, Alert, Tabs, Tab, Chip, Box, Typography, CircularProgress, Button, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, TextField, InputAdornment } from "@mui/material";
 import LocalShippingIcon from "@mui/icons-material/LocalShipping";
 import DownloadIcon from "@mui/icons-material/Download";
+import SearchIcon from "@mui/icons-material/Search";
 import Footer from "@/components/Footer";
 
 
@@ -21,12 +23,48 @@ import { unloadStaleMachine, confirmMachineReturn } from "../../lib/client/machi
 import { useSnackbar } from "notistack";
 import { formatTZDate } from "lib/client/utils";
 
+// Filtra por número de equipo (o de ingreso a bodega) y por número de serie.
+const compareStringsForFilter = (keyWord: string, field: string) => {
+  return str(field || '')
+    .latinise()
+    .toLowerCase()
+    .includes(str(keyWord).latinise().toLowerCase());
+};
+
+const matchesMachineOrSerial = (machineNum: any, serialNumber: any, filter: string) => {
+  if (!filter) return true;
+  return (
+    compareStringsForFilter(filter, machineNum != null ? String(machineNum) : '') ||
+    compareStringsForFilter(filter, serialNumber)
+  );
+};
+
+const filterMantList = (list: any[], filter: string) =>
+  list.filter((item) =>
+    matchesMachineOrSerial(item.machine?.machineNum, item.machine?.serialNumber, filter)
+  );
+
+const filterWarehouseMachineList = (list: any[], filter: string) =>
+  list.filter((item) =>
+    matchesMachineOrSerial(item.entryNumber, item.serialNumber, filter)
+  );
+
+const filterFinishedConditioningList = (list: any[], filter: string) =>
+  list.filter((item) =>
+    matchesMachineOrSerial(
+      item.warehouseMachine?.entryNumber,
+      item.warehouseMachine?.serialNumber,
+      filter
+    )
+  );
+
 function Mantenimientos({ session }) {
   const { user } = session;
   const paths = ["Inicio", "Mantenimientos"];
   const [currentTab, setCurrentTab] = useState("pendientes");
   const [conditioningTab, setConditioningTab] = useState("pendientes");
   const [unloadingId, setUnloadingId] = useState<string | null>(null);
+  const [searchFilter, setSearchFilter] = useState("");
   const { enqueueSnackbar } = useSnackbar();
 
   const isAdminOrAux = ['ADMIN', 'AUX'].includes(user?.role);
@@ -136,15 +174,20 @@ function Mantenimientos({ session }) {
   const completedErrorMessage = mantError?.message || saleRepairsError?.message;
   const isLoadingCompleted = !mantData || !saleRepairsData;
 
+  const filteredPendingList = filterMantList(combinedPendingList, searchFilter);
+  const filteredCompletedList = filterMantList(combinedCompletedList, searchFilter);
+  const filteredConditioningList = filterWarehouseMachineList(conditioningList || [], searchFilter);
+  const filteredFinishedConditioningList = filterFinishedConditioningList(finishedConditioningList || [], searchFilter);
+
   const tabs = [
-    { value: "pendientes", label: `Pendientes (${combinedPendingList.length})` },
-    { value: "pasados", label: `Pasados (${combinedCompletedList.length})` },
-    { value: "acondicionamiento", label: `Acondicionamiento (${(conditioningList || []).length})` },
+    { value: "pendientes", label: `Pendientes (${filteredPendingList.length})` },
+    { value: "pasados", label: `Pasados (${filteredCompletedList.length})` },
+    { value: "acondicionamiento", label: `Acondicionamiento (${filteredConditioningList.length})` },
   ];
 
   const conditioningTabs = [
-    { value: "pendientes", label: `Pendientes (${(conditioningList || []).length})` },
-    { value: "finalizados", label: `Finalizados (${(finishedConditioningList || []).length})` },
+    { value: "pendientes", label: `Pendientes (${filteredConditioningList.length})` },
+    { value: "finalizados", label: `Finalizados (${filteredFinishedConditioningList.length})` },
   ];
 
   return (
@@ -308,6 +351,25 @@ function Mantenimientos({ session }) {
               </Card>
             </Grid>
           )}
+          <Grid item xs={12} display="flex" justifyContent="flex-end">
+            <Box width={260}>
+              <TextField
+                fullWidth
+                size="small"
+                label="Buscar por # equipo o serie"
+                value={searchFilter}
+                onChange={(e) => setSearchFilter(e.target.value)}
+                InputProps={{
+                  startAdornment: (
+                    <InputAdornment position="start">
+                      <SearchIcon />
+                    </InputAdornment>
+                  )
+                }}
+              />
+            </Box>
+          </Grid>
+
           <Grid item xs={12}>
             <Tabs
               onChange={(_e, val) => setCurrentTab(val)}
@@ -362,7 +424,7 @@ function Mantenimientos({ session }) {
                 ) : (
                   <Card>
                     <TablaMantPendientes
-                      listData={combinedPendingList}
+                      listData={filteredPendingList}
                       userRole={user?.role}
                       techniciansList={techniciansList}
                       isBlocked={hasOverdueCollected || (isTec && hasStaleMachines) || hasOverduePendingReturns}
@@ -385,7 +447,7 @@ function Mantenimientos({ session }) {
                   />
                 ) : (
                   <Card>
-                    <TablaMant listData={combinedCompletedList} userRole={user?.role} />
+                    <TablaMant listData={filteredCompletedList} userRole={user?.role} />
                   </Card>
                 )}
               </>
@@ -418,7 +480,7 @@ function Mantenimientos({ session }) {
                       />
                     ) : (
                       <TablaAcondicionamiento
-                        listData={conditioningList || []}
+                        listData={filteredConditioningList}
                         userRole={user?.role}
                         warehousesList={warehousesList || []}
                         techniciansList={techniciansList}
@@ -440,7 +502,7 @@ function Mantenimientos({ session }) {
                       />
                     ) : (
                       <TablaAcondicionamientoFinalizados
-                        listData={finishedConditioningList || []}
+                        listData={filteredFinishedConditioningList}
                         userRole={user?.role}
                       />
                     )}
