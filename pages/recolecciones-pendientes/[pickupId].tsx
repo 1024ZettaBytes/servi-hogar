@@ -253,7 +253,16 @@ function RecoleccionPendiente({ session }) {
                                     )}
                                   />
                                 </Grid>
-                                {expiredDays > 0 && (
+                                {expiredDays > 0 && pickup.generateDebt === false && (
+                                  <Grid item lg={12} m={1}>
+                                    <Alert severity="info">
+                                      No se generará deuda por atraso en esta
+                                      recolección: así se decidió al
+                                      agendarla.
+                                    </Alert>
+                                  </Grid>
+                                )}
+                                {expiredDays > 0 && pickup.generateDebt !== false && (
                                   <>
                                     <Grid item lg={2} sm={6} xs={6} m={1}>
                                       <TextField
