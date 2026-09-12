@@ -13,7 +13,12 @@ import {
   Container,
   Skeleton,
   Typography,
-  TextField
+  TextField,
+  FormControl,
+  FormLabel,
+  RadioGroup,
+  FormControlLabel,
+  Radio
 } from '@mui/material';
 import { LoadingButton } from '@mui/lab';
 import { useGetRentById, getFetcher } from '../../../pages/api/useRequest';
@@ -56,6 +61,7 @@ function SchedulePickupModal(props) {
     msg: ''
   });
   const [selectedDay, setSelectedDay] = useState<any>(null);
+  const [generateDebt, setGenerateDebt] = useState<boolean>(true);
   const debt =
     (rent?.customer?.level?.dayPrice || 0) *
     Math.abs(
@@ -82,7 +88,8 @@ function SchedulePickupModal(props) {
         fromTime: convertDateToTZ(pickupTime.fromTime),
         endTime: convertDateToTZ(pickupTime.endTime),
       },
-      reason
+      reason,
+      generateDebt: rent?.remaining < 0 ? generateDebt : true
     });
     setIsSubmitting(false);
     if (!result.error) {
@@ -305,10 +312,35 @@ function SchedulePickupModal(props) {
                       {rent?.remaining < 0 && (
                         <Grid item lg={12}>
                           <Alert severity="warning">
-                            Se generará una deuda de ${debt}.
-                            <br />
-                            El nuevo saldo será de ${newbalance}.
+                            El cliente tiene {Math.abs(rent.remaining)} día(s)
+                            de atraso. De generarse la deuda, sería de ${debt + ' '}
+                            y el nuevo saldo sería de ${newbalance}.
                           </Alert>
+                          <FormControl sx={{ mt: 2 }}>
+                            <FormLabel id="generate-debt-label">
+                              ¿Se debe generar la deuda por atraso al
+                              completar esta recolección?
+                            </FormLabel>
+                            <RadioGroup
+                              row
+                              aria-labelledby="generate-debt-label"
+                              value={generateDebt ? 'yes' : 'no'}
+                              onChange={(event) => {
+                                setGenerateDebt(event.target.value === 'yes');
+                              }}
+                            >
+                              <FormControlLabel
+                                value="yes"
+                                control={<Radio />}
+                                label="Sí, generar deuda"
+                              />
+                              <FormControlLabel
+                                value="no"
+                                control={<Radio />}
+                                label="No generar deuda"
+                              />
+                            </RadioGroup>
+                          </FormControl>
                         </Grid>
                       )}
                     </>

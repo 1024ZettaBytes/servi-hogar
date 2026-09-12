@@ -27,6 +27,7 @@ import PendingActionsIcon from '@mui/icons-material/PendingActions';
 import DoneOutlineIcon from '@mui/icons-material/DoneOutline';
 
 import EditIcon from '@mui/icons-material/Edit';
+import MoreTimeIcon from '@mui/icons-material/MoreTime';
 import {
   Dialog,
   DialogTitle,
@@ -38,10 +39,15 @@ import {
   Select,
   MenuItem,
   CircularProgress,
-  Alert
+  Alert,
+  TextField
 } from '@mui/material';
 import { useSnackbar } from 'notistack';
-import { reassignMantTechnician } from '../../lib/client/mantainanacesFetch';
+import {
+  reassignMantTechnician,
+  setMantAllowedDays
+} from '../../lib/client/mantainanacesFetch';
+import { MANTAINANCE_DEFAULT_ALLOWED_DAYS } from '../../lib/consts/OBJ_CONTS';
 import NextLink from 'next/link';
 
 export const getStatusLabel = (status) => {
@@ -116,6 +122,10 @@ const TablaMantPendientes: FC<TablaMantPendientesProps> = ({
   const [selectedMant, setSelectedMant] = useState<any>(null);
   const [selectedTechnician, setSelectedTechnician] = useState<string>('');
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [allowedDaysModalOpen, setAllowedDaysModalOpen] = useState(false);
+  const [selectedDaysMant, setSelectedDaysMant] = useState<any>(null);
+  const [allowedDaysValue, setAllowedDaysValue] = useState<string>('');
+  const [isSubmittingDays, setIsSubmittingDays] = useState(false);
 
   const handlePageChange = (_event: any, newPage: number): void => {
     setPage(newPage);
@@ -154,12 +164,48 @@ const TablaMantPendientes: FC<TablaMantPendientesProps> = ({
     }
   };
 
+  const handleOpenAllowedDaysModal = (mant: any) => {
+    setSelectedDaysMant(mant);
+    setAllowedDaysValue(
+      String(mant?.allowedDays ?? MANTAINANCE_DEFAULT_ALLOWED_DAYS)
+    );
+    setAllowedDaysModalOpen(true);
+  };
+
+  const handleCloseAllowedDaysModal = () => {
+    setAllowedDaysModalOpen(false);
+    setSelectedDaysMant(null);
+    setAllowedDaysValue('');
+  };
+
+  const handleSubmitAllowedDays = async () => {
+    if (!selectedDaysMant || allowedDaysValue === '') return;
+    const parsedDays = Number(allowedDaysValue);
+    if (Number.isNaN(parsedDays) || parsedDays < 0) return;
+    setIsSubmittingDays(true);
+    const result = await setMantAllowedDays({
+      mantId: selectedDaysMant._id,
+      type: selectedDaysMant.type,
+      allowedDays: parsedDays
+    });
+    setIsSubmittingDays(false);
+    if (!result.error) {
+      enqueueSnackbar(result.msg, { variant: 'success' });
+      handleCloseAllowedDaysModal();
+    } else {
+      enqueueSnackbar(result.msg, { variant: 'error' });
+    }
+  };
+
   const paginatedMants = applyPagination(listData, page, limit);
 
   const theme = useTheme();
   const isAdmin = userRole === 'ADMIN';
   const isAdminOrAux = ['ADMIN', 'AUX'].includes(userRole);
-  const canComplete = !isBlocked && (isAdmin || !listData.some((m) => m.daysSinceCreate >= 3));
+  const getAllowedDays = (mant: any) =>
+    mant?.allowedDays ?? MANTAINANCE_DEFAULT_ALLOWED_DAYS;
+  const canRowComplete = (mant: any) =>
+    !isBlocked && (isAdmin || mant?.daysSinceCreate < getAllowedDays(mant));
   return (
     <>
       <Card>
@@ -181,6 +227,9 @@ const TablaMantPendientes: FC<TablaMantPendientesProps> = ({
                 <TableCell align="center">Equipo</TableCell>
                 <TableCell align="center">Estado</TableCell>
                 <TableCell align="center">Días Transcurridos</TableCell>
+                {isAdmin && (
+                  <TableCell align="center">Días permitidos</TableCell>
+                )}
                 {isAdminOrAux && <TableCell align="center">Técnico</TableCell>}
                 <TableCell align="center"></TableCell>
               </TableRow>
@@ -192,11 +241,12 @@ const TablaMantPendientes: FC<TablaMantPendientesProps> = ({
                   ? `/reparaciones-ventas/${mant?._id}` 
                   : `/mantenimientos/${mant?._id}`;
                 
+                const rowCanComplete = canRowComplete(mant);
                 return (
                   <TableRow
                     key={mant?._id}
                     sx={
-                      !canComplete
+                      !rowCanComplete
                         ? { backgroundColor: theme.colors.error.lighter }
                         : {}
                     }
@@ -225,11 +275,29 @@ const TablaMantPendientes: FC<TablaMantPendientesProps> = ({
                       )}
                     </TableCell>
                     <TableCell align="center">
-                      {getStatusLabel(canComplete ? mant?.status : 'ALERTA')}
+                      {getStatusLabel(rowCanComplete ? mant?.status : 'ALERTA')}
                     </TableCell>
                     <TableCell align="center">
                       {mant?.daysSinceCreate}
                     </TableCell>
+                    {isAdmin && (
+                      <TableCell align="center">
+                        <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 1 }}>
+                          <Typography variant="body2" color="text.primary" noWrap>
+                            {getAllowedDays(mant)}
+                          </Typography>
+                          <Tooltip title="Ampliar días permitidos" arrow>
+                            <IconButton
+                              size="small"
+                              color="primary"
+                              onClick={() => handleOpenAllowedDaysModal(mant)}
+                            >
+                              <MoreTimeIcon fontSize="small" />
+                            </IconButton>
+                          </Tooltip>
+                        </Box>
+                      </TableCell>
+                    )}
                     {isAdminOrAux && (
                       <TableCell align="center">
                         <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 1 }}>
@@ -252,7 +320,7 @@ const TablaMantPendientes: FC<TablaMantPendientesProps> = ({
                       <NextLink href={detailUrl}>
                         <Tooltip title="Ver detalle" arrow>
                           <IconButton
-                            disabled={!canComplete}
+                            disabled={!rowCanComplete}
                             sx={{
                               '&:hover': {
                                 background: theme.colors.primary.lighter
@@ -335,6 +403,62 @@ const TablaMantPendientes: FC<TablaMantPendientesProps> = ({
               startIcon={isSubmitting ? <CircularProgress size={20} /> : null}
             >
               {isSubmitting ? 'Guardando...' : 'Guardar'}
+            </Button>
+          </DialogActions>
+        </Dialog>
+      )}
+
+      {/* Modal Ampliar días permitidos */}
+      {allowedDaysModalOpen && selectedDaysMant && (
+        <Dialog
+          open={allowedDaysModalOpen}
+          onClose={handleCloseAllowedDaysModal}
+          maxWidth="xs"
+          fullWidth
+        >
+          <DialogTitle>Días permitidos antes de bloqueo</DialogTitle>
+          <DialogContent>
+            <Box sx={{ mt: 1 }}>
+              <Alert severity="info" sx={{ mb: 2 }}>
+                Mantenimiento Equipo{' '}
+                <strong>#{selectedDaysMant?.machine?.machineNum}</strong>
+                {selectedDaysMant?.type === 'SALE' ? ' (Venta)' : ''}
+              </Alert>
+              <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+                Días de tolerancia antes de bloquear las acciones del técnico
+                sobre este mantenimiento (por defecto{' '}
+                {MANTAINANCE_DEFAULT_ALLOWED_DAYS}). Útil para técnicos nuevos
+                en capacitación.
+              </Typography>
+              <TextField
+                label="Días permitidos"
+                type="number"
+                fullWidth
+                required
+                value={allowedDaysValue}
+                inputProps={{ min: 0 }}
+                onChange={(e) => setAllowedDaysValue(e.target.value)}
+              />
+            </Box>
+          </DialogContent>
+          <DialogActions>
+            <Button
+              onClick={handleCloseAllowedDaysModal}
+              disabled={isSubmittingDays}
+            >
+              Cancelar
+            </Button>
+            <Button
+              variant="contained"
+              onClick={handleSubmitAllowedDays}
+              disabled={
+                allowedDaysValue === '' ||
+                Number(allowedDaysValue) < 0 ||
+                isSubmittingDays
+              }
+              startIcon={isSubmittingDays ? <CircularProgress size={20} /> : null}
+            >
+              {isSubmittingDays ? 'Guardando...' : 'Guardar'}
             </Button>
           </DialogActions>
         </Dialog>

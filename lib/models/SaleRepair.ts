@@ -15,6 +15,7 @@ export interface ISaleRepair extends Document {
   updatedAt: Date;
   createdBy: Schema.Types.ObjectId;
   lastUpdatedBy: Schema.Types.ObjectId;
+  allowedDays: number;
 }
 
 const SaleRepairSchema = new Schema<ISaleRepair>({
@@ -51,7 +52,10 @@ const SaleRepairSchema = new Schema<ISaleRepair>({
   createdAt: { type: Date, required: true },
   updatedAt: { type: Date, required: true },
   createdBy: { type: Schema.Types.ObjectId, default: null, ref: 'users' },
-  lastUpdatedBy: { type: Schema.Types.ObjectId, required: true, ref: 'users' }
+  lastUpdatedBy: { type: Schema.Types.ObjectId, required: true, ref: 'users' },
+  // Días de tolerancia individuales antes de bloquear al técnico en esta
+  // reparación de venta. null => usa MANTAINANCE_DEFAULT_ALLOWED_DAYS.
+  allowedDays: { type: Number, default: null }
 });
 
 export const SaleRepair: Model<ISaleRepair> =

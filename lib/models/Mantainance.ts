@@ -17,6 +17,7 @@ export interface IMantainance extends Document {
   updatedAt: Date;
   createdBy: Schema.Types.ObjectId;
   lastUpdatedBy: Schema.Types.ObjectId;
+  allowedDays: number;
 }
 
 const MantainanceSchema = new Schema<IMantainance>({
@@ -50,7 +51,10 @@ const MantainanceSchema = new Schema<IMantainance>({
   createdAt: { type: Date, required: true },
   updatedAt: { type: Date, required: true },
   createdBy: { type: Schema.Types.ObjectId, default: null, ref: 'users' },
-  lastUpdatedBy: { type: Schema.Types.ObjectId, required: true, ref: 'users' }
+  lastUpdatedBy: { type: Schema.Types.ObjectId, required: true, ref: 'users' },
+  // Días de tolerancia individuales antes de bloquear al técnico en este
+  // mantenimiento. null => usa MANTAINANCE_DEFAULT_ALLOWED_DAYS.
+  allowedDays: { type: Number, default: null }
 });
 
 export const Mantainance: Model<IMantainance> =
