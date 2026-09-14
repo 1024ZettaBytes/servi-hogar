@@ -22,6 +22,7 @@ import {
   WAREHOUSE_MACHINE_ORIGIN_LABELS,
   WAREHOUSE_ORIGIN_COLORS
 } from '../../lib/consts/OBJ_CONTS';
+import MachineEntryNumberCell from '@/components/MachineEntryNumberCell';
 
 const applyPagination = (list: any[], page: number, limit: number): any[] => {
   return list.slice(page * limit, page * limit + limit);
@@ -94,14 +95,7 @@ const TablaAcondicionamientoFinalizados: FC<
               return (
                 <TableRow hover key={record._id}>
                   <TableCell>
-                    <Typography
-                      variant="body1"
-                      fontWeight="bold"
-                      color="text.primary"
-                      noWrap
-                    >
-                      {machine.entryNumber ? `#${machine.entryNumber}` : '-'}
-                    </Typography>
+                    <MachineEntryNumberCell machine={machine} />
                   </TableCell>
                   <TableCell>
                     <Typography variant="body1" color="text.primary" noWrap>

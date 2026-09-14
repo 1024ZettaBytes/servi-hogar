@@ -41,6 +41,9 @@ import {
   WAREHOUSE_MACHINE_STATUS_LABELS
 } from '../../lib/consts/OBJ_CONTS';
 import GenericModal from '@/components/GenericModal';
+import MachineEntryNumberCell, {
+  getDisplayMachineNum
+} from '@/components/MachineEntryNumberCell';
 import {
   deleteWarehouseMachine,
   dismantleWarehouseMachine,
@@ -292,15 +295,10 @@ const TablaAlmacen: FC<TablaAlmacenProps> = ({
             {paginatedMachines.map((machine) => (
               <TableRow hover key={machine._id}>
                 <TableCell>
-                  <Typography
-                    variant="body1"
-                    fontWeight="bold"
-                    color="text.primary"
-                    noWrap
-                  >
-                    #{machine.entryNumber}
-                    {machine.isRentalMachine ? ' (RENTA)' : ''}
-                  </Typography>
+                  <MachineEntryNumberCell
+                    machine={machine}
+                    suffix={machine.isRentalMachine ? ' (RENTA)' : ''}
+                  />
                 </TableCell>
                 <TableCell>
                   <Typography variant="body1" color="text.primary" noWrap>
@@ -523,7 +521,7 @@ const TablaAlmacen: FC<TablaAlmacenProps> = ({
           open={deleteModalOpen}
           title="Eliminar máquina"
           requiredReason={false}
-          text={`¿Está seguro de eliminar la máquina #${machineToDelete?.entryNumber} (${machineToDelete?.brand})?`}
+          text={`¿Está seguro de eliminar la máquina #${getDisplayMachineNum(machineToDelete)} (${machineToDelete?.brand})?`}
           isLoading={isDeleting}
           onAccept={handleDelete}
           onCancel={() => {
@@ -537,7 +535,7 @@ const TablaAlmacen: FC<TablaAlmacenProps> = ({
           open={dismantleModalOpen}
           title="Desmantelar máquina"
           requiredReason={false}
-          text={`¿Está seguro de desmantelar la máquina #${machineToDismantle?.entryNumber} (${machineToDismantle?.brand})? Esta acción es irreversible.`}
+          text={`¿Está seguro de desmantelar la máquina #${getDisplayMachineNum(machineToDismantle)} (${machineToDismantle?.brand})? Esta acción es irreversible.`}
           isLoading={isDismantling}
           onAccept={handleDismantle}
           onCancel={() => {
@@ -551,7 +549,7 @@ const TablaAlmacen: FC<TablaAlmacenProps> = ({
           open={saleModalOpen}
           title="Pasar a venta"
           requiredReason={false}
-          text={`¿Está seguro de pasar la máquina #${machineToSale?.entryNumber} (${machineToSale?.brand}) a la lista de venta? Se creará un equipo de venta a partir de esta máquina o se reactivará uno existente si ya se había creado previamente.`}
+          text={`¿Está seguro de pasar la máquina #${getDisplayMachineNum(machineToSale)} (${machineToSale?.brand}) a la lista de venta? Se creará un equipo de venta a partir de esta máquina o se reactivará uno existente si ya se había creado previamente.`}
           isLoading={isMovingToSale}
           onAccept={handleMoveToSale}
           onCancel={() => {
