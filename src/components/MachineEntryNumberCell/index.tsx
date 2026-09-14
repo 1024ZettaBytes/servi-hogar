@@ -28,28 +28,21 @@ const MachineEntryNumberCell: FC<MachineEntryNumberCellProps> = ({
   return (
     <Box>
       <Tooltip
-        title={isReingreso ? 'Número original con el que se vendió este equipo' : ''}
-        arrow
-      >
-        <Typography variant="body1" fontWeight="bold" color="text.primary" noWrap>
-          {displayNum ? `#${displayNum}${suffix}` : fallback}
-        </Typography>
-      </Tooltip>
-      {isReingreso && (
-        <Tooltip
           title={`Este equipo regresó de una venta y se le asignó el folio de almacén #${machine.entryNumber} al reingresar`}
           arrow
         >
+        <Typography variant="body1" fontWeight="bold" color="text.primary" noWrap>
+          {isReingreso ?
           <Chip
             icon={<ReplayIcon fontSize="small" />}
-            label={`Reingreso #${machine.entryNumber}`}
+            label={`Reingreso venta #${displayNum}`}
             size="small"
             color="secondary"
             variant="outlined"
             sx={{ mt: 0.5, maxWidth: '100%' }}
-          />
-        </Tooltip>
-      )}
+          /> :displayNum ? `#${displayNum}${suffix}` : fallback}
+        </Typography>
+      </Tooltip>
     </Box>
   );
 };
