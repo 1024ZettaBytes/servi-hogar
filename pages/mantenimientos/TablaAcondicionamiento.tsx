@@ -43,6 +43,9 @@ import {
   WAREHOUSE_ORIGIN_COLORS
 } from '../../lib/consts/OBJ_CONTS';
 import AssignTechnicianModal from '@/components/AssignTechnicianModal';
+import MachineEntryNumberCell, {
+  getDisplayMachineNum
+} from '@/components/MachineEntryNumberCell';
 
 const applyPagination = (list: any[], page: number, limit: number): any[] => {
   return list.slice(page * limit, page * limit + limit);
@@ -247,14 +250,7 @@ const TablaAcondicionamiento: FC<TablaAcondicionamientoProps> = ({
               {paginatedMachines.map((machine) => (
                 <TableRow hover key={machine._id}>
                   <TableCell>
-                    <Typography
-                      variant="body1"
-                      fontWeight="bold"
-                      color="text.primary"
-                      noWrap
-                    >
-                      #{machine.entryNumber}
-                    </Typography>
+                    <MachineEntryNumberCell machine={machine} />
                   </TableCell>
                   <TableCell>
                     <Typography variant="body1" color="text.primary" noWrap>
@@ -384,8 +380,11 @@ const TablaAcondicionamiento: FC<TablaAcondicionamientoProps> = ({
           <DialogTitle>Completar acondicionamiento</DialogTitle>
           <DialogContent>
             <Alert severity="info" sx={{ mb: 2, mt: 1 }}>
-              Máquina <strong>#{selectedMachine.entryNumber}</strong> —{' '}
-              {selectedMachine.brand}
+              Máquina <strong>#{getDisplayMachineNum(selectedMachine)}</strong>
+              {selectedMachine.originalSaleMachineNum
+                ? ` (reingreso #${selectedMachine.entryNumber})`
+                : ''}{' '}
+              — {selectedMachine.brand}
               {selectedMachine.serialNumber
                 ? ` (Serie: ${selectedMachine.serialNumber})`
                 : ''}

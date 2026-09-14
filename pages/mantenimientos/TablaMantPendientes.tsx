@@ -27,7 +27,7 @@ import PendingActionsIcon from '@mui/icons-material/PendingActions';
 import DoneOutlineIcon from '@mui/icons-material/DoneOutline';
 
 import EditIcon from '@mui/icons-material/Edit';
-import MoreTimeIcon from '@mui/icons-material/MoreTime';
+import AddAlarmIcon from '@mui/icons-material/AddAlarm';
 import {
   Dialog,
   DialogTitle,
@@ -39,15 +39,17 @@ import {
   Select,
   MenuItem,
   CircularProgress,
-  Alert,
-  TextField
+  Alert
 } from '@mui/material';
 import { useSnackbar } from 'notistack';
 import {
   reassignMantTechnician,
-  setMantAllowedDays
+  addMantExtraAllowedDays
 } from '../../lib/client/mantainanacesFetch';
-import { MANTAINANCE_DEFAULT_ALLOWED_DAYS } from '../../lib/consts/OBJ_CONTS';
+import {
+  MANTAINANCE_DEFAULT_ALLOWED_DAYS,
+  MANTAINANCE_EXTRA_ALLOWED_DAYS
+} from '../../lib/consts/OBJ_CONTS';
 import NextLink from 'next/link';
 
 export const getStatusLabel = (status) => {
@@ -122,10 +124,9 @@ const TablaMantPendientes: FC<TablaMantPendientesProps> = ({
   const [selectedMant, setSelectedMant] = useState<any>(null);
   const [selectedTechnician, setSelectedTechnician] = useState<string>('');
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [allowedDaysModalOpen, setAllowedDaysModalOpen] = useState(false);
-  const [selectedDaysMant, setSelectedDaysMant] = useState<any>(null);
-  const [allowedDaysValue, setAllowedDaysValue] = useState<string>('');
-  const [isSubmittingDays, setIsSubmittingDays] = useState(false);
+  const [addingExtraDaysId, setAddingExtraDaysId] = useState<string | null>(
+    null
+  );
 
   const handlePageChange = (_event: any, newPage: number): void => {
     setPage(newPage);
@@ -164,34 +165,15 @@ const TablaMantPendientes: FC<TablaMantPendientesProps> = ({
     }
   };
 
-  const handleOpenAllowedDaysModal = (mant: any) => {
-    setSelectedDaysMant(mant);
-    setAllowedDaysValue(
-      String(mant?.allowedDays ?? MANTAINANCE_DEFAULT_ALLOWED_DAYS)
-    );
-    setAllowedDaysModalOpen(true);
-  };
-
-  const handleCloseAllowedDaysModal = () => {
-    setAllowedDaysModalOpen(false);
-    setSelectedDaysMant(null);
-    setAllowedDaysValue('');
-  };
-
-  const handleSubmitAllowedDays = async () => {
-    if (!selectedDaysMant || allowedDaysValue === '') return;
-    const parsedDays = Number(allowedDaysValue);
-    if (Number.isNaN(parsedDays) || parsedDays < 0) return;
-    setIsSubmittingDays(true);
-    const result = await setMantAllowedDays({
-      mantId: selectedDaysMant._id,
-      type: selectedDaysMant.type,
-      allowedDays: parsedDays
+  const handleAddExtraAllowedDays = async (mant: any) => {
+    setAddingExtraDaysId(mant._id);
+    const result = await addMantExtraAllowedDays({
+      mantId: mant._id,
+      type: mant.type
     });
-    setIsSubmittingDays(false);
+    setAddingExtraDaysId(null);
     if (!result.error) {
       enqueueSnackbar(result.msg, { variant: 'success' });
-      handleCloseAllowedDaysModal();
     } else {
       enqueueSnackbar(result.msg, { variant: 'error' });
     }
@@ -286,14 +268,24 @@ const TablaMantPendientes: FC<TablaMantPendientesProps> = ({
                           <Typography variant="body2" color="text.primary" noWrap>
                             {getAllowedDays(mant)}
                           </Typography>
-                          <Tooltip title="Ampliar días permitidos" arrow>
-                            <IconButton
-                              size="small"
-                              color="primary"
-                              onClick={() => handleOpenAllowedDaysModal(mant)}
-                            >
-                              <MoreTimeIcon fontSize="small" />
-                            </IconButton>
+                          <Tooltip
+                            title={`Agregar ${MANTAINANCE_EXTRA_ALLOWED_DAYS} días extra`}
+                            arrow
+                          >
+                            <span>
+                              <IconButton
+                                size="small"
+                                color="success"
+                                disabled={addingExtraDaysId === mant._id}
+                                onClick={() => handleAddExtraAllowedDays(mant)}
+                              >
+                                {addingExtraDaysId === mant._id ? (
+                                  <CircularProgress size={16} />
+                                ) : (
+                                  <AddAlarmIcon fontSize="small" />
+                                )}
+                              </IconButton>
+                            </span>
                           </Tooltip>
                         </Box>
                       </TableCell>
@@ -403,62 +395,6 @@ const TablaMantPendientes: FC<TablaMantPendientesProps> = ({
               startIcon={isSubmitting ? <CircularProgress size={20} /> : null}
             >
               {isSubmitting ? 'Guardando...' : 'Guardar'}
-            </Button>
-          </DialogActions>
-        </Dialog>
-      )}
-
-      {/* Modal Ampliar días permitidos */}
-      {allowedDaysModalOpen && selectedDaysMant && (
-        <Dialog
-          open={allowedDaysModalOpen}
-          onClose={handleCloseAllowedDaysModal}
-          maxWidth="xs"
-          fullWidth
-        >
-          <DialogTitle>Días permitidos antes de bloqueo</DialogTitle>
-          <DialogContent>
-            <Box sx={{ mt: 1 }}>
-              <Alert severity="info" sx={{ mb: 2 }}>
-                Mantenimiento Equipo{' '}
-                <strong>#{selectedDaysMant?.machine?.machineNum}</strong>
-                {selectedDaysMant?.type === 'SALE' ? ' (Venta)' : ''}
-              </Alert>
-              <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-                Días de tolerancia antes de bloquear las acciones del técnico
-                sobre este mantenimiento (por defecto{' '}
-                {MANTAINANCE_DEFAULT_ALLOWED_DAYS}). Útil para técnicos nuevos
-                en capacitación.
-              </Typography>
-              <TextField
-                label="Días permitidos"
-                type="number"
-                fullWidth
-                required
-                value={allowedDaysValue}
-                inputProps={{ min: 0 }}
-                onChange={(e) => setAllowedDaysValue(e.target.value)}
-              />
-            </Box>
-          </DialogContent>
-          <DialogActions>
-            <Button
-              onClick={handleCloseAllowedDaysModal}
-              disabled={isSubmittingDays}
-            >
-              Cancelar
-            </Button>
-            <Button
-              variant="contained"
-              onClick={handleSubmitAllowedDays}
-              disabled={
-                allowedDaysValue === '' ||
-                Number(allowedDaysValue) < 0 ||
-                isSubmittingDays
-              }
-              startIcon={isSubmittingDays ? <CircularProgress size={20} /> : null}
-            >
-              {isSubmittingDays ? 'Guardando...' : 'Guardar'}
             </Button>
           </DialogActions>
         </Dialog>

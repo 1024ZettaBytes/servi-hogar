@@ -27,6 +27,9 @@ import { useGetWarehouseMachines, useGetAllWarehousesOverview, getFetcher } from
 import { formatTZDate } from 'lib/client/utils';
 import { receiveWarehouseMachine } from 'lib/client/warehouseMachinesFetch';
 import { useSnackbar } from 'notistack';
+import MachineEntryNumberCell, {
+  getDisplayMachineNum
+} from '@/components/MachineEntryNumberCell';
 
 interface Props {
   className?: string;
@@ -128,9 +131,7 @@ const TablaRecolectadasAlmacen: FC<Props> = ({ userRole }) => {
                 paginatedMachines.map((machine) => (
                   <TableRow hover key={machine._id}>
                     <TableCell>
-                      <Typography variant="body1" fontWeight="bold" noWrap>
-                        {machine.entryNumber}
-                      </Typography>
+                      <MachineEntryNumberCell machine={machine} />
                     </TableCell>
                     <TableCell>
                       <Typography variant="body1" fontWeight="bold" noWrap>
@@ -209,7 +210,7 @@ const TablaRecolectadasAlmacen: FC<Props> = ({ userRole }) => {
           <DialogTitle>Recibir máquina de almacén</DialogTitle>
           <DialogContent>
             <DialogContentText sx={{ mb: 2 }}>
-              {`Máquina #${selectedMachine.entryNumber} (${selectedMachine.brand}). Seleccione la ubicación donde se bajará el equipo:`}
+              {`Máquina #${getDisplayMachineNum(selectedMachine)} (${selectedMachine.brand}). Seleccione la ubicación donde se bajará el equipo:`}
             </DialogContentText>
             <TextField
               select
