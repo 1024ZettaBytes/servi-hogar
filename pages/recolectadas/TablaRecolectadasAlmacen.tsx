@@ -19,7 +19,8 @@ import {
   DialogContentText,
   DialogActions,
   TextField,
-  MenuItem
+  MenuItem,
+  Box
 } from '@mui/material';
 import { LoadingButton } from '@mui/lab';
 import DownloadIcon from '@mui/icons-material/Download';
@@ -44,6 +45,7 @@ const TablaRecolectadasAlmacen: FC<Props> = ({ userRole }) => {
   const [modalOpen, setModalOpen] = useState(false);
   const [isReceiving, setIsReceiving] = useState(false);
   const [selectedWarehouse, setSelectedWarehouse] = useState('');
+  const [currentImageIndex, setCurrentImageIndex] = useState(0);
 
   const { warehouseMachines, isLoadingWarehouseMachines } =
     useGetWarehouseMachines(getFetcher, 'EN_VEHICULO');
@@ -68,6 +70,7 @@ const TablaRecolectadasAlmacen: FC<Props> = ({ userRole }) => {
     setModalOpen(false);
     setSelectedMachine(null);
     setSelectedWarehouse('');
+    setCurrentImageIndex(0);
   };
 
   const handleConfirmReceive = async () => {
@@ -94,6 +97,21 @@ const TablaRecolectadasAlmacen: FC<Props> = ({ userRole }) => {
 
   const machines = warehouseMachines || [];
   const paginatedMachines = machines.slice(page * limit, (page + 1) * limit);
+
+  const images = selectedMachine?.entryPhotos || [];
+  const currentImage = images[currentImageIndex];
+
+  const handleNextImage = () => {
+    if (currentImageIndex < images.length - 1) {
+      setCurrentImageIndex(currentImageIndex + 1);
+    }
+  };
+
+  const handlePrevImage = () => {
+    if (currentImageIndex > 0) {
+      setCurrentImageIndex(currentImageIndex - 1);
+    }
+  };
 
   return (
     <>
@@ -212,6 +230,50 @@ const TablaRecolectadasAlmacen: FC<Props> = ({ userRole }) => {
             <DialogContentText sx={{ mb: 2 }}>
               {`Máquina #${getDisplayMachineNum(selectedMachine)} (${selectedMachine.brand}). Seleccione la ubicación donde se bajará el equipo:`}
             </DialogContentText>
+            {images.length > 0 && (
+              <Box sx={{ textAlign: 'center', mb: 3 }}>
+                <Typography variant="subtitle2" color="text.secondary" gutterBottom>
+                  Fotos del Equipo
+                </Typography>
+                <img
+                  src={currentImage as string}
+                  alt={`Foto ${currentImageIndex + 1}`}
+                  style={{
+                    maxWidth: '100%',
+                    maxHeight: '300px',
+                    borderRadius: '8px'
+                  }}
+                />
+                {images.length > 1 && (
+                  <Box
+                    sx={{
+                      mt: 1,
+                      display: 'flex',
+                      justifyContent: 'center',
+                      gap: 1
+                    }}
+                  >
+                    <Button
+                      size="small"
+                      onClick={handlePrevImage}
+                      disabled={currentImageIndex === 0}
+                    >
+                      Anterior
+                    </Button>
+                    <Typography variant="caption" sx={{ alignSelf: 'center' }}>
+                      {currentImageIndex + 1} / {images.length}
+                    </Typography>
+                    <Button
+                      size="small"
+                      onClick={handleNextImage}
+                      disabled={currentImageIndex === images.length - 1}
+                    >
+                      Siguiente
+                    </Button>
+                  </Box>
+                )}
+              </Box>
+            )}
             <TextField
               select
               fullWidth
