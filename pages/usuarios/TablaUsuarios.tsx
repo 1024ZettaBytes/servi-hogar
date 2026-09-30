@@ -38,6 +38,7 @@ import AttendanceDetailModal from '@/components/AttendanceDetailModal';
 interface TablaUsuariosProps {
   className?: string;
   userList: any[];
+  userRole: string;
 }
 
 const compareStringsForFilter = (keyWord: string, field: string) => {
@@ -82,9 +83,13 @@ const applyPagination = (
   return customerList.slice(page * limit, page * limit + limit);
 };
 
-const TablaUsuarios: FC<TablaUsuariosProps> = ({ userList }) => {
+const TablaUsuarios: FC<TablaUsuariosProps> = ({ userList, userRole }) => {
   const { data: session } = useSession();
   const isSuperUser = (session?.user as any)?.isSuperUser;
+  const isAdmin = userRole === 'ADMIN';
+  // AUX (office) can only unlock OPE (route) users, up to 3 times/day per
+  // user (enforced server-side). They get no other user-management action.
+  const isAux = userRole === 'AUX';
   const { enqueueSnackbar } = useSnackbar();
   const [updateModalIsOpen, setUpdateModalIsOpen] = useState(false);
   const [unlockModalIsOpen, setUnlockModalIsOpen] = useState(false);
@@ -282,21 +287,24 @@ const TablaUsuarios: FC<TablaUsuariosProps> = ({ userList }) => {
                     </TableCell>
 
                     <TableCell align="center">
-                      {!['ADMIN', 'PARTNER', 'SYSTEM'].includes(user.role?.id) && (
-                        <Tooltip title="Ver Asistencia" arrow>
-                          <IconButton
-                            onClick={() => {
-                              setAttendanceUser(user);
-                              setAttendanceModalIsOpen(true);
-                            }}
-                            color="primary"
-                            size="small"
-                          >
-                            <AccessTimeIcon fontSize="small" />
-                          </IconButton>
-                        </Tooltip>
-                      )}
-                      {user.role?.id === 'TEC' && (
+                      {isAdmin &&
+                        !['ADMIN', 'PARTNER', 'SYSTEM'].includes(
+                          user.role?.id
+                        ) && (
+                          <Tooltip title="Ver Asistencia" arrow>
+                            <IconButton
+                              onClick={() => {
+                                setAttendanceUser(user);
+                                setAttendanceModalIsOpen(true);
+                              }}
+                              color="primary"
+                              size="small"
+                            >
+                              <AccessTimeIcon fontSize="small" />
+                            </IconButton>
+                          </Tooltip>
+                        )}
+                      {isAdmin && user.role?.id === 'TEC' && (
                         <Tooltip title={'Asignar Equipos'} arrow>
                           <IconButton
                             onClick={() => {
@@ -310,7 +318,10 @@ const TablaUsuarios: FC<TablaUsuariosProps> = ({ userList }) => {
                           </IconButton>
                         </Tooltip>
                       )}
-                      {user?.isBlocked && user?.isActive && (user?.role?.id !== 'ADMIN' || isSuperUser) && (
+                      {user?.isBlocked &&
+                        user?.isActive &&
+                        ((isAdmin && (user?.role?.id !== 'ADMIN' || isSuperUser)) ||
+                          (isAux && user?.role?.id === 'OPE')) && (
                         <Tooltip title="Desbloquear Usuario" arrow>
                           <IconButton
                             onClick={() => {
@@ -330,41 +341,43 @@ const TablaUsuarios: FC<TablaUsuariosProps> = ({ userList }) => {
                           </IconButton>
                         </Tooltip>
                       )}
-                      <Tooltip
-                        title={
-                          user?.isActive
-                            ? 'Desactivar Usuario'
-                            : 'Activar usuario'
-                        }
-                        arrow
-                      >
-                        <IconButton
-                          onClick={() => {
-                            setUserToUpdate({
-                              _id: user?._id,
-                              isActive: !user?.isActive,
-                              operation: 'STATUS'
-                            });
-                            handleOnChangeStatus();
-                          }}
-                          sx={{
-                            '&:hover': {
-                              background: theme.colors.error.lighter
-                            },
-                            color: user?.isActive
-                              ? theme.palette.error.main
-                              : theme.colors.alpha.black
-                          }}
-                          color="inherit"
-                          size="small"
+                      {isAdmin && (
+                        <Tooltip
+                          title={
+                            user?.isActive
+                              ? 'Desactivar Usuario'
+                              : 'Activar usuario'
+                          }
+                          arrow
                         >
-                          {user?.isActive ? (
-                            <BlockIcon fontSize="small" />
-                          ) : (
-                            <CheckIcon fontSize="small" />
-                          )}
-                        </IconButton>
-                      </Tooltip>
+                          <IconButton
+                            onClick={() => {
+                              setUserToUpdate({
+                                _id: user?._id,
+                                isActive: !user?.isActive,
+                                operation: 'STATUS'
+                              });
+                              handleOnChangeStatus();
+                            }}
+                            sx={{
+                              '&:hover': {
+                                background: theme.colors.error.lighter
+                              },
+                              color: user?.isActive
+                                ? theme.palette.error.main
+                                : theme.colors.alpha.black
+                            }}
+                            color="inherit"
+                            size="small"
+                          >
+                            {user?.isActive ? (
+                              <BlockIcon fontSize="small" />
+                            ) : (
+                              <CheckIcon fontSize="small" />
+                            )}
+                          </IconButton>
+                        </Tooltip>
+                      )}
                     </TableCell>
                   </TableRow>
                 );

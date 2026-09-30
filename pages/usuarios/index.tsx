@@ -22,16 +22,21 @@ import NextBreadcrumbs from "@/components/Shared/BreadCrums";
 import AddTwoTone from "@mui/icons-material/AddTwoTone";
 import AddUserModal from "@/components/AddUserModal";
 
-function Usuarios({}) {
+function Usuarios({ session }) {
   const paths = ["Inicio", "Usuarios"];
   const { enqueueSnackbar } = useSnackbar();
+  const userRole = session?.user?.role;
+  const isAdmin = userRole === "ADMIN";
   const { userList, userError } = useGetUsers(getFetcher);
   const { rolesList, rolesError } = useGetRoles(getFetcher);
-  const { unlocksList, unlocksError } = useGetUserUnlocks(getFetcher);
+  // AUX only unlocks users, it does not see the unlock history log.
+  const { unlocksList, unlocksError } = useGetUserUnlocks(getFetcher, isAdmin);
   const { warehousesList, warehousesError } = useGetAllWarehousesOverview(getFetcher);
   const [addModalIsOpen, setAddModalIsOpen] = useState(false);
-  const generalError = userError || rolesError || unlocksError || warehousesError;
-  const completeData = userList && rolesList && unlocksList && warehousesList;
+  const generalError =
+    userError || rolesError || warehousesError || (isAdmin && unlocksError);
+  const completeData =
+    userList && rolesList && warehousesList && (!isAdmin || unlocksList);
 
   const handleClickOpen = () => {
     setAddModalIsOpen(true);
@@ -60,7 +65,7 @@ function Usuarios({}) {
         <PageHeader
           title={"Usuarios"}
           sutitle={""}
-          button={!generalError && completeData ? button : null}
+          button={isAdmin && !generalError && completeData ? button : null}
         />
         <NextBreadcrumbs paths={paths} lastLoaded={true} />
       </PageTitleWrapper>
@@ -88,29 +93,32 @@ function Usuarios({}) {
               <Card>
                 <TablaUsuarios
                   userList={userList}
+                  userRole={userRole}
                 />
               </Card>
             )}
           </Grid>
-          <Grid item xs={12}>
-            {generalError ? null : !completeData ? (
-              <Skeleton
-                variant="rectangular"
-                width={"100%"}
-                height={500}
-                animation="wave"
-              />
-            ) : (
-              <Card>
-                <TablaDesbloqueos
-                  unlocksList={unlocksList}
+          {isAdmin && (
+            <Grid item xs={12}>
+              {generalError ? null : !completeData ? (
+                <Skeleton
+                  variant="rectangular"
+                  width={"100%"}
+                  height={500}
+                  animation="wave"
                 />
-              </Card>
-            )}
-          </Grid>
+              ) : (
+                <Card>
+                  <TablaDesbloqueos
+                    unlocksList={unlocksList}
+                  />
+                </Card>
+              )}
+            </Grid>
+          )}
         </Grid>
       </Container>
-      {addModalIsOpen && completeData ? (
+      {isAdmin && addModalIsOpen && completeData ? (
         <AddUserModal
           open={addModalIsOpen}
           handleOnClose={handleClose}
@@ -130,6 +138,10 @@ Usuarios.getLayout = (page) => <SidebarLayout>{page}</SidebarLayout>;
 
 export async function getServerSideProps({ req, resolvedUrl }) {
   let props = await validateServerSideSession(getSession, req, resolvedUrl);
+  // ADMIN manages users fully; AUX only unlocks OPE users from this page.
+  if (props?.props?.session && !["ADMIN", "AUX"].includes(props.props.session.user.role)) {
+    return { redirect: { destination: "/", permanent: false } };
+  }
   return props;
 }
 export default Usuarios;
