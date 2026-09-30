@@ -3,6 +3,7 @@ import mongoose from 'mongoose';
 export interface UserUnlockType {
   user: mongoose.Types.ObjectId;
   unlockedBy: mongoose.Types.ObjectId;
+  unlockedByRole: string;
   reason: string;
   unlockedAt: Date;
 }
@@ -17,6 +18,14 @@ const UserUnlockSchema = new mongoose.Schema<UserUnlockType>({
     type: mongoose.Schema.Types.ObjectId,
     ref: 'users',
     required: true
+  },
+  // Role of the user that performed the unlock at the time it happened
+  // (e.g. 'ADMIN', 'AUX'). Used to enforce the daily unlock limit AUX users
+  // have on OPE users without re-deriving it from the (possibly since
+  // changed) unlockedBy user record.
+  unlockedByRole: {
+    type: String,
+    default: null
   },
   reason: {
     type: String,

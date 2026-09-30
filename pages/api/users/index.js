@@ -85,7 +85,14 @@ async function unlockUserAPI(req, res) {
 }
 
 async function handler(req, res) {
-  const validRole = await validateUserPermissions(req, res, ['ADMIN', 'AUX']);
+  // GET (list users) and PATCH (unlock user) are available to ADMIN and AUX
+  // (AUX can only unlock OPE users, up to 3 times/day per user — enforced in
+  // unlockUser()). Managing users (create/update/delete) stays ADMIN-only.
+  const allowedRoles =
+    req.method === 'GET' || req.method === 'PATCH'
+      ? ['ADMIN', 'AUX']
+      : ['ADMIN'];
+  const validRole = await validateUserPermissions(req, res, allowedRoles);
   if (validRole)
     switch (req.method) {
       case 'GET':

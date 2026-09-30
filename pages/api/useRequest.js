@@ -275,8 +275,11 @@ export const useGetUsers = (fetcher, role=null) => {
 };
 
 // User Unlocks
-export const useGetUserUnlocks = (fetcher) => {
-  const { data, error } = useSWR(ROUTES.ALL_USER_UNLOCKS, fetcher);
+export const useGetUserUnlocks = (fetcher, enabled = true) => {
+  const { data, error } = useSWR(
+    enabled ? ROUTES.ALL_USER_UNLOCKS : null,
+    fetcher
+  );
   return { unlocksList: data?.data, unlocksError: error };
 };
 

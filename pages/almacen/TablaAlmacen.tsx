@@ -31,6 +31,7 @@ import SearchIcon from '@mui/icons-material/Search';
 import BuildIcon from '@mui/icons-material/Build';
 import LocalShippingIcon from '@mui/icons-material/LocalShipping';
 import DeconstructIcon from '@mui/icons-material/ConstructionOutlined';
+import RestoreIcon from '@mui/icons-material/Restore';
 import ShoppingBagIcon from '@mui/icons-material/ShoppingBag';
 import SwapHorizIcon from '@mui/icons-material/SwapHoriz';
 import { useSnackbar } from 'notistack';
@@ -47,8 +48,10 @@ import MachineEntryNumberCell, {
 import {
   deleteWarehouseMachine,
   dismantleWarehouseMachine,
+  revertDismantleWarehouseMachine,
   moveToSale
 } from '../../lib/client/warehouseMachinesFetch';
+import { revertDismantleRentalMachine } from '../../lib/client/machinesFetch';
 
 interface TablaAlmacenProps {
   userRole: string;
@@ -135,6 +138,9 @@ const TablaAlmacen: FC<TablaAlmacenProps> = ({
   const [saleModalOpen, setSaleModalOpen] = useState(false);
   const [machineToSale, setMachineToSale] = useState(null);
   const [isMovingToSale, setIsMovingToSale] = useState(false);
+  const [revertModalOpen, setRevertModalOpen] = useState(false);
+  const [machineToRevert, setMachineToRevert] = useState(null);
+  const [isReverting, setIsReverting] = useState(false);
 
   const handlePageChange = (_event: any, newPage: number): void => {
     setPage(newPage);
@@ -190,6 +196,30 @@ const TablaAlmacen: FC<TablaAlmacenProps> = ({
     setIsDismantling(false);
     setDismantleModalOpen(false);
     setMachineToDismantle(null);
+    if (!result.error) {
+      enqueueSnackbar(result.msg, {
+        variant: 'success',
+        anchorOrigin: { vertical: 'top', horizontal: 'center' },
+        autoHideDuration: 1500
+      });
+      onUpdate();
+    } else {
+      enqueueSnackbar(result.msg, {
+        variant: 'error',
+        anchorOrigin: { vertical: 'top', horizontal: 'center' },
+        autoHideDuration: 2000
+      });
+    }
+  };
+
+  const handleRevertDismantle = async () => {
+    setIsReverting(true);
+    const result = machineToRevert.isRentalMachine
+      ? await revertDismantleRentalMachine(machineToRevert._id)
+      : await revertDismantleWarehouseMachine(machineToRevert._id);
+    setIsReverting(false);
+    setRevertModalOpen(false);
+    setMachineToRevert(null);
     if (!result.error) {
       enqueueSnackbar(result.msg, {
         variant: 'success',
@@ -498,6 +528,27 @@ const TablaAlmacen: FC<TablaAlmacenProps> = ({
                         </IconButton>
                       </Tooltip>
                     )}
+                  {userRole === 'ADMIN' &&
+                    machine.status === 'DESMANTELADA' && (
+                      <Tooltip title="Revertir desmantelación" arrow>
+                        <IconButton
+                          sx={{
+                            '&:hover': {
+                              background: theme.colors.success.lighter
+                            },
+                            color: theme.palette.success.dark
+                          }}
+                          color="inherit"
+                          size="small"
+                          onClick={() => {
+                            setMachineToRevert(machine);
+                            setRevertModalOpen(true);
+                          }}
+                        >
+                          <RestoreIcon fontSize="small" />
+                        </IconButton>
+                      </Tooltip>
+                    )}
                 </TableCell>
               </TableRow>
             ))}
@@ -541,6 +592,20 @@ const TablaAlmacen: FC<TablaAlmacenProps> = ({
           onCancel={() => {
             setDismantleModalOpen(false);
             setMachineToDismantle(null);
+          }}
+        />
+      )}
+      {revertModalOpen && (
+        <GenericModal
+          open={revertModalOpen}
+          title="Revertir desmantelación"
+          requiredReason={false}
+          text={`¿Está seguro de revertir la desmantelación de la máquina #${getDisplayMachineNum(machineToRevert)} (${machineToRevert?.brand})? ${machineToRevert?.isRentalMachine ? 'El equipo volverá a estar activo como equipo de renta.' : 'La máquina volverá al estado ALMACENADA.'}`}
+          isLoading={isReverting}
+          onAccept={handleRevertDismantle}
+          onCancel={() => {
+            setRevertModalOpen(false);
+            setMachineToRevert(null);
           }}
         />
       )}
