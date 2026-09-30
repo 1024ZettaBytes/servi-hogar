@@ -28,15 +28,17 @@ function Usuarios({ session }) {
   const userRole = session?.user?.role;
   const isAdmin = userRole === "ADMIN";
   const { userList, userError } = useGetUsers(getFetcher);
-  const { rolesList, rolesError } = useGetRoles(getFetcher);
+  // /api/users/roles is ADMIN-only (adding users is an ADMIN-only action),
+  // so AUX must not call it — doing so 403s and blocked the whole page.
+  const { rolesList, rolesError } = useGetRoles(getFetcher, isAdmin);
   // AUX only unlocks users, it does not see the unlock history log.
   const { unlocksList, unlocksError } = useGetUserUnlocks(getFetcher, isAdmin);
   const { warehousesList, warehousesError } = useGetAllWarehousesOverview(getFetcher);
   const [addModalIsOpen, setAddModalIsOpen] = useState(false);
   const generalError =
-    userError || rolesError || warehousesError || (isAdmin && unlocksError);
+    userError || warehousesError || (isAdmin && (rolesError || unlocksError));
   const completeData =
-    userList && rolesList && warehousesList && (!isAdmin || unlocksList);
+    userList && warehousesList && (!isAdmin || (rolesList && unlocksList));
 
   const handleClickOpen = () => {
     setAddModalIsOpen(true);

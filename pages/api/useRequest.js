@@ -294,8 +294,8 @@ export const useGetPendingActions = (fetcher) => {
 };
 
 // Roles
-export const useGetRoles = (fetcher) => {
-  const { data, error } = useSWR(ROUTES.ALL_ROLES, fetcher);
+export const useGetRoles = (fetcher, enabled = true) => {
+  const { data, error } = useSWR(enabled ? ROUTES.ALL_ROLES : null, fetcher);
   return { rolesList: data?.data, rolesError: error };
 };
 
