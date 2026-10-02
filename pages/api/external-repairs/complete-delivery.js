@@ -41,7 +41,7 @@ async function handler(req, res) {
     if (evidence) uploadedFiles.evidence = evidence;
     if (voucher) uploadedFiles.voucher = voucher;
 
-    await completeExternalRepairDelivery({
+    const { receipt } = await completeExternalRepairDelivery({
       repairId: one(fields.repairId),
       deliveredBy: userId,
       deliveredByRole: ok,
@@ -51,7 +51,10 @@ async function handler(req, res) {
       files: uploadedFiles,
       lastUpdatedBy: userId
     });
-    res.status(200).json({ msg: 'Entrega completada con éxito.' });
+    // `receipt` es null en una devolución (no se cobra nada).
+    res
+      .status(200)
+      .json({ msg: 'Entrega completada con éxito.', receipt });
   } catch (e) {
     console.error(e);
     res.status(500).json({ errorMsg: e.message });
