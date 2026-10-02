@@ -69,6 +69,7 @@ import {
 } from '../../lib/client/externalRepairsFetch';
 import { compressImage, formatTZDate } from '../../lib/client/utils';
 import { EXTERNAL_REPAIR_STATUS_LABELS } from './index';
+import PaymentReceipt from 'src/components/PaymentReceipt';
 
 const fmt = (d) => (d ? formatTZDate(d, 'DD MMMM YYYY') : '—');
 
@@ -102,6 +103,9 @@ function ExternalRepairDetail({ session }) {
   const [deliveryFolio, setDeliveryFolio] = useState('');
   const [deliveryAccount, setDeliveryAccount] = useState('');
   const [voucherFile, setVoucherFile] = useState<any>(null);
+  // Recibo que devuelve la entrega cobrada, para mostrárselo al cliente.
+  const [receipt, setReceipt] = useState<any>(null);
+  const [showReceipt, setShowReceipt] = useState(false);
   const [pickupPhotos, setPickupPhotos] = useState<any[]>([
     null,
     null,
@@ -401,8 +405,17 @@ function ExternalRepairDetail({ session }) {
     if (!result.error) {
       setEvidenceFile(null);
       setVoucherFile(null);
+      // Una devolución no cobra, así que no trae recibo.
+      if (result.receipt) {
+        setReceipt(result.receipt);
+        setShowReceipt(true);
+      }
     }
   }
+
+  // `receipt` solo se llena al cerrar la entrega en esta sesión; si la
+  // reparación ya venía entregada, el recibo llega con la reparación.
+  const deliveryReceipt = receipt || repair.receipt;
 
   const PICKUP_LABELS = ['Frente', 'Tablero', 'Serie', 'Debajo'];
 
@@ -1265,8 +1278,24 @@ function ExternalRepairDetail({ session }) {
                         {fmt(repair.warrantyUntil)}.
                       </Alert>
                       <Typography>
-                        Monto cobrado: <b>${repair.chargeAmount ?? 0}</b>
+                        Monto cobrado:{' '}
+                        <b>${repair.payment?.amount ?? repair.chargeAmount ?? 0}</b>
                       </Typography>
+                      {repair.payment?.method && (
+                        <Typography>
+                          Método de pago:{' '}
+                          <b>
+                            {PAYMENT_METHODS[repair.payment.method] ||
+                              repair.payment.method}
+                          </b>
+                          {repair.payment.folio
+                            ? ` · Folio: ${repair.payment.folio}`
+                            : ''}
+                          {repair.payment.paymentAccount
+                            ? ` · ${repair.payment.paymentAccount.bank} ${repair.payment.paymentAccount.number}`
+                            : ''}
+                        </Typography>
+                      )}
                       <Typography>
                         Técnico que reparó:{' '}
                         <b>{repair.repairedBy?.name || '—'}</b>
@@ -1274,16 +1303,38 @@ function ExternalRepairDetail({ session }) {
                       <Typography>
                         Entregó: {repair.deliveredBy?.name || '—'}
                       </Typography>
-                      {repair.deliveryEvidenceUrl && (
-                        <Button
-                          size="small"
-                          href={repair.deliveryEvidenceUrl}
-                          target="_blank"
-                          sx={{ mt: 1 }}
-                        >
-                          Ver evidencia
-                        </Button>
-                      )}
+                      <Box sx={{ display: 'flex', gap: 1, mt: 1 }}>
+                        {repair.deliveryEvidenceUrl && (
+                          <Button
+                            size="small"
+                            href={repair.deliveryEvidenceUrl}
+                            target="_blank"
+                            rel="noopener"
+                          >
+                            Ver evidencia
+                          </Button>
+                        )}
+                        {repair.payment?.voucherUrl && (
+                          <Button
+                            size="small"
+                            href={repair.payment.voucherUrl}
+                            target="_blank"
+                            rel="noopener"
+                          >
+                            Ver comprobante de pago
+                          </Button>
+                        )}
+                        {deliveryReceipt && (
+                          <Button
+                            size="small"
+                            variant="outlined"
+                            color="success"
+                            onClick={() => setShowReceipt(true)}
+                          >
+                            Ver recibo
+                          </Button>
+                        )}
+                      </Box>
                     </Box>
                   )}
 
@@ -1331,6 +1382,15 @@ function ExternalRepairDetail({ session }) {
           </LoadingButton>
         </DialogActions>
       </Dialog>
+
+      {/* Recibo del cobro de la entrega */}
+      {showReceipt && (
+        <PaymentReceipt
+          receipt={deliveryReceipt}
+          open={showReceipt}
+          onClose={() => setShowReceipt(false)}
+        />
+      )}
 
       <Footer />
     </>

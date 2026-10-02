@@ -36,11 +36,15 @@ import {
   MenuItem
 } from '@mui/material';
 import EditIcon from '@mui/icons-material/Edit';
+import ReceiptLongIcon from '@mui/icons-material/ReceiptLong';
+import ReceiptIcon from '@mui/icons-material/Receipt';
 import { useSnackbar } from 'notistack';
 import Footer from '@/components/Footer';
 import NextBreadcrumbs from '@/components/Shared/BreadCrums';
 import { getFetcher, useGetExternalRepairs, useGetUsers } from '../../pages/api/useRequest';
 import { reassignExternalRepairTechnician } from '../../lib/client/externalRepairsFetch';
+import { PAYMENT_METHODS } from '../../lib/consts/OBJ_CONTS';
+import PaymentReceipt from 'src/components/PaymentReceipt';
 
 export const EXTERNAL_REPAIR_STATUS_LABELS = {
   RECOLECCION_AGENDADA: { label: 'Recolección agendada', color: 'secondary' },
@@ -92,6 +96,8 @@ function ReparacionesExternas({ session }) {
   const [reassignRepair, setReassignRepair] = useState<any>(null);
   const [selectedTechnician, setSelectedTechnician] = useState('');
   const [isReassigning, setIsReassigning] = useState(false);
+  // Recibo del cobro que se abre desde la tabla de finalizadas.
+  const [selectedReceipt, setSelectedReceipt] = useState<any>(null);
 
   const list = externalRepairsList || [];
   const finalized = finalizedList || [];
@@ -124,7 +130,10 @@ function ReparacionesExternas({ session }) {
     }
   };
 
-  const renderRepairRow = (r) => {
+  // `showPayment` agrega las columnas del cobro (monto, método y comprobante).
+  // Solo se usan en la tabla de finalizadas: las reparaciones activas todavía
+  // no se han cobrado.
+  const renderRepairRow = (r, showPayment = false) => {
     const status = EXTERNAL_REPAIR_STATUS_LABELS[r.status] || {
       label: r.status,
       color: 'default'
@@ -157,6 +166,66 @@ function ReparacionesExternas({ session }) {
           <Chip size="small" label={status.label} color={status.color as any} />
         </TableCell>
         <TableCell align="center">{daysSince(r.createdAt)}</TableCell>
+        {showPayment && (
+          <>
+            <TableCell align="right">
+              {r.status === 'ENTREGADA'
+                ? `$${r.payment?.amount ?? r.chargeAmount ?? 0}`
+                : '—'}
+            </TableCell>
+            <TableCell>
+              {r.payment?.method ? (
+                <Typography variant="body2">
+                  {PAYMENT_METHODS[r.payment.method] || r.payment.method}
+                  {r.payment.folio ? ` · ${r.payment.folio}` : ''}
+                </Typography>
+              ) : (
+                '—'
+              )}
+            </TableCell>
+            <TableCell align="center">
+              {r.payment?.voucherUrl || r.receipt ? (
+                <Box
+                  sx={{
+                    display: 'flex',
+                    justifyContent: 'center',
+                    gap: 0.5
+                  }}
+                >
+                  {r.payment?.voucherUrl && (
+                    <Tooltip title="Ver comprobante de pago" arrow>
+                      <IconButton
+                        size="small"
+                        color="primary"
+                        href={r.payment.voucherUrl}
+                        target="_blank"
+                        rel="noopener"
+                      >
+                        <ReceiptLongIcon fontSize="small" />
+                      </IconButton>
+                    </Tooltip>
+                  )}
+                  {r.receipt && (
+                    <Tooltip
+                      title={`Ver recibo ${r.receipt.receiptNumber}`}
+                      arrow
+                    >
+                      <IconButton
+                        size="small"
+                        color="success"
+                        onClick={() => setSelectedReceipt(r.receipt)}
+                      >
+                        <ReceiptIcon fontSize="small" />
+                      </IconButton>
+                    </Tooltip>
+                  )}
+                </Box>
+              ) : (
+                '—'
+              )}
+            </TableCell>
+          </>
+        )}
         <TableCell align="right">
           <Button
             size="small"
@@ -244,7 +313,7 @@ function ReparacionesExternas({ session }) {
                       <TableCell align="right">Acción</TableCell>
                     </TableRow>
                   </TableHead>
-                  <TableBody>{list.map(renderRepairRow)}</TableBody>
+                  <TableBody>{list.map((r) => renderRepairRow(r))}</TableBody>
                 </Table>
               </TableContainer>
               )}
@@ -277,10 +346,15 @@ function ReparacionesExternas({ session }) {
                         <TableCell>Técnico</TableCell>
                         <TableCell>Estado</TableCell>
                         <TableCell align="center">Días</TableCell>
+                        <TableCell align="right">Monto</TableCell>
+                        <TableCell>Método de pago</TableCell>
+                        <TableCell align="center">Documentos</TableCell>
                         <TableCell align="right">Acción</TableCell>
                       </TableRow>
                     </TableHead>
-                    <TableBody>{finalized.map(renderRepairRow)}</TableBody>
+                    <TableBody>
+                      {finalized.map((r) => renderRepairRow(r, true))}
+                    </TableBody>
                   </Table>
                 </TableContainer>
               )}
@@ -296,6 +370,15 @@ function ReparacionesExternas({ session }) {
         </Grid>
       </Container>
       <Footer />
+
+      {/* Recibo del cobro de una reparación finalizada */}
+      {selectedReceipt && (
+        <PaymentReceipt
+          receipt={selectedReceipt}
+          open={!!selectedReceipt}
+          onClose={() => setSelectedReceipt(null)}
+        />
+      )}
 
       {reassignRepair && (
         <Dialog

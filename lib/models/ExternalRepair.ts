@@ -86,6 +86,9 @@ export interface IExternalRepair extends Document {
   deliveredAt: Date;
   deliveredBy: Schema.Types.ObjectId;
   deliveryEvidenceUrl: string;
+  // Cobro de la entrega (solo en la ruta REPARADA -> ENTREGADA). El método,
+  // folio, cuenta y comprobante viven en el documento Payment referenciado.
+  payment: Schema.Types.ObjectId;
   followUpNotes: IExternalRepairFollowUp[];
   // Return (rejected path)
   returnAssignedTo: Schema.Types.ObjectId;
@@ -172,6 +175,7 @@ const ExternalRepairSchema = new Schema<IExternalRepair>({
   deliveredAt: { type: Date, default: null },
   deliveredBy: { type: Schema.Types.ObjectId, ref: 'users', default: null },
   deliveryEvidenceUrl: { type: String, default: null },
+  payment: { type: Schema.Types.ObjectId, ref: 'payments', default: null },
   followUpNotes: {
     type: [
       {
