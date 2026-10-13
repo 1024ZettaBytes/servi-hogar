@@ -1,11 +1,13 @@
 import Head from "next/head";
 import { getSession } from "next-auth/react";
+import { useState } from "react";
 import SidebarLayout from "@/layouts/SidebarLayout";
 import { validateServerSideSession } from "../../lib/auth";
 import PageHeader from "@/components/PageHeader";
 import PageTitleWrapper from "@/components/PageTitleWrapper";
 import { Card, Container, Grid, Skeleton, Alert } from "@mui/material";
 import Footer from "@/components/Footer";
+import AssignPartnerMachineModal from "@/components/AssignPartnerMachineModal";
 import TablaSocios from "./TablaSocios";
 import { useGetPartners, useGetPayouts, getFetcher } from "../api/useRequest";
 import NextBreadcrumbs from "@/components/Shared/BreadCrums";
@@ -15,6 +17,8 @@ function Socios({}) {
   const paths = ["Inicio", "Socios"];
   const { partnersList, partnersError } = useGetPartners(getFetcher, true);
   const { payoutsList, payoutsError } = useGetPayouts(getFetcher);
+  const [isAssignModalOpen, setIsAssignModalOpen] = useState(false);
+  const [assignmentMessage, setAssignmentMessage] = useState("");
 
   return (
     <>
@@ -22,7 +26,15 @@ function Socios({}) {
         <title>Socios</title>
       </Head>
       <PageTitleWrapper>
-        <PageHeader title={"Socios"} sutitle={""} />
+        <PageHeader
+          title={"Socios"}
+          sutitle={""}
+          button={{
+            text: "Nuevo",
+            variant: "contained",
+            onClick: () => setIsAssignModalOpen(true)
+          }}
+        />
         <NextBreadcrumbs paths={paths} lastLoaded={true} />
       </PageTitleWrapper>
       <Container maxWidth="lg">
@@ -34,6 +46,15 @@ function Socios({}) {
           spacing={4}
         >
           <Grid item xs={12}>
+            {assignmentMessage ? (
+              <Alert
+                severity="success"
+                sx={{ mb: 2 }}
+                onClose={() => setAssignmentMessage("")}
+              >
+                {assignmentMessage}
+              </Alert>
+            ) : null}
             {partnersError ? (
               <Alert severity="error">{partnersError?.message}</Alert>
             ) : !partnersList ? (
@@ -67,6 +88,16 @@ function Socios({}) {
           </Grid>
         </Grid>
       </Container>
+      <AssignPartnerMachineModal
+        open={isAssignModalOpen}
+        partnersList={partnersList || []}
+        handleOnClose={(success, message) => {
+          setIsAssignModalOpen(false);
+          if (success && message) {
+            setAssignmentMessage(message);
+          }
+        }}
+      />
       <Footer />
     </>
   );

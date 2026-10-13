@@ -3,8 +3,11 @@ import { validateUserPermissions } from '../auth/authUtils';
 
 async function getPartnersAPI(req, res) {
   try {
-    const { detailed } = req.query;
-    const partners = await getPartnersData(detailed);
+    const { detailed, availableForAssignment } = req.query;
+    const partners = await getPartnersData(
+      detailed === 'true',
+      availableForAssignment === 'true'
+    );
     res.status(200).json({ data: partners });
   } catch (e) {
     console.error(e);

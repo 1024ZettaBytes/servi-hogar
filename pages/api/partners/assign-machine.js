@@ -23,15 +23,15 @@ async function assignMachineAPI(req, res) {
 }
 
 async function handler(req, res) {
-  //const validRole = await validateUserPermissions(req, res, ['ADMIN', 'AUX']);
-  
-  //if (validRole) {
+  const validRole = await validateUserPermissions(req, res, ['ADMIN', 'AUX']);
+
+  if (validRole) {
     switch (req.method) {
       case 'POST':
         await assignMachineAPI(req, res);
         break;
     }
-  //}
+  }
 }
 
 export default handler;
