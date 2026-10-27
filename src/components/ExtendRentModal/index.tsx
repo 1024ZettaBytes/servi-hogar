@@ -22,12 +22,14 @@ import RentPeriodExtend from "./RentPeriodExtend";
 import { LoadingButton } from "@mui/lab";
 import {
   useGetRentById,
+  useGetFeatureFlags,
   getFetcher,
   refreshData,
 } from "../../../pages/api/useRequest";
 import { extendRent } from "../../../lib/client/rentsFetch";
 import { capitalizeFirstLetter, addDaysToDate, formatTZDate } from "lib/client/utils";
 import { PLAN_ORO, PLAN_99 } from "lib/consts/OBJ_CONTS";
+import { FEATURE_FLAGS } from "lib/consts/featureFlags";
 import numeral from "numeral";
 import { useSnackbar } from "notistack";
 import { ROUTES } from "lib/consts/API_URL_CONST";
@@ -37,6 +39,7 @@ function ExtendRentModal(props) {
   const { checkBlocking } = useCheckBlocking();
   const { rentId, handleOnClose, open, userRole } = props;
   const { rent, rentByIdError } = useGetRentById(getFetcher, rentId);
+  const { featureFlags } = useGetFeatureFlags(getFetcher);
   const [rentPeriod, setRentPeriod] = useState({
     selectedWeeks: 1,
     useFreeWeeks: true,
@@ -61,10 +64,17 @@ function ExtendRentModal(props) {
   const isOverdue = rent?.remaining < -1; // Consider overdue if 2 or more days late;
 
   // For plan customers, override the selected weeks
-  const adminForcePlan = forcePlanPricing && userRole === 'ADMIN' && isOverdue && hasPlan;
-  const effectiveRentPeriod = (isPlanOro && !isOverdue) || (isPlanOro && adminForcePlan)
+  // Admins can always apply plan pricing to overdue rents; AUX only when the flag allows it
+  const canForcePlanPricing =
+    userRole === 'ADMIN' ||
+    (userRole === 'AUX' &&
+      !!featureFlags?.find(
+        (f) => f.key === FEATURE_FLAGS.AUX_OVERDUE_PLAN_PRICING
+      )?.enabled);
+  const forcePlan = forcePlanPricing && canForcePlanPricing && isOverdue && hasPlan;
+  const effectiveRentPeriod = (isPlanOro && !isOverdue) || (isPlanOro && forcePlan)
     ? { selectedWeeks: PLAN_ORO.WEEKS, useFreeWeeks: false }
-    : (isPlan99 && !isOverdue) || (isPlan99 && adminForcePlan)
+    : (isPlan99 && !isOverdue) || (isPlan99 && forcePlan)
     ? { selectedWeeks: PLAN_99.WEEKS, useFreeWeeks: false }
     : rentPeriod;
 
@@ -113,10 +123,10 @@ function ExtendRentModal(props) {
   let totalDue = 0;
   if (rent) {
     let newWeeksCost;
-    if ((isPlanOro && !isOverdue) || (isPlanOro && adminForcePlan)) {
+    if ((isPlanOro && !isOverdue) || (isPlanOro && forcePlan)) {
       // Plan Oro has fixed price
       newWeeksCost = PLAN_ORO.PRICE;
-    } else if ((isPlan99 && !isOverdue) || (isPlan99 && adminForcePlan)) {
+    } else if ((isPlan99 && !isOverdue) || (isPlan99 && forcePlan)) {
       // Plan 99 has fixed price
       newWeeksCost = PLAN_99.PRICE;
     } else {
@@ -130,7 +140,7 @@ function ExtendRentModal(props) {
 
   const onChangePeriod = (id, value) => {
     // Plan customers (not overdue or admin forcing plan) can only extend for their fixed weeks
-    if ((hasPlan && !isOverdue) || adminForcePlan) {
+    if ((hasPlan && !isOverdue) || forcePlan) {
       return;
     }
     setRentPeriod({ ...rentPeriod, [id]: value });
@@ -163,7 +173,7 @@ function ExtendRentModal(props) {
       rentId,
       rentPeriod: effectiveRentPeriod,
       lateFee: chargeLateFee ? lateFeeAmount : 0,
-      forcePlanPricing: adminForcePlan,
+      forcePlanPricing: forcePlan,
     });
     setIsSubmitting(false);
     if (!result.error) {
@@ -346,12 +356,13 @@ function ExtendRentModal(props) {
                             weekPrice={rent.customer?.level?.weekPrice}
                             onChangePeriod={onChangePeriod}
                             lateFee={chargeLateFee ? lateFeeAmount : 0}
-                            isPlanOro={(isPlanOro && !isOverdue) || (isPlanOro && adminForcePlan)}
-                            isPlan99={(isPlan99 && !isOverdue) || (isPlan99 && adminForcePlan)}
-                            planOverdue={hasPlan && isOverdue && !adminForcePlan}
+                            isPlanOro={(isPlanOro && !isOverdue) || (isPlanOro && forcePlan)}
+                            isPlan99={(isPlan99 && !isOverdue) || (isPlan99 && forcePlan)}
+                            planOverdue={hasPlan && isOverdue && !forcePlan}
+                            canForcePlanPricing={canForcePlanPricing}
                           />
                         </Grid>
-                        {userRole === 'ADMIN' && hasPlan && isOverdue && (
+                        {canForcePlanPricing && hasPlan && isOverdue && (
                           <Grid item lg={12} mb={1}>
                             <Alert severity="info">
                               <FormControlLabel
@@ -362,7 +373,7 @@ function ExtendRentModal(props) {
                                     color="primary"
                                   />
                                 }
-                                label={`Aplicar precio de ${isPlanOro ? 'Plan Oro' : 'Plan 99'} (solo admin)`}
+                                label={`Aplicar precio de ${isPlanOro ? 'Plan Oro' : 'Plan 99'}`}
                               />
                             </Alert>
                           </Grid>

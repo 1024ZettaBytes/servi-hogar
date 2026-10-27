@@ -82,6 +82,7 @@ import {
     isPlanOro?: boolean;
     isPlan99?: boolean;
     planOverdue?: boolean;
+    canForcePlanPricing?: boolean;
     onChangePeriod: Function;
   }
   const RentPeriodExtend: FC<RentPeriodExtendProps> = ({
@@ -95,7 +96,8 @@ import {
     lateFee,
     isPlanOro = false,
     isPlan99 = false,
-    planOverdue = false
+    planOverdue = false,
+    canForcePlanPricing = false
   }) => {
     const hasPlan = isPlanOro || isPlan99;
     const totalPrice = () => {
@@ -120,7 +122,10 @@ import {
               <Alert severity="warning">
                 <Typography variant="body2">
                   <strong>Atención:</strong> Este cliente tiene un plan activo pero está atrasado en su pago. 
-                  Se cobrará el precio regular. Solo un administrador puede aplicar el precio de plan con atraso.
+                  Se cobrará el precio regular.{" "}
+                  {canForcePlanPricing
+                    ? "Marque la opción para aplicar el precio del plan."
+                    : "Solo un administrador puede aplicar el precio de plan con atraso."}
                 </Typography>
               </Alert>
             </Grid>
@@ -231,6 +236,7 @@ import {
     isPlanOro: PropTypes.bool,
     isPlan99: PropTypes.bool,
     planOverdue: PropTypes.bool,
+    canForcePlanPricing: PropTypes.bool,
     onChangePeriod: PropTypes.func.isRequired,
   };
   
