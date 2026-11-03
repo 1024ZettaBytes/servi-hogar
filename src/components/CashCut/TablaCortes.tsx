@@ -176,6 +176,45 @@ const TablaCortes: FC<TablaCortesProps> = ({
                             </Tooltip>
                           )}
                         </Stack>
+                        {cut.type === 'OFICINA' &&
+                          cut.confirmedAmount !== null &&
+                          cut.confirmedAmount !== undefined && (
+                            // El conteo de quien recibió la caja es el saldo
+                            // inicial del siguiente turno, por eso también se
+                            // puede corregir.
+                            <Stack
+                              direction="row"
+                              spacing={0.5}
+                              alignItems="center"
+                              justifyContent="flex-end"
+                            >
+                              <Typography
+                                variant="caption"
+                                color="text.secondary"
+                                noWrap
+                              >
+                                Contado: {money(cut.confirmedAmount)}
+                              </Typography>
+                              {canEdit && (
+                                <Tooltip title="Corregir monto contado">
+                                  <IconButton
+                                    size="small"
+                                    onClick={() =>
+                                      onEditAmount({
+                                        kind: 'CUT',
+                                        id: cut._id,
+                                        field: 'confirmedAmount',
+                                        currentValue: cut.confirmedAmount,
+                                        label: `Corte #${cut.cutNumber} — monto contado`
+                                      })
+                                    }
+                                  >
+                                    <EditTwoToneIcon fontSize="small" />
+                                  </IconButton>
+                                </Tooltip>
+                              )}
+                            </Stack>
+                          )}
                         {cut.edits?.length > 0 && (
                           <Typography variant="caption" color="warning.main">
                             Corregido
