@@ -6,8 +6,11 @@ import createEmotionCache from 'src/createEmotionCache';
 export default class MyDocument extends Document {
   render() {
     return (
-      <Html lang="en">
+      <Html lang="es-MX" translate="no">
         <Head>
+          <meta httpEquiv="Content-Language" content="es-MX" />
+          {/* Evita que Google Translate traduzca la app (rompe el DOM de React) */}
+          <meta name="google" content="notranslate" />
           <link rel="preconnect" href="https://fonts.googleapis.com" />
           <link rel="preconnect" href="https://fonts.gstatic.com" />
           <link
