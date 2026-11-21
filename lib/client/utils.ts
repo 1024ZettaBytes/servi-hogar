@@ -26,6 +26,32 @@ export const capitalizeFirstLetter = (str: string) => {
   return capitalizedDate;
 };
 
+// Teléfonos de clientes: exactamente 10 dígitos, sin espacios ni otros caracteres
+export const PHONE_LENGTH = 10;
+export const PHONE_ERROR_MSG = 'El teléfono debe tener exactamente 10 dígitos numéricos';
+export const PHONE_REF_ERROR_MSG =
+  'El teléfono de referencia debe tener exactamente 10 dígitos numéricos';
+
+// Deja solo dígitos y recorta a 10 (para usar en onChange de los inputs)
+export const sanitizePhone = (value: any): string =>
+  (value ?? '').toString().replace(/\D/g, '').slice(0, PHONE_LENGTH);
+
+export const isValidPhone = (value: any): boolean =>
+  typeof value === 'string' && /^\d{10}$/.test(value);
+
+// Para teléfonos opcionales (ej. referencia): vacío es válido, si no, 10 dígitos
+export const isValidOptionalPhone = (value: any): boolean =>
+  value === undefined || value === null || value === '' || isValidPhone(value);
+
+// Props comunes para TextField de teléfono (teclado numérico en móvil + validación nativa)
+export const PHONE_INPUT_PROPS = {
+  inputMode: 'numeric' as const,
+  pattern: '[0-9]{10}',
+  minLength: PHONE_LENGTH,
+  maxLength: PHONE_LENGTH,
+  title: PHONE_ERROR_MSG
+};
+
 export const validateMapsUrl = (url: string) => {
   const Reg = /(https|http):\/\/(www\.|)google\.[a-z]+\/maps/;
   const lowerUrl = url.toLowerCase();

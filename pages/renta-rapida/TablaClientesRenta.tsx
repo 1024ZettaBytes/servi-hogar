@@ -1,6 +1,7 @@
 import { FC, ChangeEvent, useState } from "react";
 import * as str from "string";
 import PropTypes from "prop-types";
+import { sanitizePhone, PHONE_INPUT_PROPS } from "../../lib/client/utils";
 import {
   Divider,
   Box,
@@ -156,7 +157,9 @@ const TablaClientesRenta: FC<TablaClientesRentaProps> = ({
   ) => (
     <TextField
       fullWidth
-      inputProps={{ minLength, maxLength }}
+      inputProps={
+        field === "cell" ? PHONE_INPUT_PROPS : { minLength, maxLength }
+      }
       autoComplete="off"
       required
       id={field}
@@ -167,7 +170,8 @@ const TablaClientesRenta: FC<TablaClientesRentaProps> = ({
       onChange={(e) => {
         setCustomerToEdit({
           ...customerToEdit,
-          [field]: e.target.value,
+          [field]:
+            field === "cell" ? sanitizePhone(e.target.value) : e.target.value,
         });
       }}
     />
@@ -197,7 +201,9 @@ const TablaClientesRenta: FC<TablaClientesRentaProps> = ({
   ) => (
     <TextField
       fullWidth
-      inputProps={{ minLength, maxLength }}
+      inputProps={
+        field === "telRef" ? PHONE_INPUT_PROPS : { minLength, maxLength }
+      }
       autoComplete="off"
       required={required}
       id={field}
@@ -210,7 +216,10 @@ const TablaClientesRenta: FC<TablaClientesRentaProps> = ({
           ...customerToEdit,
           currentResidence: {
             ...customerToEdit.currentResidence,
-            [field]: e.target.value,
+            [field]:
+              field === "telRef"
+                ? sanitizePhone(e.target.value)
+                : e.target.value,
           },
         });
       }}

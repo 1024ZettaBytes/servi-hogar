@@ -49,7 +49,10 @@ import {
   replaceCoordinatesOnUrl,
   setDateToInitial,
   setDateToMid,
-  validateMapsUrl
+  validateMapsUrl,
+  sanitizePhone,
+  isValidPhone,
+  PHONE_INPUT_PROPS
 } from '../../lib/client/utils';
 import { ACCESORIES_LIST } from '../../lib/consts/OBJ_CONTS';
 import {
@@ -193,7 +196,9 @@ function RentaRapida({ session }) {
     <TextField
       fullWidth
       type={type}
-      inputProps={{ minLength, maxLength }}
+      inputProps={
+        field === 'cell' ? PHONE_INPUT_PROPS : { minLength, maxLength }
+      }
       autoComplete="off"
       disabled={disabled}
       label={label}
@@ -206,7 +211,8 @@ function RentaRapida({ session }) {
       onChange={(e) => {
         setCustomerToEdit({
           ...customerToEdit,
-          [field]: e.target.value
+          [field]:
+            field === 'cell' ? sanitizePhone(e.target.value) : e.target.value
         });
       }}
     />
@@ -221,7 +227,9 @@ function RentaRapida({ session }) {
   ) => (
     <TextField
       fullWidth
-      inputProps={{ minLength, maxLength }}
+      inputProps={
+        field === 'telRef' ? PHONE_INPUT_PROPS : { minLength, maxLength }
+      }
       autoComplete="off"
       disabled={disabled}
       required
@@ -236,7 +244,10 @@ function RentaRapida({ session }) {
           ...customerToEdit,
           currentResidence: {
             ...customerToEdit.currentResidence,
-            [field]: e.target.value
+            [field]:
+              field === 'telRef'
+                ? sanitizePhone(e.target.value)
+                : e.target.value
           }
         });
       }}
@@ -258,7 +269,7 @@ function RentaRapida({ session }) {
     if (activeStep === 0)
       return (
         customerToEdit?.currentResidence?.nameRef?.trim()?.length > 0 &&
-        customerToEdit?.currentResidence?.telRef?.trim()?.length > 0 &&
+        isValidPhone(customerToEdit?.currentResidence?.telRef) &&
         customerToEdit?.currentResidence?.maps &&
         validateMapsUrl(customerToEdit?.currentResidence?.maps)
       );

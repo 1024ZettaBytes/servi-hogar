@@ -50,7 +50,10 @@ import {
   convertDateToLocal,
   replaceCoordinatesOnUrl,
   setDateToMid,
-  validateMapsUrl
+  validateMapsUrl,
+  sanitizePhone,
+  isValidPhone,
+  PHONE_INPUT_PROPS
 } from '../../lib/client/utils';
 import {
   getFetcher,
@@ -206,7 +209,9 @@ function CompletarVenta() {
     <TextField
       fullWidth
       type={type}
-      inputProps={{ minLength, maxLength }}
+      inputProps={
+        field === 'cell' ? PHONE_INPUT_PROPS : { minLength, maxLength }
+      }
       autoComplete="off"
       disabled={disabled}
       label={label}
@@ -219,7 +224,8 @@ function CompletarVenta() {
       onChange={(e) => {
         setCustomerToEdit({
           ...customerToEdit,
-          [field]: e.target.value
+          [field]:
+            field === 'cell' ? sanitizePhone(e.target.value) : e.target.value
         });
       }}
     />
@@ -234,7 +240,9 @@ function CompletarVenta() {
   ) => (
     <TextField
       fullWidth
-      inputProps={{ minLength, maxLength }}
+      inputProps={
+        field === 'telRef' ? PHONE_INPUT_PROPS : { minLength, maxLength }
+      }
       autoComplete="off"
       disabled={disabled}
       required
@@ -249,7 +257,10 @@ function CompletarVenta() {
           ...customerToEdit,
           currentResidence: {
             ...customerToEdit.currentResidence,
-            [field]: e.target.value
+            [field]:
+              field === 'telRef'
+                ? sanitizePhone(e.target.value)
+                : e.target.value
           }
         });
       }}
@@ -274,7 +285,7 @@ function CompletarVenta() {
     if (activeStep === 0)
       return (
         customerToEdit?.currentResidence?.nameRef?.trim()?.length > 0 &&
-        customerToEdit?.currentResidence?.telRef?.trim()?.length > 0 &&
+        isValidPhone(customerToEdit?.currentResidence?.telRef) &&
         customerToEdit?.currentResidence?.maps &&
         validateMapsUrl(customerToEdit?.currentResidence?.maps)
       );
