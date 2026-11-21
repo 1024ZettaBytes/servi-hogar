@@ -26,6 +26,14 @@ import {
 import { LoadingButton } from "@mui/lab";
 import { saveCustomer } from "../../../lib/client/customersFetch";
 import { HOW_FOUND_LIST } from "../../../lib/consts/OBJ_CONTS";
+import {
+  sanitizePhone,
+  isValidPhone,
+  isValidOptionalPhone,
+  PHONE_INPUT_PROPS,
+  PHONE_ERROR_MSG,
+  PHONE_REF_ERROR_MSG
+} from "../../../lib/client/utils";
 function AddCustomerModal(props) {
   const { handleOnClose, open, citiesList, customerList } = props;
   const [isLoading, setIsLoading] = useState(false);
@@ -38,6 +46,8 @@ function AddCustomerModal(props) {
   const [referredBy, setReferredBy] = useState();
   const [hasPlan, setHasPlan] = useState(false);
   const [selectedPlan, setSelectedPlan] = useState('ORO');
+  const [cell, setCell] = useState("");
+  const [telRef, setTelRef] = useState("");
 
   function handleCitySelection(city) {
     setSelectedCity(city);
@@ -57,11 +67,19 @@ function AddCustomerModal(props) {
   }
   async function submitHandler(event) {
     event.preventDefault();
+    if (!isValidPhone(cell)) {
+      setHasError({ error: true, msg: PHONE_ERROR_MSG });
+      return;
+    }
+    if (!isValidOptionalPhone(telRef)) {
+      setHasError({ error: true, msg: PHONE_REF_ERROR_MSG });
+      return;
+    }
     setIsLoading(true);
     setHasError({ error: false, msg: "" });
     const result = await saveCustomer({
       name: event.target.name.value,
-      cell: event.target.cell.value,
+      cell,
       email: event.target.email.value,
       howFound: event.target.howFound.value,
       referredBy: referredBy,
@@ -71,7 +89,7 @@ function AddCustomerModal(props) {
       sector: selectedSector,
       residenceRef: event.target.residenceRef.value,
       nameRef: event.target.nameRef.value,
-      telRef: event.target.telRef.value,
+      telRef,
       maps: event.target.maps.value,
       isPlanOro: hasPlan && selectedPlan === 'ORO',
       isPlan99: hasPlan && selectedPlan === '99',
@@ -140,6 +158,13 @@ function AddCustomerModal(props) {
                   name="cell"
                   label="Celular"
                   fullWidth={true}
+                  value={cell}
+                  onChange={(e) => setCell(sanitizePhone(e.target.value))}
+                  inputProps={PHONE_INPUT_PROPS}
+                  error={cell.length > 0 && cell.length < 10}
+                  helperText={
+                    cell.length > 0 && cell.length < 10 ? PHONE_ERROR_MSG : ""
+                  }
                 />
               </Grid>
               <Grid item lg={12}>
@@ -325,6 +350,15 @@ function AddCustomerModal(props) {
                   name="telRef"
                   label="Teléfono Referencia"
                   fullWidth={true}
+                  value={telRef}
+                  onChange={(e) => setTelRef(sanitizePhone(e.target.value))}
+                  inputProps={PHONE_INPUT_PROPS}
+                  error={telRef.length > 0 && telRef.length < 10}
+                  helperText={
+                    telRef.length > 0 && telRef.length < 10
+                      ? PHONE_REF_ERROR_MSG
+                      : ""
+                  }
                 />
               </Grid>
               <Grid item lg={12}>

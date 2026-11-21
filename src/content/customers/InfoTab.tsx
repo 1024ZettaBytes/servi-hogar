@@ -1,4 +1,9 @@
-import { capitalizeFirstLetter, formatTZDate } from '../../../lib/client/utils';
+import {
+  capitalizeFirstLetter,
+  formatTZDate,
+  sanitizePhone,
+  PHONE_INPUT_PROPS
+} from '../../../lib/client/utils';
 import {
   Grid,
   Typography,
@@ -180,7 +185,9 @@ function CustomerInfoTab({
   ) => (
     <TextField
       fullWidth
-      inputProps={{ minLength, maxLength }}
+      inputProps={
+        field === 'cell' ? PHONE_INPUT_PROPS : { minLength, maxLength }
+      }
       autoComplete="off"
       required={required}
       id={field}
@@ -191,7 +198,8 @@ function CustomerInfoTab({
       onChange={(e) => {
         setCustomerToEdit({
           ...customerToEdit,
-          [field]: e.target.value
+          [field]:
+            field === 'cell' ? sanitizePhone(e.target.value) : e.target.value
         });
       }}
     />
@@ -204,7 +212,9 @@ function CustomerInfoTab({
   ) => (
     <TextField
       fullWidth
-      inputProps={{ minLength, maxLength }}
+      inputProps={
+        field === 'telRef' ? PHONE_INPUT_PROPS : { minLength, maxLength }
+      }
       autoComplete="off"
       required
       id={field}
@@ -217,7 +227,10 @@ function CustomerInfoTab({
           ...customerToEdit,
           currentResidence: {
             ...customerToEdit.currentResidence,
-            [field]: e.target.value
+            [field]:
+              field === 'telRef'
+                ? sanitizePhone(e.target.value)
+                : e.target.value
           }
         });
       }}
