@@ -12,6 +12,8 @@ import {
   dateToPlainString
 } from '../../../lib/client/utils';
 import { CurrentRentsLog } from '../../../lib/models/CurrentRentsLog';
+import { Rent } from '../../../lib/models/Rent';
+import { getRentStatusIds } from '../../../lib/data/statusCache';
 
 /**
  * Get payments progress for all AUX users for a specific week
@@ -56,8 +58,23 @@ async function getPaymentsProgressAPI(req, res) {
     const users = await User.find({ role: { $in: validRoles.map(role => role._id) }, isActive: true })
       .select({ _id: 1, id: 1, name: 1 })
       .lean();
-    const activeRentLog = await CurrentRentsLog.findOne({ dateText: dateToPlainString(pastWeekEnd) }).lean();
-    const totalActiveRents = activeRentLog ? activeRentLog.amount : 0;
+    const pastWeekEndText = dateToPlainString(pastWeekEnd);
+    const activeRentLog = await CurrentRentsLog.findOne({ dateText: pastWeekEndText }).lean();
+    let totalActiveRents = activeRentLog ? activeRentLog.amount : 0;
+    if (!activeRentLog) {
+      // Respaldo: si el cron no generó el registro del jueves anterior,
+      // se cuentan las rentas activas en este momento para no dejar la meta en 0.
+      const activeStatusIds = await getRentStatusIds([
+        'RENTADO',
+        'EN_CAMBIO',
+        'VENCIDA',
+        'EN_RECOLECCION'
+      ]);
+      totalActiveRents = await Rent.countDocuments({ status: { $in: activeStatusIds } });
+      console.warn(
+        `WARN: No existe CurrentRentsLog para ${pastWeekEndText}; se usa conteo en vivo: ${totalActiveRents}`
+      );
+    }
     // Calculate targets
     const target80 = Math.ceil(totalActiveRents * 0.80);
     const target85 = Math.ceil(totalActiveRents * 0.85);
